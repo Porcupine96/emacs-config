@@ -1,0 +1,393 @@
+* Configure =use-package=
+
+I use =use-package= to install and configure my packages. My =init.el= includes
+the initial setup for =package.el= and ensures that =use-package= is installed,
+since I wanna do that right away.
+
+This makes sure that =use-package= will install the package if it's not already
+available. It also means that I should be able to open Emacs for the first time
+on a fresh Debian box and have my whole environment automatically installed. I'm
+not /totally/ sure about that, but we're gettin' close.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
+#+END_SRC
+
+Always compile packages, and use the newest version available.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-compile
+    :config (auto-compile-on-load-mode))
+
+  (setq load-prefer-newer t)
+#+END_SRC
+
+* Sensible settings
+  Keep backups in a separate directory.
+  #+BEGIN_SRC emacs-lisp
+  (setq make-backup-files nil)
+  (setq backup-directory-alist '((""."~/my-emacs/backup")))
+  #+END_SRC
+
+  Disable saving the clipboard after exiting Emacs.
+  #+BEGIN_SRC emacs-lisp
+  (setq x-select-enable-clipboard-manager nil)
+  #+END_SRC
+  
+  Convert tabs to spaces.
+  #+BEGIN_SRC emacs-lisp
+  (setq indent-tabs-mode nil)
+  #+END_SRC
+
+* Visuals
+  Color theme.
+  #+BEGIN_SRC emacs-lisp
+  (load-theme 'tango)
+  #+END_SRC
+  
+  Font.
+  #+BEGIN_SRC emacs-lisp
+  (set-frame-font "Hack" nil t)
+  #+END_SRC
+
+  Hide the bezels.
+  #+BEGIN_SRC emacs-lisp
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (toggle-scroll-bar -1)
+  #+END_SRC
+  
+* Use =evil-mode=
+
+  Use =evil-mode=
+  #+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :config
+    (evil-mode 1))
+  #+END_SRC
+
+  Use =evil-commentary=
+  #+BEGIN_SRC emacs-lisp
+  (use-package evil-commentary)
+  (evil-commentary-mode)
+  #+END_SRC
+
+  Use =evil-snipe=
+  #+begin_src elisp
+  (use-package evil-snipe)
+  (require 'evil-snipe)
+
+  ;; (define-key evil-normal-state-map (kbd "f") #'evil-snipe-F)
+  #+end_src
+
+* Configure =hydra=
+  #+BEGIN_SRC emacs-lisp
+  (use-package hydra)
+  #+END_SRC
+  
+** File 
+  #+BEGIN_SRC emacs-lisp
+  (defhydra hydra-file (:color blue)
+    "
+    ^
+    ^File^     
+    ^────^───────────
+    _f_ Find 
+    _r_ Recent
+    _c_ Config
+    ^^        
+    ^^        
+    "
+    ("f" #'counsel-find-file)
+    ("r" #'counsel-recentf)
+    ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org"))))
+  #+END_SRC
+
+** Project 
+  #+BEGIN_SRC emacs-lisp
+  (defhydra hydra-project (:color blue)
+    "
+    ^
+    ^File^     
+    ^────^───────────
+    _p_ Switch project
+    _f_ Find project file
+    ^^        
+    ^^        
+    "
+    ("f" #'counsel-projectile-ag)
+    ("p" #'projectile-switch-project))
+  #+END_SRC
+
+** Buffer
+   #+begin_src elisp
+   (defhydra hydra-buffer (:color blue)
+     "
+     ^
+     ^Buffer^     
+     ^────^───────────
+     _n_ Next buffer
+     _k_ Kill buffer
+     _p_ Previous buffer
+     ^^        
+     ^^        
+     "
+     ("n" #'next-buffer)
+     ("p" #'previous-buffer)
+     ("k" #'kill-buffer))
+   #+end_src
+
+** Git 
+   #+begin_src elisp
+   (defhydra hydra-git (:color blue)
+     "
+     ^
+     ^Magit^     
+     ^────^───────────
+     _g_ Magit status
+     _i_ Magit init
+     ^^        
+     "
+     ("g" #'magit-status)
+     ("i" #'magit-init))
+   #+end_src
+
+** Help
+   #+begin_src elisp
+   (defhydra hydra-help (:color blue)
+     "
+     ^
+     ^Help^     
+     ^────^───────────
+     _k_ Describe key
+     ^^        
+     ^^        
+     "
+     ("k" #'describe-key))
+   #+end_src
+
+** Open
+   #+begin_src elisp
+   (defhydra hydra-open (:color blue)
+     "
+     ^
+     ^Open^     
+     ^────^───────────
+     _p_ Treemacs
+     ^^        
+     ^^        
+     "
+     ("p" #'treemacs))
+   #+end_src
+
+** Workspace
+   #+begin_src elisp
+   (defhydra hydra-workspace (:color blue)
+     "
+     ^
+     ^Workspace^     
+     ^─────────^───────────
+     _c_ Create workspace
+     _n_ Next workspace
+     _k_ Kill workspace
+     _p_ Previous workspace
+     ^^        
+     ^^        
+     "
+     ("c" #'persp-switch)
+     ("n" #'persp-next)
+     ("p" #'persp-prev)
+     ("k" #'persp-kill))
+   #+end_src
+
+** Leader 
+  #+BEGIN_SRC emacs-lisp
+  (defhydra hydra-leader (:color blue)
+    "
+    ────────────────────────────────────────
+    _b_     Buffer       _g_     Git
+    _h_     Help         _<SPC>_ Project files
+    _f_     File
+    _p_     Project
+    _o_     Open
+    _<tab>_ Workspace
+    ^^
+    "
+    ("b" #'hydra-buffer/body)
+    ("h" #'hydra-help/body)
+    ("f" #'hydra-file/body)
+    ("g" #'hydra-git/body)
+    ("p" #'hydra-project/body)
+    ("o" #'hydra-open/body)
+    ("<tab>" #'hydra-workspace/body)
+    ("<SPC>" #'counsel-projectile-find-file))
+  #+END_SRC
+
+* Global keybindings
+  Use hydra.
+  #+BEGIN_SRC emacs-lisp
+  (define-key evil-normal-state-map (kbd "SPC") 'hydra-leader/body)
+  #+END_SRC
+
+  Save buffer.
+  #+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x C-x") 'save-buffer)
+ #+END_SRC
+  
+  Easier movements between splits.
+  #+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-h") #'evil-window-left)
+  (global-set-key (kbd "C-j") #'evil-window-down)
+  (global-set-key (kbd "C-k") #'evil-window-up)
+  (global-set-key (kbd "C-l") #'evil-window-right)
+  #+END_SRC
+  
+  Vim-like screen jumping.
+  #+begin_src elisp
+  (global-set-key (kbd "C-u") #'evil-scroll-up)
+  #+end_src
+  
+  Use "C-w d" to close a windowd.
+  #+BEGIN_SRC emacs-lisp
+  (define-key evil-window-map (kbd "d") #'evil-window-delete)
+  #+END_SRC
+  
+* Configure =avy= 
+  #+begin_src elisp
+  (use-package avy)
+  #+end_src
+  
+* Configure =perspective=
+  Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces.
+  #+BEGIN_SRC emacs-lisp
+  (use-package perspective)
+  (persp-mode)
+  #+END_SRC
+  
+  Better keybindings.
+  #+BEGIN_SRC emacs-lisp
+  (define-key evil-normal-state-map (kbd "gt") #'persp-next)
+  (define-key evil-normal-state-map (kbd "gT") #'persp-prev)
+  #+END_SRC
+
+* Configure =ivy= / =counsel= / =swiper=
+  Default =ivy= configuration.
+  #+BEGIN_SRC emacs-lisp
+    (use-package ivy)
+    (use-package swiper)
+    (use-package counsel)
+
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq enable-recursive-minibuffers t)
+    (setq search-default-mode #'char-fold-to-regexp)
+    (global-set-key "\C-s" 'swiper)
+    (global-set-key (kbd "C-c C-r") 'ivy-resume)
+    (global-set-key (kbd "<f6>") 'ivy-resume)
+    (global-set-key (kbd "M-x") 'counsel-M-x)
+    (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+    (global-set-key (kbd "C-c g") 'counsel-git)
+    (global-set-key (kbd "C-c j") 'counsel-git-grep)
+    (global-set-key (kbd "C-c k") 'counsel-ag)
+    (global-set-key (kbd "C-x l") 'counsel-locate)
+    (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+    (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
+  #+END_SRC
+* Configure =flycheck=
+  #+begin_src emacs-lisp
+  (use-package flycheck
+    :init (global-flycheck-mode))
+  #+end_src
+* Configure =org=
+  #+BEGIN_SRC emacs-lisp
+  (use-package org
+    :ensure org-plus-contrib
+    :config
+    (require 'org-tempo)
+    (bind-keys* 
+	("C-k" . evil-window-up)
+	("C-j" . evil-window-down)))
+  #+END_SRC
+  
+* Configure =yasnippet=
+  #+BEGIN_SRC emacs-lisp
+  (use-package yasnippet)
+  #+END_SRC
+  
+* Configure =projectile=
+  #+BEGIN_SRC emacs-lisp
+  (use-package projectile)
+  (use-package counsel-projectile)
+  #+END_SRC
+* Configure =magit=
+  #+begin_src elisp
+  (use-package magit)
+  (use-package evil-magit)
+  (require 'evil-magit)
+  #+end_src
+* Configure =treemacs=
+  #+begin_src elisp
+  (use-package treemacs)
+  (use-package treemacs-evil)
+  (use-package treemacs-projectile)
+  #+end_src
+* Configure =doom-modeline=
+  #+begin_src elisp
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1))
+  #+end_src
+
+* Programming languages
+** Python
+   Setup =python-mode=.
+   #+BEGIN_SRC emacs-lisp
+   (use-package python-mode)
+   #+END_SRC
+   
+   Use =elpy= for indentation and autocompletion.
+   #+BEGIN_SRC emacs-mode
+   (use-package elpy)
+   (elpy-enable)
+   #+END_SRC
+** Scala
+   scala-mode
+   #+begin_src emacs-lisp
+    (use-package scala-mode
+    :mode "\\.s\\(cala\\|bt\\)$")
+   #+end_src
+   
+   sbt-mode
+   #+begin_src emacs-lisp
+    (use-package sbt-mode
+    :commands sbt-start sbt-command
+    :config
+    ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+    ;; allows using SPACE when in the minibuffer
+    (substitute-key-definition
+    'minibuffer-complete-word
+    'self-insert-command
+    minibuffer-local-completion-map)
+    ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
+    (setq sbt:program-options '("-Dsbt.supershell=false")))
+   #+end_src
+   
+** LSP
+   #+begin_src emacs-lisp
+   (use-package lsp-mode
+    :hook (scala-mode . lsp)
+    :config (setq lsp-prefer-flymake nil))
+   #+end_src
+   
+   #+begin_src emacs-lisp
+   (use-package lsp-ui)
+   #+end_src
+   
+   #+begin_src emacs-lisp
+   (use-package company-lsp)
+   #+end_src
+* TODO TODOs
+  - [ ] protobufs
+  - [ ] doom modeline
+  - [ ] java script / react stuff
