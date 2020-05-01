@@ -43,7 +43,8 @@ Always compile packages, and use the newest version available.
 * Visuals
   Color theme.
   #+BEGIN_SRC emacs-lisp
-  (load-theme 'tango)
+  (add-to-list 'custom-theme-load-path "~/my-emacs/themes")
+  (load-theme 'noctilux t)
   #+END_SRC
   
   Font.
@@ -69,23 +70,32 @@ Always compile packages, and use the newest version available.
 
   Use =evil-commentary=
   #+BEGIN_SRC emacs-lisp
-  (use-package evil-commentary)
+  (use-package 
+     evil-commentary
+     :ensure t
+     :after evil)
   (evil-commentary-mode)
   #+END_SRC
-
-  Use =evil-snipe=
-  #+begin_src elisp
-  (use-package evil-snipe)
-  (require 'evil-snipe)
-
-  ;; (define-key evil-normal-state-map (kbd "f") #'evil-snipe-F)
-  #+end_src
 
 * Configure =hydra=
   #+BEGIN_SRC emacs-lisp
   (use-package hydra)
   #+END_SRC
   
+** Agenda
+   #+begin_src emacs-lisp
+   (defhydra hydra-agenda (:color blue)
+     "
+     ^
+     ^Agenda^     
+     ^────^───────────
+     _a_ Weekly agenda 
+     ^^        
+     ^^        
+     "
+     ("a" #'+agenda/weekly-agenda))
+
+   #+end_src
 ** File 
   #+BEGIN_SRC emacs-lisp
   (defhydra hydra-file (:color blue)
@@ -121,7 +131,7 @@ Always compile packages, and use the newest version available.
   #+END_SRC
 
 ** Buffer
-   #+begin_src elisp
+   #+begin_src emacs-lisp
    (defhydra hydra-buffer (:color blue)
      "
      ^
@@ -139,7 +149,7 @@ Always compile packages, and use the newest version available.
    #+end_src
 
 ** Git 
-   #+begin_src elisp
+   #+begin_src emacs-lisp
    (defhydra hydra-git (:color blue)
      "
      ^
@@ -154,21 +164,25 @@ Always compile packages, and use the newest version available.
    #+end_src
 
 ** Help
-   #+begin_src elisp
+   #+begin_src emacs-lisp
    (defhydra hydra-help (:color blue)
      "
      ^
      ^Help^     
      ^────^───────────
      _k_ Describe key
+     _f_ Describe function
+     _v_ Descrive variable
      ^^        
      ^^        
      "
-     ("k" #'describe-key))
+     ("k" #'describe-key)
+     ("f" #'describe-function)
+     ("v" #'describe-variable))
    #+end_src
 
 ** Open
-   #+begin_src elisp
+   #+begin_src emacs-lisp
    (defhydra hydra-open (:color blue)
      "
      ^
@@ -182,7 +196,7 @@ Always compile packages, and use the newest version available.
    #+end_src
 
 ** Workspace
-   #+begin_src elisp
+   #+begin_src emacs-lisp
    (defhydra hydra-workspace (:color blue)
      "
      ^
@@ -206,14 +220,15 @@ Always compile packages, and use the newest version available.
   (defhydra hydra-leader (:color blue)
     "
     ────────────────────────────────────────
-    _b_     Buffer       _g_     Git
+    _a_     Agenda       _g_     Git
+    _b_     Buffer       _<tab>_ Workspace
     _h_     Help         _<SPC>_ Project files
     _f_     File
     _p_     Project
     _o_     Open
-    _<tab>_ Workspace
     ^^
     "
+    ("a" #'hydra-buffer/agenda)
     ("b" #'hydra-buffer/body)
     ("h" #'hydra-help/body)
     ("f" #'hydra-file/body)
@@ -244,18 +259,39 @@ Always compile packages, and use the newest version available.
   #+END_SRC
   
   Vim-like screen jumping.
-  #+begin_src elisp
+  #+begin_src emacs-lisp
   (global-set-key (kbd "C-u") #'evil-scroll-up)
   #+end_src
   
-  Use "C-w d" to close a windowd.
+  Use "C-w d" to close a window.
   #+BEGIN_SRC emacs-lisp
   (define-key evil-window-map (kbd "d") #'evil-window-delete)
   #+END_SRC
   
-* Configure =avy= 
-  #+begin_src elisp
+  Use =zoom-window=.
+  #+begin_src emacs-lisp
+  (define-key evil-window-map (kbd "o") #'zoom-window-zoom)
+  (define-key evil-window-map (kbd "C-o") #'zoom-window-zoom)
+  #+end_src
+
+* Configure =avy= / =evil-easymotion= / =evil-snipe=
+  #+begin_src emacs-lisp
   (use-package avy)
+  (use-package evil-easymotion)
+  #+end_src
+  
+  #+begin_src emacs-lisp
+  (define-key evil-motion-state-map (kbd "g s k") #'evilem-motion-previous-line)
+  (define-key evil-motion-state-map (kbd "g s j") #'evilem-motion-next-line)
+  (define-key evil-motion-state-map (kbd "g s f") #'evil-avy-goto-char)
+  (define-key evil-motion-state-map (kbd "g s s") #'evil-avy-goto-char-2)
+  #+end_src
+
+  Use =evil-snipe=
+  #+begin_src emacs-lisp
+  (use-package evil-snipe)
+  (require 'evil-snipe)
+  ;; (define-key evil-normal-state-map (kbd "f") #'evil-snipe-F)
   #+end_src
   
 * Configure =perspective=
@@ -309,7 +345,27 @@ Always compile packages, and use the newest version available.
 	("C-k" . evil-window-up)
 	("C-j" . evil-window-down)))
   #+END_SRC
-  
+** Org Agenda 
+   #+begin_src emacs-lisp
+    (use-package evil-org
+    :ensure t
+    :after org
+    :config
+    (add-hook 'org-mode-hook 'evil-org-mode)
+    (add-hook 'evil-org-mode-hook
+		(lambda ()
+		(evil-org-set-key-theme)))
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
+   #+end_src
+
+   #+begin_src emacs-lisp
+   (defun +agenda/weekly-agenda ()
+     (interactive)
+     (org-agenda)
+     (org-agenda-week-view))
+   #+end_src
+
 * Configure =yasnippet=
   #+BEGIN_SRC emacs-lisp
   (use-package yasnippet)
@@ -318,25 +374,53 @@ Always compile packages, and use the newest version available.
 * Configure =projectile=
   #+BEGIN_SRC emacs-lisp
   (use-package projectile)
-  (use-package counsel-projectile)
+  (use-package counsel-projectile) 
   #+END_SRC
+  
+  #+begin_src emacs-lisp
+  (setq
+    projectile-project-search-path '("~/codeheroes/chatbotize/monorepo")
+    projectile-project-root-files-functions #'(projectile-root-top-down
+						projectile-root-top-down-recurring
+						projectile-root-bottom-up
+						projectile-root-local))
+						
+   (projectile-register-project-type 'scala '("build.sbt"))
+  #+end_src
+
 * Configure =magit=
-  #+begin_src elisp
+  #+begin_src emacs-lisp
   (use-package magit)
   (use-package evil-magit)
   (require 'evil-magit)
   #+end_src
 * Configure =treemacs=
-  #+begin_src elisp
+  #+begin_src emacs-lisp
   (use-package treemacs)
   (use-package treemacs-evil)
   (use-package treemacs-projectile)
+  
+  (define-key evil-treemacs-state-map (kbd "SPC o p") #'treemacs)
+  (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
   #+end_src
 * Configure =doom-modeline=
-  #+begin_src elisp
+  #+begin_src emacs-lisp
   (use-package doom-modeline
     :ensure t
     :init (doom-modeline-mode 1))
+  #+end_src
+* Configure =zoom-window=
+  #+begin_src emacs-lisp
+  (use-package zoom-window)
+  
+  (custom-set-variables
+   '(zoom-window-mode-line-color "#4682B4"))
+  #+end_src
+* Configure =company=
+  #+begin_src emacs-lisp
+  (use-package company)
+  
+  (add-hook 'after-init-hook 'global-company-mode)
   #+end_src
 
 * Programming languages
@@ -389,5 +473,7 @@ Always compile packages, and use the newest version available.
    #+end_src
 * TODO TODOs
   - [ ] protobufs
-  - [ ] doom modeline
   - [ ] java script / react stuff
+  - [ ] workgroups.el
+  - [ ] pasting a link does not work
+  - [ ] whether to open a buffer (e.g magit-buffer on the left/right/bottom)
