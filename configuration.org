@@ -180,13 +180,14 @@ Always compile packages, and use the newest version available.
     (defhydra hydra-project (:color blue)
       "
       ^
-      ^File^     
+      ^Project^     
       ^────^───────────
       _c_ Compile project
       _p_ Switch project
       _f_ Find project file
       _i_ Invalidate project cache
       _t_ Add current project to treemacs
+      _s_ Save project files
       ^^        
       ^^        
       "
@@ -194,7 +195,8 @@ Always compile packages, and use the newest version available.
       ("f" #'counsel-projectile-ag)
       ("p" #'counsel-projectile-switch-project)
       ("i" #'projectile-invalidate-cache)
-      ("t" #'treemacs-add-and-display-current-project))
+      ("t" #'treemacs-add-and-display-current-project)
+      ("s" #'projectile-save-project-buffers))
   #+END_SRC
 
 ** Buffer
@@ -252,11 +254,12 @@ Always compile packages, and use the newest version available.
      ("s" #'lsp-describe-session)
      ("e" #'lsp-ui-flycheck-list)
      ("f" #'lsp-format-buffer)
-     ("l" #'lsp-ui-find-workspace-symbol)
+     ("l" #'lsp-ivy-workspace-symbol)
      ("r" #'lsp-workspace-folders-remove)
      ("R" #'+lsp/remove-other-sessions))
    #+end_src
    
+   Remove other LSP sessions.
    #+begin_src emacs-lisp :results none
     (defun +lsp/remove-other-sessions ()
         (interactive)
@@ -277,6 +280,8 @@ Always compile packages, and use the newest version available.
      _f_ Describe function
      _v_ Describe variable
      _p_ Describe package
+     _m_ Describe mode
+     _M_ Describe macro
      _e_ Message buffer
      ^^        
      ^^        
@@ -285,6 +290,8 @@ Always compile packages, and use the newest version available.
      ("f" #'helpful-function)
      ("v" #'helpful-variable)
      ("p" #'helpful-package)
+     ("m" #'describe-mode)
+     ("M" #'helpful-macro)
      ("e" #'view-echo-area-messages))
    #+end_src
    
@@ -481,12 +488,12 @@ Always compile packages, and use the newest version available.
   #+end_src
 * Configure =org=
   #+BEGIN_SRC emacs-lisp :results none
-  (use-package org
-    :ensure org-plus-contrib
-    :config
-    (require 'org-tempo)
-    (bind-keys* 
-        ("SPC m s" . org-schedule)
+    (use-package org
+      :ensure org-plus-contrib
+      :config
+      (require 'org-tempo)
+      :bind (:map evil-normal-state-map
+	("SPC m s" . org-schedule)
 	("C-k" . evil-window-up)
 	("C-j" . evil-window-down)))
   #+END_SRC
@@ -512,13 +519,13 @@ Always compile packages, and use the newest version available.
    
    #+begin_src emacs-lisp :results none
      (use-package org-super-agenda
+       :hook (org-agenda-mode . org-super-agenda-mode)
        :config
        (setq
-	org-super-agenda-groups
-	       '((:name "Today"
-			:time-grid t
-			:todo "TODAY"))))
-
+	 org-super-agenda-groups
+	   '((:name "Today"
+	      :time-grid t
+	      :todo "TODAY"))))
    #+end_src
    
    #+begin_src emacs-lisp :results none
@@ -555,7 +562,8 @@ Always compile packages, and use the newest version available.
 
 * Configure =yasnippet=
   #+BEGIN_SRC emacs-lisp :results none
-  (use-package yasnippet)
+  (use-package yasnippet
+    :defer t)
   (yas-global-mode)
   #+END_SRC
   
@@ -569,14 +577,15 @@ Always compile packages, and use the newest version available.
   #+END_SRC
   
   #+begin_src emacs-lisp :results none
-  (setq
-    projectile-project-search-path '("~/codeheroes/chatbotize/monorepo")
-    projectile-project-root-files-functions #'(projectile-root-top-down
-						projectile-root-top-down-recurring
-						projectile-root-bottom-up
-						projectile-root-local))
-						
-   (projectile-register-project-type 'scala '("build.sbt"))
+    (setq projectile-project-search-path '("~/codeheroes/chatbotize/monorepo"))
+    (setq projectile-project-root-files-functions '(projectile-root-local projectile-root-bottom-up projectile-root-top-down projectile-root-top-down-recurring))
+    
+      ;; projectile-project-root-files-functions #'(projectile-root-top-down
+      ;; 					      projectile-root-top-down-recurring
+      ;; 					      projectile-root-bottom-up
+      ;; 					      projectile-root-local))
+
+     (projectile-register-project-type 'scala '("build.sbt"))
   #+end_src
 
 * Configure =magit=
@@ -653,11 +662,11 @@ Always compile packages, and use the newest version available.
      python-shell-interpreter-args "-i")
    #+END_SRC
    
-   Use =elpy= for indentation and autocompletion.
-   #+BEGIN_SRC emacs-mode
-   (use-package elpy)
-   (elpy-enable)
-   #+END_SRC
+   
+   #+begin_src emacs-lisp :results none
+   (use-package pyvenv
+     :after python-mode)
+   #+end_src
 ** Scala
    scala-mode
    #+begin_src emacs-lisp :results none
@@ -678,40 +687,6 @@ Always compile packages, and use the newest version available.
     (setq sbt:program-options '("-Dsbt.supershell=false")))
    #+end_src
    
-** LSP
-   #+begin_src emacs-lisp :results none
-   (use-package lsp-mode
-    :hook (scala-mode . lsp)
-    :config (setq lsp-prefer-flymake nil)
-    :bind (:map evil-normal-state-map 
-          ("C-<return>" . lsp-execute-code-action)))
-   #+end_src
-
-   #+begin_src emacs-lisp :results none
-   (use-package lsp-ui)
-   #+end_src
-   
-   #+begin_src emacs-lisp :results none
-   (use-package company-lsp
-     :after lsp-mode company
-     :custom
-      (company-lsp-cache-candidates t)
-      (company-lsp-async t)
-      (company-lsp-enable-snippet t)
-      (company-lsp-enable-recompletion t)
-     :commands company-lsp)
-   #+end_src
-   
-   #+begin_src emacs-lisp :results none 
-
-
-
-     ;; (lsp-find-session-folder (lsp-session) default-directory)
-
-     ;; (prin1 (-> (lsp-session) lsp-session-folder->servers))
-
-   #+end_src
-   
 ** Elisp
    #+begin_src emacs-lisp :results none
    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc))
@@ -729,6 +704,39 @@ Always compile packages, and use the newest version available.
       (lambda () (c-add-style "my-style" my-protobuf-style t)))
    #+end_src
    
+** LSP
+   #+begin_src emacs-lisp :results none
+   (use-package lsp-mode
+    :hook ((scala-mode . lsp-deferred)
+           (sh-mode . lsp-deferred)
+           (python-mode . lsp-deferred))
+    :config (setq lsp-prefer-flymake nil)
+    :bind (:map evil-normal-state-map 
+          ("C-<return>" . lsp-execute-code-action)))
+   #+end_src
+
+   #+begin_src emacs-lisp :results none
+   (use-package lsp-ui)
+   #+end_src
+   
+   Use =lsp-ivy=.
+   #+begin_src emacs-lisp :results none
+   (use-package lsp-ivy
+     :after lsp-mode
+     :commands lsp-ivy-workspace-symbol)
+   #+end_src
+   
+   #+begin_src emacs-lisp :results none
+   (use-package company-lsp
+     :after lsp-mode company
+     :custom
+      (company-lsp-cache-candidates t)
+      (company-lsp-async t)
+      (company-lsp-enable-snippet t)
+      (company-lsp-enable-recompletion t)
+     :commands company-lsp)
+   #+end_src
+   
 * TODO TODOs
   - [ ] java script / react stuff
   - [ ] workgroups.el
@@ -744,4 +752,5 @@ Always compile packages, and use the newest version available.
   - [ ] company-backends based on major-mode
   - [ ] general.el
   - [ ] vc on doom-modeline did not refresh after changing a branch
+  - [ ] reimplement py-indent-or-complete
     

@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: rpc Request + Response
+# key: mrr
+# --
+message $1Request {
+
+}
+
+message $1Response {
+
+}

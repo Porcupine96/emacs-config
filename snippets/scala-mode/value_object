@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: value object
+# key: cv
+# --
+case class $1(value: String) extends AnyVal
