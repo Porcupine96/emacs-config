@@ -86,28 +86,33 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
   :type 'boolean
   :group 'lt)
 
-(defvar noctilux-colors           ; ANSI(Noctilux terminal)
-  ;; name     sRGB      Gen RGB   256       16              8
-  '((base03  "#202020" "#202020" "#202020" "brightblack"   "black")
-    (base02  "#292929" "#292929" "#292929" "black"         "black")
-    (base01  "#5f5f5f" "#5f5f5f" "#5f5f5f" "brightgreen"   "green")
-    (base00  "#999999" "#999999" "#999999" "brightyellow"  "yellow")
-    (base0   "#cccccc" "#cccccc" "#cccccc" "brightblue"    "blue")
-    (base1   "#aaaaaa" "#aaaaaa" "#aaaaaa" "brightcyan"    "cyan")
-    (base2   "#e9e2cb" "#e9e2cb" "#e9e2cb" "white"         "white")
-    (base3   "#fcf4dc" "#fcf4dc" "#fcf4dc" "brightwhite"   "white")
-    (yellow  "#aaeecc" "#aaeecc" "#aaeecc" "yellow"        "yellow")
-    (orange  "#ff8888" "#ff8888" "#ff8888" "brightred"     "red")
-    (red     "#ff3333" "#ff3333" "#ff3333" "red"           "red")
-    (magenta "#FF1F69" "#FF1F69" "#FF1F69" "magenta"       "magenta")
-    (violet  "#ccaaff" "#ccaaff" "#ccaaff" "brightmagenta" "magenta")
-    (blue    "#aaccff" "#aaccff" "#aaccff" "blue"          "blue")
-    (cyan    "#aadddd" "#aadddd" "#aadddd" "cyan"          "cyan")
-    (white   "#ffffff" "#ffffff" "#ffffff" "white"         "white")
-    (green   "#aaffaa" "#aaffaa" "#aaffaa" "green"         "green"))
-  "This is a table of all the colors used by the Noctilux color theme. Each
-   column is a different set, one of which will be chosen based on term
-   capabilities, etc.")
+(setq noctilux-colors           ; ANSI(Noctilux terminal)
+  ;; name       sRGB      Gen RGB   256       16              8
+  '((base03    "#202020" "#202020" "#202020" "brightblack"   "black")
+    (base02    "#292929" "#292929" "#292929" "black"         "black")
+    (base01    "#5f5f5f" "#5f5f5f" "#5f5f5f" "brightgreen"   "green")
+    (base00    "#999999" "#999999" "#999999" "brightyellow"  "yellow")
+    (base0     "#cccccc" "#cccccc" "#cccccc" "brightblue"    "blue")
+    (base1     "#aaaaaa" "#aaaaaa" "#aaaaaa" "brightcyan"    "cyan")
+    (base2     "#e9e2cb" "#e9e2cb" "#e9e2cb" "white"         "white")
+    (base3     "#fcf4dc" "#fcf4dc" "#fcf4dc" "brightwhite"   "white")
+    (yellow    "#aaeecc" "#aaeecc" "#aaeecc" "yellow"        "yellow")
+    (orange    "#ff8888" "#ff8888" "#ff8888" "brightred"     "red")
+    ;; (red       "#ff3333" "#ff3333" "#ff3333" "red"           "red")
+    (red       "#ff5555" "#ff5555" "#ff5555" "red"           "red")
+    (magenta   "#FF1F69" "#FF1F69" "#FF1F69" "magenta"       "magenta")
+    ;; (purple    "#ccaaff" "#ccaaff" "#ccaaff" "brightmagenta" "magenta")
+    (purple    "#bd93f9" "#bd93f9" "#bd93f9" "brightmagenta" "magenta")
+    (darkblue  "#6272a4" "#6272a4" "#6272a4" "blue" "blue")
+    (blue      "#aaccff" "#aaccff" "#aaccff" "blue"          "blue")
+    (pink      "#ff79c6" "#ff79c6" "#ff79c6" "pink"          "pink")
+    (cyan      "#8be9fd" "#8be9fd" "#8be9fd" "cyan"          "cyan")
+    (oldcyan    "#aadddd" "#aadddd" "#aadddd" "cyan"          "cyan")
+    (white     "#ffffff" "#ffffff" "#ffffff" "white"         "white")
+    ;; (green     "#aaffaa" "#aaffaa" "#aaffaa" "green"         "green")
+    (green     "#50fa7b" "#50fa7b" "#50fa7b" "green"         "green")
+    (gray      "#838484" "#838484" "#838484" "gray"          "gray")
+    (darkgreen "#008000" "#008000" "#008000" "green"         "green")))
 
 (defmacro noct-flet (specs &rest body)
   (let ((flet (if (fboundp 'cl-flet) 'cl-flet 'flet)))
@@ -124,6 +129,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
                              (8  5)
                              (otherwise 3)))))
              (nth index (assoc name noctilux-colors)))))
+
     (let ((base03      (find-color 'base03))
           (base02      (find-color 'base02))
           (base01      (find-color 'base01))
@@ -136,11 +142,16 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
           (orange      (find-color 'orange))
           (red         (find-color 'red))
           (magenta     (find-color 'magenta))
-          (violet      (find-color 'violet))
+          (purple      (find-color 'purple))
+          (darkblue    (find-color 'darkblue))
           (blue        (find-color 'blue))
+          (pink        (find-color 'pink))
+          (oldcyan     (find-color 'oldcyan))
           (cyan        (find-color 'cyan))
           (white       (find-color 'white))
           (green       (find-color 'green))
+	  (gray        (find-color 'gray))
+	  (darkgreen   (find-color 'darkgreen))
           (bold        (if noctilux-bold 'bold 'normal))
           (bright-bold (if noctilux-bold 'normal 'bold))
           (underline   (if noctilux-underline t nil))
@@ -173,7 +184,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
               (bg-orange `(:background ,orange))
               (bg-red `(:background ,red))
               (bg-magenta `(:background ,magenta))
-              (bg-violet `(:background ,violet))
+              (bg-purple `(:background ,purple))
               (bg-blue `(:background ,blue))
               (bg-cyan `(:background ,cyan))
               (bg-white `(:background ,white))
@@ -182,10 +193,10 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
               (fg-base02 `(:foreground ,base02))
               (fg-base01 `(:foreground ,base01))
               (fg-base00 `(:foreground ,base00))
-              (fg-base0 `(:foreground ,(when (<= 16 (display-color-cells))
-                                         base0)))
-              (fg-base1 `(:foreground ,(when (<= 16 (display-color-cells))
-                                         base1)))
+              (fg-base0  `(:foreground ,(when (<= 16 (display-color-cells))
+                                        base0)))
+              (fg-base1  `(:foreground ,(when (<= 16 (display-color-cells))
+                                        base1)))
               (fg-base2 `(:foreground ,base2))
               (fg-base3 `(:foreground ,base3))
               (fg-green `(:foreground ,green))
@@ -193,11 +204,20 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
               (fg-orange `(:foreground ,orange))
               (fg-red `(:foreground ,red))
               (fg-magenta `(:foreground ,magenta))
-              (fg-violet `(:foreground ,violet))
+              (fg-purple `(:foreground ,purple))
+              (fg-darkblue `(:foreground ,darkblue))
               (fg-blue `(:foreground ,blue))
+              (fg-pink `(:foreground ,pink))
               (fg-cyan `(:foreground ,cyan))
+              (fg-oldcyan `(:foreground ,oldcyan))
+              (fg-gray `(:foreground ,gray))
+              (fg-darkgreen `(:foreground ,darkgreen))
 
               (fmt-none `(:weight normal :slant normal  :underline nil        :inverse-video nil))
+              (fmt-big `(:weight normal :slant normal  :underline nil        :inverse-video nil :height 1.2))
+              (fmt-sbig `(:weight normal :slant normal  :underline nil        :inverse-video nil :height 1.1))
+              (fmt-bigger  `(:weight normal :slant normal  :underline nil        :inverse-video nil :height 1.5))
+              (fmt-small `(:weight normal :slant normal :underline nil        :inverse-video nil :height 0.8))
               (fmt-bold `(:weight ,bold  :slant normal  :underline nil        :inverse-video nil))
               (fmt-bldi `(:weight ,bold                 :underline nil        :inverse-video nil))
               (fmt-undr `(:weight normal :slant normal  :underline ,underline :inverse-video nil))
@@ -230,7 +250,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (isearch ((t (,@fmt-stnd ,@fg-orange ,@bg-back)))) ; IncSearch
              (isearch-fail ((t (,@fmt-stnd ,@fg-orange ,@bg-back)))) ; IncSearch
              (lazy-highlight ((t (,@fmt-revr ,@fg-yellow ,@bg-back)))) ; Search
-             (link ((t (,@fmt-undr ,@fg-violet))))
+             (link ((t (,@fmt-undr ,@fg-purple))))
              (link-visited ((t (,@fmt-undr ,@fg-magenta))))
              (menu ((t (,@fg-base0 ,@bg-base02))))
              (minibuffer-prompt ((t (,@fmt-bold ,@fg-cyan)))) ; Question
@@ -265,7 +285,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (custom-group-tag ((t (,@fg-base1))))
              (custom-group-tag-1 ((t (,fmt-bold ,@fg-base1))))
              (custom-invalid ((t (,@fmt-revr ,@fg-red ,@bg-back))))
-             (custom-link ((t (,@fg-violet))))
+             (custom-link ((t (,@fg-purple))))
              (custom-state ((t (,@fg-green))))
              (custom-variable-tag ((t (,@fg-base1))))
              ;; diff - DiffAdd, DiffChange, DiffDelete, and DiffText
@@ -312,14 +332,14 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (eshell-ls-missing ((t (,@fg-red))))
              (eshell-ls-product ((t (,@fg-yellow))))
              (eshell-ls-readonly ((t (,@fg-base1))))
-             (eshell-ls-special ((t (,@fg-violet))))
+             (eshell-ls-special ((t (,@fg-purple))))
              (eshell-ls-symlink ((t (,@fg-cyan))))
              (eshell-ls-unreadable ((t (,@fg-base00))))
              (eshell-prompt ((t (,@fmt-bold ,@fg-green))))
              ;; font-lock
              (font-lock-builtin-face ((t (,@fmt-none ,@fg-green)))) ; Statement
              (font-lock-comment-face ((t (,@fmt-ital ,@fg-base01)))) ; Comment
-             (font-lock-constant-face ((t (,@fmt-none ,@fg-violet)))) ; Constant
+             (font-lock-constant-face ((t (,@fmt-none ,@fg-purple)))) ; Constant
              (font-lock-function-name-face ; Identifier
               ((t (,@fmt-none ,@fg-blue))))
              (font-lock-keyword-face ((t (,@fmt-none ,@fg-green)))) ; Statement
@@ -344,11 +364,11 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (font-lock-special-keyword-face ; Special
               ((t (,@fmt-none ,@fg-red))))
              (font-lock-exit-face ((t (,@fmt-none ,@fg-red))))
-             (font-lock-other-emphasized-face ((t (,@fmt-bldi ,@fg-violet))))
+             (font-lock-other-emphasized-face ((t (,@fmt-bldi ,@fg-purple))))
              (font-lock-regexp-grouping-backslash
               ((t (,@fmt-none ,@fg-yellow))))
              ;; helm
-             (helm-M-x-key ((t (,@fg-violet))))
+             (helm-M-x-key ((t (,@fg-purple))))
              (helm-buffer-directory ((t (,@fmt-bold ,@fg-yellow))))
              (helm-buffer-file ((t (,@fmt-none ,@fg-base0))))
              (helm-buffer-not-saved ((t (,@fmt-undr ,@fg-red))))
@@ -371,16 +391,30 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              ;; info
              (info-xref ((t (,@fmt-undr ,@fg-blue))))
              (info-xref-visited ((t (,@fg-magenta :inherit info-xref))))
+
              ;; org
-             (org-hide ((t (,@fg-base03))))
-             (org-todo ((t (,@fmt-undr ,@fg-red ,@bg-base03))))
-             (org-done ((t (,@fmt-bold ,@fg-green))))
-             (org-todo-kwd-face ((t (,@fg-red ,@bg-base03))))
-             (org-done-kwd-face ((t (,@fg-green ,@bg-base03))))
-             (org-project-kwd-face ((t (,@fg-violet ,@bg-base03))))
+             (org-hide          ((t (,@fg-base03))))
+             (org-todo          ((t (,@fmt-undr ,@fg-orange ,@bg-base03))))
+             (org-done          ((t (,@fmt-none ,@fg-gray   ,@bg-base03))))
+	     (org-headline-done ((t (,@fmt-strk ,@fg-gray   ,@bg-base03))))
+
+	     (org-document-title        ((t (,@fmt-bigger   ,@fg-gray  ,@bg-base03))))
+	     (org-document-info-keyword ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-block-begin-line      ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-block-end-line        ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
+
+             (org-link ((t (,@fmt-undr ,@fg-darkblue ,@bg-base03))))
+             (org-tag ((t (,@fg-oldcyan ,@bg-base03))))
+
+	     (org-level-1 ((t (,@fmt-big ,@fg-purple ,@bg-base03))))
+	     (org-level-2 ((t (,@fmt-sbig ,@fg-pink ,@bg-base03))))
+	     (org-level-3 ((t (,@fg-green ,@bg-base03))))
+
+             (org-project-kwd-face ((t (,@fg-purple ,@bg-base03))))
              (org-waiting-kwd-face ((t (,@fg-orange ,@bg-base03))))
              (org-someday-kwd-face ((t (,@fg-blue ,@bg-base03))))
              (org-started-kwd-face ((t (,@fg-yellow ,@bg-base03))))
+
              (org-cancelled-kwd-face ((t (,@fg-green ,@bg-base03))))
              (org-delegated-kwd-face ((t (,@fg-cyan ,@bg-base03))))
              ;; table
@@ -393,7 +427,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (outline-5 ((t (,@fmt-none ,@fg-base0))))
              (outline-6 ((t (,@fmt-none ,@fg-base01))))
              (outline-7 ((t (,@fmt-none ,@fg-orange))))
-             (outline-8 ((t (,@fmt-none ,@fg-violet))))
+             (outline-8 ((t (,@fmt-none ,@fg-purple))))
              ;; speedbar
              (speedbar-button-face ((t (,@fmt-none ,@fg-base1))))
              (speedbar-directory-face ((t (,@fmt-none ,@fg-orange))))
@@ -421,7 +455,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              ;; column-marker
              (column-marker-1 ((t (,@bg-base01))))
              (column-marker-2 ((t (,@bg-cyan))))
-             (column-marker-3 ((t (,@bg-violet))))
+             (column-marker-3 ((t (,@bg-purple))))
              ;; jabber
              (jabber-activity-face ((t (,@fmt-bold ,@fg-red))))
              (jabber-activity-personal-face ((t (,@fmt-bold ,@fg-blue))))
@@ -440,7 +474,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (jabber-roster-user-online ((t (,@fmt-bold ,@fg-blue))))
              (jabber-roster-user-xa ((t (,@fmt-ital ,@fg-magenta))))
 	     ;; git-gutter
-	     (git-gutter:modified ((t (,@fg-violet))))
+	     (git-gutter:modified ((t (,@fg-purple))))
 	     (git-gutter:added ((t (,@fg-green))))
 	     (git-gutter:deleted ((t (,@fg-red))))
              ;; gnus - these are taken from mutt, not VIM
@@ -449,7 +483,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (gnus-cite-3 ((t (,@fmt-none ,@fg-yellow)))) ; quoted2
              (gnus-cite-4 ((t (,@fmt-none ,@fg-red)))) ; quoted3
              (gnus-cite-5 ((t (,@fmt-none ,@fg-orange)))) ; quoted4
-             (gnus-cite-6 ((t (,@fmt-none ,@fg-violet))))
+             (gnus-cite-6 ((t (,@fmt-none ,@fg-purple))))
              (gnus-cite-7 ((t (,@fmt-none ,@fg-green))))
              (gnus-cite-8 ((t (,@fmt-none ,@fg-magenta))))
              (gnus-cite-9 ((t (,@fmt-none ,@fg-base00))))
@@ -467,8 +501,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (gnus-group-news-1-empty ((t (,@fg-base1))))
              (gnus-group-news-2 ((t (,@fmt-bold ,@fg-blue))))
              (gnus-group-news-2-empty ((t (,@fg-blue))))
-             (gnus-group-news-low ((t (,@fmt-bold ,@fg-violet))))
-             (gnus-group-news-low-empty ((t (,@fg-violet))))
+             (gnus-group-news-low ((t (,@fmt-bold ,@fg-purple))))
+             (gnus-group-news-low-empty ((t (,@fg-purple))))
              (gnus-emphasis-highlight-words ; highlight
               ((t (,@fmt-none ,fg-yellow))))
              (gnus-header-content ((t (,@fmt-none ,@fg-base01)))) ; hdrdefault
@@ -546,7 +580,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (message-mml ((t (,@fg-blue))))
              (message-cited-text ((t (,@fg-base2))))
              (message-separator ((t (,@fg-base3))))
-             (message-header-xheader ((t (,@fg-violet))))
+             (message-header-xheader ((t (,@fg-purple))))
              (message-header-name ((t (,@fg-cyan))))
              (message-header-other ((t (,@fg-red))))
              (message-header-newsgroups ((t (,@fmt-bldi ,@fg-yellow))))
@@ -575,7 +609,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              ;; smart-mode-line
              ; use (setq sml/theme nil) for these settings to take effect
              (sml/charging ((t (,@fg-yellow))))
-             (sml/client ((t (,@fg-violet))))
+             (sml/client ((t (,@fg-purple))))
              (sml/col-number ((t (,@fmt-bb ,@fg-base2))))
              (sml/discharging ((t (,@fg-magenta))))
              (sml/filename ((t (,@fmt-bold ,@fg-green))))
@@ -590,7 +624,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (sml/name-filling ((t (,@fg-cyan))))
              (sml/numbers-separator ((t (,@fg-base00))))
              (sml/outside-modified ((t (,@fmt-none ,@fg-red))))
-             (sml/position-percentage ((t (,@fmt-bb ,@fg-violet))))
+             (sml/position-percentage ((t (,@fmt-bb ,@fg-purple))))
              (sml/prefix ((t (,@fmt-none ,@fg-cyan))))
              (sml/process ((t (,@fg-cyan))))
              (sml/read-only ((t (,@fmt-none ,@fg-yellow))))
@@ -630,10 +664,10 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (evil-ex-lazy-highlight ((t :inherit lazy-highlight)))
              (evil-ex-search ((t :inherit isearch)))
              (evil-ex-substitute-matches ((t ,@fmt-strk ,@fg-orange)))
-             (evil-ex-substitute-replacement ((t ,@fmt-undr ,@fg-red)))
+             (evil-ex-substitute-replacement ((t ,@fmt-undr ,@fg-darkgreen)))
              ;;font-latex
              (font-latex-warning-face ((t (,@fg-red))))
-             (font-latex-sectioning-5-face ((t (,@fg-violet))))
+             (font-latex-sectioning-5-face ((t (,@fg-purple))))
              ;;flyspell
              (flyspell-incorrect ((t (,@fg-red))))
              (flyspell-duplicate ((t (,@fg-yellow))))
@@ -641,16 +675,16 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (company-tooltip ((t (,@fg-base0 ,@bg-base02))))
              (company-tooltip-selection ((t (,@fg-base0 ,@bg-base01))))
              (company-tooltip-mouse ((t (,@bg-base02))))
-             (company-tooltip-common ((t (,@bg-base02 ,@fg-violet))))
-             (company-tooltip-common-selection ((t (,@fg-violet ,@bg-base01))))
+             (company-tooltip-common ((t (,@bg-base02 ,@fg-purple))))
+             (company-tooltip-common-selection ((t (,@fg-purple ,@bg-base01))))
              (company-tooltip-annotation ((t (,@fg-base0 ,@bg-base02))))
              (company-scrollbar-fg ((t (,@bg-base01))))
              (company-scrollbar-bg ((t (,@bg-base3))))
              (company-preview ((t (,@fg-base0 ,@bg-base01))))
              (company-preview-common ((t (,@fg-base0 ,@bg-base01))))
-             (company-preview-search ((t (,@fg-violet ,@bg-base01))))
+             (company-preview-search ((t (,@fg-purple ,@bg-base01))))
              (company-echo ((t nil)))
-             (company-echo-common ((t (,@fg-violet))))
+             (company-echo-common ((t (,@fg-purple))))
 	     ;;ansi-term
 	     (term-color-black ((t ( ,@fg-base02))))
 	     (term-color-red ((t ( ,@fg-red))))

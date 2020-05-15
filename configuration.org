@@ -37,6 +37,7 @@ Always compile packages, and use the newest version available.
   
   Convert tabs to spaces.
   #+BEGIN_SRC emacs-lisp :results none
+  (setq tab-width 2)
   (setq indent-tabs-mode nil)
   #+END_SRC
   
@@ -54,10 +55,16 @@ Always compile packages, and use the newest version available.
   (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
   #+end_src
   
-  Open Help buffers in the same window.
+  Open buffer position
   #+begin_src emacs-lisp :results none
-  (add-to-list 'display-buffer-alist
-             '("*Help*" display-buffer-same-window))
+  ;; (setq display-buffer-alist' nil)
+  (setq display-buffer-alist '((rx ".*") (display-buffer-reuse-window inhibit-same-window)))
+  #+end_src
+  
+  Line wrapping.
+  #+begin_src emacs-lisp :results none
+  (global-visual-line-mode t)
+  (set-default 'truncate-lines t)
   #+end_src
 
 * Miscellaneous
@@ -87,6 +94,43 @@ Always compile packages, and use the newest version available.
   (menu-bar-mode -1)
   (toggle-scroll-bar -1)
   #+END_SRC
+  
+* Configure =emacs-bind-map= 
+  #+begin_src emacs-lisp :results none
+ (use-package bind-map)
+ 
+ (bind-map org-major-map
+   :evil-keys ("SPC m")
+   :evil-states (normal motion visual)
+   :bindings (
+    "s" #'org-schedule
+    "d" #'org-deadline)
+   :major-modes (org-mode))
+ 
+ (bind-map base-leader-map
+   :evil-keys ("SPC")
+   :evil-states (normal motion visual)
+   :bindings (
+    "a" #'hydra-agenda/body
+    "b" #'hydra-buffer/body
+    "c" #'hydra-compile/body
+    "h" #'hydra-help/body
+    "f" #'hydra-file/body
+    "g" #'hydra-git/body
+    "l" #'hydra-lsp/body
+    "k" #'counsel-yank-pop
+    "p" #'hydra-project/body
+    "o" #'hydra-open/body
+    "s" #'hydra-search/body
+    "u" #'universal-argument
+    "t r" #'+core/reload-theme
+    "y a" #'yas-new-snippet
+    "y v" #'yas-visit-snippet-file
+    "RET" #'counsel-bookmark
+    "TAB" #'hydra-workspace/body
+    "SPC" #'counsel-projectile-find-file
+    "," #'counsel-projectile-switch-to-buffer))
+  #+end_src
   
 * Use =evil-mode=
 
@@ -129,7 +173,10 @@ Always compile packages, and use the newest version available.
 
 * Configure =hydra=
   #+BEGIN_SRC emacs-lisp :results none
-  (use-package hydra)
+  (use-package hydra
+   :custom 
+     (head-hint nil)
+     (hydra-key-format-spec "[%s]"))
   #+END_SRC
   
 ** Agenda
@@ -182,6 +229,7 @@ Always compile packages, and use the newest version available.
       ^
       ^Project^     
       ^────^───────────
+      _a_ Add project
       _c_ Compile project
       _p_ Switch project
       _f_ Find project file
@@ -191,6 +239,7 @@ Always compile packages, and use the newest version available.
       ^^        
       ^^        
       "
+      ("a" #'projectile-add-known-project)
       ("c" #'projectile-compile-project)
       ("f" #'counsel-projectile-ag)
       ("p" #'counsel-projectile-switch-project)
@@ -221,17 +270,36 @@ Always compile packages, and use the newest version available.
 
 ** Git 
    #+begin_src emacs-lisp :results none
+   (defhydra hydra-forge (:color blue)
+     "
+     ^
+     ^Forge^     
+     ^────^───────────
+     _b_ Browse
+     _c_ Create PR
+     _p_ Browse PR
+     ^^        
+     "
+     ("b" #'forge-browse-remote)
+     ("c" #'forge-create-pullreq)
+     ("p" #'forge-browse-pullreq))
+   #+end_src
+   
+   #+begin_src emacs-lisp :results none
    (defhydra hydra-git (:color blue)
      "
      ^
-     ^Magit^     
+     ^Git^     
      ^────^───────────
      _g_ Magit status
      _i_ Magit init
+     _r_ Remote (forge)
      ^^        
      "
      ("g" #'magit-status)
-     ("i" #'magit-init))
+     ("i" #'magit-init)
+     ("r" #'hydra-forge/body)
+     ("t" #'git-timemachine))
    #+end_src
 
 ** LSP
@@ -256,7 +324,8 @@ Always compile packages, and use the newest version available.
      ("f" #'lsp-format-buffer)
      ("l" #'lsp-ivy-workspace-symbol)
      ("r" #'lsp-workspace-folders-remove)
-     ("R" #'+lsp/remove-other-sessions))
+     ("R" #'+lsp/remove-other-sessions)
+     ("i" #'+scala/copy-import))
    #+end_src
    
    Remove other LSP sessions.
@@ -278,6 +347,7 @@ Always compile packages, and use the newest version available.
      ^────^───────────
      _k_ Describe key
      _f_ Describe function
+     _F_ Describe face
      _v_ Describe variable
      _p_ Describe package
      _m_ Describe mode
@@ -288,6 +358,7 @@ Always compile packages, and use the newest version available.
      "
      ("k" #'helpful-key)
      ("f" #'helpful-function)
+     ("F" #'describe-face)
      ("v" #'helpful-variable)
      ("p" #'helpful-package)
      ("m" #'describe-mode)
@@ -303,10 +374,12 @@ Always compile packages, and use the newest version available.
      ^Open^     
      ^────^───────────
      _p_ Treemacs
+     _e_ Eshell
      ^^        
      ^^        
      "
-     ("p" #'treemacs))
+     ("p" #'treemacs)
+     ("e" #'eshell))
    #+end_src
 
 ** Search
@@ -317,54 +390,55 @@ Always compile packages, and use the newest version available.
      ^LSP^     
      ^────^───────────
      _i_ Counsel iMenu
+     _m_ Monorepo Ag
      ^^        
      "
-     ("i" #'counsel-imenu))
+     ("i" #'counsel-imenu)
+     ("m" #'+work/search-monorepo))
    #+end_src
 ** Workspace
    #+begin_src emacs-lisp :results none 
-   (defhydra hydra-workspace (:color blue)
-     "
-     ^
-     ^Workspace^     
-     ^─────────^───────────
-     _c_ Create workspace
-     _d_ Kill workspace
-     _n_ Next workspace
-     _k_ Kill workspace
-     _p_ Previous workspace
-     _r_ Rename workspace
-     _s_ Switch workspace
-     ^^        
-     ^^        
-     "
-     ("c" #'persp-switch)
-     ("d" #'persp-kill)
-     ("n" #'persp-next)
-     ("p" #'persp-prev)
-     ("k" #'persp-kill)
-     ("r" #'persp-rename)
-     ("s" #'persp-switch))
+     (defhydra hydra-workspace (:color blue)
+       "
+       ^
+       ^Workspace^     
+       ^─────────^───────────
+       _c_ Create workspace
+       _d_ Kill workspace
+       _n_ Create named workspace
+       _k_ Kill workspace
+       _r_ Rename workspace
+       ^^        
+       ^^        
+       "
+       ("c" #'persp-switch)
+       ("d" #'persp-kill)
+       ("n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace"))))
+       ("k" #'persp-kill)
+       ("r" #'persp-rename))
    #+end_src
 
 * Global keybindings  
   #+BEGIN_SRC emacs-lisp :results none
-  (define-key evil-normal-state-map (kbd "SPC a") #'hydra-agenda/body)
-  (define-key evil-normal-state-map (kbd "SPC b") #'hydra-buffer/body)
-  (define-key evil-normal-state-map (kbd "SPC c") #'hydra-compile/body)
-  (define-key evil-normal-state-map (kbd "SPC h") #'hydra-help/body)
-  (define-key evil-normal-state-map (kbd "SPC f") #'hydra-file/body)
-  (define-key evil-normal-state-map (kbd "SPC g") #'hydra-git/body)
-  (define-key evil-normal-state-map (kbd "SPC l") #'hydra-lsp/body)
-  (define-key evil-normal-state-map (kbd "SPC k") #'counsel-yank-pop)
-  (define-key evil-normal-state-map (kbd "SPC p") #'hydra-project/body)
-  (define-key evil-normal-state-map (kbd "SPC o") #'hydra-open/body)
-  (define-key evil-normal-state-map (kbd "SPC s") #'hydra-search/body)
-  (define-key evil-normal-state-map (kbd "SPC y a") #'yas-new-snippet)
-  (define-key evil-normal-state-map (kbd "SPC RET") #'counsel-bookmark)
-  (define-key evil-normal-state-map (kbd "SPC TAB") #'hydra-workspace/body)
-  (define-key evil-normal-state-map (kbd "SPC SPC") #'counsel-projectile-find-file)
-  (define-key evil-normal-state-map (kbd "SPC ,") #'counsel-projectile-switch-to-buffer)
+ ;; (define-key evil-normal-state-map (kbd "SPC a") #'hydra-agenda/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC b") #'hydra-buffer/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC c") #'hydra-compile/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC h") #'hydra-help/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC f") #'hydra-file/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC g") #'hydra-git/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC l") #'hydra-lsp/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC k") #'counsel-yank-pop)
+ ;; (define-key evil-normal-state-map (kbd "SPC p") #'hydra-project/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC o") #'hydra-open/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC s") #'hydra-search/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC u") #'universal-argument)
+ ;; (define-key evil-normal-state-map (kbd "SPC t r") #'+core/reload-theme)
+ ;; (define-key evil-normal-state-map (kbd "SPC y a") #'yas-new-snippet)
+ ;; (define-key evil-normal-state-map (kbd "SPC y v") #'yas-visit-snippet-file)
+ ;; (define-key evil-normal-state-map (kbd "SPC RET") #'counsel-bookmark)
+ ;; (define-key evil-normal-state-map (kbd "SPC TAB") #'hydra-workspace/body)
+ ;; (define-key evil-normal-state-map (kbd "SPC SPC") #'counsel-projectile-find-file)
+ ;; (define-key evil-normal-state-map (kbd "SPC ,") #'counsel-projectile-switch-to-buffer)
   #+END_SRC
   
   Save buffer.
@@ -407,6 +481,20 @@ Always compile packages, and use the newest version available.
  (defun +core/empty-buffer () 
     (interactive)
     (switch-to-buffer-other-window (generate-new-buffer "empty")))
+  #+end_src
+  
+  #+begin_src emacs-lisp :results none
+  (defun +core/reload-theme ()
+     (interactive)
+     (let ((theme (-first-item custom-enabled-themes)))
+        (load-theme theme t)))
+  #+end_src
+  
+  Search Monorepo.
+  #+begin_src emacs-lisp :results none
+    (defun +work/search-monorepo ()
+      (interactive)
+      (counsel-ag "" "/home/porcupine/codeheroes/chatbotize/monorepo"))
   #+end_src
 
 * Configure =which-key=
@@ -488,18 +576,33 @@ Always compile packages, and use the newest version available.
   #+end_src
 * Configure =org=
   #+BEGIN_SRC emacs-lisp :results none
-    (use-package org
-      :ensure org-plus-contrib
-      :config
-      (require 'org-tempo)
-      :bind (:map evil-normal-state-map
-	("SPC m s" . org-schedule)
-	("C-k" . evil-window-up)
-	("C-j" . evil-window-down)))
+  (use-package org
+    :ensure org-plus-contrib
+    :custom (org-fontify-done-headline t)
+    :config (require 'org-tempo)
+    :bind (:map evil-normal-state-map
+      ("C-k" . evil-window-up)
+      ("C-j" . evil-window-down)
+      :map org-mode-map
+      ("C-k" . evil-window-up)
+      ("C-j" . evil-window-down))
+    :hook (org-mode . org-indent-mode))
   #+END_SRC
+  
+  #+begin_src emacs-lisp :results none
+  (use-package org-bullets
+     :after org
+     :hook (org-mode . org-bullets-mode))
+  #+end_src
   
   #+begin_src emacs-lisp :results none 
   (setq org-confirm-babel-evaluate nil)
+  #+end_src
+  
+  #+begin_src emacs-lisp :results none
+  (defvar +org/keymap (make-sparse-keymap))
+	(define-key +org/keymap (kbd "s") #'org-schedule)
+	(define-key +org/keymap (kbd "d") #'org-deadline)
   #+end_src
 
   
@@ -578,12 +681,12 @@ Always compile packages, and use the newest version available.
   
   #+begin_src emacs-lisp :results none
     (setq projectile-project-search-path '("~/codeheroes/chatbotize/monorepo"))
-    (setq projectile-project-root-files-functions '(projectile-root-local projectile-root-bottom-up projectile-root-top-down projectile-root-top-down-recurring))
-    
-      ;; projectile-project-root-files-functions #'(projectile-root-top-down
-      ;; 					      projectile-root-top-down-recurring
-      ;; 					      projectile-root-bottom-up
-      ;; 					      projectile-root-local))
+    ;; (setq projectile-project-root-files-functions '(projectile-root-local projectile-root-bottom-up projectile-root-top-down projectile-root-top-down-recurring))
+
+    (setq projectile-project-root-files-functions #'(projectile-root-top-down
+						  projectile-root-top-down-recurring
+						  projectile-root-bottom-up
+						  projectile-root-local))
 
      (projectile-register-project-type 'scala '("build.sbt"))
   #+end_src
@@ -596,22 +699,40 @@ Always compile packages, and use the newest version available.
   (require 'evil-magit)
   #+end_src
 
+* Configure =git-timemachine=
+  #+begin_src emacs-lisp :results none
+  (use-package git-timemachine)
+  #+end_src
+
 * Configure =treemacs=
   #+begin_src emacs-lisp :results none
-  (use-package treemacs)
-  (use-package treemacs-evil)
-  (use-package treemacs-projectile)
-  
-  (setq treemacs-width 60)
-  
-  (define-key evil-treemacs-state-map (kbd "SPC o p") #'treemacs)
-  (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
+    (use-package treemacs)
+
+    (use-package treemacs-evil
+      :after treemacs
+      :bind (:map evil-treemacs-state-map 
+            ("SPC u" . #'universal-argument)))
+
+    (use-package treemacs-projectile)
+
+    (setq treemacs-width 60)
+
+    (define-key evil-treemacs-state-map (kbd "SPC o p") #'treemacs)
+    (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
   #+end_src
+  
+  #+begin_src emacs-lisp :results none
+  (defun +treemacs/add-current-project-as-only ()
+    (interactive)
+    (-each (treemacs-workspace->projects (treemacs-current-workspace))
+      #'treemacs-do-remove-project-from-workspace)
+    (treemacs-add-and-display-current-project))
+  #+end_src
+  
 * Configure =doom-modeline=
   #+begin_src emacs-lisp :results none
-  (use-package doom-modeline
-    :ensure t
-    :init (doom-modeline-mode 1))
+    (use-package doom-modeline
+      :ensure t)
   #+end_src
 * Configure =zoom-window=
   #+begin_src emacs-lisp :results none
@@ -651,7 +772,19 @@ Always compile packages, and use the newest version available.
   (use-package helpful)
   #+end_src
 
-* Programming languages
+* Configure =keychain=
+  #+begin_src emacs-lisp :results none
+  (use-package keychain-environment
+     :config (keychain-refresh-environment))
+  #+end_src
+
+* Languages
+** Dockerfile
+   #+begin_src emacs-lisp :results none
+   (use-package dockerfile-mode
+     :config
+     (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
+   #+end_src
 ** Python
    Setup =python-mode=.
    #+BEGIN_SRC emacs-lisp :results none
@@ -664,9 +797,24 @@ Always compile packages, and use the newest version available.
    
    
    #+begin_src emacs-lisp :results none
+   (use-package pyenv-mode
+     :init
+       (let ((pyenv-path (expand-file-name "~/.pyenv/bin")))
+         (setenv "PATH" (concat pyenv-path ":" (getenv "PATH")))
+         (add-to-list 'exec-path pyenv-path))
+     :after python-mode)
+     
    (use-package pyvenv
      :after python-mode)
    #+end_src
+   
+
+   #+begin_src emacs-lisp :results none
+   (use-package blacken
+     :after python-mode
+     :hook (python-mode . blacken-mode))
+   #+end_src
+
 ** Scala
    scala-mode
    #+begin_src emacs-lisp :results none
@@ -685,6 +833,20 @@ Always compile packages, and use the newest version available.
     minibuffer-local-completion-map)
     ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
     (setq sbt:program-options '("-Dsbt.supershell=false")))
+   #+end_src
+   
+   #+begin_src emacs-lisp :results none
+   (defun +scala/copy-import ()
+       (interactive)
+       (setq import
+         (replace-regexp-in-string "package" "import"
+         (concat
+           (car (split-string (buffer-string) "\n"))
+           "."
+           (thing-at-point 'word))))
+   
+       (message "Copied: %s" import)
+       (kill-new import))
    #+end_src
    
 ** Elisp

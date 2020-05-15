@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: import global execution context 
+# key: gec
+# --
+import scala.concurrent.ExecutionContext.Implicits.global

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: implicit FlatMap/FunctorOps
+# key: fops
+# --
+import cats.syntax.flatMap.toFlatMapOps
+import cats.syntax.functor.toFunctorOps
