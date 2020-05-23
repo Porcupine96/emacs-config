@@ -9,37 +9,37 @@ available. It also means that I should be able to open Emacs for the first time
 on a fresh Debian box and have my whole environment automatically installed. I'm
 not /totally/ sure about that, but we're gettin' close.
 
-#+BEGIN_SRC emacs-lisp :results none
+#+begin_src emacs-lisp :results none
   (require 'use-package-ensure)
   (setq use-package-always-ensure t)
-#+END_SRC
+#+end_src
 
 Always compile packages, and use the newest version available.
 
-#+BEGIN_SRC emacs-lisp :results none
+#+begin_src emacs-lisp :results none
   (use-package auto-compile
     :config (auto-compile-on-load-mode))
 
   (setq load-prefer-newer t)
-#+END_SRC
+#+end_src
 
 * Sensible settings
   Disable backup and lockfiles.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (setq make-backup-files nil)
   (setq create-lockfiles nil)
-  #+END_SRC
+  #+end_src
 
   Disable saving the clipboard after exiting Emacs.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (setq x-select-enable-clipboard-manager nil)
-  #+END_SRC
+  #+end_src
   
   Convert tabs to spaces.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (setq tab-width 2)
   (setq indent-tabs-mode nil)
-  #+END_SRC
+  #+end_src
   
   Ask before closing emasc.
   #+begin_src emacs-lisp :results none
@@ -57,14 +57,24 @@ Always compile packages, and use the newest version available.
   
   Open buffer position
   #+begin_src emacs-lisp :results none
-  ;; (setq display-buffer-alist' nil)
-  (setq display-buffer-alist '((rx ".*") (display-buffer-reuse-window inhibit-same-window)))
+  (setq display-buffer-alist' nil)
+  
+  (add-to-list 'display-buffer-alist
+              `(,(rx bos "*compilation*" eos)
+               (display-buffer-reuse-window
+                display-buffer-in-side-window)
+               (side            . bottom)
+               (reusable-frames . visible)
+               (window-height   . 0.33)))
+
+  ;; (setq display-buffer-alist '((rx ".*") (display-buffer-reuse-window inhibit-same-window)))
   #+end_src
   
   Line wrapping.
   #+begin_src emacs-lisp :results none
   (global-visual-line-mode t)
   (set-default 'truncate-lines t)
+  (set-default 'truncate-partial-width-windows nil)
   #+end_src
 
 * Miscellaneous
@@ -74,68 +84,77 @@ Always compile packages, and use the newest version available.
 
 * Visuals
   Font.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (set-face-attribute 'default nil
   		    :family "SF Mono"
   		    :height 120
   		    :weight 'normal
   		    :width 'normal)
-  #+END_SRC
+  #+end_src
   
   Color theme.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (add-to-list 'custom-theme-load-path "~/my-emacs/themes")
   (load-theme 'noctilux t)
-  #+END_SRC
+  #+end_src
   
   Hide the bezels.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (toggle-scroll-bar -1)
-  #+END_SRC
+  #+end_src
   
 * Configure =emacs-bind-map= 
   #+begin_src emacs-lisp :results none
- (use-package bind-map)
- 
- (bind-map org-major-map
-   :evil-keys ("SPC m")
-   :evil-states (normal motion visual)
-   :bindings (
-    "s" #'org-schedule
-    "d" #'org-deadline)
-   :major-modes (org-mode))
- 
- (bind-map base-leader-map
-   :evil-keys ("SPC")
-   :evil-states (normal motion visual)
-   :bindings (
-    "a" #'hydra-agenda/body
-    "b" #'hydra-buffer/body
-    "c" #'hydra-compile/body
-    "h" #'hydra-help/body
-    "f" #'hydra-file/body
-    "g" #'hydra-git/body
-    "l" #'hydra-lsp/body
-    "k" #'counsel-yank-pop
-    "p" #'hydra-project/body
-    "o" #'hydra-open/body
-    "s" #'hydra-search/body
-    "u" #'universal-argument
-    "t r" #'+core/reload-theme
-    "y a" #'yas-new-snippet
-    "y v" #'yas-visit-snippet-file
-    "RET" #'counsel-bookmark
-    "TAB" #'hydra-workspace/body
-    "SPC" #'counsel-projectile-find-file
-    "," #'counsel-projectile-switch-to-buffer))
+  (use-package bind-map)
+
+  (bind-map org-major-map
+    :evil-keys ("SPC m")
+    :evil-states (normal motion visual)
+    :bindings (
+     "s" #'org-schedule
+     "d" #'org-deadline
+     "t" #'org-todo)
+    :major-modes (org-mode))
+
+  ;; (bind-map org-dwim-map
+  ;;    :evil-keys ("RET")
+  ;;    :evil-states (normal)
+  ;;    :bindings (
+  ;;     "RET" #'+org/dwim)
+  ;;    :major-modes (org-mode))
+
+  (bind-map base-leader-map
+    :evil-keys ("SPC")
+    :evil-states (normal motion visual)
+    :bindings (
+     "a" #'hydra-agenda/body
+     "b" #'hydra-buffer/body
+     "c" #'hydra-compile/body
+     "h" #'hydra-help/body
+     "f" #'hydra-file/body
+     "g" #'hydra-git/body
+     "l" #'hydra-lsp/body
+     "k" #'counsel-yank-pop
+     "p" #'hydra-project/body
+     "o" #'hydra-open/body
+     "s" #'hydra-search/body
+     "u" #'universal-argument
+     "e e" #'elfeed
+     "t r" #'+core/reload-theme
+     "y a" #'yas-new-snippet
+     "y v" #'yas-visit-snippet-file
+     "RET" #'counsel-bookmark
+     "TAB" #'hydra-workspace/body
+     "SPC" #'counsel-projectile-find-file
+     "," #'counsel-projectile-switch-to-buffer))
   #+end_src
   
 * Use =evil-mode=
 
   Use =evil-mode=
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (use-package evil
     :ensure t
     :init
@@ -150,16 +169,16 @@ Always compile packages, and use the newest version available.
     (evil-collection-init))
     
   (setq evil-ex-substitute-global t)
-  #+END_SRC
+  #+end_src
 
   Use =evil-commentary=
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (use-package 
      evil-commentary
      :ensure t
      :after evil)
   (evil-commentary-mode)
-  #+END_SRC
+  #+end_src
   
   Use =evil-surround=
   #+begin_src emacs-lisp :results none
@@ -172,12 +191,12 @@ Always compile packages, and use the newest version available.
   #+end_src
 
 * Configure =hydra=
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (use-package hydra
    :custom 
      (head-hint nil)
      (hydra-key-format-spec "[%s]"))
-  #+END_SRC
+  #+end_src
   
 ** Agenda
    #+begin_src emacs-lisp :results none
@@ -186,26 +205,32 @@ Always compile packages, and use the newest version available.
      ^
      ^Agenda^     
      ^────^───────────
-     _a_ Weekly agenda 
+     _a_ Agenda
+     _w_ Weekly agenda
+     _d_ Daily agenda
      ^^        
      ^^        
      "
-     ("a" #'+agenda/weekly-agenda))
+     ("a" #'org-agenda)
+     ("w" #'+agenda/weekly-agenda)
+     ("d" #'+agenda/daily-agenda))
 
    #+end_src
 ** Compile
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (defhydra hydra-compile (:color blue)
     "
     ──────────────────────────────
     _x_ Flycheck list errors
+    _c_ Compile
     ^^        
     "
-    ("x" #'flycheck-list-errors))
-  #+END_SRC
+    ("x" #'flycheck-list-errors)
+    ("c" #'compile))
+  #+end_src
    
 ** File 
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (defhydra hydra-file (:color blue)
     "
     ^
@@ -213,40 +238,46 @@ Always compile packages, and use the newest version available.
     ^────^───────────
     _f_ Find 
     _r_ Recent
+    _a_ current.org
     _c_ Config
+    _t_ Theme
     ^^        
     ^^        
     "
     ("f" #'counsel-find-file)
     ("r" #'counsel-recentf)
-    ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org"))))
-  #+END_SRC
+    ("a" (lambda () (interactive)(find-file "~/Dropbox/org/todo/current.org")))
+    ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
+    ("t" (lambda () (interactive)(find-file "~/my-emacs/themes/noctilux-theme.el"))))
+  #+end_src
 
 ** Project 
-  #+BEGIN_SRC emacs-lisp :results none
-    (defhydra hydra-project (:color blue)
-      "
-      ^
-      ^Project^     
-      ^────^───────────
-      _a_ Add project
-      _c_ Compile project
-      _p_ Switch project
-      _f_ Find project file
-      _i_ Invalidate project cache
-      _t_ Add current project to treemacs
-      _s_ Save project files
-      ^^        
-      ^^        
-      "
-      ("a" #'projectile-add-known-project)
-      ("c" #'projectile-compile-project)
-      ("f" #'counsel-projectile-ag)
-      ("p" #'counsel-projectile-switch-project)
-      ("i" #'projectile-invalidate-cache)
-      ("t" #'treemacs-add-and-display-current-project)
-      ("s" #'projectile-save-project-buffers))
-  #+END_SRC
+#+begin_src emacs-lisp :results none
+  (defhydra hydra-project (:color blue)
+    "
+    ^
+    ^Project^     
+    ^────^───────────
+    _a_ Add project
+    _c_ Compile project
+    _C_ Recompile project
+    _p_ Switch project
+    _f_ Find project file
+    _i_ Invalidate project cache
+    _t_ Add current project to treemacs
+    _s_ Save project files
+    ^^        
+    ^^        
+    "
+    ("a" #'projectile-add-known-project)
+    ("c" #'projectile-compile-project)
+    ("C" #'projectile-repeat-last-command)
+    ("f" #'counsel-projectile-ag)
+    ("p" #'counsel-projectile-switch-project)
+    ("i" #'projectile-invalidate-cache)
+    ("t" #'treemacs-add-and-display-current-project)
+    ("s" #'projectile-save-project-buffers))
+#+end_src
 
 ** Buffer
    #+begin_src emacs-lisp :results none
@@ -270,19 +301,21 @@ Always compile packages, and use the newest version available.
 
 ** Git 
    #+begin_src emacs-lisp :results none
-   (defhydra hydra-forge (:color blue)
-     "
-     ^
-     ^Forge^     
-     ^────^───────────
-     _b_ Browse
-     _c_ Create PR
-     _p_ Browse PR
-     ^^        
-     "
-     ("b" #'forge-browse-remote)
-     ("c" #'forge-create-pullreq)
-     ("p" #'forge-browse-pullreq))
+     (defhydra hydra-forge (:color blue)
+       "
+       ^
+       ^Forge^     
+       ^────^───────────
+       _a_ Assign reviewer
+       _b_ Browse
+       _c_ Create PR
+       _p_ Browse PR
+       ^^        
+       "
+       ("a" #'forge-edit-topic-review-requests)
+       ("b" #'forge-browse-remote)
+       ("c" #'forge-create-pullreq)
+       ("p" #'forge-browse-pullreq))
    #+end_src
    
    #+begin_src emacs-lisp :results none
@@ -419,40 +452,19 @@ Always compile packages, and use the newest version available.
    #+end_src
 
 * Global keybindings  
-  #+BEGIN_SRC emacs-lisp :results none
- ;; (define-key evil-normal-state-map (kbd "SPC a") #'hydra-agenda/body)
- ;; (define-key evil-normal-state-map (kbd "SPC b") #'hydra-buffer/body)
- ;; (define-key evil-normal-state-map (kbd "SPC c") #'hydra-compile/body)
- ;; (define-key evil-normal-state-map (kbd "SPC h") #'hydra-help/body)
- ;; (define-key evil-normal-state-map (kbd "SPC f") #'hydra-file/body)
- ;; (define-key evil-normal-state-map (kbd "SPC g") #'hydra-git/body)
- ;; (define-key evil-normal-state-map (kbd "SPC l") #'hydra-lsp/body)
- ;; (define-key evil-normal-state-map (kbd "SPC k") #'counsel-yank-pop)
- ;; (define-key evil-normal-state-map (kbd "SPC p") #'hydra-project/body)
- ;; (define-key evil-normal-state-map (kbd "SPC o") #'hydra-open/body)
- ;; (define-key evil-normal-state-map (kbd "SPC s") #'hydra-search/body)
- ;; (define-key evil-normal-state-map (kbd "SPC u") #'universal-argument)
- ;; (define-key evil-normal-state-map (kbd "SPC t r") #'+core/reload-theme)
- ;; (define-key evil-normal-state-map (kbd "SPC y a") #'yas-new-snippet)
- ;; (define-key evil-normal-state-map (kbd "SPC y v") #'yas-visit-snippet-file)
- ;; (define-key evil-normal-state-map (kbd "SPC RET") #'counsel-bookmark)
- ;; (define-key evil-normal-state-map (kbd "SPC TAB") #'hydra-workspace/body)
- ;; (define-key evil-normal-state-map (kbd "SPC SPC") #'counsel-projectile-find-file)
- ;; (define-key evil-normal-state-map (kbd "SPC ,") #'counsel-projectile-switch-to-buffer)
-  #+END_SRC
   
   Save buffer.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (global-set-key (kbd "C-x C-x") 'save-buffer)
- #+END_SRC
+ #+end_src
   
   Easier movements between splits.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (global-set-key (kbd "C-h") #'evil-window-left)
   (global-set-key (kbd "C-j") #'evil-window-down)
   (global-set-key (kbd "C-k") #'evil-window-up)
   (global-set-key (kbd "C-l") #'evil-window-right)
-  #+END_SRC
+  #+end_src
   
   Vim-like screen jumping.
   #+begin_src emacs-lisp :results none
@@ -460,9 +472,9 @@ Always compile packages, and use the newest version available.
   #+end_src
   
   Use "C-w d" to close a window.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (define-key evil-window-map (kbd "d") #'evil-window-delete)
-  #+END_SRC
+  #+end_src
   
   Use =zoom-window=.
   #+begin_src emacs-lisp :results none
@@ -475,7 +487,7 @@ Always compile packages, and use the newest version available.
   (global-set-key (kbd "C-+") #'text-scale-increase)
   (global-set-key (kbd "C--") #'text-scale-decrease)
   #+end_src
-
+  
 * Misc Functions
   #+begin_src emacs-lisp :results none
  (defun +core/empty-buffer () 
@@ -526,20 +538,20 @@ Always compile packages, and use the newest version available.
   
 * Configure =perspecitve=
   Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (use-package perspective)
   (persp-mode)
-  #+END_SRC
+  #+end_src
   
   Better keybindings.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (define-key evil-normal-state-map (kbd "gt") #'persp-next)
   (define-key evil-normal-state-map (kbd "gT") #'persp-prev)
-  #+END_SRC
+  #+end_src
 
 * Configure =ivy= / =counsel= / =swiper=
   Default =ivy= configuration.
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
     (use-package ivy)
     (use-package swiper)
     (use-package counsel)
@@ -564,7 +576,7 @@ Always compile packages, and use the newest version available.
     (global-set-key (kbd "C-x l") 'counsel-locate)
     (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
     (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
-  #+END_SRC
+  #+end_src
 * Configure =flycheck=
   #+begin_src emacs-lisp :results none
   (use-package flycheck
@@ -575,36 +587,49 @@ Always compile packages, and use the newest version available.
 	  ("] e" . flycheck-next-error)))
   #+end_src
 * Configure =org=
-  #+BEGIN_SRC emacs-lisp :results none
+** Core
+  #+begin_src emacs-lisp :results none
   (use-package org
     :ensure org-plus-contrib
-    :custom (org-fontify-done-headline t)
+    :custom 
+      (org-fontify-done-headline t)
+      (org-todo-keywords
+	'((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+	 (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
     :config (require 'org-tempo)
     :bind (:map evil-normal-state-map
       ("C-k" . evil-window-up)
       ("C-j" . evil-window-down)
+      ("RET" . +org/dwim)
       :map org-mode-map
       ("C-k" . evil-window-up)
       ("C-j" . evil-window-down))
     :hook (org-mode . org-indent-mode))
-  #+END_SRC
+  #+end_src
   
   #+begin_src emacs-lisp :results none
   (use-package org-bullets
      :after org
      :hook (org-mode . org-bullets-mode))
   #+end_src
-  
+    
+  Do not ask whether it is save to evaluate a snippet of code.
   #+begin_src emacs-lisp :results none 
   (setq org-confirm-babel-evaluate nil)
   #+end_src
   
+  Automatically save archive buffer after archiving a task.
   #+begin_src emacs-lisp :results none
-  (defvar +org/keymap (make-sparse-keymap))
-	(define-key +org/keymap (kbd "s") #'org-schedule)
-	(define-key +org/keymap (kbd "d") #'org-deadline)
+  (defun org-archive-save-buffer ()
+    (let ((afile (car (org-all-archive-files))))
+      (if (file-exists-p afile)
+        (let ((buffer (find-file-noselect afile)))
+            (with-current-buffer buffer
+              (save-buffer)))
+        (message "Ooops ... (%s) does not exist." afile))))
+  
+  (add-hook 'org-archive-hook 'org-archive-save-buffer)
   #+end_src
-
   
 ** Org Agenda 
    #+begin_src emacs-lisp :results none
@@ -638,59 +663,77 @@ Always compile packages, and use the newest version available.
    #+begin_src emacs-lisp :results none
    (defun +agenda/weekly-agenda ()
      (interactive)
-     (org-agenda)
-     (org-agenda-week-view))
+     (org-agenda nil "a"))
+     
+   (defun +agenda/daily-agenda ()
+     (interactive)
+     (let ((org-agenda-span 1))
+       (org-agenda nil "a")))
    #+end_src
-** Adademic
-   #+begin_src emacs-lisp :results none
-   (use-package org-ref)
-   #+end_src
+** Academic
+#+begin_src emacs-lisp :results none
+(use-package org-ref)
+#+end_src
+ 
+#+begin_src emacs-lisp :results none
+(use-package academic-phrases)
+#+end_src
    
-   #+begin_src emacs-lisp :results none
-   (use-package academic-phrases)
-   #+end_src
-   
-   # #+begin_src emacs-lisp :results none
-   # (setq synonyms-file "~/thesaurus/mthesaur.txt")
-   # (require 'synonyms)
-   # #+end_src
+** Org Capture
+#+begin_src emacs-lisp :results none
+(setq org-default-notes-file (concat org-directory "~/Dropbox/org/tood/notes.org"))
+#+end_src
+
 ** Org Babel
    #+begin_src emacs-lisp :results none
    (org-babel-do-load-languages 'org-babel-load-languages
     '(
         (shell . t)
+        (emacs-lisp . t)
+        (python . t)
+        (jupyter . t)
     )
    )
    #+end_src
+** Functions
+#+begin_src emacs-lisp :results none
+(defun +org/dwim ()
+  (interactive)
+  (let* ((context (org-element-context))
+       (type (org-element-type context)))
+  (pcase type
+  (`headline (org-todo))
+)))
+#+end_src
 
 * Configure =yasnippet=
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (use-package yasnippet
     :defer t)
   (yas-global-mode)
-  #+END_SRC
+  #+end_src
   
 * Configure =projectile=
-  #+BEGIN_SRC emacs-lisp :results none
+  #+begin_src emacs-lisp :results none
   (use-package projectile)
   (use-package counsel-projectile) 
   
   (projectile-global-mode)
   (setq projectile-enable-caching t)
-  #+END_SRC
+  #+end_src
   
   #+begin_src emacs-lisp :results none
-    (setq projectile-project-search-path '("~/codeheroes/chatbotize/monorepo"))
-    ;; (setq projectile-project-root-files-functions '(projectile-root-local projectile-root-bottom-up projectile-root-top-down projectile-root-top-down-recurring))
+ (setq projectile-project-search-path '("~/codeheroes/chatbotize/monorepo"))
+ ;; (setq projectile-project-root-files-functions '(projectile-root-local projectile-root-bottom-up projectile-root-top-down projectile-root-top-down-recurring))
 
-    (setq projectile-project-root-files-functions #'(projectile-root-top-down
-						  projectile-root-top-down-recurring
-						  projectile-root-bottom-up
-						  projectile-root-local))
+ (setq projectile-project-root-files-functions #'(projectile-root-top-down
+					  projectile-root-top-down-recurring
+					  projectile-root-bottom-up
+					  projectile-root-local))
 
-     (projectile-register-project-type 'scala '("build.sbt"))
+  (projectile-register-project-type 'scala '("build.sbt"))
   #+end_src
-
+  
 * Configure =magit=
   #+begin_src emacs-lisp :results none
   (use-package magit)
@@ -731,8 +774,10 @@ Always compile packages, and use the newest version available.
   
 * Configure =doom-modeline=
   #+begin_src emacs-lisp :results none
-    (use-package doom-modeline
-      :ensure t)
+  (use-package doom-modeline
+    :ensure 
+    :custom (doom-modeline-height 35)
+    :config (set-face-attribute 'mode-line nil :height 115))
   #+end_src
 * Configure =zoom-window=
   #+begin_src emacs-lisp :results none
@@ -762,10 +807,17 @@ Always compile packages, and use the newest version available.
      
   (smartparens-global-mode)
   #+end_src
-* Configure =dired=
-  #+begin_src emacs-lisp :results none
- (define-key dired-mode-map (kbd "J") #'dired-up-directory)
-  #+end_src
+ #+begin_src emacs-lisp :results none
+ (bind-map dired-major-map
+   :evil-states (normal motion visual)
+   :bindings (
+    "J" #'dire-up-directory)
+   :major-modes (dired-mode))
+ 
+   ;; (define-key dired-mode-map (kbd "J") #'dired-up-directory)
+   ;; (define-key dired-mode-map (kbd "c") nil)
+   ;; (define-key dired-mode-map (kbd "c d") #'dired-create-directory)
+ #+end_src
   
 * Configure =helpful=
   #+begin_src emacs-lisp :results none
@@ -778,6 +830,78 @@ Always compile packages, and use the newest version available.
      :config (keychain-refresh-environment))
   #+end_src
 
+* Configure =elfeed=
+  #+begin_src emacs-lisp :results none
+  (use-package elfeed
+    :defer t
+    :custom
+    (elfeed-search-remain-on-entry t)
+    :config
+    (setq elfeed-feeds 
+      '(("https://michalplachta.com/feed.xml")
+        ("https://www.youtube.com/feeds/videos.xml?channel_id=UC6fXiuFCWAnVPwRhBMztLlQ" youtube) ;; Leeren
+   	  ("https://degoes.net/feed.xml")
+	  ("https://blog.softwaremill.com/feed")
+    ))
+    (setq-default elfeed-search-filter "@6-months-ago +unread"))
+    
+    (evil-collection-define-key 'normal 'elfeed-search-mode-map
+        (kbd "RET") '+elfeed/show-entry
+        "b" '+elfeed/browse-url
+        "ts" '+elfeed/tag-started
+        "G" 'elfeed-update)
+        
+  (use-package elfeed-goodies
+    :after elfeed
+    :config
+      (elfeed-goodies/setup))
+  #+end_src
+  
+  #+begin_src emacs-lisp :results none
+  (defun +elfeed/show-entry (entry)
+    (interactive (list (elfeed-search-selected :ignore-region)))
+    (require 'elfeed-show)
+    (when (elfeed-entry-p entry)
+      (elfeed-search-update-entry entry)
+      (unless elfeed-search-remain-on-entry (forward-line))
+      (elfeed-show-entry entry)))
+  
+   (defun +elfeed/browse-url (&optional use-generic-p)
+     (interactive "P")
+     (let ((entries (elfeed-search-selected)))
+       (cl-loop for entry in entries
+                do (elfeed-untag entry 'unread)
+                when (elfeed-entry-link entry)
+                do (if use-generic-p
+                       (browse-url-generic it)
+                     (browse-url it)))
+       (unless (or elfeed-search-remain-on-entry (use-region-p))
+         (forward-line))))
+         
+   (defalias '+elfeed/tag-started
+     (elfeed-expose #'elfeed-search-tag-all 'started))
+  #+end_src
+
+* Configure =ox-reveal=
+#+begin_src emacs-lisp :results none
+(use-package ox-reveal
+  :defer t)
+  
+(use-package org-re-reveal
+  :defer t)
+#+end_src
+
+* Configure =jupyter=
+#+begin_src emacs-lisp :results none
+(use-package jupyter
+  :defer t)
+#+end_src
+
+* Configure =emojify=
+#+begin_src emacs-lisp :results none
+(use-package emojify)
+#+end_src
+
 * Languages
 ** Dockerfile
    #+begin_src emacs-lisp :results none
@@ -787,15 +911,14 @@ Always compile packages, and use the newest version available.
    #+end_src
 ** Python
    Setup =python-mode=.
-   #+BEGIN_SRC emacs-lisp :results none
+   #+begin_src emacs-lisp :results none
    (use-package python-mode)
    
    (setq
      python-shell-interpreter "ipython"
      python-shell-interpreter-args "-i")
-   #+END_SRC
-   
-   
+   #+end_src
+      
    #+begin_src emacs-lisp :results none
    (use-package pyenv-mode
      :init
@@ -808,11 +931,14 @@ Always compile packages, and use the newest version available.
      :after python-mode)
    #+end_src
    
-
    #+begin_src emacs-lisp :results none
    (use-package blacken
      :after python-mode
      :hook (python-mode . blacken-mode))
+   #+end_src
+   
+   #+begin_src emacs-lisp :results none
+
    #+end_src
 
 ** Scala
@@ -867,38 +993,53 @@ Always compile packages, and use the newest version available.
    #+end_src
    
 ** LSP
-   #+begin_src emacs-lisp :results none
-   (use-package lsp-mode
-    :hook ((scala-mode . lsp-deferred)
-           (sh-mode . lsp-deferred)
-           (python-mode . lsp-deferred))
-    :config (setq lsp-prefer-flymake nil)
-    :bind (:map evil-normal-state-map 
-          ("C-<return>" . lsp-execute-code-action)))
-   #+end_src
+#+begin_src emacs-lisp :results none
+(use-package lsp-mode
+ :hook ((scala-mode . lsp-deferred)
+        (sh-mode . lsp-deferred)
+        (python-mode . lsp-deferred))
+ :config (setq lsp-prefer-flymake nil)
+ :bind (:map evil-normal-state-map 
+       ("M-w" . +lsp-ui/toggle-doc-focus)          
+       ("C-<return>" . lsp-execute-code-action)))
+#+end_src
 
-   #+begin_src emacs-lisp :results none
-   (use-package lsp-ui)
-   #+end_src
+#+begin_src emacs-lisp :results none
+(use-package lsp-ui)
+#+end_src
+
+Use =lsp-ivy=.
+#+begin_src emacs-lisp :results none
+(use-package lsp-ivy
+  :after lsp-mode
+  :commands lsp-ivy-workspace-symbol)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package company-lsp
+  :after lsp-mode company
+  :custom
+   (company-lsp-cache-candidates t)
+   (company-lsp-async t)
+   (company-lsp-enable-snippet t)
+   (company-lsp-enable-recompletion t)
+  :commands company-lsp)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +lsp-ui/toggle-doc-focus ()
+  (interactive)
+  (if (lsp-ui-doc--visible-p)
+      (lsp-ui-doc-focus-frame)
+      (lsp-ui-doc-unfocus-frame)))
+#+end_src
    
-   Use =lsp-ivy=.
-   #+begin_src emacs-lisp :results none
-   (use-package lsp-ivy
-     :after lsp-mode
-     :commands lsp-ivy-workspace-symbol)
-   #+end_src
-   
-   #+begin_src emacs-lisp :results none
-   (use-package company-lsp
-     :after lsp-mode company
-     :custom
-      (company-lsp-cache-candidates t)
-      (company-lsp-async t)
-      (company-lsp-enable-snippet t)
-      (company-lsp-enable-recompletion t)
-     :commands company-lsp)
-   #+end_src
-   
+** Yaml
+#+begin_src emacs-lisp :results none
+(use-package yaml-mode 
+  :defer t)
+#+end_src
+
 * TODO TODOs
   - [ ] java script / react stuff
   - [ ] workgroups.el

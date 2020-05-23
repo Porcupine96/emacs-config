@@ -96,7 +96,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     (base1     "#aaaaaa" "#aaaaaa" "#aaaaaa" "brightcyan"    "cyan")
     (base2     "#e9e2cb" "#e9e2cb" "#e9e2cb" "white"         "white")
     (base3     "#fcf4dc" "#fcf4dc" "#fcf4dc" "brightwhite"   "white")
-    (yellow    "#aaeecc" "#aaeecc" "#aaeecc" "yellow"        "yellow")
+    (yellow    "#f1fa8c" "#f1fa8c" "#f1fa8c" "yellow"        "yellow")
     (orange    "#ff8888" "#ff8888" "#ff8888" "brightred"     "red")
     ;; (red       "#ff3333" "#ff3333" "#ff3333" "red"           "red")
     (red       "#ff5555" "#ff5555" "#ff5555" "red"           "red")
@@ -107,12 +107,18 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     (blue      "#aaccff" "#aaccff" "#aaccff" "blue"          "blue")
     (pink      "#ff79c6" "#ff79c6" "#ff79c6" "pink"          "pink")
     (cyan      "#8be9fd" "#8be9fd" "#8be9fd" "cyan"          "cyan")
-    (oldcyan    "#aadddd" "#aadddd" "#aadddd" "cyan"          "cyan")
+    (oldcyan   "#aadddd" "#aadddd" "#aadddd" "cyan"         "cyan")
     (white     "#ffffff" "#ffffff" "#ffffff" "white"         "white")
     ;; (green     "#aaffaa" "#aaffaa" "#aaffaa" "green"         "green")
     (green     "#50fa7b" "#50fa7b" "#50fa7b" "green"         "green")
     (gray      "#838484" "#838484" "#838484" "gray"          "gray")
     (darkgreen "#008000" "#008000" "#008000" "green"         "green")))
+
+
+(setq org-todo-keyword-faces '(
+    ("PROJ" . (:foreground "#bd93f9" :underline t))
+    ("STRT" . (:foreground "#aaccff" :underline t))
+    ("WAIT" . (:foreground "#f1fa8c" :underline t))))
 
 (defmacro noct-flet (specs &rest body)
   (let ((flet (if (fboundp 'cl-flet) 'cl-flet 'flet)))
@@ -397,6 +403,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (org-todo          ((t (,@fmt-undr ,@fg-orange ,@bg-base03))))
              (org-done          ((t (,@fmt-none ,@fg-gray   ,@bg-base03))))
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray   ,@bg-base03))))
+             (org-date          ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
 
 	     (org-document-title        ((t (,@fmt-bigger   ,@fg-gray  ,@bg-base03))))
 	     (org-document-info-keyword ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
@@ -660,6 +667,11 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (erc-nick-defaunoctilux-face ((t (,@fmt-none ,@fg-cyan))))
              (erc-notice-face ((t (,@fmt-none ,@fg-blue))))
              (erc-timestamp-face ((t (:foreground ,base01))))
+
+	     ;; avy
+             (avy-lead-face ((t (,@fg-base03 ,@bg-red))))
+             (avy-lead-face-0 ((t (,@fg-base03 ,@bg-purple))))
+
              ;; evil
              (evil-ex-lazy-highlight ((t :inherit lazy-highlight)))
              (evil-ex-search ((t :inherit isearch)))
