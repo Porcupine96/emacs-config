@@ -682,6 +682,11 @@ Always compile packages, and use the newest version available.
 ** Org Capture
 #+begin_src emacs-lisp :results none
 (setq org-default-notes-file (concat org-directory "~/Dropbox/org/tood/notes.org"))
+(setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
+
+(setq org-capture-templates
+    '(("i" "Inbox" entry (file+headline "~/Dropbox/org/todo/current.org" "Tasks")
+         "* TODO %?\n  %i\n  %a")))
 #+end_src
 
 ** Org Babel
