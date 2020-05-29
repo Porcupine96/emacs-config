@@ -57,24 +57,26 @@ Always compile packages, and use the newest version available.
   
   Open buffer position
   #+begin_src emacs-lisp :results none
-  (setq display-buffer-alist' nil)
-  
-  (add-to-list 'display-buffer-alist
-              `(,(rx bos "*compilation*" eos)
-               (display-buffer-reuse-window
-                display-buffer-in-side-window)
-               (side            . bottom)
-               (reusable-frames . visible)
-               (window-height   . 0.33)))
+  (setq display-buffer-alist
+     '(("\\*compilation\\*"
+        (display-buffer-in-side-window)
+        (side            . bottom)
+        (reusable-frames . visible)
+        (window-height   . 0.33))
+       ("\\*\\([Hh]elp\\|Messages\\)\\*"
+        (display-buffer-in-side-window)
+        (side           . right)
+        (window-width   . 0.5))))
 
   ;; (setq display-buffer-alist '((rx ".*") (display-buffer-reuse-window inhibit-same-window)))
   #+end_src
   
   Line wrapping.
   #+begin_src emacs-lisp :results none
-  (global-visual-line-mode t)
-  (set-default 'truncate-lines t)
-  (set-default 'truncate-partial-width-windows nil)
+    (global-visual-line-mode t)
+    (setq-default truncate-lines t)
+    (setq truncate-lines t)
+    (setq truncate-partial-width-windows nil)
   #+end_src
 
 * Miscellaneous
@@ -105,50 +107,108 @@ Always compile packages, and use the newest version available.
   (toggle-scroll-bar -1)
   #+end_src
   
-* Configure =emacs-bind-map= 
+* Configure =general=
+#+begin_src emacs-lisp :results none
+  (use-package general
+    :ensure t
+    :init
+     (setq general-override-states '(insert
+                                     emacs
+                                     hybrid
+                                     normal
+                                     visual
+                                     motion
+                                     operator
+                                     replace)))
+
+  (general-create-definer leader-def 
+    :prefix "SPC")
+    
+
+  (general-create-definer local-leader-def
+    :prefix "SPC m")
+  
+  (leader-def
+    :states '(normal visual motion)
+    :keymaps 'override
+      "a" #'hydra-agenda/body
+      "b" #'hydra-buffer/body
+      "c" #'hydra-compile/body
+      "h" #'hydra-help/body
+      "f" #'hydra-file/body
+      "g" #'hydra-git/body
+      "l" #'hydra-lsp/body
+      "k" #'counsel-yank-pop
+      "p" #'hydra-project/body
+      "r" #'hydra-resize/body
+      "o" #'hydra-open/body
+      "s" #'hydra-search/body
+      "u" #'universal-argument
+      "w f" #'+core/to-floating-frame
+      "e e" #'elfeed
+      "t r" #'+core/reload-theme
+      "y a" #'yas-new-snippet
+      "y v" #'yas-visit-snippet-file
+      "RET" #'counsel-bookmark
+      "TAB" #'hydra-workspace/body
+      "SPC" #'counsel-projectile-find-file
+      "," #'counsel-projectile-switch-to-buffer)
+  
+  (local-leader-def
+    :states 'normal
+    :keymaps 'override
+      "s" #'org-schedule
+      "d" #'org-deadline
+      "t" #'org-todo)
+    
+#+end_src
+
+* Configure =emacs-bind-map= :notangle:
   #+begin_src emacs-lisp :results none
-  (use-package bind-map)
+  ;;(use-package bind-map)
 
-  (bind-map org-major-map
-    :evil-keys ("SPC m")
-    :evil-states (normal motion visual)
-    :bindings (
-     "s" #'org-schedule
-     "d" #'org-deadline
-     "t" #'org-todo)
-    :major-modes (org-mode))
+  ;;(bind-map org-major-map
+  ;;  :evil-keys ("SPC m")
+  ;;  :evil-states (normal motion visual)
+  ;;  :bindings (
+  ;;   "s" #'org-schedule
+  ;;   "d" #'org-deadline
+  ;;   "t" #'org-todo)
+  ;;  :major-modes (org-mode))
 
-  ;; (bind-map org-dwim-map
-  ;;    :evil-keys ("RET")
-  ;;    :evil-states (normal)
-  ;;    :bindings (
-  ;;     "RET" #'+org/dwim)
-  ;;    :major-modes (org-mode))
+  ;;;; (bind-map org-dwim-map
+  ;;;;    :evil-keys ("RET")
+  ;;;;    :evil-states (normal)
+  ;;;;    :bindings (
+  ;;;;     "RET" #'+org/dwim)
+  ;;;;    :major-modes (org-mode))
 
-  (bind-map base-leader-map
-    :evil-keys ("SPC")
-    :evil-states (normal motion visual)
-    :bindings (
-     "a" #'hydra-agenda/body
-     "b" #'hydra-buffer/body
-     "c" #'hydra-compile/body
-     "h" #'hydra-help/body
-     "f" #'hydra-file/body
-     "g" #'hydra-git/body
-     "l" #'hydra-lsp/body
-     "k" #'counsel-yank-pop
-     "p" #'hydra-project/body
-     "o" #'hydra-open/body
-     "s" #'hydra-search/body
-     "u" #'universal-argument
-     "e e" #'elfeed
-     "t r" #'+core/reload-theme
-     "y a" #'yas-new-snippet
-     "y v" #'yas-visit-snippet-file
-     "RET" #'counsel-bookmark
-     "TAB" #'hydra-workspace/body
-     "SPC" #'counsel-projectile-find-file
-     "," #'counsel-projectile-switch-to-buffer))
+  ;;(bind-map base-leader-map
+  ;;  :evil-keys ("SPC")
+  ;;  :evil-states (normal motion visual)
+  ;;  :bindings (
+  ;;   "a" #'hydra-agenda/body
+  ;;   "b" #'hydra-buffer/body
+  ;;   "c" #'hydra-compile/body
+  ;;   "h" #'hydra-help/body
+  ;;   "f" #'hydra-file/body
+  ;;   "g" #'hydra-git/body
+  ;;   "l" #'hydra-lsp/body
+  ;;   "k" #'counsel-yank-pop
+  ;;   "p" #'hydra-project/body
+  ;;   "r" #'hydra-resize/body
+  ;;   "o" #'hydra-open/body
+  ;;   "s" #'hydra-search/body
+  ;;   "u" #'universal-argument
+  ;;   "w f" #'+core/to-floating-frame
+  ;;   "e e" #'elfeed
+  ;;   "t r" #'+core/reload-theme
+  ;;   "y a" #'yas-new-snippet
+  ;;   "y v" #'yas-visit-snippet-file
+  ;;   "RET" #'counsel-bookmark
+  ;;   "TAB" #'hydra-workspace/body
+  ;;   "SPC" #'counsel-projectile-find-file
+  ;;   "," #'counsel-projectile-switch-to-buffer))
   #+end_src
   
 * Use =evil-mode=
@@ -160,7 +220,11 @@ Always compile packages, and use the newest version available.
     :init
     (setq evil-want-keybinding nil)
     :config
-    (evil-mode 1))
+    (evil-mode 1)
+    (setq aw-keys '(?h ?j ?k ?l ?a ?s ?d ?f))
+    :bind (:map evil-motion-state-map
+          ("C-w C-w" . ace-window)
+          ("C-w w"   . ace-window)))
   
   (use-package evil-collection
     :after evil
@@ -343,20 +407,22 @@ Always compile packages, and use the newest version available.
      ^LSP^     
      ^────^───────────
      _b_ Metals build import
+     _d_ Go to type definition
      _s_ Describe session
      _e_ Error list
      _f_ Format
      _l_ Find symbol
-     _r_ Remove LSP workspace
+     _r_ Find references
      _R_ Remove other workspaces
      ^^        
      "
      ("b" #'lsp-metals-build-import)
+     ("d" #'lsp-goto-type-definition)
      ("s" #'lsp-describe-session)
      ("e" #'lsp-ui-flycheck-list)
      ("f" #'lsp-format-buffer)
      ("l" #'lsp-ivy-workspace-symbol)
-     ("r" #'lsp-workspace-folders-remove)
+     ("r" #'lsp-find-references)
      ("R" #'+lsp/remove-other-sessions)
      ("i" #'+scala/copy-import))
    #+end_src
@@ -416,19 +482,19 @@ Always compile packages, and use the newest version available.
    #+end_src
 
 ** Search
-   #+begin_src emacs-lisp :results none
-   (defhydra hydra-search (:color blue)
-     "
-     ^
-     ^LSP^     
-     ^────^───────────
-     _i_ Counsel iMenu
-     _m_ Monorepo Ag
-     ^^        
-     "
-     ("i" #'counsel-imenu)
-     ("m" #'+work/search-monorepo))
-   #+end_src
+#+begin_src emacs-lisp :results none
+ (defhydra hydra-search (:color blue)
+   "
+   ^
+   ^LSP^     
+   ^────^───────────
+   _i_ Counsel iMenu
+   _m_ Monorepo Ag
+   ^^        
+   "
+   ("i" #'counsel-imenu)
+   ("m" #'+work/search-monorepo))
+ #+end_src
 ** Workspace
    #+begin_src emacs-lisp :results none 
      (defhydra hydra-workspace (:color blue)
@@ -450,6 +516,20 @@ Always compile packages, and use the newest version available.
        ("k" #'persp-kill)
        ("r" #'persp-rename))
    #+end_src
+** Resize
+#+begin_src emacs-lisp :results none
+ (defhydra hydra-resize (:color blue)
+   "
+   ^
+   ^Resize^     
+   ^────^───────────
+   _h_ evil-window-decrease-width
+   _l_ evil-window-increase-width
+   ^^        
+   "
+   ("h" #'evil-window-decrease-width)
+   ("l" #'evil-window-increase-width))
+ #+end_src
 
 * Global keybindings  
   
@@ -507,6 +587,15 @@ Always compile packages, and use the newest version available.
     (defun +work/search-monorepo ()
       (interactive)
       (counsel-ag "" "/home/porcupine/codeheroes/chatbotize/monorepo"))
+  #+end_src
+  
+  Based on excelent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
+  #+begin_src emacs-lisp :results none
+   (defun +core/to-floating-frame()
+     (interactive)
+     (make-frame '((name . "floating")
+                   (window-system . x)
+                   (minibuffer . nil))))
   #+end_src
 
 * Configure =which-key=
@@ -584,7 +673,7 @@ Always compile packages, and use the newest version available.
     
     :bind (:map evil-normal-state-map 
           ("[ e" . flycheck-previous-error)
-	  ("] e" . flycheck-next-error)))
+          ("] e" . flycheck-next-error)))
   #+end_src
 * Configure =org=
 ** Core
@@ -943,7 +1032,14 @@ Always compile packages, and use the newest version available.
    #+end_src
    
    #+begin_src emacs-lisp :results none
-
+     (use-package lsp-python-ms
+       :ensure t
+       :init (setq lsp-python-ms-auto-install-server t)
+       :hook (
+              (python-mode . lsp-deferred)
+              (python-mode . (lambda ()
+                               (setq lsp-python-ms-extra-paths '("/home/porcupine/codeheroes/chatbotize/monorepo/ai/ai-intent-backend"))
+                               (require 'lsp-python-ms)))))
    #+end_src
 
 ** Scala
@@ -999,14 +1095,14 @@ Always compile packages, and use the newest version available.
    
 ** LSP
 #+begin_src emacs-lisp :results none
-(use-package lsp-mode
- :hook ((scala-mode . lsp-deferred)
-        (sh-mode . lsp-deferred)
-        (python-mode . lsp-deferred))
- :config (setq lsp-prefer-flymake nil)
- :bind (:map evil-normal-state-map 
-       ("M-w" . +lsp-ui/toggle-doc-focus)          
-       ("C-<return>" . lsp-execute-code-action)))
+  (use-package lsp-mode
+   :hook ((scala-mode . lsp-deferred)
+          (sh-mode . lsp-deferred))
+          ;; (python-mode . lsp-deferred))
+   :config (setq lsp-prefer-flymake nil)
+   :bind (:map evil-normal-state-map 
+         ("M-w" . +lsp-ui/toggle-doc-focus)          
+         ("C-<return>" . lsp-execute-code-action)))
 #+end_src
 
 #+begin_src emacs-lisp :results none

@@ -409,6 +409,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-document-info-keyword ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-begin-line      ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-end-line        ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-meta-line             ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
 
              (org-link ((t (,@fmt-undr ,@fg-darkblue ,@bg-base03))))
              (org-tag ((t (,@fg-oldcyan ,@bg-base03))))
