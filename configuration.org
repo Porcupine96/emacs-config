@@ -144,7 +144,7 @@ Always compile packages, and use the newest version available.
       "o" #'hydra-open/body
       "s" #'hydra-search/body
       "u" #'universal-argument
-      "w f" #'+core/to-floating-frame
+      "w" #'hydra-window/body
       "e e" #'elfeed
       "t r" #'+core/reload-theme
       "y a" #'yas-new-snippet
@@ -160,7 +160,12 @@ Always compile packages, and use the newest version available.
       "s" #'org-schedule
       "d" #'org-deadline
       "t" #'org-todo)
-    
+      
+  (general-define-key 
+    :prefix "SPC j"
+    :states 'normal
+    "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
+    "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg)))
 #+end_src
 
 * Configure =emacs-bind-map= :notangle:
@@ -303,6 +308,7 @@ Always compile packages, and use the newest version available.
     _f_ Find 
     _r_ Recent
     _a_ current.org
+    _s_ resources.org
     _c_ Config
     _t_ Theme
     ^^        
@@ -311,6 +317,7 @@ Always compile packages, and use the newest version available.
     ("f" #'counsel-find-file)
     ("r" #'counsel-recentf)
     ("a" (lambda () (interactive)(find-file "~/Dropbox/org/todo/current.org")))
+    ("s" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
     ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
     ("t" (lambda () (interactive)(find-file "~/my-emacs/themes/noctilux-theme.el"))))
   #+end_src
@@ -466,20 +473,22 @@ Always compile packages, and use the newest version available.
    #+end_src
    
 ** Open
-   #+begin_src emacs-lisp :results none
-   (defhydra hydra-open (:color blue)
-     "
-     ^
-     ^Open^     
-     ^────^───────────
-     _p_ Treemacs
-     _e_ Eshell
-     ^^        
-     ^^        
-     "
-     ("p" #'treemacs)
-     ("e" #'eshell))
-   #+end_src
+#+begin_src emacs-lisp :results none
+ (defhydra hydra-open (:color blue)
+   "
+   ^
+   ^Open^     
+   ^────^───────────
+   _p_ Treemacs
+   _e_ Eshell
+   _o_ Olivetti
+   ^^        
+   ^^        
+   "
+   ("p" #'treemacs)
+   ("e" #'eshell)
+   ("o" #'olivetti-mode))
+ #+end_src
 
 ** Search
 #+begin_src emacs-lisp :results none
@@ -496,26 +505,41 @@ Always compile packages, and use the newest version available.
    ("m" #'+work/search-monorepo))
  #+end_src
 ** Workspace
-   #+begin_src emacs-lisp :results none 
-     (defhydra hydra-workspace (:color blue)
-       "
-       ^
-       ^Workspace^     
-       ^─────────^───────────
-       _c_ Create workspace
-       _d_ Kill workspace
-       _n_ Create named workspace
-       _k_ Kill workspace
-       _r_ Rename workspace
-       ^^        
-       ^^        
-       "
-       ("c" #'persp-switch)
-       ("d" #'persp-kill)
-       ("n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace"))))
-       ("k" #'persp-kill)
-       ("r" #'persp-rename))
-   #+end_src
+ #+begin_src emacs-lisp :results none 
+ (defhydra hydra-workspace (:color blue)
+   "
+   ^
+   ^Workspace^     
+   ^─────────^───────────
+   _c_ Create workspace
+   _d_ Kill workspace
+   _n_ Create named workspace
+   _k_ Kill workspace
+   _r_ Rename workspace
+   ^^        
+   ^^        
+   "
+   ("c" #'persp-switch)
+   ("d" #'persp-kill)
+   ("n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace"))))
+   ("k" #'persp-kill)
+   ("r" #'persp-rename))
+ #+end_src
+** Window
+#+begin_src emacs-lisp :results none
+(defhydra hydra-window (:color blue)
+  "
+  ^ 
+  _u_ Winner undu
+  _r_ Winner redo
+  _f_ Floating window
+  ^^
+  ^^ 
+  "
+  ("u" #'winner-undo)
+  ("r" #'winner-redo)
+  ("f" #'+core/to-floating-frame))
+#+end_src
 ** Resize
 #+begin_src emacs-lisp :results none
  (defhydra hydra-resize (:color blue)
@@ -532,11 +556,10 @@ Always compile packages, and use the newest version available.
  #+end_src
 
 * Global keybindings  
-  
   Save buffer.
   #+begin_src emacs-lisp :results none
   (global-set-key (kbd "C-x C-x") 'save-buffer)
- #+end_src
+  #+end_src
   
   Easier movements between splits.
   #+begin_src emacs-lisp :results none
@@ -996,6 +1019,15 @@ Always compile packages, and use the newest version available.
 (use-package emojify)
 #+end_src
 
+* Configure =olivetti=
+#+begin_src emacs-lisp :results none
+(use-package olivetti
+  :ensure
+  :custom 
+    ((olivetti-body-width 120)
+     (olivetti-recall-visual-line-mode-entry-state t)))
+#+end_src
+
 * Languages
 ** Dockerfile
    #+begin_src emacs-lisp :results none
@@ -1038,7 +1070,7 @@ Always compile packages, and use the newest version available.
        :hook (
               (python-mode . lsp-deferred)
               (python-mode . (lambda ()
-                               (setq lsp-python-ms-extra-paths '("/home/porcupine/codeheroes/chatbotize/monorepo/ai/ai-intent-backend"))
+                               ;; (setq lsp-python-ms-extra-paths '("/home/porcupine/codeheroes/chatbotize/monorepo/ai/ai-intent-backend"))
                                (require 'lsp-python-ms)))))
    #+end_src
 
