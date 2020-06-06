@@ -66,9 +66,11 @@ Always compile packages, and use the newest version available.
        ("\\*\\([Hh]elp\\|Messages\\)\\*"
         (display-buffer-in-side-window)
         (side           . right)
+        (window-width   . 0.5))
+       ("\\*\\(Buffer List\\)\\*"
+        (display-buffer-same-window)
+        (side           . right)
         (window-width   . 0.5))))
-
-  ;; (setq display-buffer-alist '((rx ".*") (display-buffer-reuse-window inhibit-same-window)))
   #+end_src
   
   Line wrapping.
@@ -814,13 +816,17 @@ Always compile packages, and use the newest version available.
    #+end_src
 ** Functions
 #+begin_src emacs-lisp :results none
-(defun +org/dwim ()
-  (interactive)
-  (let* ((context (org-element-context))
-       (type (org-element-type context)))
-  (pcase type
-  (`headline (org-todo))
-)))
+  (defun +org/dwim ()
+    (interactive)
+    (let* ((context (org-element-context))
+           (type (org-element-type context)))
+    (pcase type
+      (`headline
+       (let ((todo-keyword (org-element-property :todo-keyword context)))
+         (if todo-keyword
+             (org-todo)
+           (message "Nothing to do"))))
+  )))
 #+end_src
 
 * Configure =yasnippet=
