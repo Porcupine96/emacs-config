@@ -63,12 +63,17 @@ Always compile packages, and use the newest version available.
         (side            . bottom)
         (reusable-frames . visible)
         (window-height   . 0.33))
+        
+       ("\\*Org todo\\*"
+        (display-buffer-in-side-window)
+        (side            . bottom)
+        (reusable-frames . visible)
+        (window-height   . 0.2))
+        
        ("\\*\\([Hh]elp\\|Messages\\)\\*"
         (display-buffer-in-side-window)
         (side           . right)
         (window-width   . 0.5))))
-
-  ;; (setq display-buffer-alist '((rx ".*") (display-buffer-reuse-window inhibit-same-window)))
   #+end_src
   
   Line wrapping.
@@ -397,11 +402,14 @@ Always compile packages, and use the newest version available.
      ^────^───────────
      _g_ Magit status
      _i_ Magit init
+     _p_ Magit push
      _r_ Remote (forge)
+     _t_ Timemachine
      ^^        
      "
      ("g" #'magit-status)
      ("i" #'magit-init)
+     ("p" #'magit-push)
      ("r" #'hydra-forge/body)
      ("t" #'git-timemachine))
    #+end_src
@@ -858,6 +866,11 @@ Always compile packages, and use the newest version available.
   (use-package forge)
   (require 'evil-magit)
   #+end_src
+  
+  vc-annotate options.
+  #+begin_src emacs-lisp :results none
+ (setq vc-git-annotate-switches '("-c"))
+  #+end_src
 
 * Configure =git-timemachine=
   #+begin_src emacs-lisp :results none
@@ -1058,6 +1071,13 @@ Always compile packages, and use the newest version available.
    #+end_src
    
    #+begin_src emacs-lisp :results none
+     (defun +pyvenv/set-to-pyenv ()
+       (interactive)
+       (pyvenv-activate
+         (pyenv-mode-full-path (pyenv-mode-version))))
+   #+end_src
+   
+   #+begin_src emacs-lisp :results none
    (use-package blacken
      :after python-mode
      :hook (python-mode . blacken-mode))
@@ -1070,7 +1090,7 @@ Always compile packages, and use the newest version available.
        :hook (
               (python-mode . lsp-deferred)
               (python-mode . (lambda ()
-                               ;; (setq lsp-python-ms-extra-paths '("/home/porcupine/codeheroes/chatbotize/monorepo/ai/ai-intent-backend"))
+                               ;; (setq lsp-python-ms-extra-paths '())
                                (require 'lsp-python-ms)))))
    #+end_src
 

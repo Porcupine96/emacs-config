@@ -41,6 +41,7 @@
  '(foreground-color "#cccccc")
  '(head-hint nil t)
  '(hydra-key-format-spec "[%s]")
+ '(org-agenda-files '("~/Dropbox/org/todo/current.org"))
  '(org-fontify-done-headline t)
  '(org-todo-keywords
    '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "|" "DONE(d!)" "KILL(k!)")

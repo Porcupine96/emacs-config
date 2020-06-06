@@ -98,27 +98,26 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     (base3     "#fcf4dc" "#fcf4dc" "#fcf4dc" "brightwhite"   "white")
     (yellow    "#f1fa8c" "#f1fa8c" "#f1fa8c" "yellow"        "yellow")
     (orange    "#ff8888" "#ff8888" "#ff8888" "brightred"     "red")
-    ;; (red       "#ff3333" "#ff3333" "#ff3333" "red"           "red")
     (red       "#ff5555" "#ff5555" "#ff5555" "red"           "red")
     (magenta   "#FF1F69" "#FF1F69" "#FF1F69" "magenta"       "magenta")
-    ;; (purple    "#ccaaff" "#ccaaff" "#ccaaff" "brightmagenta" "magenta")
     (purple    "#bd93f9" "#bd93f9" "#bd93f9" "brightmagenta" "magenta")
-    (darkblue  "#6272a4" "#6272a4" "#6272a4" "blue" "blue")
-    (blue      "#aaccff" "#aaccff" "#aaccff" "blue"          "blue")
-    (pink      "#ff79c6" "#ff79c6" "#ff79c6" "pink"          "pink")
-    (cyan      "#8be9fd" "#8be9fd" "#8be9fd" "cyan"          "cyan")
+    (darkblue  "#6272a4" "#6272a4" "#6272a4" "blue"         "blue")
+    (blue      "#0198E1" "#0198E1" "#0198E1" "blue"         "blue")
+    ;; (blue      "#aaccff" "#aaccff" "#aaccff" "blue"         "blue")
+	
+    (pink      "#ff79c6" "#ff79c6" "#ff79c6" "pink"         "pink")
+    (cyan      "#8be9fd" "#8be9fd" "#8be9fd" "cyan"         "cyan")
     (oldcyan   "#aadddd" "#aadddd" "#aadddd" "cyan"         "cyan")
-    (white     "#ffffff" "#ffffff" "#ffffff" "white"         "white")
-    ;; (green     "#aaffaa" "#aaffaa" "#aaffaa" "green"         "green")
-    (green     "#50fa7b" "#50fa7b" "#50fa7b" "green"         "green")
-    (gray      "#838484" "#838484" "#838484" "gray"          "gray")
-    (darkgreen "#008000" "#008000" "#008000" "green"         "green")))
+    (white     "#ffffff" "#ffffff" "#ffffff" "white"        "white")
+    (green     "#50fa7b" "#50fa7b" "#50fa7b" "green"        "green")
+    (gray      "#838484" "#838484" "#838484" "gray"         "gray")
+    (darkgreen "#008000" "#008000" "#008000" "green"        "green")))
 
 
 (setq org-todo-keyword-faces '(
-    ("PROJ" . (:foreground "#bd93f9" :underline t))
-    ("STRT" . (:foreground "#aaccff" :underline t))
-    ("WAIT" . (:foreground "#f1fa8c" :underline t))))
+    ("PROJ" . (:height 1.2 :foreground "#bd93f9" :underline t))
+    ("STRT" . (:height 1.2 :foreground "#0198e1" :underline t))
+    ("WAIT" . (:height 1.2 :foreground "#f1fa8c" :underline t))))
 
 (defmacro noct-flet (specs &rest body)
   (let ((flet (if (fboundp 'cl-flet) 'cl-flet 'flet)))
@@ -400,12 +399,12 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              ;; org
              (org-hide          ((t (,@fg-base03))))
-             (org-todo          ((t (,@fmt-undr ,@fg-orange ,@bg-base03))))
-             (org-done          ((t (,@fmt-none ,@fg-gray   ,@bg-base03))))
+             (org-todo          ((t (,@fmt-big ,@fmt-undr ,@fg-red ,@bg-base03))))
+             (org-done          ((t (,@fmt-big ,@fmt-none ,@fg-gray   ,@bg-base03))))
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray   ,@bg-base03))))
              (org-date          ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
 
-	     (org-document-title        ((t (,@fmt-bigger   ,@fg-gray  ,@bg-base03))))
+	     (org-document-title        ((t (,@fmt-bigger ,@fg-gray  ,@bg-base03))))
 	     (org-document-info-keyword ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-begin-line      ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-end-line        ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
@@ -418,10 +417,10 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-level-2 ((t (,@fmt-sbig ,@fg-pink ,@bg-base03))))
 	     (org-level-3 ((t (,@fg-green ,@bg-base03))))
 
-             (org-project-kwd-face ((t (,@fg-purple ,@bg-base03))))
-             (org-waiting-kwd-face ((t (,@fg-orange ,@bg-base03))))
-             (org-someday-kwd-face ((t (,@fg-blue ,@bg-base03))))
-             (org-started-kwd-face ((t (,@fg-yellow ,@bg-base03))))
+             (org-project-kwd-face ((t (,@fmt-big ,@fg-purple ,@bg-base03))))
+             (org-waiting-kwd-face ((t (,@fmt-big ,@fg-orange ,@bg-base03))))
+             (org-someday-kwd-face ((t (,@fmt-big ,@fg-blue ,@bg-base03))))
+             (org-started-kwd-face ((t (,@fmt-big ,@fg-yellow ,@bg-base03))))
 
              (org-cancelled-kwd-face ((t (,@fg-green ,@bg-base03))))
              (org-delegated-kwd-face ((t (,@fg-cyan ,@bg-base03))))
@@ -676,7 +675,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              ;; evil
              (evil-ex-lazy-highlight ((t :inherit lazy-highlight)))
              (evil-ex-search ((t :inherit isearch)))
-             (evil-ex-substitute-matches ((t ,@fmt-strk ,@fg-orange)))
+             (evil-ex-substitute-matches ((t ,@fmt-strk ,@fg-red)))
              (evil-ex-substitute-replacement ((t ,@fmt-undr ,@fg-darkgreen)))
              ;;font-latex
              (font-latex-warning-face ((t (,@fg-red))))
