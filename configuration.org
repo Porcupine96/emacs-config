@@ -73,6 +73,11 @@ Always compile packages, and use the newest version available.
        ("\\*\\([Hh]elp\\|Messages\\)\\*"
         (display-buffer-in-side-window)
         (side           . right)
+        (window-width   . 0.5))
+        
+       ("\\*\\(Buffer List\\)\\*"
+        (display-buffer-same-window)
+        (side           . right)
         (window-width   . 0.5))))
   #+end_src
   
@@ -314,6 +319,7 @@ Always compile packages, and use the newest version available.
     _r_ Recent
     _a_ current.org
     _s_ resources.org
+    _d_ dotfiles
     _c_ Config
     _t_ Theme
     ^^        
@@ -323,6 +329,7 @@ Always compile packages, and use the newest version available.
     ("r" #'counsel-recentf)
     ("a" (lambda () (interactive)(find-file "~/Dropbox/org/todo/current.org")))
     ("s" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
+    ("d" (lambda () (interactive)(dired "~/dotfiles")))
     ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
     ("t" (lambda () (interactive)(find-file "~/my-emacs/themes/noctilux-theme.el"))))
   #+end_src
@@ -415,43 +422,50 @@ Always compile packages, and use the newest version available.
    #+end_src
 
 ** LSP
-   #+begin_src emacs-lisp :results none
-   (defhydra hydra-lsp (:color blue)
-     "
-     ^
-     ^LSP^     
-     ^────^───────────
-     _b_ Metals build import
-     _d_ Go to type definition
-     _s_ Describe session
-     _e_ Error list
-     _f_ Format
-     _l_ Find symbol
-     _r_ Find references
-     _R_ Remove other workspaces
-     ^^        
-     "
-     ("b" #'lsp-metals-build-import)
-     ("d" #'lsp-goto-type-definition)
-     ("s" #'lsp-describe-session)
-     ("e" #'lsp-ui-flycheck-list)
-     ("f" #'lsp-format-buffer)
-     ("l" #'lsp-ivy-workspace-symbol)
-     ("r" #'lsp-find-references)
-     ("R" #'+lsp/remove-other-sessions)
-     ("i" #'+scala/copy-import))
-   #+end_src
+#+begin_src emacs-lisp :results none
+  (defhydra hydra-lsp (:color blue)
+    "
+    ^
+    ^LSP^     
+    ^────^───────────
+    _b_ Metals build import
+    _d_ Go to type definition
+    _s_ Describe session
+    _e_ Error list
+    _f_ Format
+    _l_ Find symbol
+    _t_ LSP Hydra toggle
+    _r_ Find references
+    _R_ Remove other workspaces
+    _i_ Go to implementation
+    _I_ Copy Import
+    ^^        
+    "
+    ("b" #'lsp-metals-build-import)
+    ("d" #'lsp-find-definition)
+    ("s" #'lsp-describe-session)
+    ("e" #'lsp-ui-flycheck-list)
+    ("f" #'lsp-format-buffer)
+    ("l" #'lsp-ivy-workspace-symbol)
+    ("t" #'hydra-lsp-toggle/body)
+    ("r" #'lsp-find-references)
+    ("R" #'+lsp/remove-other-sessions)
+    ("i" #'lsp-goto-implementation)
+    ("I" #'+scala/copy-import))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+ (defhydra hydra-lsp-toggle (:color blue)
+    "
+    ^
+    ^Toggle^     
+    ^────^───────────
+    _m_ iMenu
+    ^^        
+    "
+    ("m" #'lsp-ui-imenu))
+#+end_src
    
-   Remove other LSP sessions.
-   #+begin_src emacs-lisp :results none
-    (defun +lsp/remove-other-sessions ()
-        (interactive)
-	(-each 
-	    (-remove-item
-		(lsp-find-session-folder (lsp-session) default-directory)
-		(lsp-session-folders (lsp-session)))
-	    #'lsp-workspace-folders-remove))
-   #+end_src
 ** Help
    #+begin_src emacs-lisp :results none
    (defhydra hydra-help (:color blue)
@@ -503,15 +517,35 @@ Always compile packages, and use the newest version available.
  (defhydra hydra-search (:color blue)
    "
    ^
-   ^LSP^     
+   ^Search^     
    ^────^───────────
    _i_ Counsel iMenu
    _m_ Monorepo Ag
    ^^        
    "
    ("i" #'counsel-imenu)
-   ("m" #'+work/search-monorepo))
+   ("m" #'+work/search-monorepo)
+   ("s" #'hydra-surround/body))
  #+end_src
+ 
+#+begin_src emacs-lisp :results none
+ (defhydra hydra-surround (:color blue)
+   "
+   ^
+   ^Surround^     
+   ^────^───────────
+   _l_ List
+   _o_ Option
+   _i_ IO
+   _f_ Future
+   ^^        
+   "
+   ("l" #'+scala/surround-word-with-list)
+   ("o" #'+scala/surround-word-with-option)
+   ("i" #'+scala/surround-word-with-io)
+   ("f" #'+scala/surround-word-with-future))
+ #+end_src
+ 
 ** Workspace
  #+begin_src emacs-lisp :results none 
  (defhydra hydra-workspace (:color blue)
@@ -546,7 +580,8 @@ Always compile packages, and use the newest version available.
   "
   ("u" #'winner-undo)
   ("r" #'winner-redo)
-  ("f" #'+core/to-floating-frame))
+  ("f" #'+core/to-floating-frame)
+  ("j" #'+core/to-regular-window))
 #+end_src
 ** Resize
 #+begin_src emacs-lisp :results none
@@ -563,10 +598,16 @@ Always compile packages, and use the newest version available.
    ("l" #'evil-window-increase-width))
  #+end_src
 
-* Global keybindings  
-  Save buffer.
+* Global keybindings 
+  Buffer commands.
   #+begin_src emacs-lisp :results none
   (global-set-key (kbd "C-x C-x") 'save-buffer)
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+  #+end_src
+  
+  Toggle line truncation.
+  #+begin_src emacs-lisp :results none
+ (global-set-key (kbd "C-x w") 'toggle-truncate-lines)
   #+end_src
   
   Easier movements between splits.
@@ -575,6 +616,12 @@ Always compile packages, and use the newest version available.
   (global-set-key (kbd "C-j") #'evil-window-down)
   (global-set-key (kbd "C-k") #'evil-window-up)
   (global-set-key (kbd "C-l") #'evil-window-right)
+  #+end_src
+  
+  Winner mode.
+  #+begin_src emacs-lisp :results none
+  (global-set-key (kbd "C-c h") #'winner-undo)
+  (global-set-key (kbd "C-c l") #'winner-redo)
   #+end_src
   
   Vim-like screen jumping.
@@ -627,6 +674,23 @@ Always compile packages, and use the newest version available.
      (make-frame '((name . "floating")
                    (window-system . x)
                    (minibuffer . nil))))
+                   
+    (defun +core/to-regular-window()
+      (interactive)
+      (let ((buffer (current-buffer)))
+      (with-current-buffer buffer
+        (delete-window)
+        (display-buffer-at-bottom buffer nil))))
+  #+end_src
+  
+  #+begin_src emacs-lisp :results none
+ (defun +core/surround-word-with (left right)
+   (backward-to-word 1)
+   (forward-to-word 1)
+   (kill-word 1)
+   (insert left)
+   (yank)
+   (insert right))
   #+end_src
 
 * Configure =which-key=
@@ -822,13 +886,17 @@ Always compile packages, and use the newest version available.
    #+end_src
 ** Functions
 #+begin_src emacs-lisp :results none
-(defun +org/dwim ()
-  (interactive)
-  (let* ((context (org-element-context))
-       (type (org-element-type context)))
-  (pcase type
-  (`headline (org-todo))
-)))
+  (defun +org/dwim ()
+    (interactive)
+    (let* ((context (org-element-context))
+           (type (org-element-type context)))
+    (pcase type
+      (`headline
+       (let ((todo-keyword (org-element-property :todo-keyword context)))
+         (if todo-keyword
+             (org-todo)
+           (message "Nothing to do"))))
+  )))
 #+end_src
 
 * Configure =yasnippet=
@@ -927,7 +995,8 @@ Always compile packages, and use the newest version available.
 	(define-key company-active-map (kbd "<tab>") #'company-complete-common)
 	(define-key company-active-map (kbd "TAB") #'company-complete-common)))
   
-  (setq company-backends '(company-lsp company-capf company-yasnippet))
+  (setq company-backends '(company-lsp company-capf company-yasnippet company-dabbrev))
+  (setq company-dabbrev-downcase nil)
   #+end_src
 * Configure =smartparens=
   #+begin_src emacs-lisp :results none
@@ -1041,6 +1110,7 @@ Always compile packages, and use the newest version available.
      (olivetti-recall-visual-line-mode-entry-state t)))
 #+end_src
 
+* Configure =ibuffer=
 * Languages
 ** Dockerfile
    #+begin_src emacs-lisp :results none
@@ -1095,38 +1165,56 @@ Always compile packages, and use the newest version available.
    #+end_src
 
 ** Scala
-   scala-mode
-   #+begin_src emacs-lisp :results none
-    (use-package scala-mode
-    :mode "\\.s\\(cala\\|bt\\)$")
-   #+end_src
-   
-   sbt-mode
-   #+begin_src emacs-lisp :results none
-    (use-package sbt-mode
-    :commands sbt-start sbt-command
-    :config
-    (substitute-key-definition
-    'minibuffer-complete-word
-    'self-insert-command
-    minibuffer-local-completion-map)
-    ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
-    (setq sbt:program-options '("-Dsbt.supershell=false")))
-   #+end_src
-   
-   #+begin_src emacs-lisp :results none
-   (defun +scala/copy-import ()
-       (interactive)
-       (setq import
-         (replace-regexp-in-string "package" "import"
-         (concat
-           (car (split-string (buffer-string) "\n"))
-           "."
-           (thing-at-point 'word))))
-   
-       (message "Copied: %s" import)
-       (kill-new import))
-   #+end_src
+scala-mode
+#+begin_src emacs-lisp :results none
+ (use-package scala-mode
+ :mode "\\.s\\(cala\\|bt\\)$")
+#+end_src
+
+sbt-mode
+#+begin_src emacs-lisp :results none
+ (use-package sbt-mode
+ :commands sbt-start sbt-command
+ :config
+ (substitute-key-definition
+ 'minibuffer-complete-word
+ 'self-insert-command
+ minibuffer-local-completion-map)
+ ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
+ (setq sbt:program-options '("-Dsbt.supershell=false")))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/copy-import ()
+    (interactive)
+    (setq import
+      (replace-regexp-in-string "package" "import"
+      (concat
+        (car (split-string (buffer-string) "\n"))
+        "."
+        (thing-at-point 'word))))
+
+    (message "Copied: %s" import)
+    (kill-new import))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/surround-word-with-list ()
+  (interactive)
+  (+core/surround-word-with "List[" "]"))
+  
+(defun +scala/surround-word-with-option ()
+  (interactive)
+  (+core/surround-word-with "Option[" "]"))
+  
+(defun +scala/surround-word-with-future ()
+  (interactive)
+  (+core/surround-word-with "Future[" "]"))
+  
+(defun +scala/surround-word-with-io ()
+  (interactive)
+  (+core/surround-word-with "IO[" "]"))
+#+end_src
    
 ** Elisp
    #+begin_src emacs-lisp :results none
@@ -1185,6 +1273,17 @@ Use =lsp-ivy=.
   (if (lsp-ui-doc--visible-p)
       (lsp-ui-doc-focus-frame)
       (lsp-ui-doc-unfocus-frame)))
+#+end_src
+
+Remove other LSP sessions.
+#+begin_src emacs-lisp :results none
+(defun +lsp/remove-other-sessions ()
+    (interactive)
+    (-each 
+        (-remove-item
+            (lsp-find-session-folder (lsp-session) default-directory)
+            (lsp-session-folders (lsp-session)))
+        #'lsp-workspace-folders-remove))
 #+end_src
    
 ** Yaml

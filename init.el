@@ -39,18 +39,24 @@
  '(doom-modeline-mode t)
  '(elfeed-search-remain-on-entry t)
  '(foreground-color "#cccccc")
+ '(global-visual-line-mode t)
  '(head-hint nil t)
  '(hydra-key-format-spec "[%s]")
+ '(olivetti-body-width 120)
+ '(olivetti-recall-visual-line-mode-entry-state t)
  '(org-agenda-files '("~/Dropbox/org/todo/current.org"))
  '(org-fontify-done-headline t)
  '(org-todo-keywords
    '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "|" "DONE(d!)" "KILL(k!)")
      (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
  '(package-selected-packages
-   '(olivetti general lsp-python-ms elfeed-goodies emojify yaml-mode dired org-re-reveal org-reveal ox-reveal ob-jupyter jupyter elfeed bind-map org-bullets keychain-environment git-timemachine blacken dockerfile-mode pyenv-mode pyvenv pyenv lsp-ivy helpful smartparens smex request which-key synonyms synosaurus evil-collection academic-phrases org-ref evil-surround forge protobuf-mode company-mode evil-org evil-easymotion zoom-window doom-modeline evil-magit treemacs-projectile treemacs-evil evil-snipe treemacs counsel-projectile magit projectile hydra lsp-ui company-lsp lsp-mode yasnippet flycheck counsel swiper ivy perspective org-plus-contrib browse-kill-ring evil-commentary elpy python-mode evil use-package))
+   '(ibuffer-vc olivetti general lsp-python-ms elfeed-goodies emojify yaml-mode dired org-re-reveal org-reveal ox-reveal ob-jupyter jupyter elfeed bind-map org-bullets keychain-environment git-timemachine blacken dockerfile-mode pyenv-mode pyvenv pyenv lsp-ivy helpful smartparens smex request which-key synonyms synosaurus evil-collection academic-phrases org-ref evil-surround forge protobuf-mode company-mode evil-org evil-easymotion zoom-window doom-modeline evil-magit treemacs-projectile treemacs-evil evil-snipe treemacs counsel-projectile magit projectile hydra lsp-ui company-lsp lsp-mode yasnippet flycheck counsel swiper ivy perspective org-plus-contrib browse-kill-ring evil-commentary elpy python-mode evil use-package))
  '(projectile-mode t nil (projectile))
  '(pyenv-mode t)
- '(pyvenv-mode t)
+ '(pyvenv-mode nil)
+ '(safe-local-variable-values
+   '((lsp-python-ms-extra-paths quote
+				("/home/porcupine/codeheroes/chatbotize/monorepo/ai/ai-intent-backend" "/home/porcupine/codeheroes/chatbotize/monorepo/ai/ai-intent-backend/src"))))
  '(winner-mode t)
  '(zoom-window-mode-line-color "#4682B4"))
 
