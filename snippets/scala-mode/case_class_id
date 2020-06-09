@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: case class ...Id 
+# key: ci
+# --
+case class $1Id(value: String) extends AnyVal

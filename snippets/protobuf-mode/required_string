@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: required string
+# key: rs
+# --
+required string $1 = $2;

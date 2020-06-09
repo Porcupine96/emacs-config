@@ -1,0 +1,38 @@
+# -*- mode: snippet -*-
+# name: mongo
+# key: mongo
+# --
+
+import cats.effect.{ContextShift, IO}
+import hero.common.mongo.MongoRepository
+import reactivemongo.api.DefaultDB
+
+import scala.concurrent.ExecutionContext
+import reactivemongo.bson.BSONDocument
+import reactivemongo.api.bson.Macros.Annotations.Key
+import reactivemongo.api.bson.compat._
+
+import hero.common.util.LazyFunctionK.implicits._
+
+class Mongo$1Repository(db: DefaultDB)(implicit ec: ExecutionContext, cs: ContextShift[IO])
+    extends MongoRepository[IO](db, $2)
+    with $1Repository[IO] {
+
+  import MongoWRs._
+  import Mongo$1Repository._
+
+
+}
+
+object Mongo$1Repository {
+  case class $1DTO(
+      @Key("_id") id: String,
+  ) {
+    def toDomain: $1 =
+      $1()
+  }
+
+  object $1DTO {
+
+  }
+}
