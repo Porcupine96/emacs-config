@@ -23,6 +23,29 @@ Always compile packages, and use the newest version available.
   (setq load-prefer-newer t)
 #+end_src
 
+* Visuals
+ Font.
+ #+begin_src emacs-lisp :results none
+ (set-face-attribute 'default nil
+ 		    :family "SF Mono"
+ 		    :height 120
+ 		    :weight 'normal
+ 		    :width 'normal)
+ #+end_src
+ 
+ Color theme.
+ #+begin_src emacs-lisp :results none
+ (add-to-list 'custom-theme-load-path "~/my-emacs/themes")
+ (load-theme 'noctilux t)
+ #+end_src
+ 
+ Hide the bezels.
+ #+begin_src emacs-lisp :results none
+ (tool-bar-mode -1)
+ (menu-bar-mode -1)
+ (toggle-scroll-bar -1)
+ #+end_src
+  
 * Sensible settings
   Disable backup and lockfiles.
   #+begin_src emacs-lisp :results none
@@ -58,7 +81,7 @@ Always compile packages, and use the newest version available.
   Open buffer position
   #+begin_src emacs-lisp :results none
   (setq display-buffer-alist
-     '(("\\*compilation\\*"
+     '(("\\*\\(compilation\\|Flycheck errors\\)\\*"
         (display-buffer-in-side-window)
         (side            . bottom)
         (reusable-frames . visible)
@@ -88,35 +111,12 @@ Always compile packages, and use the newest version available.
     (setq truncate-lines t)
     (setq truncate-partial-width-windows nil)
   #+end_src
-
+  
 * Miscellaneous
   #+begin_src emacs-lisp :results none
   (setq auth-sources '("~/.authinfo"))
   #+end_src
 
-* Visuals
-  Font.
-  #+begin_src emacs-lisp :results none
-  (set-face-attribute 'default nil
-  		    :family "SF Mono"
-  		    :height 120
-  		    :weight 'normal
-  		    :width 'normal)
-  #+end_src
-  
-  Color theme.
-  #+begin_src emacs-lisp :results none
-  (add-to-list 'custom-theme-load-path "~/my-emacs/themes")
-  (load-theme 'noctilux t)
-  #+end_src
-  
-  Hide the bezels.
-  #+begin_src emacs-lisp :results none
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (toggle-scroll-bar -1)
-  #+end_src
-  
 * Configure =general=
 #+begin_src emacs-lisp :results none
   (use-package general
@@ -178,7 +178,7 @@ Always compile packages, and use the newest version available.
     "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg)))
 #+end_src
 
-* Configure =emacs-bind-map= :notangle:
+* Configure =emacs-bind-map=                                       :notangle:
   #+begin_src emacs-lisp :results none
   ;;(use-package bind-map)
 
@@ -521,6 +521,7 @@ Always compile packages, and use the newest version available.
    ^────^───────────
    _i_ Counsel iMenu
    _m_ Monorepo Ag
+   _s_ Surround 
    ^^        
    "
    ("i" #'counsel-imenu)
@@ -616,6 +617,11 @@ Always compile packages, and use the newest version available.
   (global-set-key (kbd "C-j") #'evil-window-down)
   (global-set-key (kbd "C-k") #'evil-window-up)
   (global-set-key (kbd "C-l") #'evil-window-right)
+  #+end_src
+  
+  Only window.
+  #+begin_src emacs-lisp :results none
+  (global-set-key (kbd "C-c o") #'delete-other-windows)
   #+end_src
   
   Winner mode.
@@ -946,29 +952,29 @@ Always compile packages, and use the newest version available.
   #+end_src
 
 * Configure =treemacs=
-  #+begin_src emacs-lisp :results none
-    (use-package treemacs)
+#+begin_src emacs-lisp :results none
+  (use-package treemacs)
 
-    (use-package treemacs-evil
-      :after treemacs
-      :bind (:map evil-treemacs-state-map 
-            ("SPC u" . #'universal-argument)))
+  (use-package treemacs-evil
+    :after treemacs
+    :bind (:map evil-treemacs-state-map 
+          ("SPC u" . #'universal-argument)))
 
-    (use-package treemacs-projectile)
+  (use-package treemacs-projectile)
 
-    (setq treemacs-width 60)
+  (setq treemacs-width 60)
 
-    (define-key evil-treemacs-state-map (kbd "SPC o p") #'treemacs)
-    (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
-  #+end_src
-  
-  #+begin_src emacs-lisp :results none
-  (defun +treemacs/add-current-project-as-only ()
-    (interactive)
-    (-each (treemacs-workspace->projects (treemacs-current-workspace))
-      #'treemacs-do-remove-project-from-workspace)
-    (treemacs-add-and-display-current-project))
-  #+end_src
+  (define-key evil-treemacs-state-map (kbd "SPC o p") #'treemacs)
+  (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +treemacs/add-current-project-as-only ()
+  (interactive)
+  (-each (treemacs-workspace->projects (treemacs-current-workspace))
+    #'treemacs-do-remove-project-from-workspace)
+  (treemacs-add-and-display-current-project))
+#+end_src
   
 * Configure =doom-modeline=
   #+begin_src emacs-lisp :results none
@@ -1111,6 +1117,17 @@ Always compile packages, and use the newest version available.
 #+end_src
 
 * Configure =ibuffer=
+* Configure =dired=
+#+begin_src emacs-lisp :results none
+(use-package dired-subtree
+  :ensure t
+  :after dired
+  :bind (:map dired-mode-map
+              ("<tab>" . dired-subtree-toggle)
+              ("<C-tab>" . dired-subtree-cycle)
+              ("<backtab>" . dired-subtree-remove)))
+#+end_src
+
 * Languages
 ** Dockerfile
    #+begin_src emacs-lisp :results none
@@ -1295,16 +1312,12 @@ Remove other LSP sessions.
 * TODO TODOs
   - [ ] java script / react stuff
   - [ ] workgroups.el
-  - [ ] pasting a link does not work
-  - [ ] whether to open a buffer (e.g magit-buffer on the left/right/bottom)
   - [ ] if do not run a command on hydra missclick (e.g. "SPC f p" runs "p" as paste)
   - [ ] anzu?
   - [ ] bookmarks
   - [ ] line numbers?
   - [ ] startup
   - [ ] agenda
-  - [ ] forge
-  - [ ] company-backends based on major-mode
   - [ ] general.el
   - [ ] vc on doom-modeline did not refresh after changing a branch
   - [ ] reimplement py-indent-or-complete
