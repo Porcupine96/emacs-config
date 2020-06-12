@@ -3,3 +3,16 @@ backup/
 elpa/
 transient/
 recentf
+.lsp-session-*
+.org-id-locations
+bookmarks
+emojis/
+eshell/
+forge-database.sqlite
+profile-dotemacs.el
+projectile-bookmarks.eld
+projectile.cache
+smex-items
+synonyms.el
+tramp
+url/

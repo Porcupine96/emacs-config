@@ -785,7 +785,7 @@ Always compile packages, and use the newest version available.
     (use-package counsel :defer t)
     
     ;; sorts counsel-M-x by recently used
-    (use-package smex :defer t)
+    (use-package smex :after counsel)
 
     (ivy-mode 1)
     (setq ivy-use-virtual-buffers t)
