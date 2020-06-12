@@ -1,3 +1,7 @@
+* Override GC Settings
+#+begin_src emacs-lisp :results none
+(setq gc-cons-threshold (* 100 1024 1024))
+#+end_src
 * Configure =use-package=
 
 I use =use-package= to install and configure my packages. My =init.el= includes
@@ -80,28 +84,33 @@ Always compile packages, and use the newest version available.
   
   Open buffer position
   #+begin_src emacs-lisp :results none
-  (setq display-buffer-alist
-     '(("\\*\\(compilation\\|Flycheck errors\\)\\*"
-        (display-buffer-in-side-window)
-        (side            . bottom)
-        (reusable-frames . visible)
-        (window-height   . 0.33))
-        
-       ("\\*Org todo\\*"
-        (display-buffer-in-side-window)
-        (side            . bottom)
-        (reusable-frames . visible)
-        (window-height   . 0.2))
-        
-       ("\\*\\([Hh]elp\\|Messages\\)\\*"
-        (display-buffer-in-side-window)
-        (side           . right)
-        (window-width   . 0.5))
-        
-       ("\\*\\(Buffer List\\)\\*"
-        (display-buffer-same-window)
-        (side           . right)
-        (window-width   . 0.5))))
+    (setq display-buffer-alist
+       '(("\\*\\(compilation\\|Flycheck errors\\)\\*"
+          (display-buffer-in-side-window)
+          (side            . bottom)
+          (reusable-frames . visible)
+          (window-height   . 0.33))
+
+         ("\\*Org todo\\*"
+          (display-buffer-in-side-window)
+          (side            . bottom)
+          (reusable-frames . visible)
+          (window-height   . 0.2))
+
+         ("\\*\\([Hh]elp\\|Messages\\)\\*"
+          (display-buffer-in-side-window)
+          (side           . right)
+          (window-width   . 0.5))
+
+         ("\\*\\(eshell\\|Python\\)\\*"
+          (display-buffer-in-side-window)
+          (side           . bottom)
+          (window-height  . 0.4))
+
+         ("\\*\\(Buffer List\\)\\*"
+          (display-buffer-same-window)
+          (side           . right)
+          (window-width   . 0.5))))
   #+end_src
   
   Line wrapping.
@@ -133,7 +142,6 @@ Always compile packages, and use the newest version available.
 
   (general-create-definer leader-def 
     :prefix "SPC")
-    
 
   (general-create-definer local-leader-def
     :prefix "SPC m")
@@ -166,16 +174,26 @@ Always compile packages, and use the newest version available.
   
   (local-leader-def
     :states 'normal
-    :keymaps 'override
+    :keymaps 'org-mode-map
       "s" #'org-schedule
       "d" #'org-deadline
       "t" #'org-todo)
       
+  (local-leader-def
+    :states 'normal
+    :keymaps 'python-mode-map
+      "s" #'run-python)
+      
   (general-define-key 
     :prefix "SPC j"
     :states 'normal
+    :keymaps 'org-mode-map
     "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
-    "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg)))
+    "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
+    "x" #'jupyter-org-kill-block-and-results
+    "c" #'org-babel-remove-result
+    "j" #'org-babel-next-src-block
+    "k" #'org-babel-previous-src-block)
 #+end_src
 
 * Configure =emacs-bind-map=                                       :notangle:
@@ -232,6 +250,7 @@ Always compile packages, and use the newest version available.
   #+begin_src emacs-lisp :results none
   (use-package evil
     :ensure t
+    :demand
     :init
     (setq evil-want-keybinding nil)
     :config
@@ -254,7 +273,7 @@ Always compile packages, and use the newest version available.
   #+begin_src emacs-lisp :results none
   (use-package 
      evil-commentary
-     :ensure t
+     :defer t
      :after evil)
   (evil-commentary-mode)
   #+end_src
@@ -302,10 +321,12 @@ Always compile packages, and use the newest version available.
     ──────────────────────────────
     _x_ Flycheck list errors
     _c_ Compile
+    _C_ Recompile
     ^^        
     "
     ("x" #'flycheck-list-errors)
-    ("c" #'compile))
+    ("c" #'compile)
+    ("C" #'recompile))
   #+end_src
    
 ** File 
@@ -576,13 +597,14 @@ Always compile packages, and use the newest version available.
   _u_ Winner undu
   _r_ Winner redo
   _f_ Floating window
+  _j_ Regular window at bottom 
   ^^
   ^^ 
   "
   ("u" #'winner-undo)
   ("r" #'winner-redo)
   ("f" #'+core/to-floating-frame)
-  ("j" #'+core/to-regular-window))
+  ("j" #'+core/to-regular-bottom-window))
 #+end_src
 ** Resize
 #+begin_src emacs-lisp :results none
@@ -602,8 +624,15 @@ Always compile packages, and use the newest version available.
 * Global keybindings 
   Buffer commands.
   #+begin_src emacs-lisp :results none
-  (global-set-key (kbd "C-x C-x") 'save-buffer)
-  (global-set-key (kbd "C-x C-b") 'ibuffer)
+  (global-set-key (kbd "C-x C-x") #'save-buffer)
+  (global-set-key (kbd "C-x C-b") #'ibuffer)
+  (global-set-key (kbd "C-c b n") #'next-buffer)
+  (global-set-key (kbd "C-c b p") #'previous-buffer)
+  #+end_src
+  
+  Dired jump.
+  #+begin_src emacs-lisp :results none
+  (global-set-key (kbd "C-x C-j") 'dired-jump)
   #+end_src
   
   Toggle line truncation.
@@ -681,12 +710,16 @@ Always compile packages, and use the newest version available.
                    (window-system . x)
                    (minibuffer . nil))))
                    
-    (defun +core/to-regular-window()
-      (interactive)
+    (defun +core/to-regular-bottom-window()
+       (interactive)
+       (+core/to-regular-window `bottom))
+        
+    (defun +core/to-regular-window(position)
       (let ((buffer (current-buffer)))
-      (with-current-buffer buffer
-        (delete-window)
-        (display-buffer-at-bottom buffer nil))))
+        (with-current-buffer buffer
+          (delete-window)
+          (pcase position
+            (`bottom (display-buffer-at-bottom buffer nil))))))
   #+end_src
   
   #+begin_src emacs-lisp :results none
@@ -708,8 +741,11 @@ Always compile packages, and use the newest version available.
   
 * Configure =avy= / =evil-easymotion= / =evil-snipe=
   #+begin_src emacs-lisp :results none
-  (use-package avy)
-  (use-package evil-easymotion)
+  (use-package avy 
+    :defer t)
+    
+  (use-package evil-easymotion
+    :defer t)
   #+end_src
   
   #+begin_src emacs-lisp :results none
@@ -721,7 +757,9 @@ Always compile packages, and use the newest version available.
 
   Use =evil-snipe=
   #+begin_src emacs-lisp :results none
-  (use-package evil-snipe)
+  (use-package evil-snipe 
+     :after evil)
+     
   (require 'evil-snipe)
   ;; (define-key evil-normal-state-map (kbd "f") #'evil-snipe-F)
   #+end_src
@@ -729,7 +767,7 @@ Always compile packages, and use the newest version available.
 * Configure =perspecitve=
   Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces.
   #+begin_src emacs-lisp :results none
-  (use-package perspective)
+  (use-package perspective :defer t)
   (persp-mode)
   #+end_src
   
@@ -742,12 +780,12 @@ Always compile packages, and use the newest version available.
 * Configure =ivy= / =counsel= / =swiper=
   Default =ivy= configuration.
   #+begin_src emacs-lisp :results none
-    (use-package ivy)
-    (use-package swiper)
-    (use-package counsel)
+    (use-package ivy :defer t)
+    (use-package swiper :defer t)
+    (use-package counsel :defer t)
     
     ;; sorts counsel-M-x by recently used
-    (use-package smex)
+    (use-package smex :defer t)
 
     (ivy-mode 1)
     (setq ivy-use-virtual-buffers t)
@@ -771,7 +809,7 @@ Always compile packages, and use the newest version available.
   #+begin_src emacs-lisp :results none
   (use-package flycheck
     :init (global-flycheck-mode)
-    
+    :defer t
     :bind (:map evil-normal-state-map 
           ("[ e" . flycheck-previous-error)
           ("] e" . flycheck-next-error)))
@@ -862,11 +900,11 @@ Always compile packages, and use the newest version available.
    #+end_src
 ** Academic
 #+begin_src emacs-lisp :results none
-(use-package org-ref)
+(use-package org-ref :defer t)
 #+end_src
  
 #+begin_src emacs-lisp :results none
-(use-package academic-phrases)
+(use-package academic-phrases :defer t)
 #+end_src
    
 ** Org Capture
@@ -908,14 +946,15 @@ Always compile packages, and use the newest version available.
 * Configure =yasnippet=
   #+begin_src emacs-lisp :results none
   (use-package yasnippet
-    :defer t)
+    :defer 5)
+    
   (yas-global-mode)
   #+end_src
   
 * Configure =projectile=
   #+begin_src emacs-lisp :results none
-  (use-package projectile)
-  (use-package counsel-projectile) 
+  (use-package projectile :defer t)
+  (use-package counsel-projectile :defer t) 
   
   (projectile-global-mode)
   (setq projectile-enable-caching t)
@@ -935,10 +974,10 @@ Always compile packages, and use the newest version available.
   
 * Configure =magit=
   #+begin_src emacs-lisp :results none
-  (use-package magit)
-  (use-package evil-magit)
-  (use-package forge)
-  (require 'evil-magit)
+  (use-package magit :defer t)
+  (use-package evil-magit :after magit)
+  (use-package forge :after magit)
+    ;; (require 'evil-magit)
   #+end_src
   
   vc-annotate options.
@@ -948,7 +987,7 @@ Always compile packages, and use the newest version available.
 
 * Configure =git-timemachine=
   #+begin_src emacs-lisp :results none
-  (use-package git-timemachine)
+  (use-package git-timemachine :defer t)
   #+end_src
 
 * Configure =treemacs=
@@ -956,11 +995,10 @@ Always compile packages, and use the newest version available.
   (use-package treemacs)
 
   (use-package treemacs-evil
-    :after treemacs
     :bind (:map evil-treemacs-state-map 
           ("SPC u" . #'universal-argument)))
 
-  (use-package treemacs-projectile)
+  (use-package treemacs-projectile :after treemacs)
 
   (setq treemacs-width 60)
 
@@ -975,17 +1013,17 @@ Always compile packages, and use the newest version available.
     #'treemacs-do-remove-project-from-workspace)
   (treemacs-add-and-display-current-project))
 #+end_src
-  
+
 * Configure =doom-modeline=
   #+begin_src emacs-lisp :results none
   (use-package doom-modeline
-    :ensure 
+    :ensure t 
     :custom (doom-modeline-height 35)
     :config (set-face-attribute 'mode-line nil :height 115))
   #+end_src
 * Configure =zoom-window=
   #+begin_src emacs-lisp :results none
-  (use-package zoom-window)
+  (use-package zoom-window :defer t)
   
   (custom-set-variables
    '(zoom-window-mode-line-color "#4682B4"))
@@ -993,14 +1031,15 @@ Always compile packages, and use the newest version available.
 * Configure =company=
   #+begin_src emacs-lisp :results none
   (use-package company
-  :config
-    (global-company-mode 1)
-    (with-eval-after-load 'company
-	(define-key company-mode-map (kbd "C-<space>") #'company-complete)
-	(define-key company-active-map (kbd "<return>") #'company-complete-selection)
-	(define-key company-active-map (kbd "<tab>") #'company-complete-common)
-	(define-key company-active-map (kbd "TAB") #'company-complete-common)))
-  
+    :defer t
+    :config
+      (global-company-mode 1)
+      (with-eval-after-load 'company
+          (define-key company-mode-map (kbd "C-<space>") #'company-complete)
+          (define-key company-active-map (kbd "<return>") #'company-complete-selection)
+          (define-key company-active-map (kbd "<tab>") #'company-complete-common)
+          (define-key company-active-map (kbd "TAB") #'company-complete-common)))
+    
   (setq company-backends '(company-lsp company-capf company-yasnippet company-dabbrev))
   (setq company-dabbrev-downcase nil)
   #+end_src
@@ -1026,65 +1065,14 @@ Always compile packages, and use the newest version available.
   
 * Configure =helpful=
   #+begin_src emacs-lisp :results none
-  (use-package helpful)
+  (use-package helpful :defer t)
   #+end_src
 
 * Configure =keychain=
   #+begin_src emacs-lisp :results none
   (use-package keychain-environment
+     :ensure t
      :config (keychain-refresh-environment))
-  #+end_src
-
-* Configure =elfeed=
-  #+begin_src emacs-lisp :results none
-  (use-package elfeed
-    :defer t
-    :custom
-    (elfeed-search-remain-on-entry t)
-    :config
-    (setq elfeed-feeds 
-      '(("https://michalplachta.com/feed.xml")
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UC6fXiuFCWAnVPwRhBMztLlQ" youtube) ;; Leeren
-   	  ("https://degoes.net/feed.xml")
-	  ("https://blog.softwaremill.com/feed")
-    ))
-    (setq-default elfeed-search-filter "@6-months-ago +unread"))
-    
-    (evil-collection-define-key 'normal 'elfeed-search-mode-map
-        (kbd "RET") '+elfeed/show-entry
-        "b" '+elfeed/browse-url
-        "ts" '+elfeed/tag-started
-        "G" 'elfeed-update)
-        
-  (use-package elfeed-goodies
-    :after elfeed
-    :config
-      (elfeed-goodies/setup))
-  #+end_src
-  
-  #+begin_src emacs-lisp :results none
-  (defun +elfeed/show-entry (entry)
-    (interactive (list (elfeed-search-selected :ignore-region)))
-    (require 'elfeed-show)
-    (when (elfeed-entry-p entry)
-      (elfeed-search-update-entry entry)
-      (unless elfeed-search-remain-on-entry (forward-line))
-      (elfeed-show-entry entry)))
-  
-   (defun +elfeed/browse-url (&optional use-generic-p)
-     (interactive "P")
-     (let ((entries (elfeed-search-selected)))
-       (cl-loop for entry in entries
-                do (elfeed-untag entry 'unread)
-                when (elfeed-entry-link entry)
-                do (if use-generic-p
-                       (browse-url-generic it)
-                     (browse-url it)))
-       (unless (or elfeed-search-remain-on-entry (use-region-p))
-         (forward-line))))
-         
-   (defalias '+elfeed/tag-started
-     (elfeed-expose #'elfeed-search-tag-all 'started))
   #+end_src
 
 * Configure =ox-reveal=
@@ -1104,13 +1092,14 @@ Always compile packages, and use the newest version available.
 
 * Configure =emojify=
 #+begin_src emacs-lisp :results none
-(use-package emojify)
+(use-package emojify :defer t)
 #+end_src
 
 * Configure =olivetti=
 #+begin_src emacs-lisp :results none
 (use-package olivetti
-  :ensure
+  :ensure t
+  :defer t
   :custom 
     ((olivetti-body-width 120)
      (olivetti-recall-visual-line-mode-entry-state t)))
@@ -1122,6 +1111,8 @@ Always compile packages, and use the newest version available.
 (use-package dired-subtree
   :ensure t
   :after dired
+  :config
+    (setq dired-listing-switches "-alh")
   :bind (:map dired-mode-map
               ("<tab>" . dired-subtree-toggle)
               ("<C-tab>" . dired-subtree-cycle)
@@ -1132,21 +1123,23 @@ Always compile packages, and use the newest version available.
 ** Dockerfile
    #+begin_src emacs-lisp :results none
    (use-package dockerfile-mode
+     :defer t
      :config
      (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
    #+end_src
 ** Python
    Setup =python-mode=.
    #+begin_src emacs-lisp :results none
-   (use-package python-mode)
-   
-   (setq
-     python-shell-interpreter "ipython"
-     python-shell-interpreter-args "-i")
+     (use-package python-mode :defer t)
+
+     ;; (setq
+     ;;   python-shell-interpreter "ipython"
+     ;;   python-shell-interpreter-args "-i")
    #+end_src
       
    #+begin_src emacs-lisp :results none
    (use-package pyenv-mode
+     :defer t
      :init
        (let ((pyenv-path (expand-file-name "~/.pyenv/bin")))
          (setenv "PATH" (concat pyenv-path ":" (getenv "PATH")))
@@ -1173,6 +1166,7 @@ Always compile packages, and use the newest version available.
    #+begin_src emacs-lisp :results none
      (use-package lsp-python-ms
        :ensure t
+       :after python-mode
        :init (setq lsp-python-ms-auto-install-server t)
        :hook (
               (python-mode . lsp-deferred)
@@ -1185,20 +1179,23 @@ Always compile packages, and use the newest version available.
 scala-mode
 #+begin_src emacs-lisp :results none
  (use-package scala-mode
- :mode "\\.s\\(cala\\|bt\\)$")
+   :ensure t
+   :defer t
+   :mode "\\.s\\(cala\\|bt\\)$")
 #+end_src
 
 sbt-mode
 #+begin_src emacs-lisp :results none
  (use-package sbt-mode
- :commands sbt-start sbt-command
- :config
- (substitute-key-definition
- 'minibuffer-complete-word
- 'self-insert-command
- minibuffer-local-completion-map)
- ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
- (setq sbt:program-options '("-Dsbt.supershell=false")))
+   :after scala-mode
+   :commands sbt-start sbt-command
+   :config
+   (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
+   ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
+   (setq sbt:program-options '("-Dsbt.supershell=false")))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1263,7 +1260,7 @@ sbt-mode
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package lsp-ui)
+(use-package lsp-ui :after lsp-mode)
 #+end_src
 
 Use =lsp-ivy=.
@@ -1307,6 +1304,74 @@ Remove other LSP sessions.
 #+begin_src emacs-lisp :results none
 (use-package yaml-mode 
   :defer t)
+#+end_src
+
+* Configure =elfeed=
+  #+begin_src emacs-lisp :results none
+  (use-package elfeed
+    :defer t
+    :custom
+    (elfeed-search-remain-on-entry t)
+    :config
+    (setq elfeed-feeds 
+      '(("https://michalplachta.com/feed.xml")
+        ("https://www.youtube.com/feeds/videos.xml?channel_id=UC6fXiuFCWAnVPwRhBMztLlQ" youtube) ;; Leeren
+   	  ("https://degoes.net/feed.xml")
+	  ("https://blog.softwaremill.com/feed")
+        ("https://sachachua.com/blog/feed" emacs)
+    ))
+    (setq-default elfeed-search-filter "@6-months-ago +unread"))
+    
+    (evil-collection-define-key 'normal 'elfeed-search-mode-map
+        (kbd "RET") '+elfeed/show-entry
+        "b" '+elfeed/browse-url
+        "ts" '+elfeed/tag-started
+        "G" 'elfeed-update)
+        
+  (use-package elfeed-goodies
+    :after elfeed
+    :config
+      (elfeed-goodies/setup))
+  #+end_src
+  
+  #+begin_src emacs-lisp :results none
+    (defun +elfeed/show-entry (entry)
+      (interactive (list (elfeed-search-selected :ignore-region)))
+      (require 'elfeed-show)
+      (when (elfeed-entry-p entry)
+        (elfeed-search-update-entry entry)
+        (unless elfeed-search-remain-on-entry (forward-line))
+        (elfeed-show-entry entry)))
+
+     (defun +elfeed/browse-url (&optional use-generic-p)
+       (interactive "P")
+       (let ((entries (elfeed-search-selected)))
+         (cl-loop for entry in entries
+                  do (elfeed-untag entry 'unread)
+                  when (elfeed-entry-link entry)
+                  do (if use-generic-p
+                         (browse-url-generic it)
+                       (browse-url it)))
+         (unless (or elfeed-search-remain-on-entry (use-region-p))
+           (forward-line))))
+
+     ;; (defalias '+elfeed/tag-started
+     ;;   (elfeed-expose #'elfeed-search-tag-all 'started))
+  #+end_src
+
+* Configure =Info=
+#+begin_src emacs-lisp :results none
+(define-key Info-mode-map (kbd "RET") 'Info-follow-nearest-node)
+#+end_src
+
+* Finish Setup
+Restore GC
+#+begin_src emacs-lisp :results none
+(setq gc-cons-threshold 800000)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(message "Emacs started in: %s" (emacs-init-time))
 #+end_src
 
 * TODO TODOs
