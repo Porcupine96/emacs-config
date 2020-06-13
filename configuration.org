@@ -780,9 +780,9 @@ Always compile packages, and use the newest version available.
 * Configure =ivy= / =counsel= / =swiper=
   Default =ivy= configuration.
   #+begin_src emacs-lisp :results none
-    (use-package ivy :defer t)
-    (use-package swiper :defer t)
-    (use-package counsel :defer t)
+    (use-package ivy)
+    (use-package swiper)
+    (use-package counsel)
     
     ;; sorts counsel-M-x by recently used
     (use-package smex :after counsel)
@@ -918,16 +918,42 @@ Always compile packages, and use the newest version available.
 #+end_src
 
 ** Org Babel
-   #+begin_src emacs-lisp :results none
-   (org-babel-do-load-languages 'org-babel-load-languages
-    '(
-        (shell . t)
-        (emacs-lisp . t)
-        (python . t)
-        (jupyter . t)
-    )
-   )
-   #+end_src
+Load languages.
+#+begin_src emacs-lisp :results none
+(org-babel-do-load-languages 'org-babel-load-languages
+ '(
+     (shell . t)
+     (emacs-lisp . t)
+     (python . t)
+     (jupyter . t)
+ )
+)
+#+end_src
+   
+Setup images.
+#+begin_src emacs-lisp :results none
+(setq org-startup-with-inline-images t)
+
+(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+#+end_src
+
+Change the image background. 
+#+begin_src emacs-lisp :results none
+  (defun create-image-with-background-color (args)
+    "Specify background color of Org-mode inline image through modify `ARGS'."
+    (let* ((file (car args))
+           (type (cadr args))
+           (data-p (caddr args))
+           (props (cdddr args)))
+      ;; get this return result style from `create-image'
+      (append (list file type data-p)
+              (list :background  "#F0E68C")
+              props)))
+
+  (advice-add 'create-image :filter-args
+              #'create-image-with-background-color)
+#+end_src
+
 ** Functions
 #+begin_src emacs-lisp :results none
   (defun +org/dwim ()
