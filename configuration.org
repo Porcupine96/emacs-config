@@ -3,15 +3,15 @@
 (setq gc-cons-threshold (* 100 1024 1024))
 #+end_src
 * Configure =use-package=
+I use =use-package= to install and configure my packages. My =init.el=
+includes the initial setup for =package.el= and ensures that
+=use-package= is installed, since I wanna do that right away.
 
-I use =use-package= to install and configure my packages. My =init.el= includes
-the initial setup for =package.el= and ensures that =use-package= is installed,
-since I wanna do that right away.
-
-This makes sure that =use-package= will install the package if it's not already
-available. It also means that I should be able to open Emacs for the first time
-on a fresh Debian box and have my whole environment automatically installed. I'm
-not /totally/ sure about that, but we're gettin' close.
+This makes sure that =use-package= will install the package if it's
+not already available. It also means that I should be able to open
+Emacs for the first time on a fresh Debian box and have my whole
+environment automatically installed. I'm not /totally/ sure about
+that, but we're gettin' close.
 
 #+begin_src emacs-lisp :results none
   (require 'use-package-ensure)
@@ -19,7 +19,6 @@ not /totally/ sure about that, but we're gettin' close.
 #+end_src
 
 Always compile packages, and use the newest version available.
-
 #+begin_src emacs-lisp :results none
   (use-package auto-compile
     :config (auto-compile-on-load-mode))
@@ -49,7 +48,7 @@ Always compile packages, and use the newest version available.
  (menu-bar-mode -1)
  (toggle-scroll-bar -1)
  #+end_src
-  
+ 
 * Sensible settings
   Disable backup and lockfiles.
   #+begin_src emacs-lisp :results none
@@ -127,6 +126,7 @@ Always compile packages, and use the newest version available.
   #+end_src
 
 * Configure =general=
+** Leader Key
 #+begin_src emacs-lisp :results none
   (use-package general
     :ensure t
@@ -143,9 +143,6 @@ Always compile packages, and use the newest version available.
   (general-create-definer leader-def 
     :prefix "SPC")
 
-  (general-create-definer local-leader-def
-    :prefix "SPC m")
-  
   (leader-def
     :states '(normal visual motion)
     :keymaps 'override
@@ -171,6 +168,12 @@ Always compile packages, and use the newest version available.
       "TAB" #'hydra-workspace/body
       "SPC" #'counsel-projectile-find-file
       "," #'counsel-projectile-switch-to-buffer)
+#+end_src
+
+** Local leader
+#+begin_src emacs-lisp :results none
+  (general-create-definer local-leader-def
+    :prefix "SPC m")
   
   (local-leader-def
     :states 'normal
@@ -183,7 +186,10 @@ Always compile packages, and use the newest version available.
     :states 'normal
     :keymaps 'python-mode-map
       "s" #'run-python)
-      
+#+end_src
+
+** SPC j (org-mode)
+#+begin_src emacs-lisp :results none
   (general-define-key 
     :prefix "SPC j"
     :states 'normal
@@ -193,57 +199,11 @@ Always compile packages, and use the newest version available.
     "x" #'jupyter-org-kill-block-and-results
     "c" #'org-babel-remove-result
     "j" #'org-babel-next-src-block
-    "k" #'org-babel-previous-src-block)
+    "k" #'org-babel-previous-src-block
+    "r" #'jupyter-run-repl
+    "E" #'jupyter-org-execute-to-point)
 #+end_src
 
-* Configure =emacs-bind-map=                                       :notangle:
-  #+begin_src emacs-lisp :results none
-  ;;(use-package bind-map)
-
-  ;;(bind-map org-major-map
-  ;;  :evil-keys ("SPC m")
-  ;;  :evil-states (normal motion visual)
-  ;;  :bindings (
-  ;;   "s" #'org-schedule
-  ;;   "d" #'org-deadline
-  ;;   "t" #'org-todo)
-  ;;  :major-modes (org-mode))
-
-  ;;;; (bind-map org-dwim-map
-  ;;;;    :evil-keys ("RET")
-  ;;;;    :evil-states (normal)
-  ;;;;    :bindings (
-  ;;;;     "RET" #'+org/dwim)
-  ;;;;    :major-modes (org-mode))
-
-  ;;(bind-map base-leader-map
-  ;;  :evil-keys ("SPC")
-  ;;  :evil-states (normal motion visual)
-  ;;  :bindings (
-  ;;   "a" #'hydra-agenda/body
-  ;;   "b" #'hydra-buffer/body
-  ;;   "c" #'hydra-compile/body
-  ;;   "h" #'hydra-help/body
-  ;;   "f" #'hydra-file/body
-  ;;   "g" #'hydra-git/body
-  ;;   "l" #'hydra-lsp/body
-  ;;   "k" #'counsel-yank-pop
-  ;;   "p" #'hydra-project/body
-  ;;   "r" #'hydra-resize/body
-  ;;   "o" #'hydra-open/body
-  ;;   "s" #'hydra-search/body
-  ;;   "u" #'universal-argument
-  ;;   "w f" #'+core/to-floating-frame
-  ;;   "e e" #'elfeed
-  ;;   "t r" #'+core/reload-theme
-  ;;   "y a" #'yas-new-snippet
-  ;;   "y v" #'yas-visit-snippet-file
-  ;;   "RET" #'counsel-bookmark
-  ;;   "TAB" #'hydra-workspace/body
-  ;;   "SPC" #'counsel-projectile-find-file
-  ;;   "," #'counsel-projectile-switch-to-buffer))
-  #+end_src
-  
 * Use =evil-mode=
 
   Use =evil-mode=
@@ -809,7 +769,6 @@ Always compile packages, and use the newest version available.
   #+begin_src emacs-lisp :results none
   (use-package flycheck
     :init (global-flycheck-mode)
-    :defer t
     :bind (:map evil-normal-state-map 
           ("[ e" . flycheck-previous-error)
           ("] e" . flycheck-next-error)))
@@ -829,6 +788,8 @@ Always compile packages, and use the newest version available.
       ("C-k" . evil-window-up)
       ("C-j" . evil-window-down)
       ("RET" . +org/dwim)
+      ("C-M-<return>" . #'org-insert-subheading)
+
       :map org-mode-map
       ("C-k" . evil-window-up)
       ("C-j" . evil-window-down))
@@ -929,7 +890,13 @@ Load languages.
  )
 )
 #+end_src
-   
+
+Fix tab indentation in source blocks.
+#+begin_src emacs-lisp :results none
+(setq org-src-fontify-natively t)
+(setq org-src-tab-acts-natively t)
+#+end_src
+
 Setup images.
 #+begin_src emacs-lisp :results none
 (setq org-startup-with-inline-images t)
@@ -1118,7 +1085,10 @@ Change the image background.
 
 * Configure =emojify=
 #+begin_src emacs-lisp :results none
-(use-package emojify :defer t)
+(use-package emojify 
+   :ensure t)
+
+(set-fontset-font t 'unicode "Noto Color Emoji" nil 'prepend)
 #+end_src
 
 * Configure =olivetti=
@@ -1134,15 +1104,16 @@ Change the image background.
 * Configure =ibuffer=
 * Configure =dired=
 #+begin_src emacs-lisp :results none
-(use-package dired-subtree
-  :ensure t
-  :after dired
-  :config
-    (setq dired-listing-switches "-alh")
-  :bind (:map dired-mode-map
-              ("<tab>" . dired-subtree-toggle)
-              ("<C-tab>" . dired-subtree-cycle)
-              ("<backtab>" . dired-subtree-remove)))
+  (use-package dired-subtree
+    :ensure t
+    :after dired
+    :config
+    :bind (:map dired-mode-map
+                ("<tab>" . dired-subtree-toggle)
+                ("<C-tab>" . dired-subtree-cycle)
+                ("<backtab>" . dired-subtree-remove)))
+
+  (setq dired-listing-switches "-alh")
 #+end_src
 
 * Languages
@@ -1206,7 +1177,6 @@ scala-mode
 #+begin_src emacs-lisp :results none
  (use-package scala-mode
    :ensure t
-   :defer t
    :mode "\\.s\\(cala\\|bt\\)$")
 #+end_src
 
@@ -1276,9 +1246,8 @@ sbt-mode
 ** LSP
 #+begin_src emacs-lisp :results none
   (use-package lsp-mode
-   :hook ((scala-mode . lsp-deferred)
+   :hook ((scala-mode . lsp)
           (sh-mode . lsp-deferred))
-          ;; (python-mode . lsp-deferred))
    :config (setq lsp-prefer-flymake nil)
    :bind (:map evil-normal-state-map 
          ("M-w" . +lsp-ui/toggle-doc-focus)          
@@ -1287,6 +1256,10 @@ sbt-mode
 
 #+begin_src emacs-lisp :results none
 (use-package lsp-ui :after lsp-mode)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package lsp-metals :after lsp-mode scala-mode)
 #+end_src
 
 Use =lsp-ivy=.
@@ -1330,6 +1303,33 @@ Remove other LSP sessions.
 #+begin_src emacs-lisp :results none
 (use-package yaml-mode 
   :defer t)
+#+end_src
+
+* Configure =Info=
+#+begin_src emacs-lisp :results none
+(define-key Info-mode-map (kbd "RET") 'Info-follow-nearest-node)
+#+end_src
+
+* Configure =csv-mode=
+#+begin_src emacs-lisp :results none
+(use-package csv-mode
+  :ensure t
+  :defer t)
+#+end_src
+
+* Configure =eshell=
+#+begin_src emacs-lisp :results none
+  (defun +eshell/clear ()
+    (interactive)
+    (eshell/clear 1)
+    (eshell-send-input)
+    (evil-insert nil))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+  (use-package eshell
+   :bind (:map eshell-mode-map
+          ("C-l" . +eshell/clear)))
 #+end_src
 
 * Configure =elfeed=
@@ -1385,10 +1385,6 @@ Remove other LSP sessions.
      ;;   (elfeed-expose #'elfeed-search-tag-all 'started))
   #+end_src
 
-* Configure =Info=
-#+begin_src emacs-lisp :results none
-(define-key Info-mode-map (kbd "RET") 'Info-follow-nearest-node)
-#+end_src
 
 * Finish Setup
 Restore GC
