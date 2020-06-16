@@ -35,18 +35,23 @@ Always compile packages, and use the newest version available.
  		    :weight 'normal
  		    :width 'normal)
  #+end_src
- 
+  
+ Hide the bezels.
+ #+begin_src emacs-lisp :results none
+ (tool-bar-mode -1)
+ (menu-bar-mode -1)
+ (toggle-scroll-bar -1)
+ #+end_src
+
  Color theme.
  #+begin_src emacs-lisp :results none
  (add-to-list 'custom-theme-load-path "~/my-emacs/themes")
  (load-theme 'noctilux t)
  #+end_src
  
- Hide the bezels.
+ Light theme
  #+begin_src emacs-lisp :results none
- (tool-bar-mode -1)
- (menu-bar-mode -1)
- (toggle-scroll-bar -1)
+ (use-package modus-operandi-theme :disabled)
  #+end_src
  
 * Sensible settings
@@ -107,9 +112,10 @@ Always compile packages, and use the newest version available.
           (window-height  . 0.4))
 
          ("\\*\\(Buffer List\\)\\*"
-          (display-buffer-same-window)
-          (side           . right)
-          (window-width   . 0.5))))
+          (display-buffer-same-window))
+
+         ("^magit:.*"
+          (display-buffer-same-window))))
   #+end_src
   
   Line wrapping.
@@ -429,6 +435,7 @@ Always compile packages, and use the newest version available.
     ("f" #'lsp-format-buffer)
     ("l" #'lsp-ivy-workspace-symbol)
     ("t" #'hydra-lsp-toggle/body)
+    ("T" #'lsp-treemacs-error-list)
     ("r" #'lsp-find-references)
     ("R" #'+lsp/remove-other-sessions)
     ("i" #'lsp-goto-implementation)
@@ -551,20 +558,22 @@ Always compile packages, and use the newest version available.
  #+end_src
 ** Window
 #+begin_src emacs-lisp :results none
-(defhydra hydra-window (:color blue)
-  "
-  ^ 
-  _u_ Winner undu
-  _r_ Winner redo
-  _f_ Floating window
-  _j_ Regular window at bottom 
-  ^^
-  ^^ 
-  "
-  ("u" #'winner-undo)
-  ("r" #'winner-redo)
-  ("f" #'+core/to-floating-frame)
-  ("j" #'+core/to-regular-bottom-window))
+  (defhydra hydra-window (:color blue)
+    "
+    ^ 
+    _u_ Winner undu
+    _r_ Winner redo
+    _f_ Floating window
+    _j_ Regular window at bottom 
+    _l_ Regular window on right
+    ^^
+    ^^ 
+    "
+    ("u" #'winner-undo)
+    ("r" #'winner-redo)
+    ("f" #'+core/to-floating-frame)
+    ("l" #'+core/to-regular-right-window)
+    ("j" #'+core/to-regular-bottom-window))
 #+end_src
 ** Resize
 #+begin_src emacs-lisp :results none
@@ -635,6 +644,11 @@ Always compile packages, and use the newest version available.
   (define-key evil-window-map (kbd "C-o") #'zoom-window-zoom)
   #+end_src
   
+  Use =org-capture=.
+  #+begin_src emacs-lisp :results none
+  (global-set-key (kbd "C-c c") #'org-capture)
+  #+end_src
+  
   Scale text.
   #+begin_src emacs-lisp :results none
   (global-set-key (kbd "C-+") #'text-scale-increase)
@@ -664,22 +678,27 @@ Always compile packages, and use the newest version available.
   
   Based on excelent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
   #+begin_src emacs-lisp :results none
-   (defun +core/to-floating-frame()
-     (interactive)
-     (make-frame '((name . "floating")
-                   (window-system . x)
-                   (minibuffer . nil))))
-                   
-    (defun +core/to-regular-bottom-window()
+    (defun +core/to-floating-frame()
+      (interactive)
+      (make-frame '((name . "floating")
+                    (window-system . x)
+                    (minibuffer . nil))))
+
+     (defun +core/to-regular-bottom-window()
+        (interactive)
+        (+core/to-regular-window `bottom))
+
+    (defun +core/to-regular-right-window()
        (interactive)
-       (+core/to-regular-window `bottom))
-        
-    (defun +core/to-regular-window(position)
-      (let ((buffer (current-buffer)))
-        (with-current-buffer buffer
-          (delete-window)
-          (pcase position
-            (`bottom (display-buffer-at-bottom buffer nil))))))
+       (+core/to-regular-window `right))
+
+     (defun +core/to-regular-window(position)
+       (let ((buffer (current-buffer)))
+         (with-current-buffer buffer
+           (delete-window)
+           (pcase position
+             (`bottom (display-buffer-at-bottom buffer nil))
+             (`right (display-buffer-in-direction buffer '((direction . right))))))))
   #+end_src
   
   #+begin_src emacs-lisp :results none
@@ -740,19 +759,20 @@ Always compile packages, and use the newest version available.
 * Configure =ivy= / =counsel= / =swiper=
   Default =ivy= configuration.
   #+begin_src emacs-lisp :results none
-    (use-package ivy)
-    (use-package swiper)
-    (use-package counsel)
-    
+    (use-package ivy
+      :config
+        (setq ivy-use-virtual-buffers t)
+        (setq ivy-initial-inputs-alist nil)
+        (setq enable-recursive-minibuffers t)
+        (setq search-default-mode #'char-fold-to-regexp)
+        (ivy-mode 1))
+
+    (use-package swiper :after ivy)
+    (use-package counsel :after ivy)
+
     ;; sorts counsel-M-x by recently used
     (use-package smex :after counsel)
 
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-initial-inputs-alist nil)
-    (setq enable-recursive-minibuffers t)
-    (setq search-default-mode #'char-fold-to-regexp)
-    
     (global-set-key "\C-s" 'swiper)
     (global-set-key (kbd "C-c C-r") 'ivy-resume)
     (global-set-key (kbd "<f6>") 'ivy-resume)
@@ -763,7 +783,30 @@ Always compile packages, and use the newest version available.
     (global-set-key (kbd "C-c k") 'counsel-ag)
     (global-set-key (kbd "C-x l") 'counsel-locate)
     (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+
     (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
+  #+end_src
+  
+  Recentf configuration.
+  #+begin_src emacs-lisp :results none
+  (setq recentf-max-saved-items 200)
+  #+end_src
+  
+  #+begin_src emacs-lisp :results none
+    (use-package ivy-posframe
+      :ensure
+      :after ivy
+      :config
+      (setq ivy-posframe-parameters
+            '((left-fringe . 2)
+              (right-fringe . 2)
+              (internal-border-width . 2)))
+
+      (setq ivy-posframe-display-functions-alist
+            '((complete-symbol . ivy-posframe-display-at-point)
+              (swiper . ivy-display-function-fallback)
+              (t . ivy-posframe-display-at-frame-center)))
+      (ivy-posframe-mode 1))
   #+end_src
 * Configure =flycheck=
   #+begin_src emacs-lisp :results none
@@ -819,7 +862,12 @@ Always compile packages, and use the newest version available.
   
   (add-hook 'org-archive-hook 'org-archive-save-buffer)
   #+end_src
-  
+   
+Org tag placement.
+#+begin_src emacs-lisp :results none
+(setq org-tags-column -1)
+#+end_src
+
 ** Org Agenda 
    #+begin_src emacs-lisp :results none
     (use-package evil-org
@@ -870,12 +918,12 @@ Always compile packages, and use the newest version available.
    
 ** Org Capture
 #+begin_src emacs-lisp :results none
-(setq org-default-notes-file (concat org-directory "~/Dropbox/org/tood/notes.org"))
-(setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
+  (setq org-default-notes-file (concat org-directory "~/Dropbox/org/tood/notes.org"))
+  (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
 
-(setq org-capture-templates
-    '(("i" "Inbox" entry (file+headline "~/Dropbox/org/todo/current.org" "Tasks")
-         "* TODO %?\n  %i\n  %a")))
+  (setq org-capture-templates
+      '(("i" "Inbox" entry (file+headline "~/Dropbox/org/todo/current.org" "Inbox")
+         "* TODO %?\n")))
 #+end_src
 
 ** Org Babel
@@ -975,7 +1023,7 @@ Change the image background.
   
   vc-annotate options.
   #+begin_src emacs-lisp :results none
- (setq vc-git-annotate-switches '("-c"))
+ ;; (setq vc-git-annotate-switches '("-c"))
   #+end_src
 
 * Configure =git-timemachine=
@@ -1385,6 +1433,11 @@ Remove other LSP sessions.
      ;;   (elfeed-expose #'elfeed-search-tag-all 'started))
   #+end_src
 
+* Configure =winner=
+#+begin_src emacs-lisp :results none
+(use-package winner
+  :hook (after-init-hook . winner-mode))
+#+end_src
 
 * Finish Setup
 Restore GC
@@ -1396,6 +1449,14 @@ Restore GC
 (message "Emacs started in: %s" (emacs-init-time))
 #+end_src
 
+* TMP
+  #+begin_src emacs-lisp :results none
+    (global-visual-line-mode t)
+    (setq-default truncate-lines t)
+    (setq truncate-lines t)
+    (setq truncate-partial-width-windows nil)
+  #+end_src
+  
 * TODO TODOs
   - [ ] java script / react stuff
   - [ ] workgroups.el
