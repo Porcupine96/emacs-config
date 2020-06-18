@@ -425,6 +425,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              (org-cancelled-kwd-face ((t (,@fg-green ,@bg-base03))))
              (org-delegated-kwd-face ((t (,@fg-cyan ,@bg-base03))))
+
              ;; table
              (table-cell ((t (,@fmt-none ,@fg-base0 ,@bg-back))))
              ;; outline - pandocBlockQuoteLeader*
@@ -715,6 +716,16 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
                                 base0))
 	     (ansi-color-names-vector . [,base02 ,red ,green ,yellow ,blue ,magenta ,cyan ,base00]))))))))
 
+(defun set-additional-faces ()
+  (custom-set-faces
+   `(ediff-odd-diff-A ((t (:foreground "#ffffff" :background "#848484"))))
+   `(ediff-odd-diff-B ((t (:foreground "#ffffff" :background "#848484"))))
+   `(ediff-odd-diff-C ((t (:foreground "#ffffff" :background "#848484"))))
+   `(ediff-even-diff-A ((t (:foreground "#ffffff" :background "#848484"))))
+   `(ediff-even-diff-B ((t (:foreground "#ffffff" :background "#848484"))))
+   `(ediff-even-diff-C ((t (:foreground "#ffffff" :background "#848484"))))))
+
+
 (defmacro create-noctilux-theme ()
   (let* ((theme-name 'noctilux)
          (defs (noctilux-color-definitions 'dark))
@@ -725,6 +736,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
        (deftheme ,theme-name ,noctilux-description)
        (apply 'custom-theme-set-variables ',theme-name ',theme-vars)
        (apply 'custom-theme-set-faces ',theme-name ',theme-faces)
+       (set-additional-faces)
        (provide-theme ',theme-name))))
 
 ;;;###autoload

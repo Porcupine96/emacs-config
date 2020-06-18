@@ -1,6 +1,20 @@
-* Override GC Settings
+* Startup
 #+begin_src emacs-lisp :results none
-(setq gc-cons-threshold (* 100 1024 1024))
+  (defvar file-name-handler-alist-old file-name-handler-alist)
+
+  (setq package-enable-at-startup nil
+        file-name-handler-alist nil
+        message-log-max 16384
+        gc-cons-threshold 402653184
+        gc-cons-percentage 0.6
+        auto-window-vscroll nil)
+
+  (add-hook 'after-init-hook
+            `(lambda ()
+               (setq file-name-handler-alist file-name-handler-alist-old
+                     gc-cons-threshold 800000
+                     gc-cons-percentage 0.1)
+               (garbage-collect)) t)
 #+end_src
 * Configure =use-package=
 I use =use-package= to install and configure my packages. My =init.el=
@@ -167,6 +181,7 @@ Always compile packages, and use the newest version available.
       "u" #'universal-argument
       "w" #'hydra-window/body
       "e e" #'elfeed
+      "e d" #'ediff
       "t r" #'+core/reload-theme
       "y a" #'yas-new-snippet
       "y v" #'yas-visit-snippet-file
@@ -350,24 +365,26 @@ Always compile packages, and use the newest version available.
 #+end_src
 
 ** Buffer
-   #+begin_src emacs-lisp :results none
-   (defhydra hydra-buffer (:color blue)
-     "
-     ^
-     ^Buffer^     
-     ^──────^───────────────
-     _n_ Next buffer
-     _N_ New uffer
-     _k_ Kill buffer
-     _p_ Previous buffer
-     ^^        
-     ^^        
-     "
-     ("n" #'next-buffer)
-     ("N" #'+core/empty-buffer)
-     ("p" #'previous-buffer)
-     ("k" #'kill-current-buffer))
-   #+end_src
+#+begin_src emacs-lisp :results none
+  (defhydra hydra-buffer (:color blue)
+    "
+    ^
+    ^Buffer^     
+    ^──────^───────────────
+    _b_ Ivy switch buffer
+    _n_ Next buffer
+    _N_ New buffer
+    _k_ Kill buffer
+    _p_ Previous buffer
+    ^^        
+    ^^        
+    "
+    ("b" #'ivy-switch-buffer)
+    ("n" #'next-buffer)
+    ("N" #'+core/empty-buffer)
+    ("p" #'previous-buffer)
+    ("k" #'kill-current-buffer))
+#+end_src
 
 ** Git 
    #+begin_src emacs-lisp :results none
@@ -435,7 +452,7 @@ Always compile packages, and use the newest version available.
     ("f" #'lsp-format-buffer)
     ("l" #'lsp-ivy-workspace-symbol)
     ("t" #'hydra-lsp-toggle/body)
-    ("T" #'lsp-treemacs-error-list)
+    ("T" #'lsp-treemacs-errors-list)
     ("r" #'lsp-find-references)
     ("R" #'+lsp/remove-other-sessions)
     ("i" #'lsp-goto-implementation)
@@ -659,7 +676,7 @@ Always compile packages, and use the newest version available.
   #+begin_src emacs-lisp :results none
  (defun +core/empty-buffer () 
     (interactive)
-    (switch-to-buffer-other-window (generate-new-buffer "empty")))
+    (switch-to-buffer (generate-new-buffer "empty")))
   #+end_src
   
   #+begin_src emacs-lisp :results none
@@ -673,13 +690,14 @@ Always compile packages, and use the newest version available.
   #+begin_src emacs-lisp :results none
     (defun +work/search-monorepo ()
       (interactive)
-      (counsel-ag "" "/home/porcupine/codeheroes/chatbotize/monorepo"))
+      (counsel-rg "" "/home/porcupine/codeheroes/chatbotize/monorepo"))
   #+end_src
   
   Based on excelent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
   #+begin_src emacs-lisp :results none
     (defun +core/to-floating-frame()
       (interactive)
+      (delete-window)
       (make-frame '((name . "floating")
                     (window-system . x)
                     (minibuffer . nil))))
@@ -819,24 +837,25 @@ Always compile packages, and use the newest version available.
 * Configure =org=
 ** Core
   #+begin_src emacs-lisp :results none
-  (use-package org
-    :ensure org-plus-contrib
-    :custom 
-      (org-fontify-done-headline t)
-      (org-todo-keywords
-	'((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
-	 (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
-    :config (require 'org-tempo)
-    :bind (:map evil-normal-state-map
-      ("C-k" . evil-window-up)
-      ("C-j" . evil-window-down)
-      ("RET" . +org/dwim)
-      ("C-M-<return>" . #'org-insert-subheading)
+    (use-package org
+      :ensure org-plus-contrib
+      :custom 
+        (org-fontify-done-headline t)
+        (org-todo-keywords
+          '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+           (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+      :config 
+        (require 'org-tempo)
+        (evil-collection-define-key 'normal 'org-mode-map
+          (kbd "C-k") 'evil-window-up
+          (kbd "C-j") 'evil-window-down)
 
-      :map org-mode-map
-      ("C-k" . evil-window-up)
-      ("C-j" . evil-window-down))
-    :hook (org-mode . org-indent-mode))
+      :bind (:map evil-normal-state-map
+        ("C-k" . evil-window-up)
+        ("C-j" . evil-window-down)
+        ("RET" . +org/dwim)
+        ("C-M-<return>" . #'org-insert-subheading))
+      :hook (org-mode . org-indent-mode))
   #+end_src
   
   #+begin_src emacs-lisp :results none
@@ -922,8 +941,10 @@ Org tag placement.
   (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
 
   (setq org-capture-templates
-      '(("i" "Inbox" entry (file+headline "~/Dropbox/org/todo/current.org" "Inbox")
-         "* TODO %?\n")))
+        '(("i" "Inbox" entry (file+headline "~/Dropbox/org/todo/current.org" "Inbox")
+           "* TODO %?\n%T\n")
+          ("a" "AGH" entry (file+olp "~/Dropbox/org/todo/current.org" "Actionable" "AGH")
+           "* TODO %?\n%T\n")))
 #+end_src
 
 ** Org Babel
@@ -1057,10 +1078,13 @@ Change the image background.
 
 * Configure =doom-modeline=
   #+begin_src emacs-lisp :results none
-  (use-package doom-modeline
-    :ensure t 
-    :custom (doom-modeline-height 35)
-    :config (set-face-attribute 'mode-line nil :height 115))
+    (use-package doom-modeline
+      :ensure t 
+      :config 
+        (setq doom-modeline-height 35)
+        (setq doom-modeline-vcs-max-length 40)
+        (setq doom-modeline-enable-word-count t)
+        (set-face-attribute 'mode-line nil :height 115))
   #+end_src
 * Configure =zoom-window=
   #+begin_src emacs-lisp :results none
@@ -1163,6 +1187,16 @@ Change the image background.
 
   (setq dired-listing-switches "-alh")
 #+end_src
+* Configure =ediff=
+#+begin_src emacs-lisp :results none
+  (use-package ediff
+    :ensure t 
+    :defer t
+    :config
+      (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+      (setq ediff-split-window-function 'split-window-horizontally)
+      (setq ediff-forward-word-function 'forward-char))
+#+end_src
 
 * Languages
 ** Dockerfile
@@ -1223,9 +1257,9 @@ Change the image background.
 ** Scala
 scala-mode
 #+begin_src emacs-lisp :results none
- (use-package scala-mode
-   :ensure t
-   :mode "\\.s\\(cala\\|bt\\)$")
+  (use-package scala-mode
+    :ensure t
+    :mode "\\.s\\(cala\\|bt\\)$")
 #+end_src
 
 sbt-mode
@@ -1353,9 +1387,26 @@ Remove other LSP sessions.
   :defer t)
 #+end_src
 
+** SQL
+#+begin_src emacs-lisp :results none
+(defun +sql/align ()
+  (interactive)
+  (let ((rule
+	 (list (list nil
+		     (cons 'regexp  "\\(\\s-*\\)\\(VARCHAR\\|NOT NULL\\|TIMESTAMP\\)")
+		     (cons 'group 1)
+		     (cons 'bogus nil)
+		     (cons 'spacing 3)
+		     (cons 'repeat t)))))
+    (align-region (region-beginning) (region-end) 'entire rule nil nil)))
+#+end_src
+
 * Configure =Info=
 #+begin_src emacs-lisp :results none
-(define-key Info-mode-map (kbd "RET") 'Info-follow-nearest-node)
+  (use-package info
+    :defer t
+    :bind (:map evil-normal-state-map
+      ("RET" . 'Info-follow-nearest-node)))
 #+end_src
 
 * Configure =csv-mode=
@@ -1382,30 +1433,29 @@ Remove other LSP sessions.
 
 * Configure =elfeed=
   #+begin_src emacs-lisp :results none
-  (use-package elfeed
-    :defer t
-    :custom
-    (elfeed-search-remain-on-entry t)
-    :config
-    (setq elfeed-feeds 
-      '(("https://michalplachta.com/feed.xml")
-        ("https://www.youtube.com/feeds/videos.xml?channel_id=UC6fXiuFCWAnVPwRhBMztLlQ" youtube) ;; Leeren
-   	  ("https://degoes.net/feed.xml")
-	  ("https://blog.softwaremill.com/feed")
-        ("https://sachachua.com/blog/feed" emacs)
-    ))
-    (setq-default elfeed-search-filter "@6-months-ago +unread"))
-    
-    (evil-collection-define-key 'normal 'elfeed-search-mode-map
-        (kbd "RET") '+elfeed/show-entry
-        "b" '+elfeed/browse-url
-        "ts" '+elfeed/tag-started
-        "G" 'elfeed-update)
-        
-  (use-package elfeed-goodies
-    :after elfeed
-    :config
-      (elfeed-goodies/setup))
+    (use-package elfeed
+      :defer t
+      :custom
+      (elfeed-search-remain-on-entry t)
+      :config
+      (setq elfeed-feeds 
+        '(("https://michalplachta.com/feed.xml")
+          ("https://www.youtube.com/feeds/videos.xml?channel_id=UC6fXiuFCWAnVPwRhBMztLlQ" youtube) ;; Leeren
+          ("https://degoes.net/feed.xml")
+          ("https://blog.softwaremill.com/feed")
+          ("https://sachachua.com/blog/feed" emacs)
+      ))
+      (setq-default elfeed-search-filter "@6-months-ago +unread"))
+
+      (evil-collection-define-key 'normal 'elfeed-search-mode-map
+          (kbd "RET") '+elfeed/show-entry
+          "b" '+elfeed/browse-url
+          "G" 'elfeed-update)
+
+    ;; (use-package elfeed-goodies
+    ;;   :after elfeed
+    ;;   :config
+    ;;     (elfeed-goodies/setup))
   #+end_src
   
   #+begin_src emacs-lisp :results none
@@ -1428,9 +1478,6 @@ Remove other LSP sessions.
                        (browse-url it)))
          (unless (or elfeed-search-remain-on-entry (use-region-p))
            (forward-line))))
-
-     ;; (defalias '+elfeed/tag-started
-     ;;   (elfeed-expose #'elfeed-search-tag-all 'started))
   #+end_src
 
 * Configure =winner=
@@ -1439,12 +1486,14 @@ Remove other LSP sessions.
   :hook (after-init-hook . winner-mode))
 #+end_src
 
-* Finish Setup
-Restore GC
+* Configure =string-inflection=
 #+begin_src emacs-lisp :results none
-(setq gc-cons-threshold 800000)
+  (use-package string-inflection 
+    :ensure t
+    :defer t)
 #+end_src
 
+* Finish Setup
 #+begin_src emacs-lisp :results none
 (message "Emacs started in: %s" (emacs-init-time))
 #+end_src
@@ -1455,6 +1504,20 @@ Restore GC
     (setq-default truncate-lines t)
     (setq truncate-lines t)
     (setq truncate-partial-width-windows nil)
+  #+end_src
+  
+  #+begin_src emacs-lisp :results none
+    (defun toggle-x ()
+      (interactive)
+      (if (eq ?x (char-after))
+        (progn
+          (delete-char 1)
+          (insert " ")
+          (backward-char))
+        (progn
+          (delete-char 1)
+          (insert "x")
+          (backward-char))))
   #+end_src
   
 * TODO TODOs

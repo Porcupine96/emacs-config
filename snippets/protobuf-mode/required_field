@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: required field
+# key: re
+# --
+required $1 = $2;
