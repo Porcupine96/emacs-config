@@ -758,9 +758,10 @@ Always compile packages, and use the newest version available.
 Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces.
 #+begin_src emacs-lisp :results none
   (use-package perspective 
-    :defer t
+    :defer 5
+    :init
+      (persp-mode)
     :config 
-      ;;(persp-mode)
       (define-key evil-normal-state-map (kbd "gt") #'persp-next)
       (define-key evil-normal-state-map (kbd "gT") #'persp-prev))
 #+end_src
@@ -933,7 +934,6 @@ org-super-agenda-groups
    
 ** Org Capture
 #+begin_src emacs-lisp :results none
-  (setq org-default-notes-file (concat org-directory "~/Dropbox/org/tood/notes.org"))
   (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
 
   (setq org-capture-templates
@@ -1219,14 +1219,15 @@ Setup =python-mode=.
         (add-to-list 'exec-path pyenv-path)))
 
   (use-package pyvenv
-    :after python-mode)
+    :defer t)
+    ;; :after python-mode)
 #+end_src
 
 #+begin_src emacs-lisp :results none
   (defun +pyvenv/set-to-pyenv ()
     (interactive)
     (pyvenv-activate
-      (pyenv-mode-full-path (pyenv-mode-version))))
+       (pyenv-mode-full-path (pyenv-mode-version))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1320,7 +1321,8 @@ sbt-mode
   (use-package lsp-mode
    :hook ((scala-mode . lsp)
           (sh-mode . lsp-deferred))
-   :config (setq lsp-prefer-flymake nil)
+   :config
+         (setq lsp-prefer-flymake nil)
    :bind (:map evil-normal-state-map 
          ("M-w" . +lsp-ui/toggle-doc-focus)          
          ("C-<return>" . lsp-execute-code-action)))
