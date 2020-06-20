@@ -131,7 +131,6 @@ Always compile packages, and use the newest version available.
   
   Line wrapping.
   #+begin_src emacs-lisp :results none
-    (global-visual-line-mode t)
     (setq-default truncate-lines t)
     (setq truncate-lines t)
     (setq truncate-partial-width-windows nil)
@@ -305,28 +304,29 @@ Always compile packages, and use the newest version available.
    
 ** File 
   #+begin_src emacs-lisp :results none
-  (defhydra hydra-file (:color blue)
-    "
-    ^
-    ^File^     
-    ^────^───────────
-    _f_ Find 
-    _r_ Recent
-    _a_ current.org
-    _s_ resources.org
-    _d_ dotfiles
-    _c_ Config
-    _t_ Theme
-    ^^        
-    ^^        
-    "
-    ("f" #'counsel-find-file)
-    ("r" #'counsel-recentf)
-    ("a" (lambda () (interactive)(find-file "~/Dropbox/org/todo/current.org")))
-    ("s" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
-    ("d" (lambda () (interactive)(dired "~/dotfiles")))
-    ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
-    ("t" (lambda () (interactive)(find-file "~/my-emacs/themes/noctilux-theme.el"))))
+    (defhydra hydra-file (:color blue)
+      "
+      ^
+      ^File^     
+      ^────^──────────────────────────────────────────────────────────
+      _f_ Find                             _e_ resources.org
+      _r_ Recent                           _i_ inbox.org
+      _d_ dotfiles                         _p_ private.org
+      _c_ Config                           _s_ studies.org
+      _t_ Theme                            _w_ work.org
+      ^^        
+      ^^        
+      "
+      ("f" #'counsel-find-file)
+      ("r" #'counsel-recentf)
+      ("i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org")))
+      ("w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org")))
+      ("p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org")))
+      ("e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
+      ("s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org")))
+      ("d" (lambda () (interactive)(dired "~/dotfiles")))
+      ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
+      ("t" (lambda () (interactive)(find-file "~/my-emacs/themes/noctilux-theme.el"))))
   #+end_src
 
 ** Project 
@@ -836,13 +836,16 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+begin_src emacs-lisp :results none
   (use-package org
     :ensure org-plus-contrib
-    :custom 
-      (org-fontify-done-headline t)
-      (org-todo-keywords
-        '((sequence "TODO(t)" "PROJ(p)" "STRT(s)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
-         (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
     :config 
       (require 'org-tempo)
+
+      (setq org-fontify-done-headline t)
+      (setq org-use-fast-todo-selection 'expert)
+
+      (setq org-todo-keywords
+        '((sequence "TODO(t)" "PROJECT(p)" "STRT(s)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+          (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+
       (evil-collection-define-key 'normal 'org-mode-map
         (kbd "C-k") 'evil-window-up
         (kbd "C-j") 'evil-window-down)
@@ -910,7 +913,10 @@ org-super-agenda-groups
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(setq org-agenda-files '("~/Dropbox/org/todo/current.org"))
+(setq org-agenda-files '(
+   "~/Dropbox/org/todo/private.org"
+   "~/Dropbox/org/todo/studies.org"
+   "~/Dropbox/org/todo/work.org"))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1085,7 +1091,8 @@ Change the image background.
         (setq doom-modeline-height 35)
         (setq doom-modeline-vcs-max-length 40)
         (setq doom-modeline-enable-word-count t)
-        (set-face-attribute 'mode-line nil :height 115))
+        (set-face-attribute 'mode-line nil :height 115)
+        (doom-modeline-mode))
   #+end_src
 * Configure =zoom-window=
  #+begin_src emacs-lisp :results none
@@ -1396,9 +1403,9 @@ Remove other LSP sessions.
 * Configure =Info=
 #+begin_src emacs-lisp :results none
   (use-package info
-    :defer t
-    :bind (:map evil-normal-state-map
-      ("RET" . 'Info-follow-nearest-node)))
+    :defer t)
+    ;; :bind (:map evil-normal-state-map
+    ;;   ("RET" . 'Info-follow-nearest-node)))
 #+end_src
 
 * Configure =csv-mode=
@@ -1488,24 +1495,10 @@ Remove other LSP sessions.
 
 * TMP
   #+begin_src emacs-lisp :results none
-    (global-visual-line-mode t)
-    (setq-default truncate-lines t)
     (setq truncate-lines t)
+    (setq-default truncate-lines t)
     (setq truncate-partial-width-windows nil)
-  #+end_src
-  
-  #+begin_src emacs-lisp :results none
-    (defun toggle-x ()
-      (interactive)
-      (if (eq ?x (char-after))
-        (progn
-          (delete-char 1)
-          (insert " ")
-          (backward-char))
-        (progn
-          (delete-char 1)
-          (insert "x")
-          (backward-char))))
+    (setq-default truncate-partial-width-windows nil)
   #+end_src
   
 * TODO TODOs

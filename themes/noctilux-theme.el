@@ -116,9 +116,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 
 (setq org-todo-keyword-faces '(
-    ("PROJ" . (:height 1.2 :foreground "#bd93f9" :underline t))
-    ("STRT" . (:height 1.2 :foreground "#0198e1" :underline t))
-    ("WAIT" . (:height 1.2 :foreground "#f1fa8c" :underline t))))
+    ("PROJECT" . (:height 1.2 :foreground "#ffffff" :underline t))
+    ("STRT"    . (:height 1.2 :foreground "#0198e1" :underline t))
+    ("WAIT"    . (:height 1.2 :foreground "#f1fa8c" :underline t))))
 
 (defmacro noct-flet (specs &rest body)
   (let ((flet (if (fboundp 'cl-flet) 'cl-flet 'flet)))
