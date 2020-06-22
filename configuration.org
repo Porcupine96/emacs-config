@@ -64,6 +64,11 @@ Always compile packages, and use the newest version available.
  (load-theme 'noctilux t)
  #+end_src
  
+ Enlarge preview font.
+ #+begin_src emacs-lisp :results none
+ (set-default 'preview-scale-function 1.2)
+ #+end_src
+
 * Sensible settings
   Disable backup and lockfiles.
   #+begin_src emacs-lisp :results none
@@ -165,6 +170,7 @@ Always compile packages, and use the newest version available.
       "a" #'hydra-agenda/body
       "b" #'hydra-buffer/body
       "c" #'hydra-compile/body
+      "d d" #'dockel
       "h" #'hydra-help/body
       "f" #'hydra-file/body
       "g" #'hydra-git/body
@@ -301,7 +307,22 @@ Always compile packages, and use the newest version available.
     ("c" #'compile)
     ("C" #'recompile))
   #+end_src
-   
+** Dired
+  #+begin_src emacs-lisp :results none
+    (defhydra hydra-dired-bookmarks (:color blue)
+      "
+      ──────────────────────────────
+      _s_ ~/studies
+      _S_ ~/scripts
+      _d_ ~/Downloads
+      _w_ ~/codeheroes/chatbotize
+      ^^        
+      "
+      ("s" (lambda () (interactive) (dired "~/studies")))
+      ("S" (lambda () (interactive) (dired "~/scripts")))
+      ("d" (lambda () (interactive) (dired "~/Downloads")))
+      ("w" (lambda () (interactive) (dired "~/codeheroes/chatbotize"))))
+  #+end_src
 ** File 
   #+begin_src emacs-lisp :results none
     (defhydra hydra-file (:color blue)
@@ -843,7 +864,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
       (setq org-use-fast-todo-selection 'expert)
 
       (setq org-todo-keywords
-        '((sequence "TODO(t)" "PROJECT(p)" "STRT(s)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+        '((sequence "TODO(t)" "PROJECT(p)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
           (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
       (evil-collection-define-key 'normal 'org-mode-map
@@ -943,9 +964,13 @@ org-super-agenda-groups
   (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
 
   (setq org-capture-templates
-        '(("i" "Inbox" entry (file+headline "~/Dropbox/org/todo/current.org" "Inbox")
+        '(("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org")
            "* TODO %?\n%T\n")
-          ("a" "AGH" entry (file+olp "~/Dropbox/org/todo/current.org" "Actionable" "AGH")
+          ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org")
+           "* TODO %?\n%T\n")
+          ("m" "Master" entry (file+headline "~/Dropbox/org/todo/studies.org" "Master Thesis")
+           "* TODO %?\n%T\n")
+          ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
            "* TODO %?\n%T\n")))
 #+end_src
 
@@ -1114,7 +1139,7 @@ Change the image background.
           (define-key company-active-map (kbd "<return>") #'company-complete-selection)
           (define-key company-active-map (kbd "<tab>") #'company-complete-common)
           (define-key company-active-map (kbd "TAB") #'company-complete-common))
-      (setq company-backends '(company-lsp company-capf company-yasnippet company-dabbrev))
+      (setq company-backends '(company-lsp company-capf company-yasnippet company-dabbrev company-elisp))
       (setq company-dabbrev-downcase nil))
   #+end_src
 * Configure =smartparens=
@@ -1175,10 +1200,19 @@ defer?
 
 * Configure =dired=
 #+begin_src emacs-lisp :results none
+  (defun +dired/open-externally ()
+    (interactive)
+    (call-process "zathura" nil 0 nil (dired-get-filename)))
+
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "ge" #'+dired/open-externally
+    "'" #'hydra-dired-bookmarks/body)
+#+end_src
+
+#+begin_src emacs-lisp :results none
   (use-package dired-subtree
     :ensure t
     :after dired
-    :config
     :bind (:map dired-mode-map
                 ("<tab>" . dired-subtree-toggle)
                 ("<C-tab>" . dired-subtree-cycle)
@@ -1400,12 +1434,40 @@ Remove other LSP sessions.
     (align-region (region-beginning) (region-end) 'entire rule nil nil)))
 #+end_src
 
+** Elisp
+#+begin_src emacs-lisp :results none
+  (defun sm-greek-lambda ()
+      (font-lock-add-keywords nil `(("\\<lambda\\>"
+          (0 (progn (compose-region (match-beginning 0) (match-end 0)
+          ,(make-char 'greek-iso8859-7 107))
+          nil))))))
+
+  (add-hook 'emacs-lisp-mode-hook 'sm-greek-lambda)
+#+end_src
+
 * Configure =Info=
 #+begin_src emacs-lisp :results none
   (use-package info
     :defer t)
     ;; :bind (:map evil-normal-state-map
     ;;   ("RET" . 'Info-follow-nearest-node)))
+#+end_src
+
+* Configure =smarparens=
+#+begin_src emacs-lisp :results none
+  (use-package smartparens
+    :ensure t
+    :after emacs-lisp-mode
+    :config
+      (setq show-smarparens-mode t)
+      (setq smarparens-strict-mode t)
+    :bind 
+      ("<M-l>" . sp-forward-slurp-sexp)
+      ("<M-h>" . sp-backward-slurp-sexp))
+
+  (use-package evil-smartparens
+    :ensure t
+    :after smartparens-mode)
 #+end_src
 
 * Configure =csv-mode=
@@ -1508,9 +1570,7 @@ Remove other LSP sessions.
   - [ ] anzu?
   - [ ] bookmarks
   - [ ] line numbers?
-  - [ ] startup
   - [ ] agenda
   - [ ] general.el
-  - [ ] vc on doom-modeline did not refresh after changing a branch
   - [ ] reimplement py-indent-or-complete
     
