@@ -15,7 +15,8 @@
                      gc-cons-threshold 800000
                      gc-cons-percentage 0.1)
                (message "Emacs started in: %s" (emacs-init-time))
-               (garbage-collect)) t)
+               (garbage-collect)
+               (display-battery-mode)) t)
 #+end_src
 * Configure =use-package=
 I use =use-package= to install and configure my packages. My =init.el=
@@ -64,11 +65,6 @@ Always compile packages, and use the newest version available.
  (load-theme 'noctilux t)
  #+end_src
  
- Enlarge preview font.
- #+begin_src emacs-lisp :results none
- (set-default 'preview-scale-function 1.2)
- #+end_src
-
 * Sensible settings
   Disable backup and lockfiles.
   #+begin_src emacs-lisp :results none
@@ -105,10 +101,17 @@ Always compile packages, and use the newest version available.
   Open buffer position
   #+begin_src emacs-lisp :results none
     (setq display-buffer-alist
-       '(("\\*\\(compilation\\|Flycheck errors\\)\\*"
+       '(("\\*\\(compilation\\)\\*"
           (display-buffer-in-side-window)
           (side            . bottom)
           (reusable-frames . visible)
+          (window-height   . 0.33))
+
+        ("\\*\\(Flycheck errors\\)\\*"
+          (display-buffer-in-side-window)
+          (side            . bottom)
+          (reusable-frames . visible)
+          (slot            . 1)
           (window-height   . 0.33))
 
          ("\\*Org todo\\*"
@@ -117,7 +120,7 @@ Always compile packages, and use the newest version available.
           (reusable-frames . visible)
           (window-height   . 0.2))
 
-         ("\\*\\([Hh]elp\\|Messages\\)\\*"
+         ("\\*\\([Hh]elp\\|Messages\\|helpful.*\\)\\*"
           (display-buffer-in-side-window)
           (side           . right)
           (window-width   . 0.5))
@@ -187,6 +190,7 @@ Always compile packages, and use the newest version available.
       "t r" #'+core/reload-theme
       "y a" #'yas-new-snippet
       "y v" #'yas-visit-snippet-file
+      "y c" #'company-yasnippet
       "RET" #'counsel-bookmark
       "TAB" #'hydra-workspace/body
       "SPC" #'counsel-projectile-find-file
@@ -276,23 +280,26 @@ Always compile packages, and use the newest version available.
   #+end_src
   
 ** Agenda
-   #+begin_src emacs-lisp :results none
-   (defhydra hydra-agenda (:color blue)
-     "
-     ^
-     ^Agenda^     
-     ^────^───────────
-     _a_ Agenda
-     _w_ Weekly agenda
-     _d_ Daily agenda
-     ^^        
-     ^^        
-     "
-     ("a" #'org-agenda)
-     ("w" #'+agenda/weekly-agenda)
-     ("d" #'+agenda/daily-agenda))
-
-   #+end_src
+#+begin_src emacs-lisp :results none
+(defhydra hydra-agenda (:color blue)
+  "
+  ^
+  ^Agenda^     
+  ^────^───────────
+  _a_ Agenda
+  _w_ Weekly agenda
+  _d_ Daily agenda
+  _t_ Agenda tag view
+  _h_ Agenda hot view
+  ^^        
+  ^^        
+  "
+  ("a" #'org-agenda)
+  ("w" #'+agenda/weekly-agenda)
+  ("d" #'+agenda/daily-agenda)
+  ("t" #'+agenda/filter-by-tag)
+  ("h" #'+agenda/filter-by-tag-hot))
+ #+end_src
 ** Compile
   #+begin_src emacs-lisp :results none
   (defhydra hydra-compile (:color blue)
@@ -324,9 +331,9 @@ Always compile packages, and use the newest version available.
       ("w" (lambda () (interactive) (dired "~/codeheroes/chatbotize"))))
   #+end_src
 ** File 
-  #+begin_src emacs-lisp :results none
-    (defhydra hydra-file (:color blue)
-      "
+#+begin_src emacs-lisp :results none
+(defhydra hydra-file (:color blue)
+  "
       ^
       ^File^     
       ^────^──────────────────────────────────────────────────────────
@@ -335,19 +342,21 @@ Always compile packages, and use the newest version available.
       _d_ dotfiles                         _p_ private.org
       _c_ Config                           _s_ studies.org
       _t_ Theme                            _w_ work.org
+      _x_ XMonad
       ^^        
       ^^        
       "
-      ("f" #'counsel-find-file)
-      ("r" #'counsel-recentf)
-      ("i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org")))
-      ("w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org")))
-      ("p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org")))
-      ("e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
-      ("s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org")))
-      ("d" (lambda () (interactive)(dired "~/dotfiles")))
-      ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
-      ("t" (lambda () (interactive)(find-file "~/my-emacs/themes/noctilux-theme.el"))))
+  ("f" #'counsel-find-file)
+  ("r" #'counsel-recentf)
+  ("i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org")))
+  ("w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org")))
+  ("p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org")))
+  ("e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
+  ("s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org")))
+  ("d" (lambda () (interactive)(dired "~/dotfiles")))
+  ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
+  ("t" (lambda () (interactive)(find-file "~/my-emacs/themes/noctilux-theme.el")))
+  ("x" (lambda () (interactive)(find-file "~/.xmonad/xmonad.hs"))))
   #+end_src
 
 ** Project 
@@ -467,7 +476,7 @@ Always compile packages, and use the newest version available.
     ("l" #'lsp-ivy-workspace-symbol)
     ("t" #'hydra-lsp-toggle/body)
     ("T" #'lsp-treemacs-errors-list)
-    ("r" #'lsp-find-references)
+    ("r" #'lsp-ui-peek-find-references)
     ("R" #'+lsp/remove-other-sessions)
     ("i" #'lsp-goto-implementation)
     ("I" #'+scala/copy-import))
@@ -500,6 +509,7 @@ Always compile packages, and use the newest version available.
      _m_ Describe mode
      _M_ Describe macro
      _e_ Message buffer
+     _l_ Counsel find library
      ^^        
      ^^        
      "
@@ -510,7 +520,8 @@ Always compile packages, and use the newest version available.
      ("p" #'helpful-package)
      ("m" #'describe-mode)
      ("M" #'helpful-macro)
-     ("e" #'view-echo-area-messages))
+     ("e" #'view-echo-area-messages)
+     ("l" #'counsel-find-library))
    #+end_src
    
 ** Open
@@ -622,69 +633,76 @@ Always compile packages, and use the newest version available.
  #+end_src
 
 * Global keybindings 
-  Buffer commands.
-  #+begin_src emacs-lisp :results none
-  (global-set-key (kbd "C-x C-x") #'save-buffer)
-  (global-set-key (kbd "C-x C-b") #'ibuffer)
-  (global-set-key (kbd "C-c b n") #'next-buffer)
-  (global-set-key (kbd "C-c b p") #'previous-buffer)
-  #+end_src
-  
-  Dired jump.
-  #+begin_src emacs-lisp :results none
-  (global-set-key (kbd "C-x C-j") 'dired-jump)
-  #+end_src
-  
-  Toggle line truncation.
-  #+begin_src emacs-lisp :results none
- (global-set-key (kbd "C-x w") 'toggle-truncate-lines)
-  #+end_src
-  
-  Easier movements between splits.
-  #+begin_src emacs-lisp :results none
-  (global-set-key (kbd "C-h") #'evil-window-left)
-  (global-set-key (kbd "C-j") #'evil-window-down)
-  (global-set-key (kbd "C-k") #'evil-window-up)
-  (global-set-key (kbd "C-l") #'evil-window-right)
-  #+end_src
-  
-  Only window.
-  #+begin_src emacs-lisp :results none
-  (global-set-key (kbd "C-c o") #'delete-other-windows)
-  #+end_src
-  
-  Winner mode.
-  #+begin_src emacs-lisp :results none
-  (global-set-key (kbd "C-c h") #'winner-undo)
-  (global-set-key (kbd "C-c l") #'winner-redo)
-  #+end_src
-  
-  Vim-like screen jumping.
-  #+begin_src emacs-lisp :results none
-  (global-set-key (kbd "C-u") #'evil-scroll-up)
-  #+end_src
-  
-  Use "C-w d" to close a window.
-  #+begin_src emacs-lisp :results none
-  (define-key evil-window-map (kbd "d") #'evil-window-delete)
-  #+end_src
-  
-  Use =zoom-window=.
-  #+begin_src emacs-lisp :results none
-  (define-key evil-window-map (kbd "o") #'zoom-window-zoom)
-  (define-key evil-window-map (kbd "C-o") #'zoom-window-zoom)
-  #+end_src
-  
-  Use =org-capture=.
-  #+begin_src emacs-lisp :results none
-  (global-set-key (kbd "C-c c") #'org-capture)
-  #+end_src
-  
-  Scale text.
-  #+begin_src emacs-lisp :results none
-  (global-set-key (kbd "C-+") #'text-scale-increase)
-  (global-set-key (kbd "C--") #'text-scale-decrease)
-  #+end_src
+Buffer commands.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-x C-x") #'save-buffer)
+(global-set-key (kbd "C-x C-b") #'ibuffer)
+(global-set-key (kbd "C-c b n") #'next-buffer)
+(global-set-key (kbd "C-c b p") #'previous-buffer)
+#+end_src
+
+
+Evaluation commancs.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c e b") #'eval-buffer)
+#+end_src
+
+
+Dired jump.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-x C-j") 'dired-jump)
+#+end_src
+
+Toggle line truncation.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-x w") 'toggle-truncate-lines)
+#+end_src
+
+Easier movements between splits.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-h") #'evil-window-left)
+(global-set-key (kbd "C-j") #'evil-window-down)
+(global-set-key (kbd "C-k") #'evil-window-up)
+(global-set-key (kbd "C-l") #'evil-window-right)
+#+end_src
+
+Only window.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c o") #'delete-other-windows)
+#+end_src
+
+Winner mode.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c h") #'winner-undo)
+(global-set-key (kbd "C-c l") #'winner-redo)
+#+end_src
+
+Vim-like screen jumping.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-u") #'evil-scroll-up)
+#+end_src
+
+Use "C-w d" to close a window.
+#+begin_src emacs-lisp :results none
+(define-key evil-window-map (kbd "d") #'evil-window-delete)
+#+end_src
+
+Use =zoom-window=.
+#+begin_src emacs-lisp :results none
+(define-key evil-window-map (kbd "o") #'zoom-window-zoom)
+(define-key evil-window-map (kbd "C-o") #'zoom-window-zoom)
+#+end_src
+
+Use =org-capture=.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c c") #'org-capture)
+#+end_src
+
+Scale text.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-+") #'text-scale-increase)
+(global-set-key (kbd "C--") #'text-scale-decrease)
+#+end_src
   
 * Misc Functions
   #+begin_src emacs-lisp :results none
@@ -890,6 +908,11 @@ Do not ask whether it is save to evaluate a snippet of code.
 (setq org-confirm-babel-evaluate nil)
 #+end_src
 
+Enlarge LaTeX font.
+#+begin_src emacs-lisp :results none
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
+#+end_src
+
 Automatically save archive buffer after archiving a task.
 #+begin_src emacs-lisp :results none
 (defun org-archive-save-buffer ()
@@ -923,21 +946,28 @@ Org tag placement.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-  (use-package org-super-agenda
-    :hook (org-agenda-mode . org-super-agenda-mode)
-    :config
-    (setq
-org-super-agenda-groups
-  '((:name "Today"
-     :time-grid t
-     :todo "TODAY"))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
 (setq org-agenda-files '(
    "~/Dropbox/org/todo/private.org"
    "~/Dropbox/org/todo/studies.org"
    "~/Dropbox/org/todo/work.org"))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org-agenda/created-today-group (item)
+  (let* ((marker (get-text-property 0 'org-marker item))
+         (property (org-entry-get marker "CreatedAt")))
+    property))
+
+(use-package org-super-agenda
+  :hook (org-agenda-mode . org-super-agenda-mode)
+  :config
+    (setq org-super-agenda-groups
+      '(
+        ;; (:name "Today" :and (:time-grid t :not (:pred +org-agenda/created-today-group)))
+        (:name "Today" :and (:time-grid t))
+        ;; (:name "Added today" :pred +org-agenda/created-today-group)
+        (:name "Hot" :tag "@hot")
+        (:name "Habits" :habit t))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -949,6 +979,14 @@ org-super-agenda-groups
   (interactive)
   (let ((org-agenda-span 1))
     (org-agenda nil "a")))
+
+(defun +agenda/filter-by-tag ()
+  (interactive)
+  (org-tags-view t nil))
+
+(defun +agenda/filter-by-tag-hot ()
+  (interactive)
+  (org-tags-view t "@hot"))
 #+end_src
 ** Academic
 #+begin_src emacs-lisp :results none
@@ -965,32 +1003,55 @@ org-super-agenda-groups
 
   (setq org-capture-templates
         '(("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org")
-           "* TODO %?\n%T\n")
+           "* TODO %?
+                                                                                            :PROPERTIES:
+  :CreatedAt: %T
+  :END:\n" )
           ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org")
-           "* TODO %?\n%T\n")
+           "* TODO %?
+                                                                                            :PROPERTIES:
+  :CreatedAt: %T
+  :END:\n")
           ("m" "Master" entry (file+headline "~/Dropbox/org/todo/studies.org" "Master Thesis")
-           "* TODO %?\n%T\n")
+           "* TODO %?
+                                                                                            :PROPERTIES:
+  :CreatedAt: %T
+  :END:\n" )
+          ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
+           "* TODO %?
+                                                                                            :PROPERTIES:
+  :CreatedAt: %T
+  :END:\n" )
           ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
-           "* TODO %?\n%T\n")))
+           "* TODO %?
+                                                                                            :PROPERTIES:
+  :CreatedAt: %T
+  :END:\n" )))
 #+end_src
 
 ** Org Babel
+#+begin_src emacs-lisp :results none
+  (use-package ob-ammonite
+    :ensure t
+    :defer t)
+#+end_src
+
 Load languages.
 #+begin_src emacs-lisp :results none
 (org-babel-do-load-languages 'org-babel-load-languages
- '(
-     (shell . t)
-     (emacs-lisp . t)
-     (python . t)
-     (jupyter . t)
- )
-)
+ '((shell . t)
+   (emacs-lisp . t)
+   (python . t)
+   (ammonite . t)
+   (jupyter . t)
+   (haskell . t)))
 #+end_src
 
 Fix tab indentation in source blocks.
 #+begin_src emacs-lisp :results none
 (setq org-src-fontify-natively t)
 (setq org-src-tab-acts-natively t)
+(setq org-src-preserve-indentation t)
 #+end_src
 
 Setup images.
@@ -1017,19 +1078,39 @@ Change the image background.
             #'create-image-with-background-color)
 #+end_src
 
+** Org Roam
+#+begin_src emacs-lisp :results none
+(use-package org-roam
+      :ensure t
+      :hook
+      (after-init . org-roam-mode)
+      :custom
+      (org-roam-directory "/home/porcupine/Dropbox/org-roam")
+      :bind (:map org-roam-mode-map
+              (("C-c n l" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n g" . org-roam-graph-show))
+              :map org-mode-map
+              (("C-c n i" . org-roam-insert))
+              (("C-c n I" . org-roam-insert-immediate))))
+#+end_src
+
 ** Functions
 #+begin_src emacs-lisp :results none
-  (defun +org/dwim ()
-    (interactive)
-    (let* ((context (org-element-context))
-           (type (org-element-type context)))
-    (pcase type
-      (`headline
-       (let ((todo-keyword (org-element-property :todo-keyword context)))
-         (if todo-keyword
-             (org-todo)
-           (message "Nothing to do"))))
-  )))
+(defun +org/dwim ()
+  (interactive)
+  (let* ((context (org-element-context))
+         (type (org-element-type context)))
+
+  (pcase type
+    (`headline
+     (let ((todo-keyword (org-element-property :todo-keyword context)))
+       (if todo-keyword
+           (org-todo)
+         (message "Nothing to do"))))
+    (`link
+     (org-open-at-point))
+)))
 #+end_src
 
 * Configure =yasnippet=
@@ -1049,10 +1130,12 @@ Change the image background.
        (projectile-global-mode)
        (setq projectile-project-search-path '("~/codeheroes/chatbotize/monorepo"))
        (setq projectile-enable-caching t)
-       (setq projectile-project-root-files-functions #'(projectile-root-top-down
-                                                          projectile-root-top-down-recurring
-                                                          projectile-root-bottom-up
-                                                          projectile-root-local))
+       ;; (setq projectile-project-root-files-functions #'(projectile-root-top-down
+       ;;                                                    projectile-root-top-down-recurring
+       ;;                                                    projectile-root-bottom-up
+       ;;                                                    projectile-root-local))
+
+       (setq projectile-project-root-files-functions #'(projectile-root-bottom-up))
 
        ;; TODO: think whether this one is needed
        (projectile-register-project-type 'scala '("build.sbt")))
@@ -1142,15 +1225,6 @@ Change the image background.
       (setq company-backends '(company-lsp company-capf company-yasnippet company-dabbrev company-elisp))
       (setq company-dabbrev-downcase nil))
   #+end_src
-* Configure =smartparens=
- #+begin_src emacs-lisp :results none
-   (use-package smartparens
-    :init 
-      (smartparens-global-mode)
-    :config
-      (require 'smartparens-config))
- #+end_src
- 
 * Configure =helpful=
  #+begin_src emacs-lisp :results none
  (use-package helpful :defer t)
@@ -1185,7 +1259,7 @@ defer?
 (use-package emojify 
    :ensure t
    :config
-     (set-fontset-font t 'unicode "Noto Color Emoji" nil 'prepend))
+     (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
 #+end_src
 
 * Configure =olivetti=
@@ -1342,7 +1416,13 @@ sbt-mode
   (interactive)
   (+core/surround-word-with "IO[" "]"))
 #+end_src
-   
+
+TODO colors.
+#+begin_src emacs-lisp :results none
+  (font-lock-add-keywords 'scala-mode
+   '(("\\(TODO\\):" 1 'font-lock-warning-face prepend)))
+#+end_src
+
 ** Protobuf
    #+begin_src emacs-lisp :results none
    (use-package protobuf-mode
@@ -1445,6 +1525,21 @@ Remove other LSP sessions.
   (add-hook 'emacs-lisp-mode-hook 'sm-greek-lambda)
 #+end_src
 
+** Haskell
+#+begin_src emacs-lisp :results none
+(use-package haskell-mode
+  :ensure t
+  :defer t
+  :config
+  (flycheck-haskell-setup))
+#+end_src
+
+
+#+begin_src emacs-lisp :results none
+(use-package flycheck-haskell
+  :commands flycheck-haskell-setup)
+#+end_src
+
 * Configure =Info=
 #+begin_src emacs-lisp :results none
   (use-package info
@@ -1455,19 +1550,23 @@ Remove other LSP sessions.
 
 * Configure =smarparens=
 #+begin_src emacs-lisp :results none
-  (use-package smartparens
-    :ensure t
-    :after emacs-lisp-mode
-    :config
-      (setq show-smarparens-mode t)
-      (setq smarparens-strict-mode t)
-    :bind 
-      ("<M-l>" . sp-forward-slurp-sexp)
-      ("<M-h>" . sp-backward-slurp-sexp))
+(use-package smartparens
+  :ensure t
+  :config
+    (smartparens-global-mode)
+    (show-smartparens-global-mode)
+    (smartparens-global-strict-mode)
+  :bind (:map smartparens-mode-map
+    ("M-l" . sp-forward-slurp-sexp)
+    ("M-h" . sp-forward-barf-sexp)
+    ("M-S-l" . sp-backward-slurp-sexp)
+    ("M-S-h" . sp-backward-barf-sexp)))
 
-  (use-package evil-smartparens
-    :ensure t
-    :after smartparens-mode)
+(use-package evil-smartparens
+  :ensure t
+  :hook (smartparens-mode . evil-smartparens-mode))
+
+(define-key global-map (kbd "<M-l>") nil)
 #+end_src
 
 * Configure =csv-mode=
@@ -1550,9 +1649,16 @@ Remove other LSP sessions.
 
 * Configure =string-inflection=
 #+begin_src emacs-lisp :results none
-  (use-package string-inflection 
-    :ensure t
-    :defer t)
+(use-package string-inflection 
+  :ensure t
+  :defer t)
+#+end_src
+
+* Configure =eval-expr=
+#+begin_src emacs-lisp :results none
+(use-package eval-expr
+   :ensure t
+   :defer t)
 #+end_src
 
 * TMP
