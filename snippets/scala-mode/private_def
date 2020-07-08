@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: private def
+# key: pd
+# --
+private def $1($2): $3 = {
+
+}

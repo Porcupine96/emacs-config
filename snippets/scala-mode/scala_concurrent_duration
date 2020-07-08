@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: scala concurrent duration
+# key: scd
+# --
+import scala.concurrent.duration._

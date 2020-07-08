@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: jupyter python cell 
+# key: jpc
+# --
+#+BEGIN_SRC jupyter-python :session mysession :async yes :pandoc t
+$1
+#+END_SRC
