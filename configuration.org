@@ -43,107 +43,111 @@ Always compile packages, and use the newest version available.
 #+end_src
 
 * Visuals
- Font.
- #+begin_src emacs-lisp :results none
- (set-face-attribute 'default nil
- 		    :family "SF Mono"
- 		    :height 120
- 		    :weight 'normal
- 		    :width 'normal)
- #+end_src
-  
- Hide the bezels.
- #+begin_src emacs-lisp :results none
- (tool-bar-mode -1)
- (menu-bar-mode -1)
- (toggle-scroll-bar -1)
- #+end_src
+Font.
+#+begin_src emacs-lisp :results none
+(set-face-attribute 'default nil :font "SF Mono-12")
+(set-face-attribute 'fixed-pitch nil :font "SF Mono-12")
+(set-face-attribute 'variable-pitch nil :font "Lato-14")
+#+end_src
+ 
+Hide all the bezels.
+#+begin_src emacs-lisp :results none
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(toggle-scroll-bar -1)
+#+end_src
 
- Color theme.
- #+begin_src emacs-lisp :results none
- (add-to-list 'custom-theme-load-path "~/my-emacs/themes")
- (load-theme 'noctilux t)
- #+end_src
+Color theme.
+#+begin_src emacs-lisp :results none
+(add-to-list 'custom-theme-load-path "~/my-emacs/themes")
+(load-theme 'noctilux t)
+#+end_src
  
 * Sensible settings
-  Disable backup and lockfiles.
-  #+begin_src emacs-lisp :results none
-  (setq make-backup-files nil)
-  (setq create-lockfiles nil)
-  #+end_src
+Disable backup and lockfiles.
+#+begin_src emacs-lisp :results none
+(setq make-backup-files nil)
+(setq create-lockfiles nil)
+#+end_src
 
-  Disable saving the clipboard after exiting Emacs.
-  #+begin_src emacs-lisp :results none
-  (setq x-select-enable-clipboard-manager nil)
-  #+end_src
+Disable saving the clipboard after exiting Emacs.
+#+begin_src emacs-lisp :results none
+(setq x-select-enable-clipboard-manager nil)
+#+end_src
+
+Convert tabs to spaces.
+#+begin_src emacs-lisp :results none
+(setq tab-width 2)
+(setq indent-tabs-mode nil)
+#+end_src
+
+Ask before closing emasc.
+#+begin_src emacs-lisp :results none
+(setq confirm-kill-emacs 'y-or-n-p)
+#+end_src
+
+Use colors in compilation buffer.
+defer?
+#+begin_src emacs-lisp :results none
+(require 'ansi-color)
+(defun colorize-compilation-buffer ()
+  (ansi-color-apply-on-region compilation-filter-start (point)))
   
-  Convert tabs to spaces.
-  #+begin_src emacs-lisp :results none
-  (setq tab-width 2)
-  (setq indent-tabs-mode nil)
-  #+end_src
+(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+#+end_src
   
-  Ask before closing emasc.
-  #+begin_src emacs-lisp :results none
-  (setq confirm-kill-emacs 'y-or-n-p)
-  #+end_src
+Open buffer position
+#+begin_src emacs-lisp :results none
+(setq display-buffer-alist
+  '(("\\*\\(compilation\\)\\*"
+     (display-buffer-in-side-window)
+     (side            . bottom)
+     (reusable-frames . visible)
+     (window-height   . 0.33))
+
+   ("\\*\\(Flycheck errors\\)\\*"
+     (display-buffer-in-side-window)
+     (side            . bottom)
+     (reusable-frames . visible)
+     (slot            . 1)
+     (window-height   . 0.33))
+
+    ("\\*Org todo\\*"
+     (display-buffer-in-side-window)
+     (side            . bottom)
+     (reusable-frames . visible)
+     (window-height   . 0.2))
+
+    ("\\*\\([Hh]elp\\|Messages\\|helpful.*\\)\\*"
+     (display-buffer-in-side-window)
+     (side           . right)
+     (window-width   . 0.5))
+
+    ("\\*\\(eshell\\|Python\\)\\*"
+     (display-buffer-in-side-window)
+     (side           . bottom)
+     (window-height  . 0.4))
+
+    ("\\*\\(Buffer List\\)\\*"
+     (display-buffer-same-window))
+
+    ("^magit:.*"
+     (display-buffer-same-window))))
+#+end_src
+
+Line wrapping.
+#+begin_src emacs-lisp :results none
+(setq-default truncate-lines t)
+(setq truncate-lines t)
+(setq truncate-partial-width-windows nil)
+(setq-default fill-column 80)
+#+end_src
   
-  Use colors in compilation buffer.
-  defer?
-  #+begin_src emacs-lisp :results none
-  (require 'ansi-color)
-  (defun colorize-compilation-buffer ()
-    (ansi-color-apply-on-region compilation-filter-start (point)))
-    
-  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
-  #+end_src
-  
-  Open buffer position
-  #+begin_src emacs-lisp :results none
-    (setq display-buffer-alist
-       '(("\\*\\(compilation\\)\\*"
-          (display-buffer-in-side-window)
-          (side            . bottom)
-          (reusable-frames . visible)
-          (window-height   . 0.33))
+Allow remembering risky variables
+#+begin_src emacs-lisp :results none
+(defun risky-local-variable-p (sym &optional _ignored) nil)
+#+end_src
 
-        ("\\*\\(Flycheck errors\\)\\*"
-          (display-buffer-in-side-window)
-          (side            . bottom)
-          (reusable-frames . visible)
-          (slot            . 1)
-          (window-height   . 0.33))
-
-         ("\\*Org todo\\*"
-          (display-buffer-in-side-window)
-          (side            . bottom)
-          (reusable-frames . visible)
-          (window-height   . 0.2))
-
-         ("\\*\\([Hh]elp\\|Messages\\|helpful.*\\)\\*"
-          (display-buffer-in-side-window)
-          (side           . right)
-          (window-width   . 0.5))
-
-         ("\\*\\(eshell\\|Python\\)\\*"
-          (display-buffer-in-side-window)
-          (side           . bottom)
-          (window-height  . 0.4))
-
-         ("\\*\\(Buffer List\\)\\*"
-          (display-buffer-same-window))
-
-         ("^magit:.*"
-          (display-buffer-same-window))))
-  #+end_src
-  
-  Line wrapping.
-  #+begin_src emacs-lisp :results none
-    (setq-default truncate-lines t)
-    (setq truncate-lines t)
-    (setq truncate-partial-width-windows nil)
-  #+end_src
-  
 * Miscellaneous
 #+begin_src emacs-lisp :results none
 (setq auth-sources '("~/.authinfo"))
@@ -152,83 +156,84 @@ Always compile packages, and use the newest version available.
 * Configure =general=
 ** Leader Key
 #+begin_src emacs-lisp :results none
-  (use-package general
-    :ensure t
-    :init
-     (setq general-override-states '(insert
-                                     emacs
-                                     hybrid
-                                     normal
-                                     visual
-                                     motion
-                                     operator
-                                     replace)))
+(use-package general
+  :ensure t
+  :init
+   (setq general-override-states '(insert
+                                   emacs
+                                   hybrid
+                                   normal
+                                   visual
+                                   motion
+                                   operator
+                                   replace)))
 
-  (general-create-definer leader-def 
-    :prefix "SPC")
+(general-create-definer leader-def 
+  :prefix "SPC")
 
-  (leader-def
-    :states '(normal visual motion)
-    :keymaps 'override
-      "a" #'hydra-agenda/body
-      "b" #'hydra-buffer/body
-      "c" #'hydra-compile/body
-      "d d" #'dockel
-      "h" #'hydra-help/body
-      "f" #'hydra-file/body
-      "g" #'hydra-git/body
-      "l" #'hydra-lsp/body
-      "k" #'counsel-yank-pop
-      "p" #'hydra-project/body
-      "r" #'hydra-resize/body
-      "o" #'hydra-open/body
-      "s" #'hydra-search/body
-      "u" #'universal-argument
-      "w" #'hydra-window/body
-      "e e" #'elfeed
-      "e d" #'ediff
-      "t r" #'+core/reload-theme
-      "y a" #'yas-new-snippet
-      "y v" #'yas-visit-snippet-file
-      "y c" #'company-yasnippet
-      "RET" #'counsel-bookmark
-      "TAB" #'hydra-workspace/body
-      "SPC" #'counsel-projectile-find-file
-      "," #'counsel-projectile-switch-to-buffer)
+(leader-def
+  :states '(normal visual motion)
+  :keymaps 'override
+    "a" #'hydra-agenda/body
+    "b" #'hydra-buffer/body
+    "c" #'hydra-compile/body
+    "d d" #'dockel
+    "h" #'hydra-help/body
+    "f" #'hydra-file/body
+    "g" #'hydra-git/body
+    "l" #'hydra-lsp/body
+    "k" #'helm-show-kill-ring
+    "p" #'hydra-project/body
+    "r" #'hydra-resize/body
+    "o" #'hydra-open/body
+    "s" #'hydra-search/body
+    "u" #'universal-argument
+    "w" #'hydra-window/body
+    "e e" #'elfeed
+    "e d" #'ediff
+    "t r" #'+core/reload-theme
+    "y a" #'yas-new-snippet
+    "y v" #'yas-visit-snippet-file
+    "y c" #'company-yasnippet
+    "y p" #'+core/copy-file-path
+    "RET" #'counsel-bookmark
+    "TAB" #'hydra-workspace/body
+    "SPC" #'counsel-projectile-find-file
+    "," #'counsel-projectile-switch-to-buffer)
 #+end_src
 
 ** Local leader
 #+begin_src emacs-lisp :results none
-  (general-create-definer local-leader-def
-    :prefix "SPC m")
-  
-  (local-leader-def
-    :states 'normal
-    :keymaps 'org-mode-map
-      "s" #'org-schedule
-      "d" #'org-deadline
-      "t" #'org-todo)
-      
-  (local-leader-def
-    :states 'normal
-    :keymaps 'python-mode-map
-      "s" #'run-python)
+(general-create-definer local-leader-def
+  :prefix "SPC m")
+
+(local-leader-def
+  :states 'normal
+  :keymaps 'org-mode-map
+    "s" #'org-schedule
+    "d" #'org-deadline
+    "t" #'org-todo)
+    
+(local-leader-def
+  :states 'normal
+  :keymaps 'python-mode-map
+    "s" #'run-python)
 #+end_src
 
 ** SPC j (org-mode)
 #+begin_src emacs-lisp :results none
-  (general-define-key 
-    :prefix "SPC j"
-    :states 'normal
-    :keymaps 'org-mode-map
-    "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
-    "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
-    "x" #'jupyter-org-kill-block-and-results
-    "c" #'org-babel-remove-result
-    "j" #'org-babel-next-src-block
-    "k" #'org-babel-previous-src-block
-    "r" #'jupyter-run-repl
-    "E" #'jupyter-org-execute-to-point)
+(general-define-key 
+  :prefix "SPC j"
+  :states 'normal
+  :keymaps 'org-mode-map
+  "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
+  "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
+  "x" #'jupyter-org-kill-block-and-results
+  "c" #'org-babel-remove-result
+  "j" #'org-babel-next-src-block
+  "k" #'org-babel-previous-src-block
+  "r" #'jupyter-run-repl
+  "E" #'jupyter-org-execute-to-point)
 #+end_src
 
 * Use =evil-mode=
@@ -316,19 +321,23 @@ Always compile packages, and use the newest version available.
   #+end_src
 ** Dired
   #+begin_src emacs-lisp :results none
-    (defhydra hydra-dired-bookmarks (:color blue)
-      "
-      ──────────────────────────────
-      _s_ ~/studies
-      _S_ ~/scripts
-      _d_ ~/Downloads
-      _w_ ~/codeheroes/chatbotize
-      ^^        
-      "
-      ("s" (lambda () (interactive) (dired "~/studies")))
-      ("S" (lambda () (interactive) (dired "~/scripts")))
-      ("d" (lambda () (interactive) (dired "~/Downloads")))
-      ("w" (lambda () (interactive) (dired "~/codeheroes/chatbotize"))))
+  (defhydra hydra-dired-bookmarks (:color blue)
+    "
+    ──────────────────────────────
+    _s_ ~/studies
+    _S_ ~/scripts
+    _d_ ~/Downloads
+    _D_ ~/Dropbox
+    _t_ ~/codeheroes/research-repo/thesis
+    _w_ ~/codeheroes/chatbotize
+    ^^        
+    "
+    ("s" (lambda () (interactive) (dired "~/studies")))
+    ("S" (lambda () (interactive) (dired "~/scripts")))
+    ("d" (lambda () (interactive) (dired "~/Downloads")))
+    ("D" (lambda () (interactive) (dired "~/Dropbox")))
+    ("t" (lambda () (interactive) (dired "~/codeheroes/research-repo/thesis")))
+    ("w" (lambda () (interactive) (dired "~/codeheroes/chatbotize"))))
   #+end_src
 ** File 
 #+begin_src emacs-lisp :results none
@@ -384,17 +393,19 @@ Always compile packages, and use the newest version available.
     ("p" #'counsel-projectile-switch-project)
     ("i" #'projectile-invalidate-cache)
     ("t" #'treemacs-add-and-display-current-project)
-    ("s" #'projectile-save-project-buffers))
+    ("s" #'projectile-save-project-buffers)
+    ("w" #'+projectile/search-word-under-cursor))
 #+end_src
 
 ** Buffer
 #+begin_src emacs-lisp :results none
-  (defhydra hydra-buffer (:color blue)
-    "
+(defhydra hydra-buffer (:color blue)
+  "
     ^
     ^Buffer^     
     ^──────^───────────────
     _b_ Ivy switch buffer
+    _c_ Open *compilation* buffer
     _n_ Next buffer
     _N_ New buffer
     _k_ Kill buffer
@@ -402,11 +413,12 @@ Always compile packages, and use the newest version available.
     ^^        
     ^^        
     "
-    ("b" #'ivy-switch-buffer)
-    ("n" #'next-buffer)
-    ("N" #'+core/empty-buffer)
-    ("p" #'previous-buffer)
-    ("k" #'kill-current-buffer))
+  ("b" #'ivy-switch-buffer)
+  ("c" (lambda () (interactive) (switch-to-buffer "*compilation*")))
+  ("n" #'next-buffer)
+  ("N" #'+core/empty-buffer)
+  ("p" #'previous-buffer)
+  ("k" #'kill-current-buffer))
 #+end_src
 
 ** Git 
@@ -550,12 +562,14 @@ Always compile packages, and use the newest version available.
    ^Search^     
    ^────^───────────
    _i_ Counsel iMenu
-   _m_ Monorepo Ag
+   _m_ Monorepo Counsel Rg
+   _f_ Monorepo Counsel Find File
    _s_ Surround 
    ^^        
    "
    ("i" #'counsel-imenu)
-   ("m" #'+work/search-monorepo)
+   ("m" #'+work/counsel-monorepo)
+   ("f" #'+work/counsel-find-file-monorepo)
    ("s" #'hydra-surround/body))
  #+end_src
  
@@ -705,51 +719,61 @@ Scale text.
 #+end_src
   
 * Misc Functions
-  #+begin_src emacs-lisp :results none
- (defun +core/empty-buffer () 
+ #+begin_src emacs-lisp :results none
+(defun +core/empty-buffer () 
+   (interactive)
+   (switch-to-buffer (generate-new-buffer "empty")))
+ #+end_src
+ 
+ #+begin_src emacs-lisp :results none
+(defun +core/copy-file-path ()
+  (interactive)
+  (kill-new (buffer-file-name)))
+ #+end_src
+ 
+ #+begin_src emacs-lisp :results none
+ (defun +core/reload-theme ()
     (interactive)
-    (switch-to-buffer (generate-new-buffer "empty")))
-  #+end_src
-  
-  #+begin_src emacs-lisp :results none
-  (defun +core/reload-theme ()
+    (let ((theme (-first-item custom-enabled-themes)))
+       (load-theme theme t)))
+ #+end_src
+ 
+ Search Monorepo.
+ #+begin_src emacs-lisp :results none
+(defun +work/counsel-monorepo ()
+  (interactive)
+  (counsel-rg "" "/home/porcupine/codeheroes/chatbotize/monorepo"))
+
+(defun +work/counsel-find-file-monorepo ()
+  (interactive)
+  (counsel-file-jump "" "/home/porcupine/codeheroes/chatbotize/monorepo"))
+ #+end_src
+ 
+ Based on excelent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
+ #+begin_src emacs-lisp :results none
+   (defun +core/to-floating-frame()
      (interactive)
-     (let ((theme (-first-item custom-enabled-themes)))
-        (load-theme theme t)))
-  #+end_src
-  
-  Search Monorepo.
-  #+begin_src emacs-lisp :results none
-    (defun +work/search-monorepo ()
-      (interactive)
-      (counsel-rg "" "/home/porcupine/codeheroes/chatbotize/monorepo"))
-  #+end_src
-  
-  Based on excelent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
-  #+begin_src emacs-lisp :results none
-    (defun +core/to-floating-frame()
-      (interactive)
-      (delete-window)
-      (make-frame '((name . "floating")
-                    (window-system . x)
-                    (minibuffer . nil))))
+     (delete-window)
+     (make-frame '((name . "floating")
+                   (window-system . x)
+                   (minibuffer . nil))))
 
-     (defun +core/to-regular-bottom-window()
-        (interactive)
-        (+core/to-regular-window `bottom))
-
-    (defun +core/to-regular-right-window()
+    (defun +core/to-regular-bottom-window()
        (interactive)
-       (+core/to-regular-window `right))
+       (+core/to-regular-window `bottom))
 
-     (defun +core/to-regular-window(position)
-       (let ((buffer (current-buffer)))
-         (with-current-buffer buffer
-           (delete-window)
-           (pcase position
-             (`bottom (display-buffer-at-bottom buffer nil))
-             (`right (display-buffer-in-direction buffer '((direction . right))))))))
-  #+end_src
+   (defun +core/to-regular-right-window()
+      (interactive)
+      (+core/to-regular-window `right))
+
+    (defun +core/to-regular-window(position)
+      (let ((buffer (current-buffer)))
+        (with-current-buffer buffer
+          (delete-window)
+          (pcase position
+            (`bottom (display-buffer-at-bottom buffer nil))
+            (`right (display-buffer-in-direction buffer '((direction . right))))))))
+ #+end_src
   
   #+begin_src emacs-lisp :results none
  (defun +core/surround-word-with (left right)
@@ -842,21 +866,26 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   (setq recentf-max-saved-items 200)
   #+end_src
   
-  #+begin_src emacs-lisp :results none
-    (use-package ivy-posframe
-      :ensure
-      :after ivy
-      :config
-      (setq ivy-posframe-parameters
-            '((left-fringe . 2)
-              (right-fringe . 2)
-              (internal-border-width . 2)))
+ #+begin_src emacs-lisp :results none
+(use-package ivy-posframe
+  :ensure
+  :after ivy
+  :config
+  (setq ivy-posframe-parameters
+        '((no-accept-focus . t)
+          (left-fringe . 2)
+          (right-fringe . 2)
+          (internal-border-width . 2)))
 
-      (setq ivy-posframe-display-functions-alist
-            '((complete-symbol . ivy-posframe-display-at-point)
-              (swiper . ivy-display-function-fallback)
-              (t . ivy-posframe-display-at-frame-center)))
-      (ivy-posframe-mode 1))
+  ;; (setq ivy-posframe-display-functions-alist
+  ;;       '((complete-symbol . ivy-posframe-display-at-point)
+  ;;         (swiper . ivy-display-function-fallback)
+  ;;         (t . ivy-posframe-display-at-frame-center)))
+
+  (setq ivy-posframe-display-functions-alist
+      '((complete-symbol . ivy-posframe-display-at-point)
+        (t . ivy-display-function-fallback)))
+        (ivy-posframe-mode 1))
   #+end_src
 * Configure =flycheck=
   #+begin_src emacs-lisp :results none
@@ -873,28 +902,28 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 * Configure =org=
 ** Core
 #+begin_src emacs-lisp :results none
-  (use-package org
-    :ensure org-plus-contrib
-    :config 
-      (require 'org-tempo)
+(use-package org
+  :ensure org-plus-contrib
+  :config 
+  (require 'org-tempo)
 
-      (setq org-fontify-done-headline t)
-      (setq org-use-fast-todo-selection 'expert)
+  (setq org-fontify-done-headline t)
+  (setq org-use-fast-todo-selection 'expert)
 
-      (setq org-todo-keywords
-        '((sequence "TODO(t)" "PROJECT(p)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+  (setq org-todo-keywords
+	'((sequence "TODO(t)" "PROJECT(p)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
           (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
-      (evil-collection-define-key 'normal 'org-mode-map
-        (kbd "C-k") 'evil-window-up
-        (kbd "C-j") 'evil-window-down)
+  (evil-collection-define-key 'normal 'org-mode-map
+    (kbd "C-k") 'evil-window-up
+    (kbd "C-j") 'evil-window-down)
 
-    :bind (:map evil-normal-state-map
-      ("C-k" . evil-window-up)
-      ("C-j" . evil-window-down)
-      ("RET" . +org/dwim)
-      ("C-M-<return>" . #'org-insert-subheading))
-    :hook (org-mode . org-indent-mode))
+  :bind
+  (:map evil-normal-state-map
+	("C-k" . evil-window-up)
+	("C-j" . evil-window-down)
+	("RET" . +org/dwim))
+  :hook (org-mode . org-indent-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -999,34 +1028,34 @@ Org tag placement.
    
 ** Org Capture
 #+begin_src emacs-lisp :results none
-  (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
+(setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
 
-  (setq org-capture-templates
-        '(("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org")
-           "* TODO %?
-                                                                                            :PROPERTIES:
-  :CreatedAt: %T
-  :END:\n" )
-          ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org")
-           "* TODO %?
-                                                                                            :PROPERTIES:
-  :CreatedAt: %T
-  :END:\n")
-          ("m" "Master" entry (file+headline "~/Dropbox/org/todo/studies.org" "Master Thesis")
-           "* TODO %?
-                                                                                            :PROPERTIES:
-  :CreatedAt: %T
-  :END:\n" )
-          ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
-           "* TODO %?
-                                                                                            :PROPERTIES:
-  :CreatedAt: %T
-  :END:\n" )
-          ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
-           "* TODO %?
-                                                                                            :PROPERTIES:
-  :CreatedAt: %T
-  :END:\n" )))
+(setq org-capture-templates
+      '(("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org")
+         "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n" )
+        ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org")
+         "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n")
+        ("m" "Master" entry (file+headline "~/Dropbox/org/todo/studies.org" "Master Thesis")
+         "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n" )
+        ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
+         "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n" )
+        ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
+         "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n" )))
 #+end_src
 
 ** Org Babel
@@ -1082,17 +1111,18 @@ Change the image background.
 #+begin_src emacs-lisp :results none
 (use-package org-roam
       :ensure t
-      :hook
-      (after-init . org-roam-mode)
-      :custom
-      (org-roam-directory "/home/porcupine/Dropbox/org-roam")
+      :hook (after-init-hook . org-roam-mode)
       :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
                ("C-c n g" . org-roam-graph-show))
               :map org-mode-map
               (("C-c n i" . org-roam-insert))
-              (("C-c n I" . org-roam-insert-immediate))))
+              (("C-c n I" . org-roam-insert-immediate)))
+      :config 
+        (setq org-roam-directory "/home/porcupine/Dropbox/org-roam")
+        (setq org-roam-graph-viewer "/usr/bin/brave-browser")
+        (require 'org-roam-protocol))
 #+end_src
 
 ** Functions
@@ -1102,15 +1132,16 @@ Change the image background.
   (let* ((context (org-element-context))
          (type (org-element-type context)))
 
-  (pcase type
-    (`headline
-     (let ((todo-keyword (org-element-property :todo-keyword context)))
-       (if todo-keyword
-           (org-todo)
-         (message "Nothing to do"))))
-    (`link
-     (org-open-at-point))
-)))
+    (pcase type
+      (`headline
+       (let ((todo-keyword (org-element-property :todo-keyword context)))
+	 (pcase todo-keyword
+	   (`"[ ]" (org-todo "[-]"))
+	   (`"[-]" (org-todo "[X]"))
+	   (`nil (message "+org/dwim - ignore"))
+           (default (org-todo)))))
+      (`link
+       (org-open-at-point)))))
 #+end_src
 
 * Configure =yasnippet=
@@ -1130,12 +1161,12 @@ Change the image background.
        (projectile-global-mode)
        (setq projectile-project-search-path '("~/codeheroes/chatbotize/monorepo"))
        (setq projectile-enable-caching t)
-       ;; (setq projectile-project-root-files-functions #'(projectile-root-top-down
-       ;;                                                    projectile-root-top-down-recurring
-       ;;                                                    projectile-root-bottom-up
-       ;;                                                    projectile-root-local))
+       (setq projectile-project-root-files-functions #'(projectile-root-top-down
+                                                          projectile-root-top-down-recurring
+                                                          projectile-root-bottom-up
+                                                          projectile-root-local))
 
-       (setq projectile-project-root-files-functions #'(projectile-root-bottom-up))
+       ;; (setq projectile-project-root-files-functions #'(projectile-root-bottom-up))
 
        ;; TODO: think whether this one is needed
        (projectile-register-project-type 'scala '("build.sbt")))
@@ -1144,6 +1175,13 @@ Change the image background.
       :after projectile) 
  #+end_src
  
+#+begin_src emacs-lisp :results none
+(defun +projectile/search-word-under-cursor ()
+  (interactive)
+  (let ((counsel-projectile-ag-initial-input (current-word)))
+    (counsel-projectile-ag)))
+#+end_src
+
 * Configure =magit=
  #+begin_src emacs-lisp :results none
  (use-package magit :defer t)
@@ -1192,16 +1230,16 @@ Change the image background.
 #+end_src
 
 * Configure =doom-modeline=
-  #+begin_src emacs-lisp :results none
-    (use-package doom-modeline
-      :ensure t 
-      :config 
-        (setq doom-modeline-height 35)
-        (setq doom-modeline-vcs-max-length 40)
-        (setq doom-modeline-enable-word-count t)
-        (set-face-attribute 'mode-line nil :height 115)
-        (doom-modeline-mode))
-  #+end_src
+#+begin_src emacs-lisp :results none
+(use-package doom-modeline
+  :ensure t 
+  :config 
+    (setq doom-modeline-height 35)
+    (setq doom-modeline-vcs-max-length 40)
+    (setq doom-modeline-enable-word-count t)
+    (set-face-attribute 'mode-line nil :height 115)
+    (doom-modeline-mode))
+#+end_src
 * Configure =zoom-window=
  #+begin_src emacs-lisp :results none
    (use-package zoom-window 
@@ -1306,6 +1344,16 @@ defer?
 #+end_src
 
 * Languages
+** Common
+#+begin_src emacs-lisp :results none
+(defface todo-comment-face
+  '((t :foreground "#ff5555"
+       :weight bold
+       :underline t
+       ))
+  "TODO Comment Face")
+#+end_src
+
 ** Dockerfile
 #+begin_src emacs-lisp :results none
 (use-package dockerfile-mode
@@ -1316,33 +1364,35 @@ defer?
 ** Python
 Setup =python-mode=.
 #+begin_src emacs-lisp :results none
-  (use-package python-mode
-     :ensure t
-     :defer t)
+(use-package python-mode
+   :ensure t
+   :defer t)
 
-  ;; (setq
-  ;;   python-shell-interpreter "ipython"
-  ;;   python-shell-interpreter-args "-i")
+;; (setq
+;;   python-shell-interpreter "ipython"
+;;   python-shell-interpreter-args "-i")
 #+end_src
    
 #+begin_src emacs-lisp :results none
-  (use-package pyenv-mode
-    :after python-mode
-    :init
-      (let ((pyenv-path (expand-file-name "~/.pyenv/bin")))
-        (setenv "PATH" (concat pyenv-path ":" (getenv "PATH")))
-        (add-to-list 'exec-path pyenv-path)))
+(use-package pyenv-mode
+  :after python-mode
+  :hook (python-mode . pyenv-mode)
+  :init
+    (let ((pyenv-path (expand-file-name "~/.pyenv/bin")))
+	(setenv "PATH" (concat pyenv-path ":" (getenv "PATH")))
+	(add-to-list 'exec-path pyenv-path)))
 
-  (use-package pyvenv
-    :defer t)
-    ;; :after python-mode)
+(use-package pyvenv
+  :ensure t
+  :after pyenv-mode
+  :hook (pyenv-mode . pyvenv-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
-  (defun +pyvenv/set-to-pyenv ()
-    (interactive)
-    (pyvenv-activate
-       (pyenv-mode-full-path (pyenv-mode-version))))
+(defun +pyvenv/set-to-pyenv ()
+  (interactive)
+  (pyvenv-activate
+     (pyenv-mode-full-path (pyenv-mode-version))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1352,15 +1402,21 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-  (use-package lsp-python-ms
-    :ensure t
-    :after python-mode
-    :init (setq lsp-python-ms-auto-install-server t)
-    :hook (
-           (python-mode . lsp-deferred)
-           (python-mode . (lambda ()
-                            ;; (setq lsp-python-ms-extra-paths '())
-                            (require 'lsp-python-ms)))))
+(use-package lsp-python-ms
+  :ensure t
+  :after python-mode
+  :init (setq lsp-python-ms-auto-install-server t)
+  :hook (
+         (python-mode . lsp-deferred)
+         (python-mode . (lambda ()
+                          ;; (setq lsp-python-ms-extra-paths '())
+                          (require 'lsp-python-ms)))))
+#+end_src
+
+
+#+begin_src emacs-lisp :results none
+(font-lock-add-keywords 'python-mode
+ '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
 #+end_src
 
 ** Scala
@@ -1419,8 +1475,8 @@ sbt-mode
 
 TODO colors.
 #+begin_src emacs-lisp :results none
-  (font-lock-add-keywords 'scala-mode
-   '(("\\(TODO\\):" 1 'font-lock-warning-face prepend)))
+(font-lock-add-keywords 'scala-mode
+ '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
 #+end_src
 
 ** Protobuf
@@ -1450,7 +1506,11 @@ TODO colors.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package lsp-ui :after lsp-mode)
+(use-package lsp-ui
+  :after lsp-mode
+  :config 
+    (setq lsp-ui-doc-use-childframe nil)
+    (add-to-list 'lsp-ui-doc-frame-parameters '(no-accept-focus . t)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1540,6 +1600,22 @@ Remove other LSP sessions.
   :commands flycheck-haskell-setup)
 #+end_src
 
+** ReasonML
+#+begin_src emacs-lisp :results none
+(use-package reason-mode
+  :ensure t
+  :mode "\\.rei?$"
+  :config 
+  (require 'lsp-mode)
+  (setq lsp-response-timeout 180)
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection "/home/porcupine/tool/reason-language-server")
+                    :major-modes '(reason-mode)
+                    :notification-handlers (ht ("client/registerCapability" 'ignore))
+                    :priority 1
+                    :server-id 'reason-ls)))
+#+end_src
+
 * Configure =Info=
 #+begin_src emacs-lisp :results none
   (use-package info
@@ -1553,9 +1629,10 @@ Remove other LSP sessions.
 (use-package smartparens
   :ensure t
   :config
-    (smartparens-global-mode)
-    (show-smartparens-global-mode)
-    (smartparens-global-strict-mode)
+    (require 'smartparens-config)
+    (smartparens-global-mode t)
+    (smartparens-global-strict-mode t)
+    (show-smartparens-global-mode t)
   :bind (:map smartparens-mode-map
     ("M-l" . sp-forward-slurp-sexp)
     ("M-h" . sp-forward-barf-sexp)
@@ -1564,9 +1641,12 @@ Remove other LSP sessions.
 
 (use-package evil-smartparens
   :ensure t
+  :after smartparens
   :hook (smartparens-mode . evil-smartparens-mode))
 
 (define-key global-map (kbd "<M-l>") nil)
+
+(smartparens-mode)
 #+end_src
 
 * Configure =csv-mode=
@@ -1661,22 +1741,34 @@ Remove other LSP sessions.
    :defer t)
 #+end_src
 
+* Configure =pdf-tools=
+#+begin_src emacs-lisp :results none
+(use-package pdf-tools
+  :ensure t
+  :defer t)
+#+end_src
+
+* Playing with org-protocol
+#+begin_src emacs-lisp :results none
+(server-start)
+(require 'org-protocol)
+(require 'org-roam-protocol)
+#+end_src
+
 * TMP
-  #+begin_src emacs-lisp :results none
-    (setq truncate-lines t)
-    (setq-default truncate-lines t)
-    (setq truncate-partial-width-windows nil)
-    (setq-default truncate-partial-width-windows nil)
-  #+end_src
+#+begin_src emacs-lisp :results none
+(setq truncate-lines t)
+(setq-default truncate-lines t)
+(setq truncate-partial-width-windows nil)
+(setq-default truncate-partial-width-windows nil)
+#+end_src
   
 * TODO TODOs
-  - [ ] java script / react stuff
-  - [ ] workgroups.el
-  - [ ] if do not run a command on hydra missclick (e.g. "SPC f p" runs "p" as paste)
-  - [ ] anzu?
-  - [ ] bookmarks
-  - [ ] line numbers?
-  - [ ] agenda
-  - [ ] general.el
-  - [ ] reimplement py-indent-or-complete
-    
+- [ ] java script / react stuff
+- [ ] workgroups.el
+- [ ] if do not run a command on hydra missclick (e.g. "SPC f p" runs "p" as paste)
+- [ ] anzu?
+- [ ] bookmarks
+- [ ] agenda
+- [ ] general.el
+- [ ] reimplement py-indent-or-complete
