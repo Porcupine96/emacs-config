@@ -30,24 +30,33 @@ environment automatically installed. I'm not /totally/ sure about
 that, but we're gettin' close.
 
 #+begin_src emacs-lisp :results none
-  (require 'use-package-ensure)
-  (setq use-package-always-ensure t)
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
 #+end_src
 
 Always compile packages, and use the newest version available.
 #+begin_src emacs-lisp :results none
-  (use-package auto-compile
-    :config (auto-compile-on-load-mode))
+(use-package auto-compile
+  :config (auto-compile-on-load-mode))
 
-  (setq load-prefer-newer t)
+(setq load-prefer-newer t)
+#+end_src
+
+Quelpa configuration.
+#+begin_src emacs-lisp :results none
+(use-package quelpa
+  :ensure t)
+
+(use-package quelpa-use-package
+  :ensure t)
 #+end_src
 
 * Visuals
 Font.
 #+begin_src emacs-lisp :results none
-(set-face-attribute 'default nil :font "SF Mono-12")
+(set-face-attribute 'default nil :font "SF Mono-11")
 (set-face-attribute 'fixed-pitch nil :font "SF Mono-12")
-(set-face-attribute 'variable-pitch nil :font "Lato-14")
+(set-face-attribute 'variable-pitch nil :font "Lato-15")
 #+end_src
  
 Hide all the bezels.
@@ -60,9 +69,17 @@ Hide all the bezels.
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/my-emacs/themes")
-(load-theme 'noctilux t)
+;; (load-theme 'noctilux t)
+(load-theme 'modus-operandi t)
 #+end_src
  
+#+begin_src emacs-lisp :results none
+(use-package modus-operandi-theme
+  :ensure t
+  :config 
+  (setq modus-operandi-theme-section-headings t))
+#+end_src
+
 * Sensible settings
 Disable backup and lockfiles.
 #+begin_src emacs-lisp :results none
@@ -81,7 +98,7 @@ Convert tabs to spaces.
 (setq indent-tabs-mode nil)
 #+end_src
 
-Ask before closing emasc.
+Ask before closing Emacs.
 #+begin_src emacs-lisp :results none
 (setq confirm-kill-emacs 'y-or-n-p)
 #+end_src
@@ -100,7 +117,7 @@ Open buffer position
 #+begin_src emacs-lisp :results none
 (setq display-buffer-alist
   '(("\\*\\(compilation\\)\\*"
-     (display-buffer-in-side-window)
+     (display-buffer-reuse-window)
      (side            . bottom)
      (reusable-frames . visible)
      (window-height   . 0.33))
@@ -123,7 +140,7 @@ Open buffer position
      (side           . right)
      (window-width   . 0.5))
 
-    ("\\*\\(eshell\\|Python\\)\\*"
+    ("\\*\\(eshell\\|Python\\|Synonyms List\\)\\*"
      (display-buffer-in-side-window)
      (side           . bottom)
      (window-height  . 0.4))
@@ -146,6 +163,12 @@ Line wrapping.
 Allow remembering risky variables
 #+begin_src emacs-lisp :results none
 (defun risky-local-variable-p (sym &optional _ignored) nil)
+#+end_src
+
+Compilation settings.
+#+begin_src emacs-lisp :results none
+(setq compilation-scroll-output t)
+(setq compilation-always-kill t)
 #+end_src
 
 * Miscellaneous
@@ -370,8 +393,8 @@ Allow remembering risky variables
 
 ** Project 
 #+begin_src emacs-lisp :results none
-  (defhydra hydra-project (:color blue)
-    "
+(defhydra hydra-project (:color blue)
+  "
     ^
     ^Project^     
     ^────^───────────
@@ -386,15 +409,15 @@ Allow remembering risky variables
     ^^        
     ^^        
     "
-    ("a" #'projectile-add-known-project)
-    ("c" #'projectile-compile-project)
-    ("C" #'projectile-repeat-last-command)
-    ("f" #'counsel-projectile-ag)
-    ("p" #'counsel-projectile-switch-project)
-    ("i" #'projectile-invalidate-cache)
-    ("t" #'treemacs-add-and-display-current-project)
-    ("s" #'projectile-save-project-buffers)
-    ("w" #'+projectile/search-word-under-cursor))
+  ("a" #'projectile-add-known-project)
+  ("c" #'projectile-compile-project)
+  ("C" #'projectile-repeat-last-command)
+  ("f" (lambda () (interactive) (counsel-projectile-ag "--nonumbers")))
+  ("p" #'counsel-projectile-switch-project)
+  ("i" #'projectile-invalidate-cache)
+  ("t" #'treemacs-add-and-display-current-project)
+  ("s" #'projectile-save-project-buffers)
+  ("w" #'+projectile/search-word-under-cursor))
 #+end_src
 
 ** Buffer
@@ -538,20 +561,22 @@ Allow remembering risky variables
    
 ** Open
 #+begin_src emacs-lisp :results none
- (defhydra hydra-open (:color blue)
+(defhydra hydra-open (:color blue)
    "
    ^
    ^Open^     
    ^────^───────────
    _p_ Treemacs
    _e_ Eshell
+   _E_ Eshell Open In Default
    _o_ Olivetti
    ^^        
    ^^        
    "
    ("p" #'treemacs)
    ("e" #'eshell)
-   ("o" #'olivetti-mode))
+   ("E" #'+eshell/open-in-default)
+   ("o" #'porcupine/focus-mode))
  #+end_src
 
 ** Search
@@ -742,11 +767,11 @@ Scale text.
  #+begin_src emacs-lisp :results none
 (defun +work/counsel-monorepo ()
   (interactive)
-  (counsel-rg "" "/home/porcupine/codeheroes/chatbotize/monorepo"))
+  (counsel-rg "" "/home/porcupine/codeheroes/chatbotize/monorepo" "--iglob !*.lock"))
 
 (defun +work/counsel-find-file-monorepo ()
   (interactive)
-  (counsel-file-jump "" "/home/porcupine/codeheroes/chatbotize/monorepo"))
+  (counsel-git))
  #+end_src
  
  Based on excelent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
@@ -1060,9 +1085,15 @@ Org tag placement.
 
 ** Org Babel
 #+begin_src emacs-lisp :results none
-  (use-package ob-ammonite
-    :ensure t
-    :defer t)
+(use-package ob-ammonite
+  :ensure t
+  :defer t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package ob-ipython
+  :ensure t
+  :defer t)
 #+end_src
 
 Load languages.
@@ -1070,6 +1101,7 @@ Load languages.
 (org-babel-do-load-languages 'org-babel-load-languages
  '((shell . t)
    (emacs-lisp . t)
+   ;; (ipython . t)
    (python . t)
    (ammonite . t)
    (jupyter . t)
@@ -1300,21 +1332,13 @@ defer?
      (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
 #+end_src
 
-* Configure =olivetti=
-#+begin_src emacs-lisp :results none
-(use-package olivetti
-  :ensure t
-  :defer t
-  :config 
-    (setq olivetti-body-width 120)
-    (setq olivetti-recall-visual-line-mode-entry-state t))
-#+end_src
-
 * Configure =dired=
 #+begin_src emacs-lisp :results none
   (defun +dired/open-externally ()
     (interactive)
-    (call-process "zathura" nil 0 nil (dired-get-filename)))
+     
+    (call-process "xdg-open" nil 0 nil (dired-get-filename)))
+    ;; (call-process "zathura" nil 0 nil (dired-get-filename))
 
   (evil-collection-define-key 'normal 'dired-mode-map
     "ge" #'+dired/open-externally
@@ -1377,10 +1401,10 @@ Setup =python-mode=.
 (use-package pyenv-mode
   :after python-mode
   :hook (python-mode . pyenv-mode)
-  :init
+  :config
     (let ((pyenv-path (expand-file-name "~/.pyenv/bin")))
-	(setenv "PATH" (concat pyenv-path ":" (getenv "PATH")))
-	(add-to-list 'exec-path pyenv-path)))
+         (setenv "PATH" (concat pyenv-path ":" (getenv "PATH")))
+         (add-to-list 'exec-path pyenv-path)))
 
 (use-package pyvenv
   :ensure t
@@ -1658,15 +1682,22 @@ Remove other LSP sessions.
 
 * Configure =eshell=
 #+begin_src emacs-lisp :results none
-  (defun +eshell/clear ()
-    (interactive)
-    (eshell/clear 1)
-    (eshell-send-input)
-    (evil-insert nil))
+(defun +eshell/clear ()
+   (interactive)
+   (eshell/clear 1)
+   (eshell-send-input)
+   (evil-insert nil))
+
+(defun +eshell/open-in-default ()
+  (interactive)
+  (let ((current-dir default-directory))
+    (eshell)
+    (eshell/cd current-dir)
+    (+eshell/clear)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
-  (use-package eshell
+(use-package eshell
    :defer t
    :bind (:map eshell-mode-map
           ("C-l" . +eshell/clear)))
@@ -1741,11 +1772,88 @@ Remove other LSP sessions.
    :defer t)
 #+end_src
 
+* Configure =synosaurus=
+#+begin_src emacs-lisp :results none
+(use-package synosaurus
+  :ensure t
+  :defer t)
+#+end_src
+
 * Configure =pdf-tools=
 #+begin_src emacs-lisp :results none
 (use-package pdf-tools
   :ensure t
   :defer t)
+#+end_src
+
+* Development
+#+begin_src emacs-lisp :results none
+(defun load-ejira ()
+  (interactive)
+  (use-package ejira
+    :quelpa (ejira :fetcher github :repo "nyyManni/ejira")
+    :init
+    (setq jiralib2-url              "https://chatbotize.atlassian.net"
+          jiralib2-auth             'token
+
+          ejira-org-directory       "~/.jira"
+          ejira-projects            '("CD")
+
+          ejira-priorities-alist    '(("Highest" . ?A)
+                                      ("High"    . ?B)
+                                      ("Medium"  . ?C)
+                                      ("Low" h    . ?D)
+                                      ("Lowest"  . ?E))
+          ejira-todo-states-alist   '(("To Do"       . 1)
+                                      ("In Progress" . 2)
+                                      ("Done"        . 3)))
+    :config
+    ;; Tries to auto-set custom fields by looking into /editmeta
+    ;; of an issue and an epic.
+    (add-hook 'jiralib2-post-login-hook #'ejira-guess-epic-sprint-fields)
+
+    ;; They can also be set manually if autoconfigure is not used.
+    ;; (setq ejira-sprint-field       'customfield_10001
+    ;;       ejira-epic-field         'customfield_10002
+    ;;       ejira-epic-summary-field 'customfield_10004)
+
+    ;; (require 'ejira-agenda)
+
+    ;; Make the issues visisble in your agenda by adding `ejira-org-directory'
+    ;; into your `org-agenda-files'.
+    ;; (add-to-list 'org-agenda-files ejira-org-directory)
+    ))
+#+end_src
+
+* Configure =olivetti=
+#+begin_src emacs-lisp :results none
+(use-package olivetti
+  :ensure t
+  :defer t
+  :config 
+  (custom-set-variables '(olivetti-body-width 90))
+  (custom-set-variables '(olivetti-recall-visual-line-mode-entry-state t)))
+#+end_src
+
+
+#+begin_src emacs-lisp :results none
+(use-package hide-mode-line
+  :ensure t 
+  :defer t)
+#+end_src
+
+* Writer Mode
+#+begin_src emacs-lisp :results none
+(define-minor-mode porcupine/focus-mode
+  "Focus mode."
+  :init-value nil
+  :global nil
+  (if porcupine/focus-mode
+      (progn
+	(olivetti-mode)
+	(hide-mode-line-mode))
+    (olivetti-mode -1)
+    (hide-mode-line-mode -1)))
 #+end_src
 
 * Playing with org-protocol
