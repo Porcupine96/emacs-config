@@ -235,6 +235,7 @@ Compilation settings.
   :keymaps 'org-mode-map
     "s" #'org-schedule
     "d" #'org-deadline
+    "i" #'+org/save-image-insert-link
     "t" #'org-todo)
     
 (local-leader-def
@@ -800,6 +801,16 @@ Scale text.
             (`right (display-buffer-in-direction buffer '((direction . right))))))))
  #+end_src
   
+#+begin_src emacs-lisp :results none
+(defun +core/inc-at-point ()
+  (interactive)
+  (let ((word (current-word)))
+    (kill-word 1)
+    (message (string-to-number word) ) 
+    (message "hello")
+    (insert (+ 1 (string-to-number word)))))
+#+end_src
+
   #+begin_src emacs-lisp :results none
  (defun +core/surround-word-with (left right)
    (backward-to-word 1)
@@ -914,15 +925,15 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   #+end_src
 * Configure =flycheck=
   #+begin_src emacs-lisp :results none
-    (use-package flycheck
-      :defer t
-      :init (global-flycheck-mode)
-      :bind (:map evil-normal-state-map 
-            ("[ e" . flycheck-previous-error)
-            ("] e" . flycheck-next-error))
+(use-package flycheck
+  :defer t
+  :init (global-flycheck-mode)
+  :bind (:map evil-normal-state-map 
+        ("[ e" . flycheck-previous-error)
+        ("] e" . flycheck-next-error))
 
-      :config 
-        (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+  :config 
+    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
   #+end_src
 * Configure =org=
 ** Core
@@ -934,6 +945,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 
   (setq org-fontify-done-headline t)
   (setq org-use-fast-todo-selection 'expert)
+  (setq org-image-actual-width nil)
 
   (setq org-todo-keywords
 	'((sequence "TODO(t)" "PROJECT(p)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
@@ -947,7 +959,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   (:map evil-normal-state-map
 	("C-k" . evil-window-up)
 	("C-j" . evil-window-down)
-	("RET" . +org/dwim))
+	("RET" . +org/ret-dwim))
   :hook (org-mode . org-indent-mode))
 #+end_src
 
@@ -987,16 +999,27 @@ Org tag placement.
 
 ** Org Agenda 
 #+begin_src emacs-lisp :results none
- (use-package evil-org
- :ensure t
- :after org
- :config
- (add-hook 'org-mode-hook 'evil-org-mode)
- (add-hook 'evil-org-mode-hook
-(lambda ()
-(evil-org-set-key-theme)))
- (require 'evil-org-agenda)
- (evil-org-agenda-set-keys))
+(use-package evil-org
+  :ensure t
+  :after org
+  :config
+  (add-hook 'org-mode-hook 'evil-org-mode)
+  ;; (add-hook 'evil-org-mode-hook
+  ;; 	    (lambda () (evil-org-set-key-theme)))
+
+  (general-define-key 
+      :states '('normal 'insert)
+      :keymaps '(evil-org-mode-map org-mode-map)
+      "C-<return>" '+org/c-ret-dwim
+      "C-S-<return>" '+org/c-s-ret-dwim
+      "C-M-<return>" '+org/c-m-ret-dwim)
+
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
+  ;; TODO: verify whether this is needed
+  ;; :bind (:map evil-org-mode-map 
+  ;;       ("C-S-<return>" . #'org-insert-subheading)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1132,7 +1155,8 @@ Change the image background.
          (props (cdddr args)))
     ;; get this return result style from `create-image'
     (append (list file type data-p)
-            (list :background  "#F0E68C")
+            (list :background  "#FFFFFF")
+            ;; (list :background  "#F0E68C")
             props)))
 
 (advice-add 'create-image :filter-args
@@ -1159,52 +1183,130 @@ Change the image background.
 
 ** Functions
 #+begin_src emacs-lisp :results none
-(defun +org/dwim ()
+(defun +org/ret-dwim ()
   (interactive)
   (let* ((context (org-element-context))
          (type (org-element-type context)))
-
     (pcase type
       (`headline
        (let ((todo-keyword (org-element-property :todo-keyword context)))
 	 (pcase todo-keyword
 	   (`"[ ]" (org-todo "[-]"))
 	   (`"[-]" (org-todo "[X]"))
-	   (`nil (message "+org/dwim - ignore"))
+	   (`nil (message "+org/ret-dwim - ignore"))
            (default (org-todo)))))
       (`link
        (org-open-at-point)))))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun +org/insert-item-next-line ()
+  (move-end-of-line nil)
+  (org-insert-item))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org/insert-item-prev-line ()
+  (move-beginning-of-line nil)
+  (org-insert-item))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org/c-ret-dwim ()
+  (interactive)
+  (let* ((context (org-element-context))
+         (type (org-element-type context)))
+
+    (pcase type
+      (`item (+org/insert-item-next-line))
+      (`plain-list (+org/insert-item-next-line))
+      (`paragraph
+       (if (org-in-item-p) 
+         (+org/insert-item-next-line)
+         (org-insert-heading-respect-content)))
+      (_ (org-insert-heading-respect-content)))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org/c-s-ret-dwim ()
+  (interactive)
+  (let* ((context (org-element-context))
+         (type (org-element-type context)))
+
+    (pcase type
+      (`item (+org/insert-item-prev-line))
+      (`plain-list (+org/insert-item-prev-line))
+      (`paragraph
+       (if (org-in-item-p) 
+         (+org/insert-item-prev-line)
+         (+org/insert-heading-before)))
+      (_ (+org/insert-heading-before)))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org/c-m-ret-dwim ()
+  (interactive)
+  (let* ((context (org-element-context))
+         (type (org-element-type context)))
+
+
+    (+org/insert-subheading-respecting-content-below)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org/insert-subheading-respecting-content-below ()
+  (interactive)
+  (org-insert-heading-respect-content)
+  (org-do-demote))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org/insert-heading-before ()
+  (interactive)
+  (org-backward-heading-same-level 0)
+  (move-beginning-of-line nil)
+  (org-insert-heading))
+#+end_src
+
+Save image and insert it's link at point.
+#+begin_src emacs-lisp :results none
+(defun +org/save-image-insert-link (url)
+  (interactive "sURL: ")
+  (let* ((now (floor (* 1000 (float-time))))
+         (path (concat "~/Dropbox/img/" (number-to-string now) ".png")))
+    (url-copy-file url path)
+    (insert (concat "#+ATTR_ORG: :width 350\n" "[[" path "]]"))))
+#+end_src
+
 * Configure =yasnippet=
   #+begin_src emacs-lisp :results none
-  (use-package yasnippet
-    :defer 5
-    :config 
-      (yas-global-mode))
+(use-package yasnippet
+  :defer 5
+  :config 
+    (yas-global-mode))
   #+end_src
   
 * Configure =projectile=
  #+begin_src emacs-lisp :results none
-   (use-package projectile 
-     :ensure t
-     :defer t
-     :config
-       (projectile-global-mode)
-       (setq projectile-project-search-path '("~/codeheroes/chatbotize/monorepo"))
-       (setq projectile-enable-caching t)
-       (setq projectile-project-root-files-functions #'(projectile-root-top-down
-                                                          projectile-root-top-down-recurring
-                                                          projectile-root-bottom-up
-                                                          projectile-root-local))
+ (use-package projectile 
+   :ensure t
+   :defer t
+   :config
+     (projectile-global-mode)
+     (setq projectile-project-search-path '("~/codeheroes/chatbotize/monorepo"))
+     (setq projectile-enable-caching t)
+     (setq projectile-project-root-files-functions #'(projectile-root-top-down
+                                                        projectile-root-top-down-recurring
+                                                        projectile-root-bottom-up
+                                                        projectile-root-local))
 
-       ;; (setq projectile-project-root-files-functions #'(projectile-root-bottom-up))
+     ;; (setq projectile-project-root-files-functions #'(projectile-root-bottom-up))
 
-       ;; TODO: think whether this one is needed
-       (projectile-register-project-type 'scala '("build.sbt")))
+     ;; TODO: think whether this one is needed
+     (projectile-register-project-type 'scala '("build.sbt")))
 
-   (use-package counsel-projectile
-      :after projectile) 
+ (use-package counsel-projectile
+    :after projectile) 
  #+end_src
  
 #+begin_src emacs-lisp :results none
@@ -1216,9 +1318,9 @@ Change the image background.
 
 * Configure =magit=
  #+begin_src emacs-lisp :results none
- (use-package magit :defer t)
- (use-package evil-magit :after magit)
- (use-package forge :after magit)
+(use-package magit :defer t)
+(use-package evil-magit :after magit)
+(use-package forge :after magit)
  #+end_src
  
  vc-annotate options.
@@ -1228,29 +1330,29 @@ Change the image background.
 
 * Configure =git-timemachine=
  #+begin_src emacs-lisp :results none
-  (use-package git-timemachine 
-    :ensure t
-    :defer t)
+(use-package git-timemachine 
+  :ensure t
+  :defer t)
  #+end_src
 
 * Configure =treemacs=
 #+begin_src emacs-lisp :results none
-   (use-package treemacs 
-      :ensure t
-      :defer t
-      :config 
-        (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
-        (setq treemacs-width 60))
+(use-package treemacs 
+   :ensure t
+   :defer t
+   :config 
+     (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
+     (setq treemacs-width 60))
 
-   (use-package treemacs-evil
-     :after treemacs 
-     :bind (:map evil-treemacs-state-map 
-           ("SPC u" . #'universal-argument))
-     :config
-       (define-key evil-treemacs-state-map (kbd "SPC o p") #'treemacs))
+(use-package treemacs-evil
+  :after treemacs 
+  :bind (:map evil-treemacs-state-map 
+        ("SPC u" . #'universal-argument))
+  :config
+    (define-key evil-treemacs-state-map (kbd "SPC o p") #'treemacs))
 
-   (use-package treemacs-projectile
-     :after treemacs)
+(use-package treemacs-projectile
+  :after treemacs)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1274,26 +1376,26 @@ Change the image background.
 #+end_src
 * Configure =zoom-window=
  #+begin_src emacs-lisp :results none
-   (use-package zoom-window 
-      :ensure t
-      :defer t
-      :config
-        (custom-set-variables
-          '(zoom-window-mode-line-color "#4682B4")))
+(use-package zoom-window 
+   :ensure t
+   :defer t
+   :config
+     (custom-set-variables
+       '(zoom-window-mode-line-color "#4682B4")))
  #+end_src
 * Configure =company=
   #+begin_src emacs-lisp :results none
-  (use-package company
-    :defer t
-    :config
-      (global-company-mode 1)
-      (with-eval-after-load 'company
-          (define-key company-mode-map (kbd "C-<space>") #'company-complete)
-          (define-key company-active-map (kbd "<return>") #'company-complete-selection)
-          (define-key company-active-map (kbd "<tab>") #'company-complete-common)
-          (define-key company-active-map (kbd "TAB") #'company-complete-common))
-      (setq company-backends '(company-lsp company-capf company-yasnippet company-dabbrev company-elisp))
-      (setq company-dabbrev-downcase nil))
+(use-package company
+  :defer t
+  :config
+    (global-company-mode 1)
+    (with-eval-after-load 'company
+        (define-key company-mode-map (kbd "C-<space>") #'company-complete)
+        (define-key company-active-map (kbd "<return>") #'company-complete-selection)
+        (define-key company-active-map (kbd "<tab>") #'company-complete-common)
+        (define-key company-active-map (kbd "TAB") #'company-complete-common))
+    (setq company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
+    (setq company-dabbrev-downcase nil))
   #+end_src
 * Configure =helpful=
  #+begin_src emacs-lisp :results none
@@ -1365,6 +1467,18 @@ defer?
     (setq ediff-window-setup-function 'ediff-setup-windows-plain)
     (setq ediff-split-window-function 'split-window-horizontally)
     (setq ediff-forward-word-function 'forward-char))
+#+end_src
+* Configure =smerge=
+#+begin_src emacs-lisp :results none
+(use-package smerge-mode
+  :ensure t
+  :defer t
+  :bind (:map smerge-mode-map 
+    ("C-c m u" . smerge-keep-upper)
+    ("C-c m l" . smerge-keep-lower)
+    ("C-c m a" . smerge-keep-all)
+    ("C-c m p" . smerge-prev)
+    ("C-c m n" . smerge-next)))
 #+end_src
 
 * Languages
@@ -1442,27 +1556,33 @@ Setup =python-mode=.
 (font-lock-add-keywords 'python-mode
  '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
 #+end_src
+** Clojure
+#+begin_src emacs-lisp :results none
+(use-package clojure-mode
+  :ensure t
+  :defer t)
+#+end_src
 
 ** Scala
 scala-mode
 #+begin_src emacs-lisp :results none
-  (use-package scala-mode
-    :ensure t
-    :mode "\\.s\\(cala\\|bt\\)$")
+(use-package scala-mode
+  :ensure t
+  :mode "\\.s\\(cala\\|bt\\)$")
 #+end_src
 
 sbt-mode
 #+begin_src emacs-lisp :results none
-  (use-package sbt-mode
-    :after scala-mode
-    :commands sbt-start sbt-command
-    :config
-      (substitute-key-definition
-         'minibuffer-complete-word
-         'self-insert-command
-          minibuffer-local-completion-map)
+(use-package sbt-mode
+  :after scala-mode
+  :commands sbt-start sbt-command
+  :config
+    (substitute-key-definition
+       'minibuffer-complete-word
+       'self-insert-command
+        minibuffer-local-completion-map)
 
-      (setq sbt:program-options '("-Dsbt.supershell=false")))
+    (setq sbt:program-options '("-Dsbt.supershell=false")))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1503,6 +1623,25 @@ TODO colors.
  '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun +scala/declaration-to-assignment ()
+  (interactive)
+  (evil-ex (concat "'<,'>" "s/" "\\(\\w+\\):.*" "/" "\\1 = \\1,")))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/name-parameters ()
+  (interactive)
+  (evil-ex (concat "'<,'>" "s/" "\\w+\\.\\(\\w+\\)" "/" "\\1 = \\0")))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/reverse-pattern-match ()
+  (interactive)
+  (evil-ex (concat "'<,'>" "s/" "case \\(.*\\) => \\(.*\\)" "/" "case \\2 => \\1")))
+#+end_src
+
+
 ** Protobuf
    #+begin_src emacs-lisp :results none
    (use-package protobuf-mode
@@ -1534,6 +1673,7 @@ TODO colors.
   :after lsp-mode
   :config 
     (setq lsp-ui-doc-use-childframe nil)
+    (setq lsp-ui-doc-enable nil)
     (add-to-list 'lsp-ui-doc-frame-parameters '(no-accept-focus . t)))
 #+end_src
 
@@ -1546,17 +1686,6 @@ Use =lsp-ivy=.
 (use-package lsp-ivy
   :after lsp-mode
   :commands lsp-ivy-workspace-symbol)
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package company-lsp
-  :after lsp-mode company
-  :custom
-   (company-lsp-cache-candidates t)
-   (company-lsp-async t)
-   (company-lsp-enable-snippet t)
-   (company-lsp-enable-recompletion t)
-  :commands company-lsp)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1642,10 +1771,10 @@ Remove other LSP sessions.
 
 * Configure =Info=
 #+begin_src emacs-lisp :results none
-  (use-package info
-    :defer t)
-    ;; :bind (:map evil-normal-state-map
-    ;;   ("RET" . 'Info-follow-nearest-node)))
+(use-package info
+  :defer t)
+  ;; :bind (:map evil-normal-state-map
+  ;;   ("RET" . 'Info-follow-nearest-node)))
 #+end_src
 
 * Configure =smarparens=
@@ -1655,8 +1784,8 @@ Remove other LSP sessions.
   :config
     (require 'smartparens-config)
     (smartparens-global-mode t)
-    (smartparens-global-strict-mode t)
     (show-smartparens-global-mode t)
+    ;; (smartparens-global-strict-mode t)
   :bind (:map smartparens-mode-map
     ("M-l" . sp-forward-slurp-sexp)
     ("M-h" . sp-forward-barf-sexp)
@@ -1795,6 +1924,8 @@ Remove other LSP sessions.
     :init
     (setq jiralib2-url              "https://chatbotize.atlassian.net"
           jiralib2-auth             'token
+          jiralib2-user-login-name  "lukasz.kazmierczak@chatbotize.com"
+          jiralib2-token            "yfwfE6bf7onwJJmrMZPu613F"
 
           ejira-org-directory       "~/.jira"
           ejira-projects            '("CD")
@@ -1831,8 +1962,8 @@ Remove other LSP sessions.
   :ensure t
   :defer t
   :config 
-  (custom-set-variables '(olivetti-body-width 90))
-  (custom-set-variables '(olivetti-recall-visual-line-mode-entry-state t)))
+    (custom-set-variables '(olivetti-body-width 90))
+    (custom-set-variables '(olivetti-recall-visual-line-mode-entry-state t)))
 #+end_src
 
 
@@ -1842,18 +1973,25 @@ Remove other LSP sessions.
   :defer t)
 #+end_src
 
-* Writer Mode
+* Focus Mode
 #+begin_src emacs-lisp :results none
-(define-minor-mode porcupine/focus-mode
-  "Focus mode."
-  :init-value nil
-  :global nil
-  (if porcupine/focus-mode
-      (progn
-	(olivetti-mode)
-	(hide-mode-line-mode))
-    (olivetti-mode -1)
-    (hide-mode-line-mode -1)))
+;; (defun +focus/focus-mode-function ()
+;;     (when (derived-mode-p 'scala-mode) 
+;;       (setq olivetti-body-width 150))
+;;     (olivetti-mode)
+;;     (hide-mode-line-mode))
+
+;; (define-minor-mode porcupine/focus-mode
+;;   "Focus mode."
+;;   :init-value nil
+;;   :global 't
+;;   (if porcupine/focus-mode
+;;       (progn
+;;     	  (+focus/focus-mode-function)
+;;   	  (add-hook 'prog-mode-hook '+focus/focus-mode-function))
+;;     (remove-hook 'prog-mode-hook '+focus/focus-mode-function)
+;;     (olivetti-mode -1)
+;;     (hide-mode-line-mode -1)))
 #+end_src
 
 * Playing with org-protocol
@@ -1878,5 +2016,4 @@ Remove other LSP sessions.
 - [ ] anzu?
 - [ ] bookmarks
 - [ ] agenda
-- [ ] general.el
 - [ ] reimplement py-indent-or-complete
