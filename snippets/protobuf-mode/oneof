@@ -1,0 +1,6 @@
+# key: oo
+# name: oneof
+# --
+oneof $1 {
+  $2
+}

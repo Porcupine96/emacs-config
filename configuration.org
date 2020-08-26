@@ -240,6 +240,12 @@ Compilation settings.
     
 (local-leader-def
   :states 'normal
+  :keymaps 'scala-mode-map
+    "i" #'+scala/copy-import
+    "s" #'hydra-scala-surround/body)
+
+(local-leader-def
+  :states 'normal
   :keymaps 'python-mode-map
     "s" #'run-python)
 #+end_src
@@ -269,8 +275,8 @@ Compilation settings.
     :init
     (setq evil-want-keybinding nil)
     :config
-    (evil-mode 1)
-    (setq aw-keys '(?h ?j ?k ?l ?a ?s ?d ?f))
+        (evil-mode 1)
+        (setq aw-keys '(?h ?j ?k ?l ?a ?s ?d ?f))
     :bind (:map evil-motion-state-map
           ("C-w C-w" . ace-window)
           ("C-w w"   . ace-window)))
@@ -308,6 +314,7 @@ Compilation settings.
      (hydra-key-format-spec "[%s]"))
   #+end_src
   
+
 ** Agenda
 #+begin_src emacs-lisp :results none
 (defhydra hydra-agenda (:color blue)
@@ -374,8 +381,9 @@ Compilation settings.
       _r_ Recent                           _i_ inbox.org
       _d_ dotfiles                         _p_ private.org
       _c_ Config                           _s_ studies.org
+      _C_ Cheatsheet
       _t_ Theme                            _w_ work.org
-      _x_ XMonad
+      _x_ XMonad                           _W_ work/work.org
       ^^        
       ^^        
       "
@@ -383,8 +391,10 @@ Compilation settings.
   ("r" #'counsel-recentf)
   ("i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org")))
   ("w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org")))
+  ("W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org")))
   ("p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org")))
   ("e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
+  ("C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org")))
   ("s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org")))
   ("d" (lambda () (interactive)(dired "~/dotfiles")))
   ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
@@ -440,7 +450,7 @@ Compilation settings.
   ("b" #'ivy-switch-buffer)
   ("c" (lambda () (interactive) (switch-to-buffer "*compilation*")))
   ("n" #'next-buffer)
-  ("N" #'+core/empty-buffer)
+  ("N" #'scratch)
   ("p" #'previous-buffer)
   ("k" #'kill-current-buffer))
 #+end_src
@@ -470,6 +480,7 @@ Compilation settings.
      ^
      ^Git^     
      ^────^───────────
+     _b_ Magit branch
      _g_ Magit status
      _i_ Magit init
      _p_ Magit push
@@ -477,6 +488,7 @@ Compilation settings.
      _t_ Timemachine
      ^^        
      "
+     ("b" #'magit-branch)
      ("g" #'magit-status)
      ("i" #'magit-init)
      ("p" #'magit-push)
@@ -595,28 +607,9 @@ Compilation settings.
    "
    ("i" #'counsel-imenu)
    ("m" #'+work/counsel-monorepo)
-   ("f" #'+work/counsel-find-file-monorepo)
-   ("s" #'hydra-surround/body))
+   ("f" #'+work/counsel-find-file-monorepo))
  #+end_src
- 
-#+begin_src emacs-lisp :results none
- (defhydra hydra-surround (:color blue)
-   "
-   ^
-   ^Surround^     
-   ^────^───────────
-   _l_ List
-   _o_ Option
-   _i_ IO
-   _f_ Future
-   ^^        
-   "
-   ("l" #'+scala/surround-word-with-list)
-   ("o" #'+scala/surround-word-with-option)
-   ("i" #'+scala/surround-word-with-io)
-   ("f" #'+scala/surround-word-with-future))
- #+end_src
- 
+  
 ** Workspace
  #+begin_src emacs-lisp :results none 
  (defhydra hydra-workspace (:color blue)
@@ -670,6 +663,25 @@ Compilation settings.
    "
    ("h" #'evil-window-decrease-width)
    ("l" #'evil-window-increase-width))
+ #+end_src
+** Scala
+#+begin_src emacs-lisp :results none
+(defhydra hydra-scala-surround (:color blue)
+   "
+   ^
+   ^Surround^     
+   ^────^───────────
+   _l_ List
+   _o_ Option
+   _i_ IO
+   _f_ Future
+   ^^        
+   "
+   ("l" #'+scala/surround-word-with-list)
+   ("o" #'+scala/surround-word-with-option)
+   ("i" #'+scala/surround-word-with-io)
+   ("f" #'+scala/surround-word-with-future)
+   ("s" #'+scala/surround-word-with-future-successful))
  #+end_src
 
 * Global keybindings 
@@ -746,9 +758,9 @@ Scale text.
   
 * Misc Functions
  #+begin_src emacs-lisp :results none
-(defun +core/empty-buffer () 
+(defun +core/scratch-buffer () 
    (interactive)
-   (switch-to-buffer (generate-new-buffer "empty")))
+   (switch-to-buffer (generate-new-buffer "*scratch*")))
  #+end_src
  
  #+begin_src emacs-lisp :results none
@@ -865,6 +877,12 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
       (define-key evil-normal-state-map (kbd "gT") #'persp-prev))
 #+end_src
 
+* Configure =scratch=
+#+begin_src emacs-lisp :results none
+(use-package scratch 
+  :ensure t
+  :defer t)
+#+end_src
 * Configure =ivy= / =counsel= / =swiper=
   Default =ivy= configuration.
   #+begin_src emacs-lisp :results none
@@ -1128,6 +1146,7 @@ Load languages.
    (python . t)
    (ammonite . t)
    (jupyter . t)
+   (sql . t)
    (haskell . t)))
 #+end_src
 
@@ -1611,6 +1630,10 @@ sbt-mode
 (defun +scala/surround-word-with-future ()
   (interactive)
   (+core/surround-word-with "Future[" "]"))
+
+(defun +scala/surround-word-with-future-successful ()
+  (interactive)
+  (+core/surround-word-with "Future.successful(" ")"))
   
 (defun +scala/surround-word-with-io ()
   (interactive)
@@ -1641,7 +1664,6 @@ TODO colors.
   (evil-ex (concat "'<,'>" "s/" "case \\(.*\\) => \\(.*\\)" "/" "case \\2 => \\1")))
 #+end_src
 
-
 ** Protobuf
    #+begin_src emacs-lisp :results none
    (use-package protobuf-mode
@@ -1658,14 +1680,15 @@ TODO colors.
    
 ** LSP
 #+begin_src emacs-lisp :results none
-  (use-package lsp-mode
-   :hook ((scala-mode . lsp)
-          (sh-mode . lsp-deferred))
-   :config
-         (setq lsp-prefer-flymake nil)
-   :bind (:map evil-normal-state-map 
-         ("M-w" . +lsp-ui/toggle-doc-focus)          
-         ("C-<return>" . lsp-execute-code-action)))
+(use-package lsp-mode
+ :hook ((scala-mode . lsp)
+        (python-mode . lsp)
+        (sh-mode . lsp-deferred))
+ :config
+       (setq lsp-prefer-flymake nil)
+ :bind (:map evil-normal-state-map 
+       ("M-w" . +lsp-ui/toggle-doc-focus)          
+       ("C-<return>" . lsp-execute-code-action)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1767,6 +1790,13 @@ Remove other LSP sessions.
                     :notification-handlers (ht ("client/registerCapability" 'ignore))
                     :priority 1
                     :server-id 'reason-ls)))
+#+end_src
+
+** JavaScript
+#+begin_src emacs-lisp :results none
+(use-package prettier-js
+  :ensure t
+  :defer t)
 #+end_src
 
 * Configure =Info=
@@ -1975,23 +2005,23 @@ Remove other LSP sessions.
 
 * Focus Mode
 #+begin_src emacs-lisp :results none
-;; (defun +focus/focus-mode-function ()
-;;     (when (derived-mode-p 'scala-mode) 
-;;       (setq olivetti-body-width 150))
-;;     (olivetti-mode)
-;;     (hide-mode-line-mode))
+(defun +focus/focus-mode-function ()
+    (when (derived-mode-p 'scala-mode) 
+      (setq olivetti-body-width 150))
+    (olivetti-mode)
+    (hide-mode-line-mode))
 
-;; (define-minor-mode porcupine/focus-mode
-;;   "Focus mode."
-;;   :init-value nil
-;;   :global 't
-;;   (if porcupine/focus-mode
-;;       (progn
-;;     	  (+focus/focus-mode-function)
-;;   	  (add-hook 'prog-mode-hook '+focus/focus-mode-function))
-;;     (remove-hook 'prog-mode-hook '+focus/focus-mode-function)
-;;     (olivetti-mode -1)
-;;     (hide-mode-line-mode -1)))
+(define-minor-mode porcupine/focus-mode
+  "Focus mode."
+  :init-value nil
+  :global 't
+  (if porcupine/focus-mode
+      (progn
+    	  (+focus/focus-mode-function)
+  	  (add-hook 'prog-mode-hook '+focus/focus-mode-function))
+    (remove-hook 'prog-mode-hook '+focus/focus-mode-function)
+    (olivetti-mode -1)
+    (hide-mode-line-mode -1)))
 #+end_src
 
 * Playing with org-protocol
