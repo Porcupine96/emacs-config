@@ -1048,6 +1048,12 @@ Org tag placement.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defun +org-agenda/test (item)
+  (let* ((marker (get-text-property 0 'org-marker item))
+         (scheduled (org-entry-get 0 "SCHDEDULED" marker)))
+    (print scheduled)
+    marker))
+
 (defun +org-agenda/created-today-group (item)
   (let* ((marker (get-text-property 0 'org-marker item))
          (property (org-entry-get marker "CreatedAt")))
@@ -1059,9 +1065,10 @@ Org tag placement.
     (setq org-super-agenda-groups
       '(
         ;; (:name "Today" :and (:time-grid t :not (:pred +org-agenda/created-today-group)))
-        (:name "Today" :and (:time-grid t))
+        ;; (:name "Today" :and (:time-grid t))
         ;; (:name "Added today" :pred +org-agenda/created-today-group)
-        (:name "Hot" :tag "@hot")
+        ;; (:name "Hot" :tag "@hot")
+        (:name "test" :pred +org-agenda/test)
         (:name "Habits" :habit t))))
 #+end_src
 
@@ -1121,7 +1128,8 @@ Org tag placement.
          "* TODO %?
 :PROPERTIES:
 :CreatedAt: %T
-:END:\n" )))
+:END:\n" )
+        ("d" "Dictionary" table-line (file "~/Dropbox/org/todo/dictionary.org") "| %:description | %:initial | %:link |")))
 #+end_src
 
 ** Org Babel
@@ -1448,9 +1456,10 @@ Save image and insert it's link at point.
 defer?
 #+begin_src emacs-lisp :results none
 (use-package emojify 
-   :ensure t
-   :config
-     (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
+   :defer t
+   :ensure t)
+   ;; :config
+   ;;   (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
 #+end_src
 
 * Configure =dired=
@@ -1857,9 +1866,9 @@ Remove other LSP sessions.
 
 #+begin_src emacs-lisp :results none
 (use-package eshell
-   :defer t
-   :bind (:map eshell-mode-map
-          ("C-l" . +eshell/clear)))
+   :defer t)
+   ;; :bind (:map eshell-mode-map
+   ;;        ("C-l" . +eshell/clear)))
 #+end_src
 
 * Configure =elfeed=
@@ -2031,14 +2040,6 @@ Remove other LSP sessions.
 (require 'org-roam-protocol)
 #+end_src
 
-* TMP
-#+begin_src emacs-lisp :results none
-(setq truncate-lines t)
-(setq-default truncate-lines t)
-(setq truncate-partial-width-windows nil)
-(setq-default truncate-partial-width-windows nil)
-#+end_src
-  
 * TODO TODOs
 - [ ] java script / react stuff
 - [ ] workgroups.el
