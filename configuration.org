@@ -42,15 +42,6 @@ Always compile packages, and use the newest version available.
 (setq load-prefer-newer t)
 #+end_src
 
-Quelpa configuration.
-#+begin_src emacs-lisp :results none
-(use-package quelpa
-  :ensure t)
-
-(use-package quelpa-use-package
-  :ensure t)
-#+end_src
-
 * Visuals
 Font.
 #+begin_src emacs-lisp :results none
@@ -380,6 +371,7 @@ Compilation settings.
       _f_ Find                             _e_ resources.org
       _r_ Recent                           _i_ inbox.org
       _d_ dotfiles                         _p_ private.org
+      _D_ dictionary
       _c_ Config                           _s_ studies.org
       _C_ Cheatsheet
       _t_ Theme                            _w_ work.org
@@ -395,6 +387,7 @@ Compilation settings.
   ("p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org")))
   ("e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
   ("C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org")))
+  ("D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org")))
   ("s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org")))
   ("d" (lambda () (interactive)(dired "~/dotfiles")))
   ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
@@ -602,7 +595,6 @@ Compilation settings.
    _i_ Counsel iMenu
    _m_ Monorepo Counsel Rg
    _f_ Monorepo Counsel Find File
-   _s_ Surround 
    ^^        
    "
    ("i" #'counsel-imenu)
@@ -966,7 +958,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   (setq org-image-actual-width nil)
 
   (setq org-todo-keywords
-	'((sequence "TODO(t)" "PROJECT(p)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+	'((sequence "TODO(t)" "PROJECT(p)" "REVIEW(r)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
           (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
   (evil-collection-define-key 'normal 'org-mode-map
@@ -977,7 +969,9 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   (:map evil-normal-state-map
 	("C-k" . evil-window-up)
 	("C-j" . evil-window-down)
-	("RET" . +org/ret-dwim))
+	("RET" . +org/ret-dwim)
+   :map org-mode-map
+    ("C-c n e" . emojify-insert-emoji))
   :hook (org-mode . org-indent-mode))
 #+end_src
 
@@ -1174,27 +1168,26 @@ Setup images.
 
 Change the image background. 
 #+begin_src emacs-lisp :results none
-(defun create-image-with-background-color (args)
-  "Specify background color of Org-mode inline image through modify `ARGS'."
-  (let* ((file (car args))
-         (type (cadr args))
-         (data-p (caddr args))
-         (props (cdddr args)))
-    ;; get this return result style from `create-image'
-    (append (list file type data-p)
-            (list :background  "#FFFFFF")
-            ;; (list :background  "#F0E68C")
-            props)))
+;; (defun create-image-with-background-color (args)
+;;   "Specify background color of Org-mode inline image through modify `ARGS'."
+;;   (let* ((file (car args))
+;;          (type (cadr args))
+;;          (data-p (caddr args))
+;;          (props (cdddr args)))
+;;     ;; get this return result style from `create-image'
+;;     (append (list file type data-p)
+;;             (list :background  "#FFFFFF")
+;;             ;; (list :background  "#F0E68C")
+;;             props)))
 
-(advice-add 'create-image :filter-args
-            #'create-image-with-background-color)
+;; (advice-add 'create-image :filter-args
+;;             #'create-image-with-background-color)
 #+end_src
 
 ** Org Roam
 #+begin_src emacs-lisp :results none
 (use-package org-roam
       :ensure t
-      :hook (after-init-hook . org-roam-mode)
       :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -1205,8 +1198,20 @@ Change the image background.
       :config 
         (setq org-roam-directory "/home/porcupine/Dropbox/org-roam")
         (setq org-roam-graph-viewer "/usr/bin/brave-browser")
-        (require 'org-roam-protocol))
+        (require 'org-roam-protocol)
+        (org-roam-mode))
 #+end_src
+
+** Org Fancy Priorities
+#+begin_src emacs-lisp :results none
+(use-package org-fancy-priorities
+  :ensure t
+  :hook
+    (org-mode . org-fancy-priorities-mode)
+  :config
+    (setq org-fancy-priorities-list '("❗" "❕" "🆙")))
+#+end_src
+
 
 ** Functions
 #+begin_src emacs-lisp :results none
@@ -1247,6 +1252,7 @@ Change the image background.
     (pcase type
       (`item (+org/insert-item-next-line))
       (`plain-list (+org/insert-item-next-line))
+      (`latex-fragment (org-latex-preview))
       (`paragraph
        (if (org-in-item-p) 
          (+org/insert-item-next-line)
@@ -1424,6 +1430,17 @@ Save image and insert it's link at point.
     (setq company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
     (setq company-dabbrev-downcase nil))
   #+end_src
+* Configure =emojify=
+defer?
+#+begin_src emacs-lisp :results none
+(use-package emojify 
+  :ensure t
+  :config
+  (setq emojify-display-style "unicode") 
+  (global-emojify-mode))
+;;   (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
+#+end_src
+
 * Configure =helpful=
  #+begin_src emacs-lisp :results none
  (use-package helpful :defer t)
@@ -1450,16 +1467,6 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (use-package jupyter
   :defer t)
-#+end_src
-
-* Configure =emojify=
-defer?
-#+begin_src emacs-lisp :results none
-(use-package emojify 
-   :defer t
-   :ensure t)
-   ;; :config
-   ;;   (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
 #+end_src
 
 * Configure =dired=
@@ -1952,47 +1959,6 @@ Remove other LSP sessions.
 (use-package pdf-tools
   :ensure t
   :defer t)
-#+end_src
-
-* Development
-#+begin_src emacs-lisp :results none
-(defun load-ejira ()
-  (interactive)
-  (use-package ejira
-    :quelpa (ejira :fetcher github :repo "nyyManni/ejira")
-    :init
-    (setq jiralib2-url              "https://chatbotize.atlassian.net"
-          jiralib2-auth             'token
-          jiralib2-user-login-name  "lukasz.kazmierczak@chatbotize.com"
-          jiralib2-token            "yfwfE6bf7onwJJmrMZPu613F"
-
-          ejira-org-directory       "~/.jira"
-          ejira-projects            '("CD")
-
-          ejira-priorities-alist    '(("Highest" . ?A)
-                                      ("High"    . ?B)
-                                      ("Medium"  . ?C)
-                                      ("Low" h    . ?D)
-                                      ("Lowest"  . ?E))
-          ejira-todo-states-alist   '(("To Do"       . 1)
-                                      ("In Progress" . 2)
-                                      ("Done"        . 3)))
-    :config
-    ;; Tries to auto-set custom fields by looking into /editmeta
-    ;; of an issue and an epic.
-    (add-hook 'jiralib2-post-login-hook #'ejira-guess-epic-sprint-fields)
-
-    ;; They can also be set manually if autoconfigure is not used.
-    ;; (setq ejira-sprint-field       'customfield_10001
-    ;;       ejira-epic-field         'customfield_10002
-    ;;       ejira-epic-summary-field 'customfield_10004)
-
-    ;; (require 'ejira-agenda)
-
-    ;; Make the issues visisble in your agenda by adding `ejira-org-directory'
-    ;; into your `org-agenda-files'.
-    ;; (add-to-list 'org-agenda-files ejira-org-directory)
-    ))
 #+end_src
 
 * Configure =olivetti=
