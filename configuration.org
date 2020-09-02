@@ -238,7 +238,8 @@ Compilation settings.
 (local-leader-def
   :states 'normal
   :keymaps 'python-mode-map
-    "s" #'run-python)
+    "s" #'run-python
+    "s" #'hydra-python-surround/body)
 #+end_src
 
 ** SPC j (org-mode)
@@ -675,6 +676,20 @@ Compilation settings.
    ("f" #'+scala/surround-word-with-future)
    ("s" #'+scala/surround-word-with-future-successful))
  #+end_src
+** Python
+#+begin_src emacs-lisp :results none
+(defhydra hydra-python-surround (:color blue)
+   "
+   ^
+   ^Surround^     
+   ^────^───────────
+   _l_ List
+   _o_ Optional
+   ^^        
+   "
+   ("l" #'+python/surround-word-with-list)
+   ("o" #'+python/surround-word-with-optional))
+ #+end_src
 
 * Global keybindings 
 Buffer commands.
@@ -909,7 +924,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   
   Recentf configuration.
   #+begin_src emacs-lisp :results none
-  (setq recentf-max-saved-items 200)
+  (setq recentf-max-saved-items 300)
   #+end_src
   
  #+begin_src emacs-lisp :results none
@@ -1191,7 +1206,7 @@ Change the image background.
       :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
-               ("C-c n g" . org-roam-graph-show))
+               ("C-c n g" . org-roam-graph))
               :map org-mode-map
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate)))
@@ -1201,6 +1216,24 @@ Change the image background.
         (require 'org-roam-protocol)
         (org-roam-mode))
 #+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package org-roam-server
+  :ensure t
+  :config
+  (setq org-roam-server-host "127.0.0.1"
+        org-roam-server-port 8080
+        org-roam-server-authenticate nil
+        org-roam-server-export-inline-images t
+        org-roam-server-serve-files nil
+        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+        org-roam-server-network-poll t
+        org-roam-server-network-arrows nil
+        org-roam-server-network-label-truncate t
+        org-roam-server-network-label-truncate-length 60
+        org-roam-server-network-label-wrap-length 20))
+#+end_src
+
 
 ** Org Fancy Priorities
 #+begin_src emacs-lisp :results none
@@ -1386,6 +1419,13 @@ Save image and insert it's link at point.
 
 (use-package treemacs-projectile
   :after treemacs)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package treemacs-icons-dired
+  :after treemacs dired
+  :ensure t
+  :config (treemacs-icons-dired-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1591,6 +1631,18 @@ Setup =python-mode=.
 (font-lock-add-keywords 'python-mode
  '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
 #+end_src
+
+
+#+begin_src emacs-lisp :results none
+(defun +python/surround-word-with-list ()
+  (interactive)
+  (+core/surround-word-with "List[" "]"))
+
+(defun +python/surround-word-with-optional ()
+  (interactive)
+  (+core/surround-word-with "Optional[" "]"))
+#+end_src
+
 ** Clojure
 #+begin_src emacs-lisp :results none
 (use-package clojure-mode
