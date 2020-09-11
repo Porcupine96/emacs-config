@@ -62,6 +62,7 @@ Color theme.
 (add-to-list 'custom-theme-load-path "~/my-emacs/themes")
 ;; (load-theme 'noctilux t)
 (load-theme 'modus-operandi t)
+;; (load-theme 'modus-vivendi t)
 #+end_src
  
 #+begin_src emacs-lisp :results none
@@ -69,6 +70,11 @@ Color theme.
   :ensure t
   :config 
   (setq modus-operandi-theme-section-headings t))
+
+(use-package modus-vivendi-theme
+  :ensure t
+  :config 
+  (setq modus-vivendi-theme-section-headings t))
 #+end_src
 
 * Sensible settings
@@ -417,6 +423,7 @@ Compilation settings.
   ("a" #'projectile-add-known-project)
   ("c" #'projectile-compile-project)
   ("C" #'projectile-repeat-last-command)
+  ;; ("f" (lambda () (interactive) (counsel-projectile-ag "--nonumbers")))
   ("f" (lambda () (interactive) (counsel-projectile-ag "--nonumbers")))
   ("p" #'counsel-projectile-switch-project)
   ("i" #'projectile-invalidate-cache)
@@ -505,7 +512,8 @@ Compilation settings.
     _l_ Find symbol
     _t_ LSP Hydra toggle
     _r_ Find references
-    _R_ Remove other workspaces
+    _R_ Rename
+    _x_ Remove other workspaces
     _i_ Go to implementation
     _I_ Copy Import
     ^^        
@@ -519,7 +527,8 @@ Compilation settings.
     ("t" #'hydra-lsp-toggle/body)
     ("T" #'lsp-treemacs-errors-list)
     ("r" #'lsp-ui-peek-find-references)
-    ("R" #'+lsp/remove-other-sessions)
+    ("R" #'lsp-rename)
+    ("x" #'+lsp/remove-other-sessions)
     ("i" #'lsp-goto-implementation)
     ("I" #'+scala/copy-import))
 #+end_src
@@ -700,6 +709,9 @@ Buffer commands.
 (global-set-key (kbd "C-c b p") #'previous-buffer)
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(global-unset-key (kbd "C-SPC"))
+#+end_src
 
 Evaluation commancs.
 #+begin_src emacs-lisp :results none
@@ -755,6 +767,11 @@ Use =zoom-window=.
 Use =org-capture=.
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-c c") #'org-capture)
+#+end_src
+
+Use =emojify-mode=
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c n e") #'emojify-insert-emoji)
 #+end_src
 
 Scale text.
@@ -963,31 +980,28 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 * Configure =org=
 ** Core
 #+begin_src emacs-lisp :results none
-(use-package org
-  :ensure org-plus-contrib
-  :config 
-  (require 'org-tempo)
+  (use-package org
+    :ensure org-plus-contrib
+    :config 
+    (require 'org-tempo)
 
-  (setq org-fontify-done-headline t)
-  (setq org-use-fast-todo-selection 'expert)
-  (setq org-image-actual-width nil)
+    (setq org-fontify-done-headline t)
+    (setq org-use-fast-todo-selection 'expert)
+    (setq org-image-actual-width nil)
 
-  (setq org-todo-keywords
-	'((sequence "TODO(t)" "PROJECT(p)" "REVIEW(r)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
-          (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+    (setq org-todo-keywords
+	  '((sequence "TODO(t)" "PROJECT(p)" "REVIEW(r)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+	    (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
-  (evil-collection-define-key 'normal 'org-mode-map
-    (kbd "C-k") 'evil-window-up
-    (kbd "C-j") 'evil-window-down)
+    (evil-collection-define-key 'normal 'org-mode-map
+      (kbd "C-k") 'evil-window-up
+      (kbd "C-j") 'evil-window-down)
 
-  :bind
-  (:map evil-normal-state-map
-	("C-k" . evil-window-up)
-	("C-j" . evil-window-down)
-	("RET" . +org/ret-dwim)
-   :map org-mode-map
-    ("C-c n e" . emojify-insert-emoji))
-  :hook (org-mode . org-indent-mode))
+    :bind
+    (:map evil-normal-state-map
+	  ("C-k" . evil-window-up)
+	  ("C-j" . evil-window-down))
+    :hook (org-mode . org-indent-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1040,6 +1054,11 @@ Org tag placement.
       "C-<return>" '+org/c-ret-dwim
       "C-S-<return>" '+org/c-s-ret-dwim
       "C-M-<return>" '+org/c-m-ret-dwim)
+
+  (general-define-key 
+      :states '('normal)
+      :keymaps '(evil-org-mode-map org-mode-map)
+      "<return>" '+org/ret-dwim)
 
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
@@ -1206,6 +1225,7 @@ Change the image background.
       :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
+               ("C-c n C" . org-roam-db-build-cache)
                ("C-c n g" . org-roam-graph))
               :map org-mode-map
               (("C-c n i" . org-roam-insert))
@@ -1234,7 +1254,6 @@ Change the image background.
         org-roam-server-network-label-wrap-length 20))
 #+end_src
 
-
 ** Org Fancy Priorities
 #+begin_src emacs-lisp :results none
 (use-package org-fancy-priorities
@@ -1244,7 +1263,6 @@ Change the image background.
   :config
     (setq org-fancy-priorities-list '("❗" "❕" "🆙")))
 #+end_src
-
 
 ** Functions
 #+begin_src emacs-lisp :results none
@@ -1342,6 +1360,19 @@ Save image and insert it's link at point.
          (path (concat "~/Dropbox/img/" (number-to-string now) ".png")))
     (url-copy-file url path)
     (insert (concat "#+ATTR_ORG: :width 350\n" "[[" path "]]"))))
+#+end_src
+* Configure =flyspell=
+#+begin_src emacs-lisp :results none 
+(use-package flyspell
+  :ensure t
+  :hook (org-mode . flyspell-mode))
+#+end_src
+* Configure =guess-language=
+#+begin_src emacs-lisp :results none
+(use-package guess-language
+  :ensure t
+  :config
+    (setq guess-language-languages '(en pl)))
 #+end_src
 
 * Configure =yasnippet=
@@ -1463,24 +1494,14 @@ Save image and insert it's link at point.
   :config
     (global-company-mode 1)
     (with-eval-after-load 'company
-        (define-key company-mode-map (kbd "C-<space>") #'company-complete)
+        (define-key company-mode-map (kbd "C-SPC") #'company-complete)
+        (define-key company-active-map (kbd "RET") #'company-complete-selection)
         (define-key company-active-map (kbd "<return>") #'company-complete-selection)
         (define-key company-active-map (kbd "<tab>") #'company-complete-common)
         (define-key company-active-map (kbd "TAB") #'company-complete-common))
     (setq company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
     (setq company-dabbrev-downcase nil))
   #+end_src
-* Configure =emojify=
-defer?
-#+begin_src emacs-lisp :results none
-(use-package emojify 
-  :ensure t
-  :config
-  (setq emojify-display-style "unicode") 
-  (global-emojify-mode))
-;;   (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
-#+end_src
-
 * Configure =helpful=
  #+begin_src emacs-lisp :results none
  (use-package helpful :defer t)
@@ -1509,6 +1530,16 @@ defer?
   :defer t)
 #+end_src
 
+* Configure =emojify=
+defer?
+#+begin_src emacs-lisp :results none
+(use-package emojify 
+  :ensure t
+  :config
+  ;; (setq emojify-display-style "unicode") 
+  (global-emojify-mode))
+;;   (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
+#+end_src
 * Configure =dired=
 #+begin_src emacs-lisp :results none
   (defun +dired/open-externally ()
