@@ -61,8 +61,8 @@ Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/my-emacs/themes")
 ;; (load-theme 'noctilux t)
-(load-theme 'modus-operandi t)
-;; (load-theme 'modus-vivendi t)
+;; (load-theme 'modus-operandi t)
+(load-theme 'modus-vivendi t)
 #+end_src
  
 #+begin_src emacs-lisp :results none
@@ -416,6 +416,7 @@ Compilation settings.
     _f_ Find project file
     _i_ Invalidate project cache
     _t_ Add current project to treemacs
+    _T_ TODOs in project
     _s_ Save project files
     ^^        
     ^^        
@@ -424,10 +425,11 @@ Compilation settings.
   ("c" #'projectile-compile-project)
   ("C" #'projectile-repeat-last-command)
   ;; ("f" (lambda () (interactive) (counsel-projectile-ag "--nonumbers")))
-  ("f" (lambda () (interactive) (counsel-projectile-ag "--nonumbers")))
+  ("f" #'counsel-projectile-ag)
   ("p" #'counsel-projectile-switch-project)
   ("i" #'projectile-invalidate-cache)
   ("t" #'treemacs-add-and-display-current-project)
+  ("T" #'+projectile/search-todos)
   ("s" #'projectile-save-project-buffers)
   ("w" #'+projectile/search-word-under-cursor))
 #+end_src
@@ -1182,6 +1184,7 @@ Load languages.
    (python . t)
    (ammonite . t)
    (jupyter . t)
+   (js . t)
    (sql . t)
    (haskell . t)))
 #+end_src
@@ -1413,6 +1416,12 @@ Save image and insert it's link at point.
     (counsel-projectile-ag)))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun +projectile/search-todos ()
+  (interactive)
+  (let ((counsel-projectile-ag-initial-input "todo:"))
+    (counsel-projectile-ag)))
+#+end_src
 * Configure =magit=
  #+begin_src emacs-lisp :results none
 (use-package magit :defer t)
@@ -1492,6 +1501,7 @@ Save image and insert it's link at point.
 (use-package company
   :defer t
   :config
+    (setq company-minimum-prefix-length 1)
     (global-company-mode 1)
     (with-eval-after-load 'company
         (define-key company-mode-map (kbd "C-SPC") #'company-complete)
@@ -1956,9 +1966,12 @@ Remove other LSP sessions.
 
 #+begin_src emacs-lisp :results none
 (use-package eshell
-   :defer t)
-   ;; :bind (:map eshell-mode-map
-   ;;        ("C-l" . +eshell/clear)))
+  :defer t
+  :config
+    ;; NOTE: the bindings need to be set using a hook
+    ;; because of the known issue: https://github.com/noctuid/general.el/issues/32
+    (add-hook 'eshell-mode-hook
+      (lambda () (define-key eshell-mode-map (kbd "C-l") #'+eshell/clear))))
 #+end_src
 
 * Configure =elfeed=
@@ -2042,6 +2055,10 @@ Remove other LSP sessions.
 (use-package pdf-tools
   :ensure t
   :defer t)
+    ;; (evil-set-initial-state 'pdf-view-mode 'emacs)
+    ;; (add-hook 'pdf-view-mode-hook
+    ;; (lambda ()
+    ;;     (set (make-local-variable 'evil-emacs-state-cursor) (list nil)))))
 #+end_src
 
 * Configure =olivetti=

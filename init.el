@@ -25,8 +25,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("cc63dade39a93f82519c9eef9cbf4ba7d4378a81f46250ccfa5a29119b96e253" "7f8b4cbf5d20b71daf43378c41471130412b8fcfc3380c371d9ebb5b27416ba5" default))
- '(elfeed-search-remain-on-entry t)
+   '("a1e54c03c2fa33d4cacabd32fcdbab8a8f3c287d8e6565605817c61cf179c6c0" "cc63dade39a93f82519c9eef9cbf4ba7d4378a81f46250ccfa5a29119b96e253" "7f8b4cbf5d20b71daf43378c41471130412b8fcfc3380c371d9ebb5b27416ba5" default))
+ '(elfeed-search-remain-on-entry t t)
  '(head-hint nil t)
  '(hydra-key-format-spec "[%s]")
  '(olivetti-body-width 90)
