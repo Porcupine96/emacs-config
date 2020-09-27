@@ -45,9 +45,9 @@ Always compile packages, and use the newest version available.
 * Visuals
 Font.
 #+begin_src emacs-lisp :results none
-(set-face-attribute 'default nil :font "SF Mono-11")
-(set-face-attribute 'fixed-pitch nil :font "SF Mono-12")
-(set-face-attribute 'variable-pitch nil :font "Lato-15")
+(set-face-attribute 'default nil :font "Input Mono Narrow-11")
+(set-face-attribute 'fixed-pitch nil :font "Input Mono Narrow-12")
+;; (set-face-attribute 'variable-pitch nil :font "Lato-15")
 #+end_src
  
 Hide all the bezels.
@@ -57,14 +57,6 @@ Hide all the bezels.
 (toggle-scroll-bar -1)
 #+end_src
 
-Color theme.
-#+begin_src emacs-lisp :results none
-(add-to-list 'custom-theme-load-path "~/my-emacs/themes")
-;; (load-theme 'noctilux t)
-;; (load-theme 'modus-operandi t)
-(load-theme 'modus-vivendi t)
-#+end_src
- 
 #+begin_src emacs-lisp :results none
 (use-package modus-operandi-theme
   :ensure t
@@ -77,6 +69,14 @@ Color theme.
   (setq modus-vivendi-theme-section-headings t))
 #+end_src
 
+Color theme.
+#+begin_src emacs-lisp :results none
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+;; (load-theme 'noctilux t)
+;; (load-theme 'modus-operandi t)
+(load-theme 'modus-vivendi t)
+#+end_src
+ 
 * Sensible settings
 Disable backup and lockfiles.
 #+begin_src emacs-lisp :results none
@@ -357,7 +357,6 @@ Compilation settings.
     _S_ ~/scripts
     _d_ ~/Downloads
     _D_ ~/Dropbox
-    _t_ ~/codeheroes/research-repo/thesis
     _w_ ~/codeheroes/chatbotize
     ^^        
     "
@@ -365,8 +364,7 @@ Compilation settings.
     ("S" (lambda () (interactive) (dired "~/scripts")))
     ("d" (lambda () (interactive) (dired "~/Downloads")))
     ("D" (lambda () (interactive) (dired "~/Dropbox")))
-    ("t" (lambda () (interactive) (dired "~/codeheroes/research-repo/thesis")))
-    ("w" (lambda () (interactive) (dired "~/codeheroes/chatbotize"))))
+    ("w" (lambda () (interactive) (dired "~/work"))))
   #+end_src
 ** File 
 #+begin_src emacs-lisp :results none
@@ -397,8 +395,8 @@ Compilation settings.
   ("D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org")))
   ("s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org")))
   ("d" (lambda () (interactive)(dired "~/dotfiles")))
-  ("c" (lambda () (interactive)(find-file "~/my-emacs/configuration.org")))
-  ("t" (lambda () (interactive)(find-file "~/my-emacs/themes/noctilux-theme.el")))
+  ("c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org")))
+  ("t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el")))
   ("x" (lambda () (interactive)(find-file "~/.xmonad/xmonad.hs"))))
   #+end_src
 
@@ -806,7 +804,7 @@ Scale text.
  #+begin_src emacs-lisp :results none
 (defun +work/counsel-monorepo ()
   (interactive)
-  (counsel-rg "" "/home/porcupine/codeheroes/chatbotize/monorepo" "--iglob !*.lock"))
+  (counsel-rg "" "~/work/monorepo" "--iglob !*.lock"))
 
 (defun +work/counsel-find-file-monorepo ()
   (interactive)
@@ -977,7 +975,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
         ("] e" . flycheck-next-error))
 
   :config 
-    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc proselint)))
   #+end_src
 * Configure =org=
 ** Core
@@ -1098,7 +1096,7 @@ Org tag placement.
         ;; (:name "Today" :and (:time-grid t))
         ;; (:name "Added today" :pred +org-agenda/created-today-group)
         ;; (:name "Hot" :tag "@hot")
-        (:name "test" :pred +org-agenda/test)
+        (:name "Hot" :priority "A" )
         (:name "Habits" :habit t))))
 #+end_src
 
@@ -1172,6 +1170,11 @@ Org tag placement.
 #+begin_src emacs-lisp :results none
 (use-package ob-ipython
   :ensure t
+  :defer t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package jupyter
   :defer t)
 #+end_src
 
@@ -1393,7 +1396,7 @@ Save image and insert it's link at point.
    :defer t
    :config
      (projectile-global-mode)
-     (setq projectile-project-search-path '("~/codeheroes/chatbotize/monorepo"))
+     (setq projectile-project-search-path '("~/work/monorepo"))
      (setq projectile-enable-caching t)
      (setq projectile-project-root-files-functions #'(projectile-root-top-down
                                                         projectile-root-top-down-recurring
@@ -1531,12 +1534,6 @@ Save image and insert it's link at point.
   :defer t)
   
 (use-package org-re-reveal
-  :defer t)
-#+end_src
-
-* Configure =jupyter=
-#+begin_src emacs-lisp :results none
-(use-package jupyter
   :defer t)
 #+end_src
 
