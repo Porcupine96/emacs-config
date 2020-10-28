@@ -1,3 +1,5 @@
+#+STARTUP: overview
+
 * Startup
 #+begin_src emacs-lisp :results none
   (defvar file-name-handler-alist-old file-name-handler-alist)
@@ -61,20 +63,20 @@ Hide all the bezels.
 (use-package modus-operandi-theme
   :ensure t
   :config 
-  (setq modus-operandi-theme-section-headings t))
+    (setq modus-operandi-theme-section-headings t))
 
 (use-package modus-vivendi-theme
   :ensure t
   :config 
-  (setq modus-vivendi-theme-section-headings t))
+    (setq modus-vivendi-theme-section-headings t))
 #+end_src
 
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-;; (load-theme 'noctilux t)
+(load-theme 'noctilux t)
 ;; (load-theme 'modus-operandi t)
-(load-theme 'modus-vivendi t)
+;; (load-theme 'modus-vivendi t)
 #+end_src
  
 * Sensible settings
@@ -231,6 +233,7 @@ Compilation settings.
   :states 'normal
   :keymaps 'org-mode-map
     "s" #'org-schedule
+    "S" #'org-screenshot-take
     "d" #'org-deadline
     "i" #'+org/save-image-insert-link
     "t" #'org-todo)
@@ -262,6 +265,29 @@ Compilation settings.
   "k" #'org-babel-previous-src-block
   "r" #'jupyter-run-repl
   "E" #'jupyter-org-execute-to-point)
+#+end_src
+
+** org-mode
+#+begin_src emacs-lisp :results none
+(general-define-key 
+    :states '('normal 'insert)
+    :keymaps '(evil-org-mode-map org-mode-map)
+    "C-<return>" '+org/c-ret-dwim
+    "C-S-<return>" '+org/c-s-ret-dwim
+    "C-M-<return>" '+org/c-m-ret-dwim)
+
+(general-define-key 
+    :states '('normal)
+    :keymaps '(evil-org-mode-map org-mode-map)
+    "<return>" '+org/ret-dwim)
+#+end_src
+
+** TODO bufler
+#+begin_src emacs-lisp :results none
+(general-define-key 
+    :states '('normal)
+    :keymaps '(bufler-mode-map evil-motion-state-map)
+    "<return>" 'bufler-switch-bufer)
 #+end_src
 
 * Use =evil-mode=
@@ -321,6 +347,7 @@ Compilation settings.
   ^Agenda^     
   ^────^───────────
   _a_ Agenda
+  _c_ Calendar
   _w_ Weekly agenda
   _d_ Daily agenda
   _t_ Agenda tag view
@@ -329,6 +356,7 @@ Compilation settings.
   ^^        
   "
   ("a" #'org-agenda)
+  ("c" #'open-calendar)
   ("w" #'+agenda/weekly-agenda)
   ("d" #'+agenda/daily-agenda)
   ("t" #'+agenda/filter-by-tag)
@@ -376,11 +404,11 @@ Compilation settings.
       _f_ Find                             _e_ resources.org
       _r_ Recent                           _i_ inbox.org
       _d_ dotfiles                         _p_ private.org
-      _D_ dictionary
+      _D_ dictionary                       _P_ polybar
       _c_ Config                           _s_ studies.org
       _C_ Cheatsheet
       _t_ Theme                            _w_ work.org
-      _x_ XMonad                           _W_ work/work.org
+      _x_ i3                              _W_ work/work.org
       ^^        
       ^^        
       "
@@ -390,6 +418,7 @@ Compilation settings.
   ("w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org")))
   ("W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org")))
   ("p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org")))
+  ("P" (lambda () (interactive)(find-file "~/.config/polybar/config")))
   ("e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
   ("C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org")))
   ("D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org")))
@@ -397,7 +426,7 @@ Compilation settings.
   ("d" (lambda () (interactive)(dired "~/dotfiles")))
   ("c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org")))
   ("t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el")))
-  ("x" (lambda () (interactive)(find-file "~/.xmonad/xmonad.hs"))))
+  ("x" (lambda () (interactive)(find-file "~/.config/i3/config"))))
   #+end_src
 
 ** Project 
@@ -448,7 +477,7 @@ Compilation settings.
     ^^        
     ^^        
     "
-  ("b" #'ivy-switch-buffer)
+  ("b" #'bufler)
   ("c" (lambda () (interactive) (switch-to-buffer "*compilation*")))
   ("n" #'next-buffer)
   ("N" #'scratch)
@@ -713,6 +742,10 @@ Buffer commands.
 (global-unset-key (kbd "C-SPC"))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "M-\"") #'helm-show-kill-ring)
+#+end_src
+
 Evaluation commancs.
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-c e b") #'eval-buffer)
@@ -740,12 +773,6 @@ Easier movements between splits.
 Only window.
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-c o") #'delete-other-windows)
-#+end_src
-
-Winner mode.
-#+begin_src emacs-lisp :results none
-(global-set-key (kbd "C-c h") #'winner-undo)
-(global-set-key (kbd "C-c l") #'winner-redo)
 #+end_src
 
 Vim-like screen jumping.
@@ -980,28 +1007,28 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 * Configure =org=
 ** Core
 #+begin_src emacs-lisp :results none
-  (use-package org
-    :ensure org-plus-contrib
-    :config 
-    (require 'org-tempo)
+(use-package org
+  :ensure org-plus-contrib
+  :config 
+  (require 'org-tempo)
 
-    (setq org-fontify-done-headline t)
-    (setq org-use-fast-todo-selection 'expert)
-    (setq org-image-actual-width nil)
+  (setq org-fontify-done-headline t)
+  (setq org-use-fast-todo-selection 'expert)
+  (setq org-image-actual-width nil)
 
-    (setq org-todo-keywords
-	  '((sequence "TODO(t)" "PROJECT(p)" "REVIEW(r)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
-	    (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+  (setq org-todo-keywords
+  '((sequence "REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+    (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
-    (evil-collection-define-key 'normal 'org-mode-map
-      (kbd "C-k") 'evil-window-up
-      (kbd "C-j") 'evil-window-down)
+  (evil-collection-define-key 'normal 'org-mode-map
+    (kbd "C-k") 'evil-window-up
+    (kbd "C-j") 'evil-window-down)
 
-    :bind
-    (:map evil-normal-state-map
-	  ("C-k" . evil-window-up)
-	  ("C-j" . evil-window-down))
-    :hook (org-mode . org-indent-mode))
+  :bind
+     (:map evil-normal-state-map
+         ("C-k" . evil-window-up)
+         ("C-j" . evil-window-down))
+  :hook (org-mode . org-indent-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1044,10 +1071,21 @@ Org tag placement.
   :ensure t
   :after org
   :config
-  (add-hook 'org-mode-hook 'evil-org-mode)
-  ;; (add-hook 'evil-org-mode-hook
-  ;; 	    (lambda () (evil-org-set-key-theme)))
+    (add-hook 'org-mode-hook 'evil-org-mode)
+    (add-hook 'evil-org-mode-hook 'general-define-org-keys)
+    
 
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
+  ;; TODO: verify whether this is needed
+  ;; :bind (:map evil-org-mode-map 
+  ;;       ("C-S-<return>" . #'org-insert-subheading)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun general-define-org-keys ()
+  (message "HELLO I'M HERE")
   (general-define-key 
       :states '('normal 'insert)
       :keymaps '(evil-org-mode-map org-mode-map)
@@ -1058,14 +1096,7 @@ Org tag placement.
   (general-define-key 
       :states '('normal)
       :keymaps '(evil-org-mode-map org-mode-map)
-      "<return>" '+org/ret-dwim)
-
-  (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
-
-  ;; TODO: verify whether this is needed
-  ;; :bind (:map evil-org-mode-map 
-  ;;       ("C-S-<return>" . #'org-insert-subheading)))
+      "<return>" '+org/ret-dwim))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1088,23 +1119,25 @@ Org tag placement.
     property))
 
 (use-package org-super-agenda
-  :hook (org-agenda-mode . org-super-agenda-mode)
+  :hook
+     (org-agenda-mode . org-super-agenda-mode)
+     (org-agenda-mode . pagenda-mode)
   :config
     (setq org-super-agenda-groups
       '(
-        ;; (:name "Today" :and (:time-grid t :not (:pred +org-agenda/created-today-group)))
-        ;; (:name "Today" :and (:time-grid t))
-        ;; (:name "Added today" :pred +org-agenda/created-today-group)
-        ;; (:name "Hot" :tag "@hot")
-        (:name "Hot" :priority "A" )
-        (:name "Habits" :habit t))))
+        (:name " Today" :time-grid t)
+        (:name ":flame: Hot" :priority "A" )
+        (:name "♨ Warm" :priority "B" )
+        (:name "Studies" :priority "B" )
+        (:name ":repeat: Habits" :habit t))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (defun +agenda/weekly-agenda ()
   (interactive)
-  (org-agenda nil "a"))
-  
+  (let ((org-agenda-span 8))
+    (org-agenda nil "a")))
+
 (defun +agenda/daily-agenda ()
   (interactive)
   (let ((org-agenda-span 1))
@@ -1238,7 +1271,7 @@ Change the image background.
               (("C-c n I" . org-roam-insert-immediate)))
       :config 
         (setq org-roam-directory "/home/porcupine/Dropbox/org-roam")
-        (setq org-roam-graph-viewer "/usr/bin/brave-browser")
+        (setq org-roam-graph-viewer "/usr/bin/brave")
         (require 'org-roam-protocol)
         (org-roam-mode))
 #+end_src
@@ -1248,7 +1281,7 @@ Change the image background.
   :ensure t
   :config
   (setq org-roam-server-host "127.0.0.1"
-        org-roam-server-port 8080
+        org-roam-server-port 5555
         org-roam-server-authenticate nil
         org-roam-server-export-inline-images t
         org-roam-server-serve-files nil
@@ -1371,7 +1404,15 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none 
 (use-package flyspell
   :ensure t
-  :hook (org-mode . flyspell-mode))
+  :hook (org-mode . flyspell-mode)
+  :config
+    (setq ispell-program-name "hunspell")
+    (setq ispell-dictionary "english,polish")
+    (ispell-set-spellchecker-params)
+    (ispell-hunspell-add-multi-dic "english,polish")
+  :bind
+     (:map flyspell-mode-map
+        ("C-c $" . nil)))
 #+end_src
 * Configure =guess-language=
 #+begin_src emacs-lisp :results none
@@ -1471,12 +1512,11 @@ Save image and insert it's link at point.
   :config (treemacs-icons-dired-mode))
 #+end_src
 
+* Configure =bufler=
 #+begin_src emacs-lisp :results none
-(defun +treemacs/add-current-project-as-only ()
-  (interactive)
-  (-each (treemacs-workspace->projects (treemacs-current-workspace))
-    #'treemacs-do-remove-project-from-workspace)
-  (treemacs-add-and-display-current-project))
+(use-package bufler
+  :ensure t
+  :defer t)
 #+end_src
 
 * Configure =doom-modeline=
@@ -1500,7 +1540,7 @@ Save image and insert it's link at point.
        '(zoom-window-mode-line-color "#4682B4")))
  #+end_src
 * Configure =company=
-  #+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none
 (use-package company
   :defer t
   :config
@@ -1514,7 +1554,34 @@ Save image and insert it's link at point.
         (define-key company-active-map (kbd "TAB") #'company-complete-common))
     (setq company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
     (setq company-dabbrev-downcase nil))
-  #+end_src
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +company/company-complete ()
+  "The same as 'company-complete' but adds 'company-select-next' at the end"
+  (interactive)
+  (when (company-manual-begin)
+    (if (or company-selection-changed
+            (and (eq real-last-command 'company-complete)
+                 (eq last-command 'company-complete-common)))
+        (call-interactively 'company-complete-selection)
+      (call-interactively 'company-complete-common)
+      (when company-candidates
+        (setq this-command 'company-complete-common))))
+        (company-select-next))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun advice-unadvice (sym)
+  "Remove all advices from symbol SYM."
+  (interactive "aFunction symbol: ")
+  (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(advice-add 'company-complete :after (lambda (&rest r) (company-select-next)))
+#+end_src
+
 * Configure =helpful=
  #+begin_src emacs-lisp :results none
  (use-package helpful :defer t)
@@ -1581,6 +1648,25 @@ defer?
     (setq ediff-split-window-function 'split-window-horizontally)
     (setq ediff-forward-word-function 'forward-char))
 #+end_src
+* Configure =calfw=
+#+begin_src emacs-lisp :results none
+(use-package calfw
+  :ensure t
+  :config
+    (setq cfw:display-calendar-holidays nil))
+
+(use-package calfw-org
+  :ensure t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun open-calendar ()
+  (interactive)
+  (cfw:open-calendar-buffer
+   :contents-sources
+    (list (cfw:org-create-source "Blue"))))
+#+end_src
+
 * Configure =smerge=
 #+begin_src emacs-lisp :results none
 (use-package smerge-mode
@@ -1648,8 +1734,10 @@ Setup =python-mode=.
 
 #+begin_src emacs-lisp :results none
 (use-package blacken
+  :ensure t
   :after python-mode
-  :hook (python-mode . blacken-mode))
+  :config
+    (add-hook 'python-mode-hook 'blacken-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1770,6 +1858,17 @@ TODO colors.
   (evil-ex (concat "'<,'>" "s/" "case \\(.*\\) => \\(.*\\)" "/" "case \\2 => \\1")))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun +scala/replace-with-filename ()
+  (interactive)
+  (let ((path (buffer-file-name)))
+    (string-match ".*/\\(.*\\)\\.scala" path)
+    (left-word 1)
+    (kill-word 1)
+    (insert (substring path (match-beginning 1) (match-end 1)))))
+#+end_src
+
+
 ** Protobuf
    #+begin_src emacs-lisp :results none
    (use-package protobuf-mode
@@ -1790,8 +1889,11 @@ TODO colors.
  :hook ((scala-mode . lsp)
         (python-mode . lsp)
         (sh-mode . lsp-deferred))
+ :init
+       (setq lsp-keymap-prefix "C-c l")
  :config
        (setq lsp-prefer-flymake nil)
+       (lsp-enable-which-key-integration t)
  :bind (:map evil-normal-state-map 
        ("M-w" . +lsp-ui/toggle-doc-focus)          
        ("C-<return>" . lsp-execute-code-action)))
@@ -2073,6 +2175,11 @@ Remove other LSP sessions.
 (use-package hide-mode-line
   :ensure t 
   :defer t)
+#+end_src
+
+* Own
+#+begin_src emacs-lisp :results none
+(load-file "~/.emacs.d/config/pagenda.el")
 #+end_src
 
 * Focus Mode

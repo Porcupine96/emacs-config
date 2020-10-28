@@ -71,10 +71,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     (purple    "#bd93f9" "#bd93f9" "#bd93f9" "brightmagenta" "magenta")
     (darkblue  "#6272a4" "#6272a4" "#6272a4" "blue"          "blue")
     (blue      "#0198E1" "#0198E1" "#0198E1" "blue"          "blue")
-    ;; (blue      "#aaccff" "#aaccff" "#aaccff" "blue"         "blue")
-	
     (pink      "#ff79c6" "#ff79c6" "#ff79c6" "pink"         "pink")
-    ;; (cyan      "#8be9fd" "#7590db""#8be9fd" "#8be9fd" "cyan"         "cyan")
     (cyan      "#7590db" "#7590db" "#7590db" "cyan"         "cyan")
     (oldcyan   "#aadddd" "#aadddd" "#aadddd" "cyan"         "cyan")
     (white     "#ffffff" "#ffffff" "#ffffff" "white"        "white")
@@ -373,6 +370,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (org-done          ((t (,@fmt-big ,@fmt-none ,@fg-gray   ,@bg-base03))))
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray   ,@bg-base03))))
              (org-date          ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
+
+             (org-code          ((t (,@fmt-none ,@fg-green ,@bg-base03))))
+             (org-verbatim      ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
 
 	     (org-document-title        ((t (,@fmt-bigger ,@fg-gray  ,@bg-base03))))
 	     (org-document-info-keyword ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
