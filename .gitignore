@@ -17,3 +17,6 @@ synonyms.el
 tramp
 url/
 configuration.el
+/org-roam.db
+/.dap-breakpoints
+/auto-save-list/
