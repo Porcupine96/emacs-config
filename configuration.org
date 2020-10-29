@@ -614,6 +614,7 @@ Compilation settings.
    _p_ Treemacs
    _e_ Eshell
    _E_ Eshell Open In Default
+   _P_ Eshell Open In Project Root
    _o_ Olivetti
    ^^        
    ^^        
@@ -621,6 +622,7 @@ Compilation settings.
    ("p" #'treemacs)
    ("e" #'eshell)
    ("E" #'+eshell/open-in-default)
+   ("P" #'+eshell/open-in-project-root)
    ("o" #'porcupine/focus-mode))
  #+end_src
 
@@ -1207,6 +1209,12 @@ Org tag placement.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(use-package ob-http
+  :ensure t
+  :defer t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (use-package jupyter
   :defer t)
 #+end_src
@@ -1222,6 +1230,7 @@ Load languages.
    (jupyter . t)
    (js . t)
    (sql . t)
+   (http . t)
    (haskell . t)))
 #+end_src
 
@@ -1628,16 +1637,20 @@ defer?
 #+end_src
 
 #+begin_src emacs-lisp :results none
-  (use-package dired-subtree
-    :ensure t
-    :after dired
-    :bind (:map dired-mode-map
-                ("<tab>" . dired-subtree-toggle)
-                ("<C-tab>" . dired-subtree-cycle)
-                ("<backtab>" . dired-subtree-remove)))
-
-  (setq dired-listing-switches "-alh")
+(use-package dired-subtree
+  :ensure t
+  :after dired
+  :bind (:map dired-mode-map
+              ("<tab>" . dired-subtree-toggle)
+              ("<C-tab>" . dired-subtree-cycle)
+              ("<backtab>" . dired-subtree-remove))
+  :config
+    (setq dired-listing-switches "-alh")
+    (advice-add 'dired-subtree-toggle :after (lambda (&rest r) (revert-buffer)))
+    (advice-add 'dired-subtree-cycle :after (lambda (&rest r) (revert-buffer)))
+    (advice-add 'dired-subtree-remove :after (lambda (&rest r) (revert-buffer))))
 #+end_src
+
 * Configure =ediff=
 #+begin_src emacs-lisp :results none
 (use-package ediff
@@ -2061,6 +2074,12 @@ Remove other LSP sessions.
     (eshell)
     (eshell/cd current-dir)
     (+eshell/clear)))
+
+(defun +eshell/open-in-project-root ()
+  (interactive)
+  (eshell)
+  (eshell/cd (projectile-project-root))
+  (+eshell/clear))
 #+end_src
 
 #+begin_src emacs-lisp :results none
