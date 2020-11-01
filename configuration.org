@@ -994,6 +994,18 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
         (t . ivy-display-function-fallback)))
         (ivy-posframe-mode 1))
   #+end_src
+* Configure =ivy-bibtex=
+#+begin_src emacs-lisp :results none
+(use-package ivy-bibtex
+  :ensure t
+  :defer t
+  :bind (:map org-mode-map 
+    (("C-c n b" . ivy-bibtex)))
+  :config
+    (setq bibtex-completion-bibliography '("~/Dropbox/papers/papers.bib"))
+    (setq bibtex-completion-library-path '("~/Dropbox/papers/pdfs")))
+#+end_src
+
 * Configure =flycheck=
   #+begin_src emacs-lisp :results none
 (use-package flycheck
@@ -1302,6 +1314,21 @@ Change the image background.
         org-roam-server-network-label-wrap-length 20))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(use-package org-roam-bibtex
+  :ensure t)
+#+end_src
+
+#+begin_src emacs-lisp
+(key-chord-define org-mode-map "[[" #'+org/insert-roam-link)
+
+(defun +org/insert-roam-link ()
+    "Inserts an Org-roam link."
+    (interactive)
+    (insert "[[roam:]]")
+    (backward-char 2))
+#+end_src
+
 ** Org Fancy Priorities
 #+begin_src emacs-lisp :results none
 (use-package org-fancy-priorities
@@ -1423,12 +1450,13 @@ Save image and insert it's link at point.
      (:map flyspell-mode-map
         ("C-c $" . nil)))
 #+end_src
-* Configure =guess-language=
+* KILL Configure =guess-language=
+CLOSED: [2020-11-01 Sun 00:03]
 #+begin_src emacs-lisp :results none
-(use-package guess-language
-  :ensure t
-  :config
-    (setq guess-language-languages '(en pl)))
+;; (use-package guess-language
+;;   :ensure t
+;;   :config
+;;     (setq guess-language-languages '(en pl)))
 #+end_src
 
 * Configure =yasnippet=
@@ -1646,6 +1674,7 @@ defer?
               ("<backtab>" . dired-subtree-remove))
   :config
     (setq dired-listing-switches "-alh")
+    (advice-add 'dired-create-directory :after (lambda (&rest r) (revert-buffer)))
     (advice-add 'dired-subtree-toggle :after (lambda (&rest r) (revert-buffer)))
     (advice-add 'dired-subtree-cycle :after (lambda (&rest r) (revert-buffer)))
     (advice-add 'dired-subtree-remove :after (lambda (&rest r) (revert-buffer))))
@@ -2172,11 +2201,8 @@ Remove other LSP sessions.
 #+begin_src emacs-lisp :results none
 (use-package pdf-tools
   :ensure t
-  :defer t)
-    ;; (evil-set-initial-state 'pdf-view-mode 'emacs)
-    ;; (add-hook 'pdf-view-mode-hook
-    ;; (lambda ()
-    ;;     (set (make-local-variable 'evil-emacs-state-cursor) (list nil)))))
+  :config
+    (pdf-tools-install))
 #+end_src
 
 * Configure =olivetti=

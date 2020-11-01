@@ -395,8 +395,15 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (org-cancelled-kwd-face ((t (,@fg-green ,@bg-base03))))
              (org-delegated-kwd-face ((t (,@fg-cyan ,@bg-base03))))
 
+	     ;; dired
+	     (dired-subtree-depth-1-face ((t (,@fmt-none))))
+	     (dired-subtree-depth-2-face ((t (,@fmt-none))))
+	     (dired-subtree-depth-3-face ((t (,@fmt-none))))
+	     (dired-subtree-depth-4-face ((t (,@fmt-none))))
+	     
              ;; table
              (table-cell ((t (,@fmt-none ,@fg-base0 ,@bg-back))))
+
              ;; outline - pandocBlockQuoteLeader*
              (outline-1 ((t (,@fmt-none ,@fg-blue))))
              (outline-2 ((t (,@fmt-none ,@fg-cyan))))
