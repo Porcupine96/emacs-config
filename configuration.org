@@ -144,7 +144,7 @@ Open buffer position
      (side           . bottom)
      (window-height  . 0.4))
 
-    ("\\*\\(Buffer List\\)\\*"
+    ("\\*\\(Buffer List\\|Bufler\\)\\*"
      (display-buffer-same-window))
 
     ("^magit:.*"
@@ -232,8 +232,9 @@ Compilation settings.
 (local-leader-def
   :states 'normal
   :keymaps 'org-mode-map
+    "o" #'+ocr/screenshot
     "s" #'org-schedule
-    "S" #'org-screenshot-take
+    "S" #'my-org-screenshot-take
     "d" #'org-deadline
     "i" #'+org/save-image-insert-link
     "t" #'org-todo)
@@ -280,14 +281,6 @@ Compilation settings.
     :states '('normal)
     :keymaps '(evil-org-mode-map org-mode-map)
     "<return>" '+org/ret-dwim)
-#+end_src
-
-** TODO bufler
-#+begin_src emacs-lisp :results none
-(general-define-key 
-    :states '('normal)
-    :keymaps '(bufler-mode-map evil-motion-state-map)
-    "<return>" 'bufler-switch-bufer)
 #+end_src
 
 * Use =evil-mode=
@@ -738,6 +731,12 @@ Buffer commands.
 (global-set-key (kbd "C-x C-b") #'ibuffer)
 (global-set-key (kbd "C-c b n") #'next-buffer)
 (global-set-key (kbd "C-c b p") #'previous-buffer)
+
+(global-set-key (kbd "C-x b") #'bufler-switch-buffer)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c n b") #'helm-bibtex)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -945,6 +944,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
          (setq ivy-initial-inputs-alist nil)
          (setq enable-recursive-minibuffers t)
          (setq search-default-mode #'char-fold-to-regexp)
+         (setq ivy-read-action-function 'ivy-hydra-read-action)
          (ivy-mode 1)
          (global-set-key (kbd "C-c C-r") 'ivy-resume)
          (global-set-key (kbd "<f6>") 'ivy-resume))
@@ -996,14 +996,21 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   #+end_src
 * Configure =ivy-bibtex=
 #+begin_src emacs-lisp :results none
-(use-package ivy-bibtex
+(use-package helm-bibtex
   :ensure t
   :defer t
-  :bind (:map org-mode-map 
-    (("C-c n b" . ivy-bibtex)))
   :config
-    (setq bibtex-completion-bibliography '("~/Dropbox/papers/papers.bib"))
-    (setq bibtex-completion-library-path '("~/Dropbox/papers/pdfs")))
+    (setq bibtex-completion-bibliography '("~/Dropbox/zotero/zotero.bib"))
+    ;; (setq bibtex-completion-library-path '("~/Dropbox/papers/pdfs"))
+    (setq bibtex-completion-pdf-field "File"))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +bibtex/open-on-scihub ()
+  (interactive)
+  (let ((url (bibtex-url (point) t))
+        (scihub-url "https://sci-hub.se/"))
+    (browse-url (concat scihub-url (string-trim url)))))
 #+end_src
 
 * Configure =flycheck=
@@ -1058,7 +1065,7 @@ Do not ask whether it is save to evaluate a snippet of code.
 
 Enlarge LaTeX font.
 #+begin_src emacs-lisp :results none
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.7))
 #+end_src
 
 Automatically save archive buffer after archiving a task.
@@ -1553,7 +1560,12 @@ CLOSED: [2020-11-01 Sun 00:03]
 #+begin_src emacs-lisp :results none
 (use-package bufler
   :ensure t
-  :defer t)
+  :defer t
+  :bind (:map bufler-list-mode-map 
+    ("<return>" . bufler-list-buffer-switch))
+  :config 
+    (evil-collection-define-key 'key 'normal 
+       'bufler-list-mode-map "gp" #'bufler-list-buffer-peek))
 #+end_src
 
 * Configure =doom-modeline=
@@ -2035,7 +2047,7 @@ Remove other LSP sessions.
   (require 'lsp-mode)
   (setq lsp-response-timeout 180)
   (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection "/home/porcupine/tool/reason-language-server")
+   (make-lsp-client :new-connection (lsp-stdio-connection "/usr/bin/reason-language-server")
                     :major-modes '(reason-mode)
                     :notification-handlers (ht ("client/registerCapability" 'ignore))
                     :priority 1
@@ -2211,7 +2223,7 @@ Remove other LSP sessions.
   :ensure t
   :defer t
   :config 
-    (custom-set-variables '(olivetti-body-width 90))
+    (custom-set-variables '(olivetti-body-width 120))
     (custom-set-variables '(olivetti-recall-visual-line-mode-entry-state t)))
 #+end_src
 
@@ -2220,6 +2232,75 @@ Remove other LSP sessions.
 (use-package hide-mode-line
   :ensure t 
   :defer t)
+#+end_src
+
+* OCR
+#+begin_src emacs-lisp :results none
+;; (defun +ocr/take-screenshot (path)
+;;   (apply 'start-process
+;; 	 (append
+;; 	  (list "scrot" "*screenshot*" "scrot" "-s" path))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +ocr/take-screenshot (path)
+     (start-process "screenshot" "*screenshot*" "screenshot-to-file" path))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +ocr/screenshot()
+  (interactive)
+  (let* ((path (concat (make-temp-name "/tmp/ocr") ".png")))
+    (when (get-buffer "*screenshot*")
+      (with-current-buffer (get-buffer "*screenshot*")
+	(erase-buffer)))
+    (setq screenshot-process
+	  (or (+ocr/take-screenshot path)
+	   (error "Unable to start screenshot process")))
+    (when screenshot-process 
+	(message "Click on a window, or select a rectangle...")
+      (set-process-sentinel
+       screenshot-process
+       `(lambda (process event)
+           (+ocr/run-ocr ,path))))))
+
+(defun +ocr/run-ocr (image-path)
+   (let* ((result-dir (file-name-directory image-path))
+          (result-name (file-name-base image-path))
+          (result-path (concat result-dir result-name)))
+
+   (call-process "tesseract" nil "*tesseract*" nil "-l" "pol+eng" image-path result-path)
+   (insert-file-contents (concat result-path ".txt"))))
+#+end_src
+
+* org-screenshot
+#+begin_src emacs-lisp :results none
+(defun my-org-screenshot-take ()
+  (interactive)
+
+  (when (and org-screenshot-process
+             (member (process-status org-screenshot-process)
+                     '(run stop)))
+    (error "screenshot process is still running"))
+  (let* ((name (org-screenshot-generate-file-name (org-screenshot-image-directory)))
+         (file (format "%s%s" (org-screenshot-image-directory)
+                       name))
+         (path (expand-file-name file)))
+    (when (get-buffer "*screenshot*")
+      (with-current-buffer (get-buffer "*screenshot*")
+	(erase-buffer)))
+    (setq org-screenshot-process
+          (or 
+           (+ocr/take-screenshot path)
+           (error "Unable to start scrot process")))
+    (when org-screenshot-process 
+      (message "Click on a window, or select a rectangle..."))
+    (set-process-sentinel
+     org-screenshot-process
+     `(lambda (process event)
+      (insert "#+ATTR_ORG: :width 500\n")
+	(org-screenshot-process-done
+	 process event ,file ,(current-buffer) nil ',last-input-event)))))
 #+end_src
 
 * Own
