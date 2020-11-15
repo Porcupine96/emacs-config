@@ -184,6 +184,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
               (fg-oldcyan `(:foreground ,oldcyan))
               (fg-gray `(:foreground ,gray))
               (fg-darkgreen `(:foreground ,darkgreen))
+              (fg-white `(:foreground ,white))
 
               (fmt-none `(:weight normal :slant normal  :underline nil        :inverse-video nil))
               (fmt-big `(:weight normal :slant normal  :underline nil        :inverse-video nil :height 1.2))
@@ -374,8 +375,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (org-code          ((t (,@fmt-none ,@fg-green ,@bg-base03))))
              (org-verbatim      ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
 
-	     (org-document-title        ((t (,@fmt-bigger ,@fg-gray  ,@bg-base03))))
+	     (org-document-title        ((t (,@fmt-bigger ,@fg-gray ,@bg-base03))))
 	     (org-document-info-keyword ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-block                 ((t (,@fmt-none ,@fg-white ,@bg-base03))))
 	     (org-block-begin-line      ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-end-line        ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-meta-line             ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))

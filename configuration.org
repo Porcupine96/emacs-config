@@ -47,7 +47,7 @@ Always compile packages, and use the newest version available.
 * Visuals
 Font.
 #+begin_src emacs-lisp :results none
-(set-face-attribute 'default nil :font "Input Mono Narrow-11")
+(set-face-attribute 'default nil :font "Input Mono Narrow-12")
 (set-face-attribute 'fixed-pitch nil :font "Input Mono Narrow-12")
 ;; (set-face-attribute 'variable-pitch nil :font "Lato-15")
 #+end_src
@@ -243,7 +243,10 @@ Compilation settings.
   :states 'normal
   :keymaps 'scala-mode-map
     "i" #'+scala/copy-import
-    "s" #'hydra-scala-surround/body)
+    "s" #'hydra-scala-surround/body
+    "c c" (lambda () (interactive) (+projectile/compile "bl"))
+    "c p" (lambda () (interactive) (+projectile/compile  "protob"))
+    "c n" (lambda () (interactive) (+projectile/compile "bl -n")))
 
 (local-leader-def
   :states 'normal
@@ -1128,6 +1131,8 @@ Org tag placement.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(require 'calendar)
+
 (defun +org-agenda/test (item)
   (let* ((marker (get-text-property 0 'org-marker item))
          (scheduled (org-entry-get 0 "SCHDEDULED" marker)))
@@ -1141,28 +1146,33 @@ Org tag placement.
 
 (use-package org-super-agenda
   :hook
-     (org-agenda-mode . org-super-agenda-mode)
-     (org-agenda-mode . pagenda-mode)
-  :config
-    (setq org-super-agenda-groups
-      '(
-        (:name " Today" :time-grid t)
-        (:name ":flame: Hot" :priority "A" )
-        (:name "♨ Warm" :priority "B" )
-        (:name "Studies" :priority "B" )
-        (:name ":repeat: Habits" :habit t))))
+    (org-agenda-mode . org-super-agenda-mode)
+    (org-agenda-mode . pagenda-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defun +agenda/show (span)
+  (-let* (((month day year) (calendar-current-date 3))
+          (three-days-from-now (format "%d-%d-%d" year month day))
+          (org-agenda-span span)
+          (org-super-agenda-groups
+           `((:name "Today" :time-grid t)
+             (:name ":flame: Hot" :and (:priority "A" :todo "TODO"))
+             (:name "🖥 Work" :and (:category "work"
+                                 :todo "TODO"))
+             (:name "‍🎓 Studies" :and (:category "studies" 
+         				  :todo ("TODO" "STRT")
+         				  :scheduled (before ,three-days-from-now)))
+             (:name ":repeat: Habits" :habit t))))
+     (org-agenda nil "a")))
+
 (defun +agenda/weekly-agenda ()
   (interactive)
-  (let ((org-agenda-span 8))
-    (org-agenda nil "a")))
+  (+agenda/show 8))
 
 (defun +agenda/daily-agenda ()
   (interactive)
-  (let ((org-agenda-span 1))
-    (org-agenda nil "a")))
+  (+agenda/show 1))
 
 (defun +agenda/filter-by-tag ()
   (interactive)
@@ -1510,6 +1520,17 @@ CLOSED: [2020-11-01 Sun 00:03]
   (let ((counsel-projectile-ag-initial-input "todo:"))
     (counsel-projectile-ag)))
 #+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +projectile/compile (command)
+   (interactive)
+   (let ((compilation-read-command nil))
+    (projectile--run-project-cmd command projectile-compilation-cmd-map
+            :show-prompt nil
+            :prompt-prefix "Compile command: "
+            :save-buffers t)))
+#+end_src
+
 * Configure =magit=
  #+begin_src emacs-lisp :results none
 (use-package magit :defer t)
@@ -1592,8 +1613,10 @@ CLOSED: [2020-11-01 Sun 00:03]
 #+begin_src emacs-lisp :results none
 (use-package company
   :defer t
+  :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0)
   :config
-    (setq company-minimum-prefix-length 1)
     (global-company-mode 1)
     (with-eval-after-load 'company
         (define-key company-mode-map (kbd "C-SPC") #'company-complete)
@@ -1830,12 +1853,81 @@ Setup =python-mode=.
   :defer t)
 #+end_src
 
+** Protobuf
+   #+begin_src emacs-lisp :results none
+   (use-package protobuf-mode
+     :ensure t 
+     :defer t)
+   
+   (defconst my-protobuf-style
+     '((c-basic-offset . 4)
+      (indent-tabs-mode . nil)))
+
+    (add-hook 'protobuf-mode-hook 
+      (lambda () (c-add-style "my-style" my-protobuf-style t)))
+   #+end_src
+   
+** LSP
+#+begin_src emacs-lisp :results none
+(use-package lsp-mode
+   :hook ((python-mode . lsp)
+          (sh-mode . lsp-deferred))
+   :init
+         (setq lsp-keymap-prefix "C-c l")
+   :config
+         (setq lsp-prefer-flymake nil)
+         (lsp-enable-which-key-integration t)
+   :bind (:map evil-normal-state-map 
+         ("M-w" . +lsp-ui/toggle-doc-focus)          
+         ("C-<return>" . lsp-execute-code-action)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package lsp-ui
+  :after lsp-mode
+  :config 
+    (setq lsp-ui-doc-use-childframe nil)
+    (setq lsp-ui-doc-enable nil)
+    (add-to-list 'lsp-ui-doc-frame-parameters '(no-accept-focus . t)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package lsp-metals :after lsp-mode scala-mode)
+#+end_src
+
+Use =lsp-ivy=.
+#+begin_src emacs-lisp :results none
+(use-package lsp-ivy
+  :after lsp-mode
+  :commands lsp-ivy-workspace-symbol)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +lsp-ui/toggle-doc-focus ()
+  (interactive)
+  (if (lsp-ui-doc--visible-p)
+      (lsp-ui-doc-focus-frame)
+      (lsp-ui-doc-unfocus-frame)))
+#+end_src
+
+Remove other LSP sessions.
+#+begin_src emacs-lisp :results none
+(defun +lsp/remove-other-sessions ()
+    (interactive)
+    (-each 
+        (-remove-item
+            (lsp-find-session-folder (lsp-session) default-directory)
+            (lsp-session-folders (lsp-session)))
+        #'lsp-workspace-folders-remove))
+#+end_src
+   
 ** Scala
 scala-mode
 #+begin_src emacs-lisp :results none
 (use-package scala-mode
   :ensure t
-  :mode "\\.s\\(cala\\|bt\\)$")
+  :mode "\\.s\\(cala\\|bt\\)$"
+  :hook (scala-mode . lsp-deferred))
 #+end_src
 
 sbt-mode
@@ -1922,76 +2014,6 @@ TODO colors.
     (insert (substring path (match-beginning 1) (match-end 1)))))
 #+end_src
 
-
-** Protobuf
-   #+begin_src emacs-lisp :results none
-   (use-package protobuf-mode
-     :ensure t 
-     :defer t)
-   
-   (defconst my-protobuf-style
-     '((c-basic-offset . 4)
-      (indent-tabs-mode . nil)))
-
-    (add-hook 'protobuf-mode-hook 
-      (lambda () (c-add-style "my-style" my-protobuf-style t)))
-   #+end_src
-   
-** LSP
-#+begin_src emacs-lisp :results none
-(use-package lsp-mode
- :hook ((scala-mode . lsp)
-        (python-mode . lsp)
-        (sh-mode . lsp-deferred))
- :init
-       (setq lsp-keymap-prefix "C-c l")
- :config
-       (setq lsp-prefer-flymake nil)
-       (lsp-enable-which-key-integration t)
- :bind (:map evil-normal-state-map 
-       ("M-w" . +lsp-ui/toggle-doc-focus)          
-       ("C-<return>" . lsp-execute-code-action)))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package lsp-ui
-  :after lsp-mode
-  :config 
-    (setq lsp-ui-doc-use-childframe nil)
-    (setq lsp-ui-doc-enable nil)
-    (add-to-list 'lsp-ui-doc-frame-parameters '(no-accept-focus . t)))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package lsp-metals :after lsp-mode scala-mode)
-#+end_src
-
-Use =lsp-ivy=.
-#+begin_src emacs-lisp :results none
-(use-package lsp-ivy
-  :after lsp-mode
-  :commands lsp-ivy-workspace-symbol)
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +lsp-ui/toggle-doc-focus ()
-  (interactive)
-  (if (lsp-ui-doc--visible-p)
-      (lsp-ui-doc-focus-frame)
-      (lsp-ui-doc-unfocus-frame)))
-#+end_src
-
-Remove other LSP sessions.
-#+begin_src emacs-lisp :results none
-(defun +lsp/remove-other-sessions ()
-    (interactive)
-    (-each 
-        (-remove-item
-            (lsp-find-session-folder (lsp-session) default-directory)
-            (lsp-session-folders (lsp-session)))
-        #'lsp-workspace-folders-remove))
-#+end_src
-   
 ** Yaml
 #+begin_src emacs-lisp :results none
 (use-package yaml-mode 
@@ -2013,6 +2035,13 @@ Remove other LSP sessions.
 #+end_src
 
 ** Elisp
+#+begin_src emacs-lisp :results none
+(use-package emacs
+  :bind
+    (:map emacs-lisp-mode-map
+      ("C-c i" . indent-region)))
+#+end_src
+
 #+begin_src emacs-lisp :results none
   (defun sm-greek-lambda ()
       (font-lock-add-keywords nil `(("\\<lambda\\>"
@@ -2275,8 +2304,12 @@ Remove other LSP sessions.
 
 * org-screenshot
 #+begin_src emacs-lisp :results none
-(defun my-org-screenshot-take ()
-  (interactive)
+(defun my-org-screenshot-take (width)
+  (interactive
+    (list 
+      (cond 
+         (current-prefix-arg (read-string "Width: "))
+         (t "500"))))
 
   (when (and org-screenshot-process
              (member (process-status org-screenshot-process)
@@ -2298,7 +2331,7 @@ Remove other LSP sessions.
     (set-process-sentinel
      org-screenshot-process
      `(lambda (process event)
-      (insert "#+ATTR_ORG: :width 500\n")
+      (insert (format "#+ATTR_ORG: :width %s\n" ,width))
 	(org-screenshot-process-done
 	 process event ,file ,(current-buffer) nil ',last-input-event)))))
 #+end_src
