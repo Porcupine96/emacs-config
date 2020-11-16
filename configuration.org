@@ -245,8 +245,13 @@ Compilation settings.
     "i" #'+scala/copy-import
     "s" #'hydra-scala-surround/body
     "c c" (lambda () (interactive) (+projectile/compile "bl"))
-    "c p" (lambda () (interactive) (+projectile/compile  "protob"))
+    "c p" (lambda () (interactive) (+projectile/compile "protob"))
     "c n" (lambda () (interactive) (+projectile/compile "bl -n")))
+
+(which-key-add-key-based-replacements
+  "SPC m c c" "bl"
+  "SPC m c n" "bl -n"
+  "SPC m c p" "protob")
 
 (local-leader-def
   :states 'normal
@@ -404,7 +409,7 @@ Compilation settings.
       _c_ Config                           _s_ studies.org
       _C_ Cheatsheet
       _t_ Theme                            _w_ work.org
-      _x_ i3                              _W_ work/work.org
+      _x_ Sway config                      _W_ work/work.org
       ^^        
       ^^        
       "
@@ -422,7 +427,7 @@ Compilation settings.
   ("d" (lambda () (interactive)(dired "~/dotfiles")))
   ("c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org")))
   ("t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el")))
-  ("x" (lambda () (interactive)(find-file "~/.config/i3/config"))))
+  ("x" (lambda () (interactive)(find-file "~/.config/sway/config"))))
   #+end_src
 
 ** Project 
@@ -1157,7 +1162,7 @@ Org tag placement.
           (org-agenda-span span)
           (org-super-agenda-groups
            `((:name "Today" :time-grid t)
-             (:name ":flame: Hot" :and (:priority "A" :todo "TODO"))
+             ;; (:name ":flame: Hot" :and (:priority "A" :todo "TODO"))
              (:name "🖥 Work" :and (:category "work"
                                  :todo "TODO"))
              (:name "‍🎓 Studies" :and (:category "studies" 
@@ -1626,6 +1631,9 @@ CLOSED: [2020-11-01 Sun 00:03]
         (define-key company-active-map (kbd "TAB") #'company-complete-common))
     (setq company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
     (setq company-dabbrev-downcase nil))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1870,7 +1878,8 @@ Setup =python-mode=.
 ** LSP
 #+begin_src emacs-lisp :results none
 (use-package lsp-mode
-   :hook ((python-mode . lsp)
+   :hook ((python-mode . lsp-deferred)
+          (c-mode . lsp-deferred)
           (sh-mode . lsp-deferred))
    :init
          (setq lsp-keymap-prefix "C-c l")
@@ -1921,6 +1930,13 @@ Remove other LSP sessions.
         #'lsp-workspace-folders-remove))
 #+end_src
    
+#+begin_src emacs-lisp :results none
+(defun +lsp-treemacs/remove-session-at-point ()
+  (interactive)
+  (let ((file (button-get (treemacs-node-at-point) :key)))
+    (lsp-workspace-folders-remove file)))
+#+end_src
+
 ** Scala
 scala-mode
 #+begin_src emacs-lisp :results none
