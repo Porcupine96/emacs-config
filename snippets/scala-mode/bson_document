@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: BSONDocument
+# key: bd
+# --
+BSONDocument($0)

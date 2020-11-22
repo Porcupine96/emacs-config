@@ -244,14 +244,18 @@ Compilation settings.
   :keymaps 'scala-mode-map
     "i" #'+scala/copy-import
     "s" #'hydra-scala-surround/body
+    "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
     "c c" (lambda () (interactive) (+projectile/compile "bl"))
     "c p" (lambda () (interactive) (+projectile/compile "protob"))
-    "c n" (lambda () (interactive) (+projectile/compile "bl -n")))
+    "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
+    "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
+    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala")))
 
-(which-key-add-key-based-replacements
-  "SPC m c c" "bl"
-  "SPC m c n" "bl -n"
-  "SPC m c p" "protob")
+;;(which-key-add-key-based-replacements
+;;  "SPC m c c" "bl"
+;;  "SPC m c n" "bl -n"
+;;  "SPC m c p" "protob")
 
 (local-leader-def
   :states 'normal
@@ -582,6 +586,7 @@ Compilation settings.
      ^
      ^Help^     
      ^────^───────────
+     _b_ Describe bindings
      _k_ Describe key
      _f_ Describe function
      _F_ Describe face
@@ -594,6 +599,7 @@ Compilation settings.
      ^^        
      ^^        
      "
+     ("b" #'counsel-descbinds)
      ("k" #'helpful-key)
      ("f" #'helpful-function)
      ("F" #'describe-face)
@@ -964,6 +970,8 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 
     (use-package counsel 
       :after ivy
+      :custom 
+        (counsel-find-file-ignore-regexp "#.*#")
       :config
         (global-set-key (kbd "M-x") 'counsel-M-x)
         (global-set-key (kbd "C-x C-f") 'counsel-find-file)
@@ -1009,7 +1017,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :defer t
   :config
     (setq bibtex-completion-bibliography '("~/Dropbox/zotero/zotero.bib"))
-    ;; (setq bibtex-completion-library-path '("~/Dropbox/papers/pdfs"))
     (setq bibtex-completion-pdf-field "File"))
 #+end_src
 
@@ -1114,7 +1121,6 @@ Org tag placement.
 
 #+begin_src emacs-lisp :results none
 (defun general-define-org-keys ()
-  (message "HELLO I'M HERE")
   (general-define-key 
       :states '('normal 'insert)
       :keymaps '(evil-org-mode-map org-mode-map)
@@ -1141,7 +1147,6 @@ Org tag placement.
 (defun +org-agenda/test (item)
   (let* ((marker (get-text-property 0 'org-marker item))
          (scheduled (org-entry-get 0 "SCHDEDULED" marker)))
-    (print scheduled)
     marker))
 
 (defun +org-agenda/created-today-group (item)
@@ -1164,12 +1169,13 @@ Org tag placement.
            `((:name "Today" :time-grid t)
              ;; (:name ":flame: Hot" :and (:priority "A" :todo "TODO"))
              (:name "🖥 Work" :and (:category "work"
-                                 :todo "TODO"))
+                                 :todo ("STRT" "TODO" "REVIEW")))
              (:name "‍🎓 Studies" :and (:category "studies" 
-         				  :todo ("TODO" "STRT")
+         				  :todo ("STRT" "TODO" "REVIEW")
          				  :scheduled (before ,three-days-from-now)))
              (:name ":repeat: Habits" :habit t))))
-     (org-agenda nil "a")))
+     (org-agenda nil "a")
+     (scroll-down)))
 
 (defun +agenda/weekly-agenda ()
   (interactive)
@@ -1189,7 +1195,23 @@ Org tag placement.
 #+end_src
 ** Academic
 #+begin_src emacs-lisp :results none
-(use-package org-ref :defer t)
+(use-package org-ref 
+  :ensure t
+  :config 
+    (setq org-ref-default-bibliography '("~/Dropbox/zotero/zotero.bib"))
+    (setq org-ref-bibliography-notes "~/Dropbox/papers/notes.org")
+    (setq org-ref-pdf-directory "~/Dropbox/papers/pdfs")
+
+    (defun my/org-ref-open-pdf-at-point ()
+	(interactive)
+	(let* ((results (org-ref-get-bibtex-key-and-file))
+		(key (car results))
+		(pdf-file (car (bibtex-completion-find-pdf key))))
+	    (if (file-exists-p pdf-file)
+		(org-open-file pdf-file)
+	    (message "No PDF found for %s" key))))
+
+    (setq org-ref-open-pdf-function 'my/org-ref-open-pdf-at-point))
 #+end_src
  
 #+begin_src emacs-lisp :results none
@@ -1255,17 +1277,17 @@ Org tag placement.
 
 Load languages.
 #+begin_src emacs-lisp :results none
-(org-babel-do-load-languages 'org-babel-load-languages
- '((shell . t)
-   (emacs-lisp . t)
-   ;; (ipython . t)
-   (python . t)
-   (ammonite . t)
-   (jupyter . t)
-   (js . t)
-   (sql . t)
-   (http . t)
-   (haskell . t)))
+  (org-babel-do-load-languages 'org-babel-load-languages
+   '((shell . t)
+     (emacs-lisp . t)
+     (ipython . t)
+     (python . t)
+     (ammonite . t)
+     ;; (jupyter . t)
+     (js . t)
+     (sql . t)
+     (http . t)
+     (haskell . t)))
 #+end_src
 
 Fix tab indentation in source blocks.
@@ -1337,8 +1359,25 @@ Change the image background.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defvar orb-title-format "${author-or-editor-abbrev} (${date}).  ${title}.")
+
 (use-package org-roam-bibtex
-  :ensure t)
+  :ensure t
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :custom
+    (orb-autokey-format "%a%y")
+    (orb-templates
+     `(("r" "ref" plain
+        (function org-roam-capture--get-point)
+        ""
+        :file-name "refs/${citekey}"
+        :head ,(s-join "\n"
+                       (list
+                        (concat "#+title: "
+                                orb-title-format)
+                        "#+roam_key: ${ref}"
+                        "#+created: %U"))
+        :unnarrowed t))))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1575,13 +1614,6 @@ CLOSED: [2020-11-01 Sun 00:03]
   :after treemacs)
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(use-package treemacs-icons-dired
-  :after treemacs dired
-  :ensure t
-  :config (treemacs-icons-dired-mode))
-#+end_src
-
 * Configure =bufler=
 #+begin_src emacs-lisp :results none
 (use-package bufler
@@ -1621,34 +1653,34 @@ CLOSED: [2020-11-01 Sun 00:03]
   :custom
     (company-minimum-prefix-length 1)
     (company-idle-delay 0)
+    (company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
+    (company-dabbrev-downcase nil)
+  :bind (:map company-active-map
+          ("<tab>" . company-complete-selection)
+          ("<return>" . +company/custom-complete))
+        ;; (:map company-mode-map 
+        ;;   ("C-<spc>" . #'company-complete))
+        (:map lsp-mode-map
+          ("<tab>" . company-indent-or-complete-common)
+          ("C-c s" . company-yasnippet))
   :config
     (global-company-mode 1)
     (with-eval-after-load 'company
         (define-key company-mode-map (kbd "C-SPC") #'company-complete)
-        (define-key company-active-map (kbd "RET") #'company-complete-selection)
-        (define-key company-active-map (kbd "<return>") #'company-complete-selection)
         (define-key company-active-map (kbd "<tab>") #'company-complete-common)
-        (define-key company-active-map (kbd "TAB") #'company-complete-common))
-    (setq company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
-    (setq company-dabbrev-downcase nil))
+        (define-key company-active-map (kbd "TAB") #'company-complete-common)
+        (define-key company-active-map (kbd "RET") #'+company/custom-complete)
+        (define-key company-active-map (kbd "<return>") #'company-complete-selection)))
 
 (use-package company-box
   :hook (company-mode . company-box-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(defun +company/company-complete ()
-  "The same as 'company-complete' but adds 'company-select-next' at the end"
+(defun +company/custom-complete ()
   (interactive)
-  (when (company-manual-begin)
-    (if (or company-selection-changed
-            (and (eq real-last-command 'company-complete)
-                 (eq last-command 'company-complete-common)))
-        (call-interactively 'company-complete-selection)
-      (call-interactively 'company-complete-common)
-      (when company-candidates
-        (setq this-command 'company-complete-common))))
-        (company-select-next))
+  (let ((company-selection (or company-selection 0)))
+    (company-complete-selection)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1695,6 +1727,21 @@ defer?
 ;;   (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
 #+end_src
 * Configure =dired=
+#+begin_src emacs-lisp :results none
+(use-package dired 
+  :ensure nil
+  :hook (dired-mode . dired-hide-details-mode)
+  :config
+   (setq dired-dwim-target t))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package treemacs-icons-dired
+  :after treemacs dired
+  :ensure t
+  :config (treemacs-icons-dired-mode))
+#+end_src
+
 #+begin_src emacs-lisp :results none
   (defun +dired/open-externally ()
     (interactive)
@@ -1820,9 +1867,7 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (use-package blacken
   :ensure t
-  :after python-mode
-  :config
-    (add-hook 'python-mode-hook 'blacken-mode))
+  :hook (python-mode . blacken-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2030,6 +2075,17 @@ TODO colors.
     (insert (substring path (match-beginning 1) (match-end 1)))))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(require 's)
+
+(defun +scala/goto (path)
+  (interactive)
+  (let* ((project-root (file-name-as-directory (projectile-project-root)))
+         (root (s-chop-suffix "project/" project-root))
+         (path (concat (file-name-as-directory root) path)))
+    (find-file path)))
+#+end_src
+
 ** Yaml
 #+begin_src emacs-lisp :results none
 (use-package yaml-mode 
@@ -2106,6 +2162,12 @@ TODO colors.
   :defer t)
 #+end_src
 
+** GraphQL
+#+begin_src emacs-lisp :results none
+(use-package graphql-mode
+  :ensure t)
+#+end_src
+
 * Configure =Info=
 #+begin_src emacs-lisp :results none
 (use-package info
@@ -2114,12 +2176,12 @@ TODO colors.
   ;;   ("RET" . 'Info-follow-nearest-node)))
 #+end_src
 
-* Configure =smarparens=
+* Configure =smartparens=
 #+begin_src emacs-lisp :results none
 (use-package smartparens
   :ensure t
+  :hook (prog-mode . smartparens-mode)
   :config
-    (require 'smartparens-config)
     (smartparens-global-mode t)
     (show-smartparens-global-mode t)
     ;; (smartparens-global-strict-mode t)
@@ -2136,7 +2198,7 @@ TODO colors.
 
 (define-key global-map (kbd "<M-l>") nil)
 
-(smartparens-mode)
+(require 'smartparens-config)
 #+end_src
 
 * Configure =csv-mode=
@@ -2258,8 +2320,7 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package pdf-tools
   :ensure t
-  :config
-    (pdf-tools-install))
+  :config (pdf-tools-install))
 #+end_src
 
 * Configure =olivetti=
@@ -2320,6 +2381,9 @@ TODO colors.
 
 * org-screenshot
 #+begin_src emacs-lisp :results none
+(defun generate-file-name (dir)
+  (concat (number-to-string (random 10000000)) ".png"))
+
 (defun my-org-screenshot-take (width)
   (interactive
     (list 
@@ -2331,7 +2395,7 @@ TODO colors.
              (member (process-status org-screenshot-process)
                      '(run stop)))
     (error "screenshot process is still running"))
-  (let* ((name (org-screenshot-generate-file-name (org-screenshot-image-directory)))
+  (let* ((name (generate-file-name (org-screenshot-image-directory)))
          (file (format "%s%s" (org-screenshot-image-directory)
                        name))
          (path (expand-file-name file)))
@@ -2341,7 +2405,7 @@ TODO colors.
     (setq org-screenshot-process
           (or 
            (+ocr/take-screenshot path)
-           (error "Unable to start scrot process")))
+           (error "Unable to start screenshot process")))
     (when org-screenshot-process 
       (message "Click on a window, or select a rectangle..."))
     (set-process-sentinel
@@ -2383,6 +2447,11 @@ TODO colors.
 (server-start)
 (require 'org-protocol)
 (require 'org-roam-protocol)
+#+end_src
+
+* Temporary
+#+begin_src emacs-lisp :results none
+(load "/home/porcupine/.emacs.d/elpa/smartparens-20201113.951/smartparens")
 #+end_src
 
 * TODO TODOs

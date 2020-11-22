@@ -15,6 +15,9 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
+(setq comp-deferred-compilation-black-list
+      '("jupyter-channel" "sp-show--pair-function"))
+
 (org-babel-load-file "~/.emacs.d/configuration.org")
 
 (custom-set-variables
@@ -37,6 +40,7 @@
  '(flymake-note-bitmap '(exclamation-mark modus-theme-fringe-cyan))
  '(flymake-warning-bitmap '(exclamation-mark modus-theme-fringe-yellow))
  '(foreground-color "#cccccc")
+ '(helm-minibuffer-history-key "M-p")
  '(highlight-tail-colors '(("#2f4a00" . 0) ("#00415e" . 20)))
  '(hl-todo-keyword-faces
    '(("HOLD" . "#cfdf30")
@@ -64,8 +68,16 @@
  '(olivetti-body-width 90)
  '(olivetti-recall-visual-line-mode-entry-state t)
  '(package-selected-packages
-   '(c-mode company-box emacs-lisp emacs-lisp-mode parrot org-roam-bibtex ivy-bibtex dired ob-http calfw-org calfw bufler hide-mode-line olivetti synosaurus eval-expr string-inflection elfeed csv-mode evil-smartparens smartparens prettier-js reason-mode flycheck-haskell haskell-mode yaml-mode lsp-ivy lsp-metals lsp-ui protobuf-mode sbt-mode clojure-mode lsp-python-ms blacken pyvenv pyenv-mode python-mode dockerfile-mode dired-subtree emojify org-re-reveal ox-reveal keychain-environment helpful company zoom-window doom-modeline treemacs-icons-dired treemacs-projectile treemacs-evil treemacs git-timemachine forge evil-magit magit counsel-projectile projectile yasnippet guess-language org-fancy-priorities org-roam-server org-roam jupyter which-key use-package smex scratch perspective org-super-agenda org-ref org-plus-contrib org-bullets ob-ipython ob-ammonite modus-vivendi-theme modus-operandi-theme ivy-posframe general flycheck evil-surround evil-snipe evil-org evil-easymotion evil-commentary evil-collection counsel auto-compile academic-phrases))
+   '(graphql-mode c-mode company-box emacs-lisp emacs-lisp-mode parrot org-roam-bibtex ivy-bibtex dired ob-http calfw-org calfw bufler hide-mode-line olivetti synosaurus eval-expr string-inflection elfeed csv-mode evil-smartparens smartparens prettier-js reason-mode flycheck-haskell haskell-mode yaml-mode lsp-ivy lsp-metals lsp-ui protobuf-mode sbt-mode clojure-mode lsp-python-ms blacken pyvenv pyenv-mode python-mode dockerfile-mode dired-subtree emojify org-re-reveal ox-reveal keychain-environment helpful company zoom-window doom-modeline treemacs-icons-dired treemacs-projectile treemacs-evil treemacs git-timemachine forge evil-magit magit counsel-projectile projectile yasnippet guess-language org-fancy-priorities org-roam-server org-roam jupyter which-key use-package smex scratch perspective org-super-agenda org-ref org-plus-contrib org-bullets ob-ipython ob-ammonite modus-vivendi-theme modus-operandi-theme ivy-posframe general flycheck evil-surround evil-snipe evil-org evil-easymotion evil-commentary evil-collection counsel auto-compile academic-phrases))
  '(pyenv-mode t)
+ '(safe-local-variable-values
+   '((eval font-lock-add-keywords nil
+	   `((,(concat "("
+		       (regexp-opt
+			'("sp-do-move-op" "sp-do-move-cl" "sp-do-put-op" "sp-do-put-cl" "sp-do-del-op" "sp-do-del-cl")
+			t)
+		       "\\_>")
+	      1 'font-lock-variable-name-face)))))
  '(vc-annotate-background nil)
  '(vc-annotate-background-mode nil)
  '(vc-annotate-color-map
@@ -88,6 +100,8 @@
      (340 . "#00bcff")
      (360 . "#b6a0ff")))
  '(vc-annotate-very-old-color nil)
+ '(warning-suppress-log-types '((comp) (comp) (comp)))
+ '(warning-suppress-types '((comp) (comp) (comp) (comp)))
  '(xterm-color-names
    ["#000000" "#ff8059" "#44bc44" "#eecc00" "#2fafff" "#feacd0" "#00d3d0" "#a8a8a8"])
  '(xterm-color-names-bright

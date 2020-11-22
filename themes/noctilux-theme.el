@@ -402,6 +402,11 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (dired-subtree-depth-2-face ((t (,@fmt-none))))
 	     (dired-subtree-depth-3-face ((t (,@fmt-none))))
 	     (dired-subtree-depth-4-face ((t (,@fmt-none))))
+	     (dired-subtree-depth-5-face ((t (,@fmt-none))))
+	     (dired-subtree-depth-6-face ((t (,@fmt-none))))
+	     (dired-subtree-depth-7-face ((t (,@fmt-none))))
+	     (dired-subtree-depth-8-face ((t (,@fmt-none))))
+	     (dired-subtree-depth-9-face ((t (,@fmt-none))))
 	     
              ;; table
              (table-cell ((t (,@fmt-none ,@fg-base0 ,@bg-back))))
