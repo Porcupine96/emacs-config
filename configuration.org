@@ -78,6 +78,10 @@ Color theme.
 ;; (load-theme 'modus-operandi t)
 ;; (load-theme 'modus-vivendi t)
 #+end_src
+
+#+begin_src emacs-lisp :results none
+(global-prettify-symbols-mode 1)
+#+end_src
  
 * Sensible settings
 Disable backup and lockfiles.
@@ -342,7 +346,6 @@ Compilation settings.
      (head-hint nil)
      (hydra-key-format-spec "[%s]"))
   #+end_src
-  
 
 ** Agenda
 #+begin_src emacs-lisp :results none
@@ -816,6 +819,11 @@ Use =emojify-mode=
 (global-set-key (kbd "C-c n e") #'emojify-insert-emoji)
 #+end_src
 
+Inserting unicode characters.
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c n u") #'counsel-unicode-char)
+#+end_src
+
 Scale text.
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-+") #'text-scale-increase)
@@ -1053,17 +1061,20 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   (setq org-image-actual-width nil)
 
   (setq org-todo-keywords
-  '((sequence "REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
-    (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+	'((sequence "REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+	  (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
   (evil-collection-define-key 'normal 'org-mode-map
     (kbd "C-k") 'evil-window-up
     (kbd "C-j") 'evil-window-down)
 
+  (add-hook 'org-mode-hook
+	    (lambda () (push '("#begin_src" . ">>") prettify-symbols-alist)))
+
   :bind
-     (:map evil-normal-state-map
-         ("C-k" . evil-window-up)
-         ("C-j" . evil-window-down))
+  (:map evil-normal-state-map
+        ("C-k" . evil-window-up)
+        ("C-j" . evil-window-down))
   :hook (org-mode . org-indent-mode))
 #+end_src
 
@@ -1163,11 +1174,10 @@ Org tag placement.
 #+begin_src emacs-lisp :results none
 (defun +agenda/show (span)
   (-let* (((month day year) (calendar-current-date 3))
-          (three-days-from-now (format "%d-%d-%d" year month day))
+          (three-days-from-now (format "%d-%d-%02d" year month day))
           (org-agenda-span span)
           (org-super-agenda-groups
            `((:name "Today" :time-grid t)
-             ;; (:name ":flame: Hot" :and (:priority "A" :todo "TODO"))
              (:name "🖥 Work" :and (:category "work"
                                  :todo ("STRT" "TODO" "REVIEW")))
              (:name "‍🎓 Studies" :and (:category "studies" 
@@ -1329,6 +1339,7 @@ Change the image background.
       :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
+               ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n C" . org-roam-db-build-cache)
                ("C-c n g" . org-roam-graph))
               :map org-mode-map
@@ -1356,6 +1367,12 @@ Change the image background.
         org-roam-server-network-label-truncate t
         org-roam-server-network-label-truncate-length 60
         org-roam-server-network-label-wrap-length 20))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org-roam/find-file-by-title ()
+  (interactive)
+  (org-roam-find-file (+org/property-value "TITLE")))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1497,6 +1514,16 @@ Save image and insert it's link at point.
     (url-copy-file url path)
     (insert (concat "#+ATTR_ORG: :width 350\n" "[[" path "]]"))))
 #+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org/property-value (property)
+  (first (mapcar
+      (lambda (prop) (org-element-property :value prop))
+      (org-element-map
+          (org-element-parse-buffer)
+          'keyword
+          (lambda (el) (when (string-match "TITLE" (org-element-property :key el)) el))))))
+#+end_src
 * Configure =flyspell=
 #+begin_src emacs-lisp :results none 
 (use-package flyspell
@@ -1511,15 +1538,6 @@ Save image and insert it's link at point.
      (:map flyspell-mode-map
         ("C-c $" . nil)))
 #+end_src
-* KILL Configure =guess-language=
-CLOSED: [2020-11-01 Sun 00:03]
-#+begin_src emacs-lisp :results none
-;; (use-package guess-language
-;;   :ensure t
-;;   :config
-;;     (setq guess-language-languages '(en pl)))
-#+end_src
-
 * Configure =yasnippet=
   #+begin_src emacs-lisp :results none
 (use-package yasnippet
@@ -1622,8 +1640,9 @@ CLOSED: [2020-11-01 Sun 00:03]
   :bind (:map bufler-list-mode-map 
     ("<return>" . bufler-list-buffer-switch))
   :config 
-    (evil-collection-define-key 'key 'normal 
-       'bufler-list-mode-map "gp" #'bufler-list-buffer-peek))
+    (evil-collection-define-key 'normal 'bufler-list-mode-map 
+       "D" #'bufler-list-buffer-kill
+       "gp" #'bufler-list-buffer-peek))
 #+end_src
 
 * Configure =doom-modeline=
@@ -1656,10 +1675,8 @@ CLOSED: [2020-11-01 Sun 00:03]
     (company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
     (company-dabbrev-downcase nil)
   :bind (:map company-active-map
-          ("<tab>" . company-complete-selection)
+          ("<tab>" . +company/custom-complete)
           ("<return>" . +company/custom-complete))
-        ;; (:map company-mode-map 
-        ;;   ("C-<spc>" . #'company-complete))
         (:map lsp-mode-map
           ("<tab>" . company-indent-or-complete-common)
           ("C-c s" . company-yasnippet))
@@ -1678,6 +1695,8 @@ CLOSED: [2020-11-01 Sun 00:03]
 
 #+begin_src emacs-lisp :results none
 (defun +company/custom-complete ()
+  "Run company-complete-selection either on the selected item or on the first
+   item if no candidate was selected."
   (interactive)
   (let ((company-selection (or company-selection 0)))
     (company-complete-selection)))
@@ -1835,7 +1854,11 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (use-package python-mode
    :ensure t
-   :defer t)
+   :defer t
+   :config
+
+   (add-hook 'python-mode-hook 
+     (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
 
 ;; (setq
 ;;   python-shell-interpreter "ipython"
@@ -1871,15 +1894,21 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package lsp-python-ms
+(use-package blacken
   :ensure t
-  :after python-mode
-  :init (setq lsp-python-ms-auto-install-server t)
-  :hook (
-         (python-mode . lsp-deferred)
-         (python-mode . (lambda ()
-                          ;; (setq lsp-python-ms-extra-paths '())
-                          (require 'lsp-python-ms)))))
+  :hook (python-mode . blacken-mode))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+;; (use-package lsp-python-ms
+;;   :ensure t
+;;   :after python-mode
+;;   :init (setq lsp-python-ms-auto-install-server t)
+;;   :hook (
+;;          (python-mode . lsp-deferred)
+;;          (python-mode . (lambda ()
+;;                           ;; (setq lsp-python-ms-extra-paths '())
+;;                           (require 'lsp-python-ms)))))
 #+end_src
 
 
@@ -1962,6 +1991,14 @@ Use =lsp-ivy=.
   (if (lsp-ui-doc--visible-p)
       (lsp-ui-doc-focus-frame)
       (lsp-ui-doc-unfocus-frame)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +lsp/references ()
+  (interactive)
+  (let ((loc (lsp-request "textDocument/references"
+                          ((lsp--text-document-position-params) (list :context `(:includeDeclaration nil))))))
+     (print (lsp--locations-to-xref-items loc))))
 #+end_src
 
 Remove other LSP sessions.
@@ -2114,16 +2151,6 @@ TODO colors.
       ("C-c i" . indent-region)))
 #+end_src
 
-#+begin_src emacs-lisp :results none
-  (defun sm-greek-lambda ()
-      (font-lock-add-keywords nil `(("\\<lambda\\>"
-          (0 (progn (compose-region (match-beginning 0) (match-end 0)
-          ,(make-char 'greek-iso8859-7 107))
-          nil))))))
-
-  (add-hook 'emacs-lisp-mode-hook 'sm-greek-lambda)
-#+end_src
-
 ** Haskell
 #+begin_src emacs-lisp :results none
 (use-package haskell-mode
@@ -2159,7 +2186,24 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package prettier-js
   :ensure t
+  :hook (js-mode . prettier-js-mode) 
   :defer t)
+#+end_src
+
+** Rust
+#+begin_src emacs-lisp :results none
+(use-package rust-mode
+  :ensure t
+  :init
+    (setq rust-format-on-save t)
+  :hook ((rust-mode . lsp-deferred)))
+#+end_src
+
+** TypeScript
+#+begin_src emacs-lisp :results none
+(use-package typescript-mode
+  :mode "\\.\\(ts\\|tsx\\)$"
+  :ensure t)
 #+end_src
 
 ** GraphQL
@@ -2231,13 +2275,23 @@ TODO colors.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defun +eshell/configure-eshell ()
+  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
+  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-l") '+eshell/clear)
+  (evil-normalize-keymaps)
+
+  (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+  (setq eshell-history-size              10000
+        eshell-buffer-maximum-lines      10000
+        eshell-hist-ignoredups           t
+        eshell-scroll-to-bottom-on-input t))
+
 (use-package eshell
   :defer t
+  :hook (eshell-first-time-mode . +eshell/configure-eshell)
   :config
-    ;; NOTE: the bindings need to be set using a hook
-    ;; because of the known issue: https://github.com/noctuid/general.el/issues/32
-    (add-hook 'eshell-mode-hook
-      (lambda () (define-key eshell-mode-map (kbd "C-l") #'+eshell/clear))))
+    (defalias 'e "find-file-other-window $1"))
 #+end_src
 
 * Configure =elfeed=
@@ -2447,11 +2501,6 @@ TODO colors.
 (server-start)
 (require 'org-protocol)
 (require 'org-roam-protocol)
-#+end_src
-
-* Temporary
-#+begin_src emacs-lisp :results none
-(load "/home/porcupine/.emacs.d/elpa/smartparens-20201113.951/smartparens")
 #+end_src
 
 * TODO TODOs
