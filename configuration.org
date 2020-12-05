@@ -211,7 +211,14 @@ Compilation settings.
     "k" #'helm-show-kill-ring
     "p" #'hydra-project/body
     "r" #'hydra-resize/body
-    "o" #'hydra-open/body
+
+    "o p" #'treemacs
+    "o e" #'eshell
+    "o E" #'+eshell/open-in-default
+    "o P" #'+eshell/open-in-project-root
+    "o o" #'porcupine/focus-mode
+    "o v" #'vterm
+
     "s" #'hydra-search/body
     "u" #'universal-argument
     "w" #'hydra-window/body
@@ -614,28 +621,6 @@ Compilation settings.
      ("l" #'counsel-find-library))
    #+end_src
    
-** Open
-#+begin_src emacs-lisp :results none
-(defhydra hydra-open (:color blue)
-   "
-   ^
-   ^Open^     
-   ^────^───────────
-   _p_ Treemacs
-   _e_ Eshell
-   _E_ Eshell Open In Default
-   _P_ Eshell Open In Project Root
-   _o_ Olivetti
-   ^^        
-   ^^        
-   "
-   ("p" #'treemacs)
-   ("e" #'eshell)
-   ("E" #'+eshell/open-in-default)
-   ("P" #'+eshell/open-in-project-root)
-   ("o" #'porcupine/focus-mode))
- #+end_src
-
 ** Search
 #+begin_src emacs-lisp :results none
  (defhydra hydra-search (:color blue)
@@ -1053,6 +1038,8 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+begin_src emacs-lisp :results none
 (use-package org
   :ensure org-plus-contrib
+  :custom
+    (org-ellipsis " ▾")
   :config 
   (require 'org-tempo)
 
@@ -1069,7 +1056,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
     (kbd "C-j") 'evil-window-down)
 
   (add-hook 'org-mode-hook
-	    (lambda () (push '("#begin_src" . ">>") prettify-symbols-alist)))
+	    (lambda () (push '(":@call:" . "☎") prettify-symbols-alist)))
 
   :bind
   (:map evil-normal-state-map
@@ -1168,7 +1155,10 @@ Org tag placement.
 (use-package org-super-agenda
   :hook
     (org-agenda-mode . org-super-agenda-mode)
-    (org-agenda-mode . pagenda-mode))
+    (org-agenda-mode . pagenda-mode)
+  :config
+    (add-hook 'org-agenda-mode-hook
+                (lambda () (push '(":@call:" . "☎") prettify-symbols-alist))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1183,6 +1173,8 @@ Org tag placement.
              (:name "‍🎓 Studies" :and (:category "studies" 
          				  :todo ("STRT" "TODO" "REVIEW")
          				  :scheduled (before ,three-days-from-now)))
+             (:name ":house_with_garden: Private" :and (:category "private"
+                                 :todo ("STRT" "TODO" "REVIEW")))
              (:name ":repeat: Habits" :habit t))))
      (org-agenda nil "a")
      (scroll-down)))
@@ -1859,10 +1851,6 @@ Setup =python-mode=.
 
    (add-hook 'python-mode-hook 
      (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
-
-;; (setq
-;;   python-shell-interpreter "ipython"
-;;   python-shell-interpreter-args "-i")
 #+end_src
    
 #+begin_src emacs-lisp :results none
@@ -1916,7 +1904,6 @@ Setup =python-mode=.
 (font-lock-add-keywords 'python-mode
  '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
 #+end_src
-
 
 #+begin_src emacs-lisp :results none
 (defun +python/surround-word-with-list ()
@@ -2291,7 +2278,14 @@ TODO colors.
   :defer t
   :hook (eshell-first-time-mode . +eshell/configure-eshell)
   :config
-    (defalias 'e "find-file-other-window $1"))
+    (defalias 'e "find-file-other-window $1")
+    (defalias 'gs "git status"))
+#+end_src
+
+* Configure =vterm=
+#+begin_src emacs-lisp :results none
+(use-package vterm
+    :ensure t)
 #+end_src
 
 * Configure =elfeed=
@@ -2394,14 +2388,46 @@ TODO colors.
   :defer t)
 #+end_src
 
-* OCR
+* org-screenshot
 #+begin_src emacs-lisp :results none
-;; (defun +ocr/take-screenshot (path)
-;;   (apply 'start-process
-;; 	 (append
-;; 	  (list "scrot" "*screenshot*" "scrot" "-s" path))))
+(defun generate-file-name (dir)
+  (concat (number-to-string (random 10000000)) ".png"))
+
+(defconst image-directory "./images/")
+
+(defun my-org-screenshot-take (width)
+  (interactive
+    (list 
+      (cond 
+         (current-prefix-arg (read-string "Width: "))
+         (t "500"))))
+
+  (when (and (boundp 'org-screenshot-process)
+              org-screenshot-process
+             (member (process-status org-screenshot-process)
+                     '(run stop)))
+    (error "screenshot process is still running"))
+  (let* ((name (generate-file-name image-directory))
+         (file (format "%s%s" image-directory name))
+         (path (expand-file-name file)))
+    (when (get-buffer "*screenshot*")
+      (with-current-buffer (get-buffer "*screenshot*")
+	(erase-buffer)))
+    (setq org-screenshot-process
+          (or 
+           (+ocr/take-screenshot path)
+           (error "Unable to start screenshot process")))
+    (when org-screenshot-process 
+      (message "Click on a window, or select a rectangle..."))
+    (set-process-sentinel
+     org-screenshot-process
+     `(lambda (process event)
+      (insert (format "#+ATTR_ORG: :width %s\n" ,width))
+	(org-screenshot-process-done
+	 process event ,file ,(current-buffer) nil ',last-input-event)))))
 #+end_src
 
+* org-ocr
 #+begin_src emacs-lisp :results none
 (defun +ocr/take-screenshot (path)
      (start-process "screenshot" "*screenshot*" "screenshot-to-file" path))
@@ -2431,43 +2457,6 @@ TODO colors.
 
    (call-process "tesseract" nil "*tesseract*" nil "-l" "pol+eng" image-path result-path)
    (insert-file-contents (concat result-path ".txt"))))
-#+end_src
-
-* org-screenshot
-#+begin_src emacs-lisp :results none
-(defun generate-file-name (dir)
-  (concat (number-to-string (random 10000000)) ".png"))
-
-(defun my-org-screenshot-take (width)
-  (interactive
-    (list 
-      (cond 
-         (current-prefix-arg (read-string "Width: "))
-         (t "500"))))
-
-  (when (and org-screenshot-process
-             (member (process-status org-screenshot-process)
-                     '(run stop)))
-    (error "screenshot process is still running"))
-  (let* ((name (generate-file-name (org-screenshot-image-directory)))
-         (file (format "%s%s" (org-screenshot-image-directory)
-                       name))
-         (path (expand-file-name file)))
-    (when (get-buffer "*screenshot*")
-      (with-current-buffer (get-buffer "*screenshot*")
-	(erase-buffer)))
-    (setq org-screenshot-process
-          (or 
-           (+ocr/take-screenshot path)
-           (error "Unable to start screenshot process")))
-    (when org-screenshot-process 
-      (message "Click on a window, or select a rectangle..."))
-    (set-process-sentinel
-     org-screenshot-process
-     `(lambda (process event)
-      (insert (format "#+ATTR_ORG: :width %s\n" ,width))
-	(org-screenshot-process-done
-	 process event ,file ,(current-buffer) nil ',last-input-event)))))
 #+end_src
 
 * Own

@@ -65,7 +65,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     (base2     "#e9e2cb" "#e9e2cb" "#e9e2cb" "white"         "white")
     (base3     "#fcf4dc" "#fcf4dc" "#fcf4dc" "brightwhite"   "white")
     (yellow    "#f1fa8c" "#f1fa8c" "#f1fa8c" "yellow"        "yellow")
-    (orange    "#ff8888" "#ff8888" "#ff8888" "brightred"     "red")
+    (orange    "#ff7518" "#ff7518" "#ff7518" "brightred"     "red")
     (red       "#ff5555" "#ff5555" "#ff5555" "red"           "red")
     (magenta   "#FF1F69" "#FF1F69" "#FF1F69" "magenta"       "magenta")
     (purple    "#bd93f9" "#bd93f9" "#bd93f9" "brightmagenta" "magenta")
@@ -213,7 +213,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
               (fmt-orangewave `(:underline (:color ,orange :style wave) :inherit default)))
           `((;; basic
              (default ((t (,@fg-base0 ,@bg-back)))) ; Normal
-             (cursor ((t (,@fg-base03 ,@bg-white)))) ; Cursor
+             (cursor ((t (,@fg-base03 ,@bg-orange)))) ; Cursor
              (error ((t (,@fmt-bold ,@fg-red)))) ; Error
              (escape-glyph-face ((t (,@fg-red))))
              (fringe ((t (,@fg-base01 ,@bg-base02))))
@@ -375,6 +375,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              (org-code          ((t (,@fmt-none ,@fg-green ,@bg-base03))))
              (org-verbatim      ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
+	     (org-ellipsis      ((t (,@fmt-none ,@fg-gray))))
 
 	     (org-document-title        ((t (,@fmt-bigger ,@fg-gray ,@bg-base03))))
 	     (org-document-info-keyword ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
@@ -384,7 +385,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-meta-line             ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
 
              (org-link ((t (,@fmt-undr ,@fg-darkblue ,@bg-base03))))
-             (org-tag ((t (,@fg-oldcyan ,@bg-base03))))
+             (org-tag ((t (,@fg-orange ,@bg-base03))))
 
 	     (org-level-1 ((t (,@fmt-big ,@fg-purple ,@bg-base03))))
 	     (org-level-2 ((t (,@fmt-sbig ,@fg-pink ,@bg-base03))))
@@ -397,6 +398,15 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              (org-cancelled-kwd-face ((t (,@fg-green ,@bg-base03))))
              (org-delegated-kwd-face ((t (,@fg-cyan ,@bg-base03))))
+
+	     ;; org-agenda
+	     (org-agenda-date-today ((t (,@fmt-none ,@fg-purple))))
+	     (org-super-agenda-header ((t (,@fmt-big ,@fg-purple))))
+	     (org-scheduled-previously ((t (,@fg-white))))
+	     (org-scheduled-today ((t (,@fg-white))))
+
+	     ;; cfw calendar
+	     (cfw:face-toolbar ((t (,@bg-base03))))
 
 	     ;; dired
 	     (dired-subtree-depth-1-face ((t (,@fmt-none))))

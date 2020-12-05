@@ -27,13 +27,14 @@
  org-deadline-warning-days 7
  org-log-done 'time
  org-agenda-block-separator 9472  ;; straight line
- org-agenda-tags-column 100
+ org-agenda-tags-column 80
  org-agenda-compact-blocks t
  diary-show-holidays-flag nil
  org-agenda-breadcrumbs-separator " ❱ "
  org-agenda-scheduled-leaders '("" "")
  org-agenda-current-time-string "❱"
- org-agenda-prefix-format '((agenda . " %i %-12:c%?-12t% s")
+ org-agenda-todo-keyword-format "%-1s"
+ org-agenda-prefix-format '((agenda . " %?-12t% s")
                             (timeline . "  % s")
                             (todo . "%i %-12:c%b")
                             (tags . "%i %-12:c%b")
