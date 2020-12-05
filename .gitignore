@@ -20,3 +20,5 @@ configuration.el
 /org-roam.db
 /.dap-breakpoints
 /auto-save-list/
+.yas-compiled-snippets.el
+eln-cache/
