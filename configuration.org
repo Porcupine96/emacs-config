@@ -20,6 +20,22 @@
                (garbage-collect)
                (display-battery-mode)) t)
 #+end_src
+
+* Straight
+#+begin_src emacs-lisp :results none
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+#+end_src
 * Configure =use-package=
 I use =use-package= to install and configure my packages. My =init.el=
 includes the initial setup for =package.el= and ensures that
@@ -57,6 +73,7 @@ Hide all the bezels.
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
+(blink-cursor-mode -1)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -225,6 +242,7 @@ Compilation settings.
     "e e" #'elfeed
     "e d" #'ediff
     "t r" #'+core/reload-theme
+    "t e" #'treemacs-display-current-project-exclusively
     "y a" #'yas-new-snippet
     "y v" #'yas-visit-snippet-file
     "y c" #'company-yasnippet
@@ -303,6 +321,7 @@ Compilation settings.
 (general-define-key 
     :states '('normal)
     :keymaps '(evil-org-mode-map org-mode-map)
+    "C-<return>" '+org/c-ret-dwim
     "<return>" '+org/ret-dwim)
 #+end_src
 
@@ -345,6 +364,23 @@ Compilation settings.
      :config
        (global-evil-surround-mode 1))
   #+end_src
+
+#+begin_src emacs-lisp :results none
+(defmacro define-and-bind-text-object (key start-regex end-regex)
+  (let ((inner-name (make-symbol "inner-name"))
+        (outer-name (make-symbol "outer-name")))
+    `(progn
+       (evil-define-text-object ,inner-name (count &optional beg end type)
+         (evil-select-paren ,start-regex ,end-regex beg end type count nil))
+       (evil-define-text-object ,outer-name (count &optional beg end type)
+         (evil-select-paren ,start-regex ,end-regex beg end type count t))
+       (define-key evil-inner-text-objects-map ,key (quote ,inner-name))
+       (define-key evil-outer-text-objects-map ,key (quote ,outer-name)))))
+
+(define-and-bind-text-object "=" "=" "=")
+(define-and-bind-text-object "~" "~" "~")
+(define-and-bind-text-object "*" "*" "*")
+#+end_src
 
 * Configure =hydra=
   #+begin_src emacs-lisp :results none
@@ -742,6 +778,10 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-x 4 j") #'dired-jump-other-window)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (global-unset-key (kbd "C-SPC"))
 #+end_src
 
@@ -753,7 +793,6 @@ Evaluation commancs.
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-c e b") #'eval-buffer)
 #+end_src
-
 
 Dired jump.
 #+begin_src emacs-lisp :results none
@@ -891,6 +930,23 @@ Scale text.
    (yank)
    (insert right))
   #+end_src
+
+* Quelpa
+#+begin_src emacs-lisp :results none
+(unless (package-installed-p 'quelpa)
+  (with-temp-buffer
+    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    (eval-buffer)
+    (quelpa-self-upgrade)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(quelpa
+ '(quelpa-use-package
+   :fetcher git
+   :url "https://github.com/quelpa/quelpa-use-package.git"))
+(require 'quelpa-use-package)
+#+end_src
 
 * Configure =which-key=
   #+begin_src emacs-lisp :results none
@@ -1274,22 +1330,23 @@ Org tag placement.
 
 #+begin_src emacs-lisp :results none
 (use-package jupyter
+  :straight (:no-native-compile t)
   :defer t)
 #+end_src
 
 Load languages.
 #+begin_src emacs-lisp :results none
-  (org-babel-do-load-languages 'org-babel-load-languages
-   '((shell . t)
-     (emacs-lisp . t)
-     (ipython . t)
-     (python . t)
-     (ammonite . t)
-     ;; (jupyter . t)
-     (js . t)
-     (sql . t)
-     (http . t)
-     (haskell . t)))
+(org-babel-do-load-languages 'org-babel-load-languages
+ '((shell . t)
+   (emacs-lisp . t)
+   (ipython . t)
+   (python . t)
+   (ammonite . t)
+   (jupyter . t)
+   (js . t)
+   (sql . t)
+   (http . t)
+   (haskell . t)))
 #+end_src
 
 Fix tab indentation in source blocks.
@@ -2371,6 +2428,26 @@ TODO colors.
   :config (pdf-tools-install))
 #+end_src
 
+#+begin_src  emacs-lisp :results none
+(use-package pdf-continuous-scroll-mode
+  :quelpa (pdf-continuous-scroll-mode :fetcher github :repo "dalanicolai/pdf-continuous-scroll-mode.el")
+  :commands pdf-continuous-scroll-mode
+  :config 
+    (with-eval-after-load 'pdf-view
+        (require 'pdf-continuous-scroll-mode)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package org-pdftools
+  :hook (org-mode . org-pdftools-setup-link))
+
+(use-package org-noter-pdftools
+  :after org-noter
+  :config
+  (with-eval-after-load 'pdf-annot
+    (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+#+end_src
+
 * Configure =olivetti=
 #+begin_src emacs-lisp :results none
 (use-package olivetti
@@ -2407,6 +2484,7 @@ TODO colors.
              (member (process-status org-screenshot-process)
                      '(run stop)))
     (error "screenshot process is still running"))
+  (make-directory image-directory t)
   (let* ((name (generate-file-name image-directory))
          (file (format "%s%s" image-directory name))
          (path (expand-file-name file)))

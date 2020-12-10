@@ -81,11 +81,11 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 
 (setq org-todo-keyword-faces '(
-    ("PROJECT" . (:height 1.2 :foreground "#ffffff" :underline t))
-    ("STRT"    . (:height 1.2 :foreground "#0198e1" :underline t))
-    ("SOMEDAY" . (:height 1.2 :foreground "#ff8888" :underline t))
-    ("REVIEW"  . (:height 1.2 :foreground "#f1fa8c" :underline t))
-    ("WAIT"    . (:height 1.2 :foreground "#f1fa8c" :underline t))))
+    ("PROJECT" . (:height 1.2 :foreground "#ffffff" :weight normal :underline t))
+    ("STRT"    . (:height 1.2 :foreground "#0198e1" :weight normal :underline t))
+    ("SOMEDAY" . (:height 1.2 :foreground "#ff8888" :weight normal :underline t))
+    ("REVIEW"  . (:height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+    ("WAIT"    . (:height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
 
 (defmacro noct-flet (specs &rest body)
   (let ((flet (if (fboundp 'cl-flet) 'cl-flet 'flet)))
@@ -216,7 +216,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (cursor ((t (,@fg-base03 ,@bg-orange)))) ; Cursor
              (error ((t (,@fmt-bold ,@fg-red)))) ; Error
              (escape-glyph-face ((t (,@fg-red))))
-             (fringe ((t (,@fg-base01 ,@bg-base02))))
+             ;; (fringe ((t (,@fg-base01 ,@bg-base02))))
+             (fringe ((t (,@fg-base01 ,@bg-base03))))
              (linum ((t (,@fg-base01 ,@bg-base02))))
              (header-line ((t (,@fg-base0 ,@bg-base02 ,@fmt-revbb)))) ; Pmenu
              (highlight ((t (,@bg-base02))))
@@ -368,8 +369,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              ;; org
              (org-hide          ((t (,@fg-base03))))
-             (org-todo          ((t (,@fmt-big ,@fmt-undr ,@fg-red ,@bg-base03))))
-             (org-done          ((t (,@fmt-big ,@fmt-none ,@fg-gray   ,@bg-base03))))
+             (org-todo          ((t (,@fmt-big ,@fmt-undr   ,@fg-red  ,@bg-base03))))
+             (org-done          ((t (,@fmt-big ,@fmt-none   ,@fg-gray ,@bg-base03))))
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray   ,@bg-base03))))
              (org-date          ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
 
