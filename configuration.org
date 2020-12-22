@@ -65,7 +65,7 @@ Font.
 #+begin_src emacs-lisp :results none
 (set-face-attribute 'default nil :font "Input Mono Narrow-12")
 (set-face-attribute 'fixed-pitch nil :font "Input Mono Narrow-12")
-;; (set-face-attribute 'variable-pitch nil :font "Lato-15")
+(set-face-attribute 'variable-pitch nil :font "DejaVu Sans-15")
 #+end_src
  
 Hide all the bezels.
@@ -218,7 +218,14 @@ Compilation settings.
   :states '(normal visual motion)
   :keymaps 'override
     "a" #'hydra-agenda/body
-    "b" #'hydra-buffer/body
+
+    "b b" #'bufler
+    "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
+    "b n" #'next-buffer
+    "b N" #'+core/scratch-buffer
+    "b p" #'previous-buffer
+    "b k" #'kill-current-buffer
+
     "c" #'hydra-compile/body
     "d d" #'dockel
     "h" #'hydra-help/body
@@ -278,8 +285,15 @@ Compilation settings.
     "c p" (lambda () (interactive) (+projectile/compile "protob"))
     "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
     "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
+    "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
     "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala")))
+
+(local-leader-def
+  :states 'normal
+  :keymaps 'rust-mode-map
+    "c c" #'rust-compile
+    "c r" #'rust-run)
 
 ;;(which-key-add-key-based-replacements
 ;;  "SPC m c c" "bl"
@@ -337,6 +351,7 @@ Compilation settings.
         (evil-mode 1)
         (setq aw-keys '(?h ?j ?k ?l ?a ?s ?d ?f))
     :bind (:map evil-motion-state-map
+          ("C-w C-U" . winner-undo)
           ("C-w C-w" . ace-window)
           ("C-w w"   . ace-window)))
   
@@ -510,30 +525,6 @@ Compilation settings.
   ("T" #'+projectile/search-todos)
   ("s" #'projectile-save-project-buffers)
   ("w" #'+projectile/search-word-under-cursor))
-#+end_src
-
-** Buffer
-#+begin_src emacs-lisp :results none
-(defhydra hydra-buffer (:color blue)
-  "
-    ^
-    ^Buffer^     
-    ^──────^───────────────
-    _b_ Ivy switch buffer
-    _c_ Open *compilation* buffer
-    _n_ Next buffer
-    _N_ New buffer
-    _k_ Kill buffer
-    _p_ Previous buffer
-    ^^        
-    ^^        
-    "
-  ("b" #'bufler)
-  ("c" (lambda () (interactive) (switch-to-buffer "*compilation*")))
-  ("n" #'next-buffer)
-  ("N" #'scratch)
-  ("p" #'previous-buffer)
-  ("k" #'kill-current-buffer))
 #+end_src
 
 ** Git 
@@ -799,6 +790,11 @@ Dired jump.
 (global-set-key (kbd "C-x C-j") 'dired-jump)
 #+end_src
 
+Disable downcase-region
+#+begin_src emacs-lisp :results none
+(global-unset-key (kbd "C-x C-l"))
+#+end_src
+
 Toggle line truncation.
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-x w") 'toggle-truncate-lines)
@@ -980,7 +976,7 @@ Scale text.
   ;;(require 'evil-snipe)
   #+end_src
   
-* Configure =perspecitve=
+* Configure =perspective=
 Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces.
 #+begin_src emacs-lisp :results none
   (use-package perspective 
@@ -1025,7 +1021,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
         (global-set-key (kbd "M-x") 'counsel-M-x)
         (global-set-key (kbd "C-x C-f") 'counsel-find-file)
         (global-set-key (kbd "C-c g") 'counsel-git)
-        (global-set-key (kbd "C-c j") 'counsel-git-grep)
         (global-set-key (kbd "C-c k") 'counsel-ag)
         (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
 
@@ -1067,6 +1062,9 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :config
     (setq bibtex-completion-bibliography '("~/Dropbox/zotero/zotero.bib"))
     (setq bibtex-completion-pdf-field "File"))
+
+    ;; (setq bibtex-completion-format-citation-functions
+    ;;   '((default . +bibtex/format-citations-apa7))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1078,17 +1076,62 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+end_src
 
 * Configure =flycheck=
-  #+begin_src emacs-lisp :results none
-(use-package flycheck
-  :defer t
-  :init (global-flycheck-mode)
-  :bind (:map evil-normal-state-map 
-        ("[ e" . flycheck-previous-error)
-        ("] e" . flycheck-next-error))
 
-  :config 
-    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc proselint)))
-  #+end_src
+#+begin_src emacs-lisp :results none
+(defvar arrow (vector 
+                          #b00100000
+                          #b00110000
+                          #b00111000
+                          #b00111100
+                          #b00111110
+                          #b00111100
+                          #b00111000
+                          #b00110000
+                          #b00100000))
+
+(defvar double-line (vector 
+                          #b00101000
+                          #b00101000
+                          #b00101000
+                          #b00101000
+                          #b00101000
+                          #b00101000
+                          #b00101000
+                          #b00101000
+                          #b00101000))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+  (use-package flycheck
+    :defer t
+    :init (global-flycheck-mode)
+    :bind (:map evil-normal-state-map 
+	  ("[ e" . flycheck-previous-error)
+	  ("] e" . flycheck-next-error))
+
+    :config 
+      (define-fringe-bitmap 'flycheck-fringe-bitmap-ball arrow)
+      (define-fringe-bitmap 'flycheck-fringe-bitmap-continuation double-line)
+      ;; flycheck-fringe-bitmap-continuation (?)
+
+      (flycheck-define-error-level 'error
+	:severity 100
+	:compilation-level 2
+	:overlay-category 'flycheck-error-overlay
+	:fringe-bitmap 'flycheck-fringe-bitmap-ball
+	:fringe-face 'flycheck-fringe-error
+	:error-list-face 'flycheck-error-list-error)
+
+       (flycheck-define-error-level 'warning
+	 :severity 50
+	 :compilation-level 1
+	 :overlay-category 'flycheck-warning-overlay
+	 :fringe-bitmap 'flycheck-fringe-bitmap-ball
+	 :fringe-face 'flycheck-fringe-warning
+	 :error-list-face 'flycheck-error-list-warning)
+
+      (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc proselint)))
+#+end_src
 * Configure =org=
 ** Core
 #+begin_src emacs-lisp :results none
@@ -1096,6 +1139,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :ensure org-plus-contrib
   :custom
     (org-ellipsis " ▾")
+    (line-spacing 0.1)
   :config 
   (require 'org-tempo)
 
@@ -1112,13 +1156,15 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
     (kbd "C-j") 'evil-window-down)
 
   (add-hook 'org-mode-hook
-	    (lambda () (push '(":@call:" . "☎") prettify-symbols-alist)))
+	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist))))
 
   :bind
-  (:map evil-normal-state-map
-        ("C-k" . evil-window-up)
-        ("C-j" . evil-window-down))
-  :hook (org-mode . org-indent-mode))
+   (:map evil-normal-state-map
+         ("C-k" . evil-window-up)
+         ("C-j" . evil-window-down))
+  :hook (org-mode . org-indent-mode)
+        (org-mode . variable-pitch-mode)
+        (org-mode . auto-fill-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1134,7 +1180,7 @@ Do not ask whether it is save to evaluate a snippet of code.
 
 Enlarge LaTeX font.
 #+begin_src emacs-lisp :results none
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.7))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
 #+end_src
 
 Automatically save archive buffer after archiving a task.
@@ -1164,7 +1210,6 @@ Org tag placement.
     (add-hook 'org-mode-hook 'evil-org-mode)
     (add-hook 'evil-org-mode-hook 'general-define-org-keys)
     
-
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
 
@@ -1196,25 +1241,29 @@ Org tag placement.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(require 'calendar)
+  (require 'calendar)
 
-(defun +org-agenda/test (item)
-  (let* ((marker (get-text-property 0 'org-marker item))
-         (scheduled (org-entry-get 0 "SCHDEDULED" marker)))
-    marker))
+  (defun +org-agenda/test (item)
+    (let* ((marker (get-text-property 0 'org-marker item))
+           (scheduled (org-entry-get 0 "SCHDEDULED" marker)))
+      marker))
 
-(defun +org-agenda/created-today-group (item)
-  (let* ((marker (get-text-property 0 'org-marker item))
-         (property (org-entry-get marker "CreatedAt")))
-    property))
+  (defun +org-agenda/created-today-group (item)
+    (let* ((marker (get-text-property 0 'org-marker item))
+           (property (org-entry-get marker "CreatedAt")))
+      property))
 
-(use-package org-super-agenda
-  :hook
-    (org-agenda-mode . org-super-agenda-mode)
-    (org-agenda-mode . pagenda-mode)
-  :config
-    (add-hook 'org-agenda-mode-hook
-                (lambda () (push '(":@call:" . "☎") prettify-symbols-alist))))
+  (use-package org-super-agenda
+    :hook
+      (org-agenda-mode . org-super-agenda-mode)
+      (org-agenda-mode . pagenda-mode)
+    :bind 
+      (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
+       :map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
+       :map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
+    :config
+      (add-hook 'org-agenda-mode-hook
+                  (lambda () (push '(":@call:" . "☎") prettify-symbols-alist))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1255,6 +1304,7 @@ Org tag placement.
 #+begin_src emacs-lisp :results none
 (use-package org-ref 
   :ensure t
+  :straight (:no-native-compile t)
   :config 
     (setq org-ref-default-bibliography '("~/Dropbox/zotero/zotero.bib"))
     (setq org-ref-bibliography-notes "~/Dropbox/papers/notes.org")
@@ -1275,7 +1325,18 @@ Org tag placement.
 #+begin_src emacs-lisp :results none
 (use-package academic-phrases :defer t)
 #+end_src
-   
+** Org journal
+#+begin_src emacs-lisp :results none
+(use-package org-journal
+  :ensure t
+  :defer t
+  :init
+    (setq org-journal-prefix-key "C-c j")
+  :config
+    (setq org-journal-dir "~/Dropbox/org/journal/"
+          org-journal-date-format "%A, %d %B %Y"))
+#+end_src
+
 ** Org Capture
 #+begin_src emacs-lisp :results none
 (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
@@ -1385,6 +1446,7 @@ Change the image background.
 #+begin_src emacs-lisp :results none
 (use-package org-roam
       :ensure t
+      :straight (:no-native-compile t)
       :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -1429,7 +1491,7 @@ Change the image background.
 
 (use-package org-roam-bibtex
   :ensure t
-  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :hook (org-roam . org-roam-bibtex-mode)
   :custom
     (orb-autokey-format "%a%y")
     (orb-templates
@@ -1454,6 +1516,11 @@ Change the image background.
     (interactive)
     (insert "[[roam:]]")
     (backward-char 2))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +bibtex/format-citations-apa7 (keys)
+  (bibtex-completion-apa-format-reference (car keys)))
 #+end_src
 
 ** Org Fancy Priorities
@@ -1588,12 +1655,11 @@ Save image and insert it's link at point.
         ("C-c $" . nil)))
 #+end_src
 * Configure =yasnippet=
-  #+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none
 (use-package yasnippet
-  :defer 5
   :config 
     (yas-global-mode))
-  #+end_src
+#+end_src
   
 * Configure =projectile=
  #+begin_src emacs-lisp :results none
@@ -1665,7 +1731,6 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (use-package treemacs 
    :ensure t
-   :defer t
    :config 
      (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
      (setq treemacs-width 60))
@@ -1999,6 +2064,8 @@ Setup =python-mode=.
    :hook ((python-mode . lsp-deferred)
           (c-mode . lsp-deferred)
           (sh-mode . lsp-deferred))
+   :custom
+         (lsp-headerline-breadcrumb-enable nil)
    :init
          (setq lsp-keymap-prefix "C-c l")
    :config
@@ -2423,9 +2490,14 @@ TODO colors.
 
 * Configure =pdf-tools=
 #+begin_src emacs-lisp :results none
+(defun +pdf/setup ()
+  (hide-mode-line-mode))
+
 (use-package pdf-tools
   :ensure t
-  :config (pdf-tools-install))
+  :config 
+    (pdf-tools-install)
+    (add-hook 'pdf-view-mode-hook #'+pdf/setup))
 #+end_src
 
 #+begin_src  emacs-lisp :results none
@@ -2458,11 +2530,22 @@ TODO colors.
     (custom-set-variables '(olivetti-recall-visual-line-mode-entry-state t)))
 #+end_src
 
-
 #+begin_src emacs-lisp :results none
 (use-package hide-mode-line
   :ensure t 
   :defer t)
+#+end_src
+
+* Emacs App Framework
+#+begin_src emacs-lisp :results none
+;; (use-package eaf
+;;   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" 
+;;   :custom
+;;   (eaf-find-alternate-file-in-dired t)
+;;   :config
+;;   (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+;;   (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+;;   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 #+end_src
 
 * org-screenshot

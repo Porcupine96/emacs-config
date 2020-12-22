@@ -71,13 +71,13 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     (purple    "#bd93f9" "#bd93f9" "#bd93f9" "brightmagenta" "magenta")
     (darkblue  "#6272a4" "#6272a4" "#6272a4" "blue"          "blue")
     (blue      "#0198E1" "#0198E1" "#0198E1" "blue"          "blue")
-    (pink      "#ff79c6" "#ff79c6" "#ff79c6" "pink"         "pink")
-    (cyan      "#7590db" "#7590db" "#7590db" "cyan"         "cyan")
-    (oldcyan   "#aadddd" "#aadddd" "#aadddd" "cyan"         "cyan")
-    (white     "#ffffff" "#ffffff" "#ffffff" "white"        "white")
-    (green     "#50fa7b" "#50fa7b" "#50fa7b" "green"        "green")
-    (gray      "#838484" "#838484" "#838484" "gray"         "gray")
-    (darkgreen "#008000" "#008000" "#008000" "green"        "green")))
+    (pink      "#ff79c6" "#ff79c6" "#ff79c6" "pink"          "pink")
+    (cyan      "#7590db" "#7590db" "#7590db" "cyan"          "cyan")
+    (oldcyan   "#aadddd" "#aadddd" "#aadddd" "cyan"          "cyan")
+    (white     "#ffffff" "#ffffff" "#ffffff" "white"         "white")
+    (green     "#50fa7b" "#50fa7b" "#50fa7b" "green"         "green")
+    (gray      "#838484" "#838484" "#838484" "gray"          "gray")
+    (darkgreen "#008000" "#008000" "#008000" "green"         "green")))
 
 
 (setq org-todo-keyword-faces '(
@@ -219,7 +219,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              ;; (fringe ((t (,@fg-base01 ,@bg-base02))))
              (fringe ((t (,@fg-base01 ,@bg-base03))))
              (linum ((t (,@fg-base01 ,@bg-base02))))
-             (header-line ((t (,@fg-base0 ,@bg-base02 ,@fmt-revbb)))) ; Pmenu
+             (header-line ((t (,@fg-base0 ,@bg-base03)))) ; Pmenu
              (highlight ((t (,@bg-base02))))
              (hl-line ((t (:underline ,opt-under ,@bg-base02)))) ; CursorLine
              (isearch ((t (,@fmt-stnd ,@fg-orange ,@bg-back)))) ; IncSearch
@@ -380,10 +380,13 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 	     (org-document-title        ((t (,@fmt-bigger ,@fg-gray ,@bg-base03))))
 	     (org-document-info-keyword ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
-	     (org-block                 ((t (,@fmt-none ,@fg-white ,@bg-base03))))
-	     (org-block-begin-line      ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
-	     (org-block-end-line        ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-block                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-white ,@bg-base03))))
+	     (org-block-begin-line      ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-block-end-line        ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-drawer                ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-meta-line             ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
+
+	     (org-table                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-blue ,@bg-base03))))
 
              (org-link ((t (,@fmt-undr ,@fg-darkblue ,@bg-base03))))
              (org-tag ((t (,@fg-orange ,@bg-base03))))
@@ -668,6 +671,14 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; avy
              (avy-lead-face ((t (,@fg-base03 ,@bg-red))))
              (avy-lead-face-0 ((t (,@fg-base03 ,@bg-purple))))
+
+	     ;; tab-line
+	     (tab-line ((t (,@bg-base03))))
+
+	     ;; tab-bar
+	     (tab-bar ((t (,@bg-base03))))
+
+	     ;; lsp
 
              ;; evil
              (evil-ex-lazy-highlight ((t :inherit lazy-highlight)))

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: print dictionary
+# key: pdic
+# --
+for k, v in $0.items():
+    print(k, v)
