@@ -97,6 +97,7 @@ Color theme.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(setq prettify-symbols-unprettify-at-point t)
 (global-prettify-symbols-mode 1)
 #+end_src
  
@@ -222,6 +223,7 @@ Compilation settings.
     "b b" #'bufler
     "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
     "b n" #'next-buffer
+    "b s" #'+core/summon-scratch
     "b N" #'+core/scratch-buffer
     "b p" #'previous-buffer
     "b k" #'kill-current-buffer
@@ -857,6 +859,12 @@ Scale text.
    (switch-to-buffer (generate-new-buffer "*scratch*")))
  #+end_src
  
+#+begin_src emacs-lisp :results none
+(defun +core/summon-scratch ()
+   (interactive)
+   (switch-to-buffer-other-window "*scratch*"))
+#+end_src
+
  #+begin_src emacs-lisp :results none
 (defun +core/copy-file-path ()
   (interactive)
@@ -1026,6 +1034,14 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 
     ;; sorts counsel-M-x by recently used
     (use-package smex :after counsel)
+
+    (use-package ivy-prescient
+       :ensure t
+       :straight
+       :disabled
+       :after counsel
+       :config 
+         (ivy-prescient-mode 1))
   #+end_src
   
   Recentf configuration.
@@ -1089,48 +1105,60 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
                           #b00110000
                           #b00100000))
 
-(defvar double-line (vector 
-                          #b00101000
-                          #b00101000
-                          #b00101000
-                          #b00101000
-                          #b00101000
-                          #b00101000
-                          #b00101000
-                          #b00101000
-                          #b00101000))
+(defvar line (vector 
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000
+                          #b00100000))
 #+end_src
 
 #+begin_src emacs-lisp :results none
-  (use-package flycheck
-    :defer t
-    :init (global-flycheck-mode)
-    :bind (:map evil-normal-state-map 
-	  ("[ e" . flycheck-previous-error)
-	  ("] e" . flycheck-next-error))
+(use-package flycheck
+  :defer t
+  :init (global-flycheck-mode)
+  :config 
+    (evil-define-key '(normal) flycheck-mode-map (kbd "] e") 'flycheck-next-error)
+    (evil-define-key '(normal) flycheck-mode-map (kbd "[ e") 'flycheck-previous-error)
 
-    :config 
-      (define-fringe-bitmap 'flycheck-fringe-bitmap-ball arrow)
-      (define-fringe-bitmap 'flycheck-fringe-bitmap-continuation double-line)
-      ;; flycheck-fringe-bitmap-continuation (?)
+    (define-fringe-bitmap 'flycheck-fringe-bitmap-ball arrow)
+    (define-fringe-bitmap 'flycheck-fringe-bitmap-continuation line)
+    ;; flycheck-fringe-bitmap-continuation (?)
 
-      (flycheck-define-error-level 'error
-	:severity 100
-	:compilation-level 2
-	:overlay-category 'flycheck-error-overlay
-	:fringe-bitmap 'flycheck-fringe-bitmap-ball
-	:fringe-face 'flycheck-fringe-error
-	:error-list-face 'flycheck-error-list-error)
+    (flycheck-define-error-level 'error
+      :severity 100
+      :compilation-level 2
+      :overlay-category 'flycheck-error-overlay
+      :fringe-bitmap 'flycheck-fringe-bitmap-ball
+      :fringe-face 'flycheck-fringe-error
+      :error-list-face 'flycheck-error-list-error)
 
-       (flycheck-define-error-level 'warning
-	 :severity 50
-	 :compilation-level 1
-	 :overlay-category 'flycheck-warning-overlay
-	 :fringe-bitmap 'flycheck-fringe-bitmap-ball
-	 :fringe-face 'flycheck-fringe-warning
-	 :error-list-face 'flycheck-error-list-warning)
+    (flycheck-define-error-level 'warning
+      :severity 50
+      :compilation-level 1
+      :overlay-category 'flycheck-warning-overlay
+      :fringe-bitmap 'flycheck-fringe-bitmap-ball
+      :fringe-face 'flycheck-fringe-warning
+      :error-list-face 'flycheck-error-list-warning)
 
-      (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc proselint)))
+    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc proselint)))
 #+end_src
 * Configure =org=
 ** Core
@@ -1139,7 +1167,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :ensure org-plus-contrib
   :custom
     (org-ellipsis " ▾")
-    (line-spacing 0.1)
+    (line-spacing 0.0)
   :config 
   (require 'org-tempo)
 
@@ -1156,8 +1184,12 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
     (kbd "C-j") 'evil-window-down)
 
   (add-hook 'org-mode-hook
-	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist))))
-
+	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
+                       (push '("- [ ]" . "☐") prettify-symbols-alist)
+                       (push '("- [X]" . "☒") prettify-symbols-alist)
+                       (push '("-" . "–") prettify-symbols-alist)
+                       (push '("#+begin_src" . ">>") prettify-symbols-alist)
+                       (push '("#+end_src" . "<<") prettify-symbols-alist))))
   :bind
    (:map evil-normal-state-map
          ("C-k" . evil-window-up)
@@ -1180,7 +1212,8 @@ Do not ask whether it is save to evaluate a snippet of code.
 
 Enlarge LaTeX font.
 #+begin_src emacs-lisp :results none
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
+(setq org-format-latex-options 
+  (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.5))
 #+end_src
 
 Automatically save archive buffer after archiving a task.
@@ -1269,7 +1302,7 @@ Org tag placement.
 #+begin_src emacs-lisp :results none
 (defun +agenda/show (span)
   (-let* (((month day year) (calendar-current-date 3))
-          (three-days-from-now (format "%d-%d-%02d" year month day))
+          (three-days-from-now (format "%d-%02d-%02d" year month day))
           (org-agenda-span span)
           (org-super-agenda-groups
            `((:name "Today" :time-grid t)
@@ -1850,15 +1883,20 @@ Save image and insert it's link at point.
 #+end_src
 
 * Configure =emojify=
-defer?
 #+begin_src emacs-lisp :results none
 (use-package emojify 
   :ensure t
   :config
-  ;; (setq emojify-display-style "unicode") 
-  (global-emojify-mode))
-;;   (set-fontset-font t 'unicode " Noto Color Emoji" nil 'prepend))
+    ;; TODO: this does not work for some reason
+    (setq emojify-user-emojis '((":check-box-empty:" . (("name" . "Check Box - Empty")
+                                                        ("unicode" . "U+2610")
+                                                        ("style" . "unicode")))))
+    (when (featurep 'emojify)
+      (emojify-set-emoji-data))
+    
+      (global-emojify-mode))
 #+end_src
+
 * Configure =dired=
 #+begin_src emacs-lisp :results none
 (use-package dired 
