@@ -2658,6 +2658,28 @@ TODO colors.
    (insert-file-contents (concat result-path ".txt"))))
 #+end_src
 
+* Work
+#+begin_src emacs-lisp :results none
+(defconst +work/monorepo-path "~/work/monorepo")
+
+(defconst +work/proto-paths (list
+  (list "ai" (concat +work/monorepo-path  "/ai/ai-protobufs"))
+  (list "creator" (concat +work/monorepo-path  "/creator/creator-protobufs"))
+  (list "inbox" (concat +work/monorepo-path  "/inbox/inbox-protobufs"))
+  (list "core" (concat +work/monorepo-path  "/core/core-protobufs"))
+  (list "chat" (concat +work/monorepo-path  "/chat/chat-protobufs"))))
+
+(defun +work/goto-proto ()
+  (interactive)
+  (let* ((project-name (projectile-project-name))
+         (name-chunks (split-string project-name "-"))
+         (module (car name-chunks))
+         (proto-name (string-join (cdr name-chunks) "_"))
+         (proto-root (nth 1 (assoc module +work/proto-paths))))
+
+    (find-file-other-window (concat proto-root "/" proto-name))))
+#+end_src
+
 * Own
 #+begin_src emacs-lisp :results none
 (load-file "~/.emacs.d/config/pagenda.el")
