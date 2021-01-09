@@ -85,6 +85,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     ("STRT"    . (:height 1.2 :foreground "#0198e1" :weight normal :underline t))
     ("SOMEDAY" . (:height 1.2 :foreground "#ff8888" :weight normal :underline t))
     ("REVIEW"  . (:height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+    ("DEPLOY"  . (:height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
     ("WAIT"    . (:height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
 
 (defmacro noct-flet (specs &rest body)
@@ -379,12 +380,12 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-ellipsis      ((t (,@fmt-none ,@fg-gray))))
 
 	     (org-document-title        ((t (,@fmt-bigger ,@fg-gray ,@bg-base03))))
-	     (org-document-info-keyword ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-document-info-keyword ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-white ,@bg-base03))))
 	     (org-block-begin-line      ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-end-line        ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-drawer                ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
-	     (org-meta-line             ((t (,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-meta-line             ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 
 	     (org-table                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-blue ,@bg-base03))))
 
@@ -669,8 +670,10 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (erc-timestamp-face ((t (:foreground ,base01))))
 
 	     ;; avy
-             (avy-lead-face ((t (,@fg-base03 ,@bg-red))))
-             (avy-lead-face-0 ((t (,@fg-base03 ,@bg-purple))))
+             (avy-lead-face   ((t (:inherit fixed-pitch ,@fg-base03 ,@bg-red))))
+             (avy-lead-face-0 ((t (:inherit fixed-pitch ,@fg-base03 ,@bg-purple))))
+             (avy-lead-face-1 ((t (:inherit fixed-pitch))))
+             (avy-lead-face-2 ((t (:inherit fixed-pitch))))
 
 	     ;; tab-line
 	     (tab-line ((t (,@bg-base03))))

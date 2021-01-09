@@ -244,6 +244,7 @@ Compilation settings.
     "o P" #'+eshell/open-in-project-root
     "o o" #'porcupine/focus-mode
     "o v" #'vterm
+    "o m" #'mu4e
 
     "s" #'hydra-search/body
     "u" #'universal-argument
@@ -953,12 +954,12 @@ Scale text.
 #+end_src
 
 * Configure =which-key=
-  #+begin_src emacs-lisp :results none
-    (use-package which-key
-      :ensure t
-      :defer t
-      :init (which-key-mode))
-  #+end_src
+ #+begin_src emacs-lisp :results none
+ (use-package which-key
+   :ensure t
+   :defer t
+   :init (which-key-mode))
+ #+end_src
   
 * Configure =avy= / =evil-easymotion= / =evil-snipe=
   #+begin_src emacs-lisp :results none
@@ -1167,7 +1168,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :ensure org-plus-contrib
   :custom
     (org-ellipsis " ▾")
-    (line-spacing 0.0)
   :config 
   (require 'org-tempo)
 
@@ -1176,7 +1176,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   (setq org-image-actual-width nil)
 
   (setq org-todo-keywords
-	'((sequence "REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+	'((sequence "REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "DEPLOY(E)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
 	  (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
   (evil-collection-define-key 'normal 'org-mode-map
@@ -1187,22 +1187,34 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
                        (push '("- [ ]" . "☐") prettify-symbols-alist)
                        (push '("- [X]" . "☒") prettify-symbols-alist)
-                       (push '("-" . "–") prettify-symbols-alist)
+                       ;; (push '("-" . "–") prettify-symbols-alist)
+                       (push '("->" . "→") prettify-symbols-alist)
+                       (push '("<-" . "←") prettify-symbols-alist)
                        (push '("#+begin_src" . ">>") prettify-symbols-alist)
                        (push '("#+end_src" . "<<") prettify-symbols-alist))))
+
+  (add-hook 'after-init-hook
+      (lambda ()
+       (require 'org-indent)  
+       (set-face-attribute 'org-indent nil
+           :inherit '(org-hide fixed-pitch))))
   :bind
    (:map evil-normal-state-map
          ("C-k" . evil-window-up)
          ("C-j" . evil-window-down))
   :hook (org-mode . org-indent-mode)
         (org-mode . variable-pitch-mode)
+        (org-mode . prettify-symbols-mode)
         (org-mode . auto-fill-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package org-bullets
-   :after org
-   :hook (org-mode . org-bullets-mode))
+(use-package org-superstar
+  :after org
+  :hook (org-mode . org-superstar-mode)
+  :custom
+  (org-superstar-remove-leading-stars t)
+  (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
 #+end_src
   
 Do not ask whether it is save to evaluate a snippet of code.
@@ -1800,6 +1812,7 @@ Save image and insert it's link at point.
     (setq doom-modeline-height 35)
     (setq doom-modeline-vcs-max-length 40)
     (setq doom-modeline-enable-word-count t)
+    (setq doom-modeline-mu4e t)
     (set-face-attribute 'mode-line nil :height 115)
     (doom-modeline-mode))
 #+end_src
@@ -2008,6 +2021,9 @@ Setup =python-mode=.
    :ensure t
    :defer t
    :config
+
+   (setq python-indent-guess-indent-offset t)  
+   (setq python-indent-guess-indent-offset-verbose nil)
 
    (add-hook 'python-mode-hook 
      (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
@@ -2527,7 +2543,7 @@ TODO colors.
 #+end_src
 
 * Configure =pdf-tools=
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none 
 (defun +pdf/setup ()
   (hide-mode-line-mode))
 
@@ -2538,7 +2554,7 @@ TODO colors.
     (add-hook 'pdf-view-mode-hook #'+pdf/setup))
 #+end_src
 
-#+begin_src  emacs-lisp :results none
+#+begin_src  emacs-lisp :results none 
 (use-package pdf-continuous-scroll-mode
   :quelpa (pdf-continuous-scroll-mode :fetcher github :repo "dalanicolai/pdf-continuous-scroll-mode.el")
   :commands pdf-continuous-scroll-mode
@@ -2547,7 +2563,7 @@ TODO colors.
         (require 'pdf-continuous-scroll-mode)))
 #+end_src
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none 
 (use-package org-pdftools
   :hook (org-mode . org-pdftools-setup-link))
 
@@ -2574,6 +2590,35 @@ TODO colors.
   :defer t)
 #+end_src
 
+* Configure =mu4e=
+#+begin_src emacs-lisp :results none
+(use-package mu4e
+  :ensure nil
+
+  :config 
+  (setq mu4e-change-filenames-when-moving t)
+  (setq mu4e-update-interval 60)
+  (setq mu4e-get-mail-command "mbsync -a")
+  (setq mu4e-maildir "~/.mail")
+
+  (setq mu4e-drafts-folder "/[Gmail]/Drafts")
+  (setq mu4e-sent-folder   "/[Gmail]/Sent Mail")
+  (setq mu4e-refile-folder "/[Gmail]/All Mail")
+  (setq mu4e-trash-folder  "/[Gmail]/Trash")
+
+  (setq mu4e-maildir-shortcuts
+      '(("/gmail/Inbox"       . ?i)
+        ("/[Gmail]/Sent Mail" . ?s)
+        ("/[Gmail]/Trash"     . ?t)
+        ("/[Gmail]/Drafts"    . ?d)
+        ("/[Gmail]/All Mail"  . ?a))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package mu4e-alert
+  :ensure t)
+#+end_src
+
 * Emacs App Framework
 #+begin_src emacs-lisp :results none
 ;; (use-package eaf
@@ -2581,9 +2626,15 @@ TODO colors.
 ;;   :custom
 ;;   (eaf-find-alternate-file-in-dired t)
 ;;   :config
+
+;;   (require 'eaf-evil)
+;;   (setq eaf-evil-leader-key "SPC")
+
+;;   (eaf-bind-key persp-next "gt" eaf-pdf-viewer-keybinding)
+;;   (eaf-bind-key persp-prev "gT" eaf-pdf-viewer-keybinding)
+
 ;;   (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
+;;   (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding))
 #+end_src
 
 * org-screenshot
