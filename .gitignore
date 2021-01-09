@@ -22,3 +22,7 @@ configuration.el
 /auto-save-list/
 .yas-compiled-snippets.el
 eln-cache/
+eaf/
+straight/
+quelpa/
+site-lisp/
