@@ -375,6 +375,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray   ,@bg-base03))))
              (org-date          ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
 
+	     (org-checkbox-statistics-todo  ((t (,@fmt-none ,@fg-red ,@bg-base03))))
+	     (org-checkbox-statistics-done  ((t (,@fmt-none ,@fg-gray ,@bg-base03))))
+
              (org-code          ((t (,@fmt-none ,@fg-green ,@bg-base03))))
              (org-verbatim      ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
 	     (org-ellipsis      ((t (,@fmt-none ,@fg-gray))))

@@ -96,11 +96,6 @@ Color theme.
 ;; (load-theme 'modus-vivendi t)
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(setq prettify-symbols-unprettify-at-point t)
-(global-prettify-symbols-mode 1)
-#+end_src
- 
 * Sensible settings
 Disable backup and lockfiles.
 #+begin_src emacs-lisp :results none
@@ -238,6 +233,7 @@ Compilation settings.
     "p" #'hydra-project/body
     "r" #'hydra-resize/body
 
+    "o c" #'cfw:open-org-calendar
     "o p" #'treemacs
     "o e" #'eshell
     "o E" #'+eshell/open-in-default
@@ -1185,13 +1181,13 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
-                       (push '("- [ ]" . "☐") prettify-symbols-alist)
-                       (push '("- [X]" . "☒") prettify-symbols-alist)
-                       ;; (push '("-" . "–") prettify-symbols-alist)
+                       (push '("[ ]" . "☐") prettify-symbols-alist)
+                       (push '("[-]" . "☐") prettify-symbols-alist)
+                       (push '("[X]" . "☒") prettify-symbols-alist)
                        (push '("->" . "→") prettify-symbols-alist)
                        (push '("<-" . "←") prettify-symbols-alist)
-                       (push '("#+begin_src" . ">>") prettify-symbols-alist)
-                       (push '("#+end_src" . "<<") prettify-symbols-alist))))
+                       (push '("#+begin_src" . ">") prettify-symbols-alist)
+                       (push '("#+end_src" . "<") prettify-symbols-alist))))
 
   (add-hook 'after-init-hook
       (lambda ()
@@ -1204,7 +1200,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
          ("C-j" . evil-window-down))
   :hook (org-mode . org-indent-mode)
         (org-mode . variable-pitch-mode)
-        (org-mode . prettify-symbols-mode)
         (org-mode . auto-fill-mode))
 #+end_src
 
@@ -1813,7 +1808,18 @@ Save image and insert it's link at point.
     (setq doom-modeline-vcs-max-length 40)
     (setq doom-modeline-enable-word-count t)
     (setq doom-modeline-mu4e t)
+
     (set-face-attribute 'mode-line nil :height 115)
+
+    (doom-modeline-def-modeline 'pc/modeline
+      '(bar matches buffer-info remote-host buffer-position selection-info)
+      '(misc-info minor-modes input-method buffer-encoding major-mode vcs process mu4e battery checker))
+
+    (defun pc/setup-modeline ()
+      (doom-modeline-set-modeline 'pc/modeline 'default))
+
+    (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
+
     (doom-modeline-mode))
 #+end_src
 * Configure =zoom-window=
@@ -2616,7 +2622,10 @@ TODO colors.
 
 #+begin_src emacs-lisp :results none
 (use-package mu4e-alert
-  :ensure t)
+  :ensure t
+  :config 
+
+  (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
 #+end_src
 
 * Emacs App Framework
@@ -2764,11 +2773,9 @@ TODO colors.
 (require 'org-roam-protocol)
 #+end_src
 
-* TODO TODOs
-- [ ] java script / react stuff
-- [ ] workgroups.el
-- [ ] if do not run a command on hydra missclick (e.g. "SPC f p" runs "p" as paste)
-- [ ] anzu?
-- [ ] bookmarks
-- [ ] agenda
-- [ ] reimplement py-indent-or-complete
+* Test
+#+begin_src emacs-lisp :results none
+(setq prettify-symbols-unprettify-at-point t)
+(global-prettify-symbols-mode 1)
+#+end_src
+
