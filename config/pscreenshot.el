@@ -1,6 +1,6 @@
 (require 'org-screenshot)
 
-(defgroup pscreensot nil
+(defgroup pscreenshot nil
   "pscreenshot group")
 
 (defconst pscreenshot/image-directory "./images/")
@@ -41,5 +41,6 @@
       (insert (format "#+ATTR_ORG: :width %s\n" ,width))
 	(org-screenshot-process-done
 	 process event ,file ,(current-buffer) nil ',last-input-event)))))
+
 
 (provide 'pscreenshot)

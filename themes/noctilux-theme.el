@@ -81,12 +81,12 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 
 (setq org-todo-keyword-faces '(
-    ("PROJECT" . (:height 1.2 :foreground "#ffffff" :weight normal :underline t))
-    ("STRT"    . (:height 1.2 :foreground "#0198e1" :weight normal :underline t))
-    ("SOMEDAY" . (:height 1.2 :foreground "#ff8888" :weight normal :underline t))
-    ("REVIEW"  . (:height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-    ("DEPLOY"  . (:height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-    ("WAIT"    . (:height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
+    ("PROJECT" . (:inherit fixed-pitch :height 1.2 :foreground "#ffffff" :weight normal :underline t))
+    ("STRT"    . (:inherit fixed-pitch :height 1.2 :foreground "#0198e1" :weight normal :underline t))
+    ("SOMEDAY" . (:inherit fixed-pitch :height 1.2 :foreground "#ff8888" :weight normal :underline t))
+    ("REVIEW"  . (:inherit fixed-pitch :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+    ("DEPLOY"  . (:inherit fixed-pitch :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+    ("WAIT"    . (:inherit fixed-pitch :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
 
 (defmacro noct-flet (specs &rest body)
   (let ((flet (if (fboundp 'cl-flet) 'cl-flet 'flet)))
@@ -370,8 +370,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              ;; org
              (org-hide          ((t (,@fg-base03))))
-             (org-todo          ((t (,@fmt-big ,@fmt-undr   ,@fg-red  ,@bg-base03))))
-             (org-done          ((t (,@fmt-big ,@fmt-none   ,@fg-gray ,@bg-base03))))
+             (org-todo          ((t (:inherit fixed-pitch :height 1.2 ,@fmt-undr ,@fg-red  ,@bg-base03))))
+             (org-done          ((t (:inherit fixed-pitch :height 1.2 ,@fmt-none ,@fg-gray ,@bg-base03))))
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray   ,@bg-base03))))
              (org-date          ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
 
@@ -393,7 +393,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-table                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-blue ,@bg-base03))))
 
              (org-link ((t (,@fmt-undr ,@fg-darkblue ,@bg-base03))))
-             (org-tag ((t (,@fg-orange ,@bg-base03))))
+             (org-tag ((t (:inherit fixed-pitch :height 1.2 ,@fg-orange ,@bg-base03))))
 
 	     (org-level-1 ((t (,@fmt-big ,@fg-purple ,@bg-base03))))
 	     (org-level-2 ((t (,@fmt-sbig ,@fg-pink ,@bg-base03))))

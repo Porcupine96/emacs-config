@@ -151,7 +151,7 @@ Open buffer position
      (reusable-frames . visible)
      (window-height   . 0.2))
 
-    ("\\*\\([Hh]elp\\|Messages\\|helpful.*\\)\\*"
+    ("\\*\\([Hh]elp\\|Messages\\|helpful.*\\|xref\\)\\*"
      (display-buffer-in-side-window)
      (side           . right)
      (window-width   . 0.5))
@@ -190,152 +190,6 @@ Compilation settings.
 * Miscellaneous
 #+begin_src emacs-lisp :results none
 (setq auth-sources '("~/.authinfo"))
-#+end_src
-
-* Configure =general=
-** Leader Key
-#+begin_src emacs-lisp :results none
-(use-package general
-  :ensure t
-  :init
-   (setq general-override-states '(insert
-                                   emacs
-                                   hybrid
-                                   normal
-                                   visual
-                                   motion
-                                   operator
-                                   replace)))
-
-(general-create-definer leader-def 
-  :prefix "SPC")
-
-(leader-def
-  :states '(normal visual motion)
-  :keymaps 'override
-    "a" #'hydra-agenda/body
-
-    "b b" #'bufler
-    "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
-    "b n" #'next-buffer
-    "b s" #'+core/summon-scratch
-    "b N" #'+core/scratch-buffer
-    "b p" #'previous-buffer
-    "b k" #'kill-current-buffer
-
-    "c" #'hydra-compile/body
-    "d d" #'dockel
-    "h" #'hydra-help/body
-    "f" #'hydra-file/body
-    "g" #'hydra-git/body
-    "l" #'hydra-lsp/body
-    "k" #'helm-show-kill-ring
-    "p" #'hydra-project/body
-    "r" #'hydra-resize/body
-
-    "o c" #'cfw:open-org-calendar
-    "o p" #'treemacs
-    "o e" #'eshell
-    "o E" #'+eshell/open-in-default
-    "o P" #'+eshell/open-in-project-root
-    "o o" #'porcupine/focus-mode
-    "o v" #'vterm
-    "o m" #'mu4e
-
-    "s" #'hydra-search/body
-    "u" #'universal-argument
-    "w" #'hydra-window/body
-    "e e" #'elfeed
-    "e d" #'ediff
-    "t r" #'+core/reload-theme
-    "t e" #'treemacs-display-current-project-exclusively
-    "y a" #'yas-new-snippet
-    "y v" #'yas-visit-snippet-file
-    "y c" #'company-yasnippet
-    "y p" #'+core/copy-file-path
-    "RET" #'counsel-bookmark
-    "TAB" #'hydra-workspace/body
-    "SPC" #'counsel-projectile-find-file
-    "," #'counsel-projectile-switch-to-buffer)
-#+end_src
-
-** Local leader
-#+begin_src emacs-lisp :results none
-(general-create-definer local-leader-def
-  :prefix "SPC m")
-
-(local-leader-def
-  :states 'normal
-  :keymaps 'org-mode-map
-    "o" #'+ocr/screenshot
-    "s" #'org-schedule
-    "S" #'my-org-screenshot-take
-    "d" #'org-deadline
-    "i" #'+org/save-image-insert-link
-    "t" #'org-todo)
-    
-(local-leader-def
-  :states 'normal
-  :keymaps 'scala-mode-map
-    "i" #'+scala/copy-import
-    "s" #'hydra-scala-surround/body
-    "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
-    "c c" (lambda () (interactive) (+projectile/compile "bl"))
-    "c p" (lambda () (interactive) (+projectile/compile "protob"))
-    "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
-    "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
-    "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
-    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
-    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala")))
-
-(local-leader-def
-  :states 'normal
-  :keymaps 'rust-mode-map
-    "c c" #'rust-compile
-    "c r" #'rust-run)
-
-;;(which-key-add-key-based-replacements
-;;  "SPC m c c" "bl"
-;;  "SPC m c n" "bl -n"
-;;  "SPC m c p" "protob")
-
-(local-leader-def
-  :states 'normal
-  :keymaps 'python-mode-map
-    "s" #'run-python
-    "s" #'hydra-python-surround/body)
-#+end_src
-
-** SPC j (org-mode)
-#+begin_src emacs-lisp :results none
-(general-define-key 
-  :prefix "SPC j"
-  :states 'normal
-  :keymaps 'org-mode-map
-  "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
-  "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
-  "x" #'jupyter-org-kill-block-and-results
-  "c" #'org-babel-remove-result
-  "j" #'org-babel-next-src-block
-  "k" #'org-babel-previous-src-block
-  "r" #'jupyter-run-repl
-  "E" #'jupyter-org-execute-to-point)
-#+end_src
-
-** org-mode
-#+begin_src emacs-lisp :results none
-(general-define-key 
-    :states '('normal 'insert)
-    :keymaps '(evil-org-mode-map org-mode-map)
-    "C-<return>" '+org/c-ret-dwim
-    "C-S-<return>" '+org/c-s-ret-dwim
-    "C-M-<return>" '+org/c-m-ret-dwim)
-
-(general-define-key 
-    :states '('normal)
-    :keymaps '(evil-org-mode-map org-mode-map)
-    "C-<return>" '+org/c-ret-dwim
-    "<return>" '+org/ret-dwim)
 #+end_src
 
 * Use =evil-mode=
@@ -568,41 +422,6 @@ Compilation settings.
    #+end_src
 
 ** LSP
-#+begin_src emacs-lisp :results none
-  (defhydra hydra-lsp (:color blue)
-    "
-    ^
-    ^LSP^     
-    ^────^───────────
-    _b_ Metals build import
-    _d_ Go to type definition
-    _s_ Describe session
-    _e_ Error list
-    _f_ Format
-    _l_ Find symbol
-    _t_ LSP Hydra toggle
-    _r_ Find references
-    _R_ Rename
-    _x_ Remove other workspaces
-    _i_ Go to implementation
-    _I_ Copy Import
-    ^^        
-    "
-    ("b" #'lsp-metals-build-import)
-    ("d" #'lsp-find-definition)
-    ("s" #'lsp-describe-session)
-    ("e" #'lsp-ui-flycheck-list)
-    ("f" #'lsp-format-buffer)
-    ("l" #'lsp-ivy-workspace-symbol)
-    ("t" #'hydra-lsp-toggle/body)
-    ("T" #'lsp-treemacs-errors-list)
-    ("r" #'lsp-ui-peek-find-references)
-    ("R" #'lsp-rename)
-    ("x" #'+lsp/remove-other-sessions)
-    ("i" #'lsp-goto-implementation)
-    ("I" #'+scala/copy-import))
-#+end_src
-
 #+begin_src emacs-lisp :results none
  (defhydra hydra-lsp-toggle (:color blue)
     "
@@ -1000,54 +819,58 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :defer t)
 #+end_src
 * Configure =ivy= / =counsel= / =swiper=
-  Default =ivy= configuration.
-  #+begin_src emacs-lisp :results none
-    (use-package ivy
-       :config
-         (setq ivy-use-virtual-buffers t)
-         (setq ivy-initial-inputs-alist nil)
-         (setq enable-recursive-minibuffers t)
-         (setq search-default-mode #'char-fold-to-regexp)
-         (setq ivy-read-action-function 'ivy-hydra-read-action)
-         (ivy-mode 1)
-         (global-set-key (kbd "C-c C-r") 'ivy-resume)
-         (global-set-key (kbd "<f6>") 'ivy-resume))
+Default =ivy= configuration.
+#+begin_src emacs-lisp :results none
+(use-package ivy
+   :straight (:no-native-compile t)
+   :config
+     (setq ivy-use-virtual-buffers t)
+     (setq ivy-initial-inputs-alist nil)
+     (setq enable-recursive-minibuffers t)
+     (setq search-default-mode #'char-fold-to-regexp)
+     (setq ivy-read-action-function 'ivy-hydra-read-action)
+     (ivy-mode 1)
+     (global-set-key (kbd "C-c C-r") 'ivy-resume)
+     (global-set-key (kbd "<f6>") 'ivy-resume))
 
-    (use-package swiper
-      :after ivy
-      :config
-        (global-set-key "\C-s" 'swiper))
+(use-package swiper
+  :straight (:no-native-compile t)
+  :after ivy
+  :config
+    (global-set-key "\C-s" 'swiper))
 
-    (use-package counsel 
-      :after ivy
-      :custom 
-        (counsel-find-file-ignore-regexp "#.*#")
-      :config
-        (global-set-key (kbd "M-x") 'counsel-M-x)
-        (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-        (global-set-key (kbd "C-c g") 'counsel-git)
-        (global-set-key (kbd "C-c k") 'counsel-ag)
-        (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
+(use-package counsel 
+  :straight (:no-native-compile t) 
+  :after ivy
+  :custom 
+    (counsel-find-file-ignore-regexp "#.*#")
+  :config
+    (global-set-key (kbd "M-x") 'counsel-M-x)
+    (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+    (global-set-key (kbd "C-c g") 'counsel-git)
+    (global-set-key (kbd "C-c k") 'counsel-ag)
+    (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
 
-    ;; sorts counsel-M-x by recently used
-    (use-package smex :after counsel)
+;; sorts counsel-M-x by recently used
+(use-package smex :after counsel)
 
-    (use-package ivy-prescient
-       :ensure t
-       :straight
-       :disabled
-       :after counsel
-       :config 
-         (ivy-prescient-mode 1))
-  #+end_src
-  
-  Recentf configuration.
-  #+begin_src emacs-lisp :results none
-  (setq recentf-max-saved-items 300)
-  #+end_src
-  
+(use-package ivy-prescient
+   :straight (:no-native-compile t) 
+   :ensure t
+   :disabled
+   :after counsel
+   :config 
+     (ivy-prescient-mode 1))
+#+end_src
+
+Recentf configuration.
+#+begin_src emacs-lisp :results none
+(setq recentf-max-saved-items 300)
+#+end_src
+
  #+begin_src emacs-lisp :results none
 (use-package ivy-posframe
+  :straight (:no-native-compile t) 
   :ensure
   :after ivy
   :config
@@ -1171,6 +994,9 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   (setq org-use-fast-todo-selection 'expert)
   (setq org-image-actual-width nil)
 
+  ;; open files in the same window
+  (setf (alist-get 'file org-link-frame-setup) 'find-file)
+
   (setq org-todo-keywords
 	'((sequence "REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "DEPLOY(E)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
 	  (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
@@ -1181,13 +1007,19 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
-                       (push '("[ ]" . "☐") prettify-symbols-alist)
-                       (push '("[-]" . "☐") prettify-symbols-alist)
-                       (push '("[X]" . "☒") prettify-symbols-alist)
-                       (push '("->" . "→") prettify-symbols-alist)
-                       (push '("<-" . "←") prettify-symbols-alist)
-                       (push '("#+begin_src" . ">") prettify-symbols-alist)
-                       (push '("#+end_src" . "<") prettify-symbols-alist))))
+                     (push '("[ ]" . "☐") prettify-symbols-alist)
+                     (push '("[-]" . "☐") prettify-symbols-alist)
+                     (push '("[X]" . "☒") prettify-symbols-alist)
+                     (push '("->" . "→") prettify-symbols-alist)
+                     (push '("<-" . "←") prettify-symbols-alist)
+                     (push '("<->" . "←→") prettify-symbols-alist)
+                     (push '("---" . "⎯") prettify-symbols-alist)
+                     (push '("#+begin_src" . ">") prettify-symbols-alist)
+                     (push '("#+end_src" . "<") prettify-symbols-alist)
+                     (push '("#+BEGIN_SRC" . ">") prettify-symbols-alist)
+                     (push '("#+END_SRC" . "<") prettify-symbols-alist)
+
+                     (prettify-symbols-mode 1))))
 
   (add-hook 'after-init-hook
       (lambda ()
@@ -1239,6 +1071,18 @@ Automatically save archive buffer after archiving a task.
 Org tag placement.
 #+begin_src emacs-lisp :results none
 (setq org-tags-column -1)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org/open-at-point-other-window ()
+  (interactive)
+
+  (let ((org-link-frame-setup '((vm . vm-visit-folder-other-frame)
+                                (vm-imap . vm-visit-imap-folder-other-frame)
+                                (file . find-file-other-window)
+                                (wl . wl-other-frame))))
+
+    (org-open-at-point)))
 #+end_src
 
 ** Org Agenda 
@@ -1316,7 +1160,7 @@ Org tag placement.
              (:name "🖥 Work" :and (:category "work"
                                  :todo ("STRT" "TODO" "REVIEW")))
              (:name "‍🎓 Studies" :and (:category "studies" 
-         				  :todo ("STRT" "TODO" "REVIEW")
+         				  :todo ("PROJECT" "STRT" "TODO" "REVIEW")
          				  :scheduled (before ,three-days-from-now)))
              (:name ":house_with_garden: Private" :and (:category "private"
                                  :todo ("STRT" "TODO" "REVIEW")))
@@ -1431,8 +1275,8 @@ Org tag placement.
 
 #+begin_src emacs-lisp :results none
 (use-package jupyter
-  :straight (:no-native-compile t)
-  :defer t)
+ :straight (:no-native-compile t)
+ :defer t)
 #+end_src
 
 Load languages.
@@ -1485,9 +1329,9 @@ Change the image background.
 ** Org Roam
 #+begin_src emacs-lisp :results none
 (use-package org-roam
-      :ensure t
-      :straight (:no-native-compile t)
-      :bind (:map org-roam-mode-map
+  :ensure t
+  :straight (:no-native-compile t)
+  :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
                ("C-c n F" . +org-roam/find-file-by-title)
@@ -1496,11 +1340,23 @@ Change the image background.
               :map org-mode-map
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate)))
-      :config 
-        (setq org-roam-directory "/home/porcupine/Dropbox/org-roam")
-        (setq org-roam-graph-viewer "/usr/bin/brave")
-        (require 'org-roam-protocol)
-        (org-roam-mode))
+  :config 
+  (setq org-roam-directory "/home/porcupine/Dropbox/org-roam")
+  (setq org-roam-graph-viewer "/usr/bin/brave")
+  (setq org-roam-completion-system 'ivy)
+
+  (setq org-roam-capture-templates '(
+				     ("d" "default" plain (function org-roam--capture-get-point)
+				      "%?"
+				      :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
+				      :head "#+title: ${title}\n#+roam_tags: \n#+startup: content latexpreview\n"
+				      :unnarrowed t)))
+
+
+  (add-hook 'org-capture-after-finalize-hook 'org-roam-db-build-cache)
+
+  (require 'org-roam-protocol)
+  (org-roam-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1608,6 +1464,8 @@ Change the image background.
   (interactive)
   (let* ((context (org-element-context))
          (type (org-element-type context)))
+    
+    (print type)
 
     (pcase type
       (`item (+org/insert-item-next-line))
@@ -1694,6 +1552,15 @@ Save image and insert it's link at point.
      (:map flyspell-mode-map
         ("C-c $" . nil)))
 #+end_src
+* Configure =langtool=
+#+begin_src emacs-lisp :results none
+(use-package langtool
+  :ensure t
+  :defer t
+  :config
+    (setq langtool-java-classpath 
+       "/usr/share/languagetool:/usr/share/java/languagetool/*"))
+#+end_src
 * Configure =yasnippet=
 #+begin_src emacs-lisp :results none
 (use-package yasnippet
@@ -1749,16 +1616,20 @@ Save image and insert it's link at point.
 #+end_src
 
 * Configure =magit=
- #+begin_src emacs-lisp :results none
-(use-package magit :defer t)
+#+begin_src emacs-lisp :results none
+(use-package magit
+  :defer t
+  :config
+    (setq magit-list-refs-sortby "committerdate"))
+
 (use-package evil-magit :after magit)
 (use-package forge :after magit)
- #+end_src
+#+end_src
  
- vc-annotate options.
- #+begin_src emacs-lisp :results none
+vc-annotate options.
+#+begin_src emacs-lisp :results none
 ;; (setq vc-git-annotate-switches '("-c"))
- #+end_src
+#+end_src
 
 * Configure =git-timemachine=
  #+begin_src emacs-lisp :results none
@@ -2070,15 +1941,14 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-;; (use-package lsp-python-ms
-;;   :ensure t
-;;   :after python-mode
-;;   :init (setq lsp-python-ms-auto-install-server t)
-;;   :hook (
-;;          (python-mode . lsp-deferred)
-;;          (python-mode . (lambda ()
-;;                           ;; (setq lsp-python-ms-extra-paths '())
-;;                           (require 'lsp-python-ms)))))
+(use-package lsp-python-ms
+  :ensure t
+  :after python-mode
+  :init (setq lsp-python-ms-auto-install-server t)
+  :hook (
+         (python-mode . (lambda ()
+                          (require 'lsp-python-ms)
+                          (lsp)))))
 #+end_src
 
 
@@ -2170,6 +2040,22 @@ Use =lsp-ivy=.
   (let ((loc (lsp-request "textDocument/references"
                           ((lsp--text-document-position-params) (list :context `(:includeDeclaration nil))))))
      (print (lsp--locations-to-xref-items loc))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +lsp/lsp-select-log-level()
+  (interactive)
+  (let* ((level-string   (ivy-read "Lsp log level" '("ERROR" "WARN" "INFO" "DEBUG")))
+         (severity  (pcase level-string
+                      (`"ERROR" 1)
+                      (`"WARN" 2)
+                      (`"INFO" 3)
+                      (`"DEBUG" 5)
+                      ))
+         )
+    (when severity
+      (setq lsp-treemacs-error-list-severity severity))
+    (call-interactively 'lsp-treemacs-errors-list)))
 #+end_src
 
 Remove other LSP sessions.
@@ -2628,6 +2514,173 @@ TODO colors.
   (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
 #+end_src
 
+* Configure =general=
+** Leader Key
+#+begin_src emacs-lisp :results none
+(use-package general
+  :ensure t
+  :init
+   (setq general-override-states '(insert
+                                   emacs
+                                   hybrid
+                                   normal
+                                   visual
+                                   motion
+                                   operator
+                                   replace)))
+
+(general-create-definer leader-def 
+  :prefix "SPC")
+
+(leader-def
+  :states '(normal visual motion)
+  :keymaps 'override
+    "a" #'hydra-agenda/body
+
+    "b b" #'bufler
+    "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
+    "b n" #'next-buffer
+    "b s" #'+core/summon-scratch
+    "b N" #'+core/scratch-buffer
+    "b p" #'previous-buffer
+    "b k" #'kill-current-buffer
+
+    "c" #'hydra-compile/body
+    "d d" #'dockel
+    "h" #'hydra-help/body
+    "f" #'hydra-file/body
+    "g" #'hydra-git/body
+    "k" #'helm-show-kill-ring
+
+    "l b" #'lsp-metals-build-import
+    "l d" #'lsp-find-definition
+    "l s" #'lsp-describe-session
+    "l e" #'lsp-ui-flycheck-list
+    "l f" #'lsp-format-buffer
+    "l l" #'lsp-ivy-workspace-symbol
+    "l t" #'hydra-lsp-toggle/body
+    "l T" #'lsp-treemacs-errors-list
+    ;; "l r" #'lsp-ui-peek-find-references
+    "l r" #'lsp-find-references
+    "l R" #'lsp-rename
+    "l x" #'+lsp/remove-other-sessions
+    "l i" #'lsp-goto-implementation
+    "l I" #'+scala/copy-import
+
+    "o c" #'cfw:open-org-calendar
+    "o p" #'treemacs
+    "o e" #'eshell
+    "o E" #'+eshell/open-in-default
+    "o P" #'+eshell/open-in-project-root
+    "o o" #'porcupine/focus-mode
+    "o v" #'vterm
+    "o m" #'mu4e
+
+    "p" #'hydra-project/body
+    "r" #'hydra-resize/body
+
+    "s" #'hydra-search/body
+    "u" #'universal-argument
+    "w" #'hydra-window/body
+    "e e" #'elfeed
+    "e d" #'ediff
+    "t r" #'+core/reload-theme
+    "t e" #'treemacs-display-current-project-exclusively
+    "y a" #'yas-new-snippet
+    "y v" #'yas-visit-snippet-file
+    "y c" #'company-yasnippet
+    "y p" #'+core/copy-file-path
+    "RET" #'counsel-bookmark
+    "TAB" #'hydra-workspace/body
+    "SPC" #'counsel-projectile-find-file
+    "," #'counsel-projectile-switch-to-buffer)
+#+end_src
+
+** Local leader
+#+begin_src emacs-lisp :results none
+(general-create-definer local-leader-def
+  :prefix "SPC m")
+
+(local-leader-def
+  :states 'normal
+  :keymaps 'org-mode-map
+    "o" #'+ocr/screenshot
+    "s" #'org-schedule
+    "S" #'pscreenshot/org-screenshot-take
+    "d" #'org-deadline
+    "i" #'+org/save-image-insert-link
+    "t" #'org-todo)
+    
+(local-leader-def
+  :states 'normal
+  :keymaps 'text-mode-map
+    "o" #'+ocr/screenshot)
+
+(local-leader-def
+  :states 'normal
+  :keymaps 'scala-mode-map
+    "i" #'+scala/copy-import
+    "s" #'hydra-scala-surround/body
+    "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
+    "c c" (lambda () (interactive) (+projectile/compile "bl"))
+    "c p" (lambda () (interactive) (+projectile/compile "protob"))
+    "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
+    "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
+    "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
+    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala")))
+
+(local-leader-def
+  :states 'normal
+  :keymaps 'rust-mode-map
+    "c c" #'rust-compile
+    "c r" #'rust-run)
+
+;;(which-key-add-key-based-replacements
+;;  "SPC m c c" "bl"
+;;  "SPC m c n" "bl -n"
+;;  "SPC m c p" "protob")
+
+(local-leader-def
+  :states 'normal
+  :keymaps 'python-mode-map
+    "s" #'run-python
+    "s" #'hydra-python-surround/body)
+#+end_src
+
+** SPC j (org-mode)
+#+begin_src emacs-lisp :results none
+(general-define-key 
+  :prefix "SPC j"
+  :states 'normal
+  :keymaps 'org-mode-map
+  "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
+  "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
+  "x" #'jupyter-org-kill-block-and-results
+  "c" #'org-babel-remove-result
+  "j" #'org-babel-next-src-block
+  "k" #'org-babel-previous-src-block
+  "r" #'jupyter-run-repl
+  "E" #'jupyter-org-execute-to-point)
+#+end_src
+
+** org-mode
+#+begin_src emacs-lisp :results none
+(general-define-key 
+    :states '('normal 'insert)
+    :keymaps '(evil-org-mode-map org-mode-map)
+    "C-<return>" '+org/c-ret-dwim
+    "S-<return>" '+org/open-at-point-other-window
+    "C-S-<return>" '+org/c-s-ret-dwim
+    "C-M-<return>" '+org/c-m-ret-dwim)
+
+(general-define-key 
+    :states '('normal)
+    :keymaps '(evil-org-mode-map org-mode-map)
+    "C-<return>" '+org/c-ret-dwim
+    "<return>" '+org/ret-dwim)
+#+end_src
+
 * Emacs App Framework
 #+begin_src emacs-lisp :results none
 ;; (use-package eaf
@@ -2644,46 +2697,6 @@ TODO colors.
 
 ;;   (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
 ;;   (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding))
-#+end_src
-
-* org-screenshot
-#+begin_src emacs-lisp :results none
-(defun generate-file-name (dir)
-  (concat (number-to-string (random 10000000)) ".png"))
-
-(defconst image-directory "./images/")
-
-(defun my-org-screenshot-take (width)
-  (interactive
-    (list 
-      (cond 
-         (current-prefix-arg (read-string "Width: "))
-         (t "500"))))
-
-  (when (and (boundp 'org-screenshot-process)
-              org-screenshot-process
-             (member (process-status org-screenshot-process)
-                     '(run stop)))
-    (error "screenshot process is still running"))
-  (make-directory image-directory t)
-  (let* ((name (generate-file-name image-directory))
-         (file (format "%s%s" image-directory name))
-         (path (expand-file-name file)))
-    (when (get-buffer "*screenshot*")
-      (with-current-buffer (get-buffer "*screenshot*")
-	(erase-buffer)))
-    (setq org-screenshot-process
-          (or 
-           (+ocr/take-screenshot path)
-           (error "Unable to start screenshot process")))
-    (when org-screenshot-process 
-      (message "Click on a window, or select a rectangle..."))
-    (set-process-sentinel
-     org-screenshot-process
-     `(lambda (process event)
-      (insert (format "#+ATTR_ORG: :width %s\n" ,width))
-	(org-screenshot-process-done
-	 process event ,file ,(current-buffer) nil ',last-input-event)))))
 #+end_src
 
 * org-ocr
@@ -2740,9 +2753,10 @@ TODO colors.
     (find-file-other-window (concat proto-root "/" proto-name))))
 #+end_src
 
-* Own
+* My packages
 #+begin_src emacs-lisp :results none
 (load-file "~/.emacs.d/config/pagenda.el")
+(load-file "~/.emacs.d/config/pscreenshot.el")
 #+end_src
 
 * Focus Mode

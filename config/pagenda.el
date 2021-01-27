@@ -30,9 +30,9 @@
  org-agenda-tags-column 80
  org-agenda-compact-blocks t
  diary-show-holidays-flag nil
- org-agenda-breadcrumbs-separator " ❱ "
+ org-agenda-breadcrumbs-separator " → "
  org-agenda-scheduled-leaders '("" "")
- org-agenda-current-time-string "❱"
+ org-agenda-current-time-string "→"
  org-agenda-todo-keyword-format "%-1s"
  org-agenda-prefix-format '((agenda . " %?-12t% s")
                             (timeline . "  % s")
