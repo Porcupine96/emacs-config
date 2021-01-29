@@ -372,8 +372,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (org-hide          ((t (,@fg-base03))))
              (org-todo          ((t (:inherit fixed-pitch :height 1.2 ,@fmt-undr ,@fg-red  ,@bg-base03))))
              (org-done          ((t (:inherit fixed-pitch :height 1.2 ,@fmt-none ,@fg-gray ,@bg-base03))))
-	     (org-headline-done ((t (,@fmt-strk ,@fg-gray   ,@bg-base03))))
-             (org-date          ((t (,@fmt-none ,@fg-yellow ,@bg-base03))))
+	     (org-headline-done ((t (,@fmt-strk ,@fg-gray ,@bg-base03))))
+             (org-date          ((t (:inherit fixed-pitch ,@fmt-none ,@fg-yellow ,@bg-base03))))
 
 	     (org-checkbox-statistics-todo  ((t (,@fmt-none ,@fg-red ,@bg-base03))))
 	     (org-checkbox-statistics-done  ((t (,@fmt-none ,@fg-gray ,@bg-base03))))
@@ -389,6 +389,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-block-end-line        ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-drawer                ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-meta-line             ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-special-keyword       ((t (:inherit fixed-pitch ,@fg-green))))
 
 	     (org-table                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-blue ,@bg-base03))))
 

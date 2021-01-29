@@ -23,7 +23,7 @@
                      '(run stop)))
     (error "screenshot process is still running"))
   (make-directory pscreenshot/image-directory t)
-  (let* ((name (generate-file-name pscreenshot/image-directory))
+  (let* ((name (pscreenshot/generate-file-name pscreenshot/image-directory))
          (file (format "%s%s" pscreenshot/image-directory name))
          (path (expand-file-name file)))
     (when (get-buffer "*screenshot*")

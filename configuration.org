@@ -774,8 +774,14 @@ Scale text.
    :ensure t
    :defer t
    :init (which-key-mode))
+
+;; This should be triggered only in scala-mode.
+;;(which-key-add-key-based-replacements
+;;  "SPC m c c" "bl"
+;;  "SPC m c n" "bl -n"
+;;  "SPC m c p" "protob")
  #+end_src
-  
+ 
 * Configure =avy= / =evil-easymotion= / =evil-snipe=
   #+begin_src emacs-lisp :results none
   (use-package avy 
@@ -1194,16 +1200,24 @@ Org tag placement.
     (setq org-ref-bibliography-notes "~/Dropbox/papers/notes.org")
     (setq org-ref-pdf-directory "~/Dropbox/papers/pdfs")
 
-    (defun my/org-ref-open-pdf-at-point ()
-	(interactive)
-	(let* ((results (org-ref-get-bibtex-key-and-file))
-		(key (car results))
-		(pdf-file (car (bibtex-completion-find-pdf key))))
-	    (if (file-exists-p pdf-file)
-		(org-open-file pdf-file)
-	    (message "No PDF found for %s" key))))
+    (defun +org-ref/org-ref-open-associated-pdf ()
+	  (interactive)
+	  (let* ((key (string-remove-prefix "cite:" (+org/property-value "roam_key")))
+	  	(pdf-file (car (bibtex-completion-find-pdf key))))
+	      (if (file-exists-p pdf-file)
+	  	(org-open-file pdf-file)
+	      (message "No PDF found for %s" key))))
 
-    (setq org-ref-open-pdf-function 'my/org-ref-open-pdf-at-point))
+    (defun +org-ref/org-ref-open-pdf-at-point ()
+	  (interactive)
+	  (let* ((results (org-ref-get-bibtex-key-and-file))
+	  	(key (car results))
+	  	(pdf-file (car (bibtex-completion-find-pdf key))))
+	      (if (file-exists-p pdf-file)
+	  	(org-open-file pdf-file)
+	      (message "No PDF found for %s" key))))
+
+    (setq org-ref-open-pdf-function '+org-ref/org-ref-open-pdf-at-point))
 #+end_src
  
 #+begin_src emacs-lisp :results none
@@ -1387,7 +1401,7 @@ Change the image background.
 
 (use-package org-roam-bibtex
   :ensure t
-  :hook (org-roam . org-roam-bibtex-mode)
+  :hook (org-roam . org-roam-bibtex)
   :custom
     (orb-autokey-format "%a%y")
     (orb-templates
@@ -1536,7 +1550,7 @@ Save image and insert it's link at point.
       (org-element-map
           (org-element-parse-buffer)
           'keyword
-          (lambda (el) (when (string-match "TITLE" (org-element-property :key el)) el))))))
+          (lambda (el) (when (string-match property (org-element-property :key el)) el))))))
 #+end_src
 * Configure =flyspell=
 #+begin_src emacs-lisp :results none 
@@ -2441,6 +2455,9 @@ TODO colors.
 
 (use-package pdf-tools
   :ensure t
+  :bind (:map pdf-history-minor-mode-map
+              ("[" . pdf-history-backward)
+              ("]" . pdf-history-forward))
   :config 
     (pdf-tools-install)
     (add-hook 'pdf-view-mode-hook #'+pdf/setup))
@@ -2635,11 +2652,6 @@ TODO colors.
   :keymaps 'rust-mode-map
     "c c" #'rust-compile
     "c r" #'rust-run)
-
-;;(which-key-add-key-based-replacements
-;;  "SPC m c c" "bl"
-;;  "SPC m c n" "bl -n"
-;;  "SPC m c p" "protob")
 
 (local-leader-def
   :states 'normal
