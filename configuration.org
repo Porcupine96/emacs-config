@@ -1058,7 +1058,7 @@ Do not ask whether it is save to evaluate a snippet of code.
 Enlarge LaTeX font.
 #+begin_src emacs-lisp :results none
 (setq org-format-latex-options 
-  (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.5))
+  (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.4))
 #+end_src
 
 Automatically save archive buffer after archiving a task.
@@ -1352,6 +1352,7 @@ Change the image background.
                ("C-c n C" . org-roam-db-build-cache)
                ("C-c n g" . org-roam-graph))
               :map org-mode-map
+              (("C-c C-b" . org-cycle-list-bullet))
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate)))
   :config 
@@ -1441,6 +1442,29 @@ Change the image background.
     (org-mode . org-fancy-priorities-mode)
   :config
     (setq org-fancy-priorities-list '("❗" "❕" "🆙")))
+#+end_src
+
+** Export CSS
+#+begin_src emacs-lisp :results none
+(defun my-org-inline-css-hook (exporter)
+  "Insert custom inline css"
+  (when (eq exporter 'html)
+    (let* ((dir (ignore-errors (file-name-directory (buffer-file-name))))
+           (path (concat dir "style.css"))
+           (homestyle (or (null dir) (null (file-exists-p path))))
+           (final (if homestyle "~/.emacs.d/org.css" path)))
+
+      (setq org-html-head-include-default-style nil)
+      (setq org-html-head (concat
+                           "<style type=\"text/css\">\n"
+                           "<!--/*--><![CDATA[/*><!--*/\n"
+                           (with-temp-buffer
+                             (insert-file-contents final)
+                             (buffer-string))
+                           "/*]]>*/-->\n"
+                           "</style>\n")))))
+
+(add-hook 'org-export-before-processing-hook 'my-org-inline-css-hook)
 #+end_src
 
 ** Functions
@@ -2455,9 +2479,6 @@ TODO colors.
 
 (use-package pdf-tools
   :ensure t
-  :bind (:map pdf-history-minor-mode-map
-              ("[" . pdf-history-backward)
-              ("]" . pdf-history-forward))
   :config 
     (pdf-tools-install)
     (add-hook 'pdf-view-mode-hook #'+pdf/setup))
