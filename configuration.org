@@ -836,8 +836,7 @@ Default =ivy= configuration.
      (setq search-default-mode #'char-fold-to-regexp)
      ;; (setq ivy-read-action-function 'ivy-hydra-read-action)
      (ivy-mode 1)
-     (global-set-key (kbd "C-c C-r") 'ivy-resume)
-     (global-set-key (kbd "<f6>") 'ivy-resume))
+     (global-set-key (kbd "C-c C-r") 'ivy-resume))
 
 (use-package swiper
   :straight (:no-native-compile t)
@@ -999,6 +998,7 @@ Recentf configuration.
   (setq org-fontify-done-headline t)
   (setq org-use-fast-todo-selection 'expert)
   (setq org-image-actual-width nil)
+  (setq org-src-window-setup 'split-window-right)
 
   ;; open files in the same window
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
@@ -1011,10 +1011,12 @@ Recentf configuration.
     (kbd "C-k") 'evil-window-up
     (kbd "C-j") 'evil-window-down)
 
+  (add-to-list 'org-emphasis-alist '("`" bold :foreground "Orange"))
+
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
                      (push '("[ ]" . "☐") prettify-symbols-alist)
-                     (push '("[-]" . "☐") prettify-symbols-alist)
+                     (push '("[-]" . "⚀") prettify-symbols-alist)
                      (push '("[X]" . "☒") prettify-symbols-alist)
                      (push '("->" . "→") prettify-symbols-alist)
                      (push '("<-" . "←") prettify-symbols-alist)
@@ -1113,14 +1115,14 @@ Org tag placement.
 #+begin_src emacs-lisp :results none
 (defun general-define-org-keys ()
   (general-define-key 
-      :states '('normal 'insert)
+      :states '(normal insert motion)
       :keymaps '(evil-org-mode-map org-mode-map)
       "C-<return>" '+org/c-ret-dwim
       "C-S-<return>" '+org/c-s-ret-dwim
       "C-M-<return>" '+org/c-m-ret-dwim)
 
   (general-define-key 
-      :states '('normal)
+      :states '(normal)
       :keymaps '(evil-org-mode-map org-mode-map)
       "<return>" '+org/ret-dwim))
 #+end_src
@@ -1293,9 +1295,13 @@ Org tag placement.
 #+begin_src emacs-lisp :results none
 (use-package jupyter
  :straight (:no-native-compile t)
- :defer t
  :config
     (load-file "/home/porcupine/.emacs.d/straight/repos/emacs-jupyter/jupyter-channel.el"))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(setq org-plantuml-jar-path
+      (expand-file-name "~/tools/plantuml.jar"))
 #+end_src
 
 Load languages.
@@ -1306,6 +1312,7 @@ Load languages.
    (ipython . t)
    (python . t)
    (ammonite . t)
+   (plantuml . t)
    ;; (jupyter . t)
    (js . t)
    (sql . t)
@@ -1664,12 +1671,8 @@ Save image and insert it's link at point.
 (use-package magit
   :defer t
   :config
-    (load-file "/home/porcupine/.emacs.d/elpa/magit-20210203.1158/magit-branch.el")
+    ;; (load-file "/home/porcupine/.emacs.d/elpa/magit-20210203.1158/magit-branch.el")
     (setq magit-list-refs-sortby "committerdate"))
-
-(use-package evil-magit 
-   :ensure t  
-   :after magit)
 
 (use-package forge 
    :ensure t  
@@ -1993,16 +1996,24 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package lsp-python-ms
-  :ensure t
-  :after python-mode
-  :init (setq lsp-python-ms-auto-install-server t)
-  :hook (
-         (python-mode . (lambda ()
-                          (require 'lsp-python-ms)
-                          (lsp)))))
+;; (use-package lsp-python-ms
+;;   :ensure t
+;;   :after python-mode
+;;   :init (setq lsp-python-ms-auto-install-server t)
+;;   :hook (
+;;          (python-mode . (lambda ()
+;;                           (require 'lsp-python-ms)
+;;                           (lsp)))))
 #+end_src
 
+
+#+begin_src emacs-lisp :results none
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+#+end_src
 
 #+begin_src emacs-lisp :results none
 (font-lock-add-keywords 'python-mode
@@ -2412,12 +2423,19 @@ TODO colors.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(require 'dash)
+
 (defun +vterm/focus-or-create () 
   (interactive)
 
-  (if (get-buffer "vterm") 
-    (switch-to-buffer "vterm")
-    (vterm)))
+  (let ((vterm-buffers (-filter
+  		      (lambda (b) (s-starts-with-p "vterm" b))
+  		      (-map 'buffer-name (buffer-list)))))
+  
+    (cond
+     ((length= vterm-buffers 0) (vterm))
+     ((length= vterm-buffers 1) (switch-to-buffer (car vterm-buffers)))
+     (t (switch-to-buffer (completing-read "Choose: " vterm-buffers))))))
 #+end_src
 
 * Configure =elfeed=
