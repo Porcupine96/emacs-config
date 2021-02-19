@@ -552,6 +552,7 @@ Compilation settings.
    "
    ("l" #'+scala/surround-word-with-list)
    ("o" #'+scala/surround-word-with-option)
+   ("t" #'+scala/surround-word-with-try)
    ("i" #'+scala/surround-word-with-io)
    ("f" #'+scala/surround-word-with-future)
    ("s" #'+scala/surround-word-with-future-successful))
@@ -1615,6 +1616,7 @@ Save image and insert it's link at point.
 * Configure =yasnippet=
 #+begin_src emacs-lisp :results none
 (use-package yasnippet
+  :ensure t
   :config 
     (yas-global-mode))
 #+end_src
@@ -1769,7 +1771,7 @@ vc-annotate options.
           ("<return>" . +company/custom-complete))
         (:map lsp-mode-map
           ("<tab>" . company-indent-or-complete-common)
-          ("C-c s" . company-yasnippet))
+          ("C-c y" . company-yasnippet))
   :config
     (global-company-mode 1)
     (with-eval-after-load 'company
@@ -2064,6 +2066,7 @@ Setup =python-mode=.
    :config
          (setq lsp-prefer-flymake nil)
          (lsp-enable-which-key-integration t)
+         (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
    :bind (:map evil-normal-state-map 
          ("M-w" . +lsp-ui/toggle-doc-focus)          
          ("C-<return>" . lsp-execute-code-action)))
@@ -2180,6 +2183,10 @@ sbt-mode
 (defun +scala/surround-word-with-list ()
   (interactive)
   (+core/surround-word-with "List[" "]"))
+
+(defun +scala/surround-word-with-try ()
+  (interactive)
+  (+core/surround-word-with "Try[" "]"))
   
 (defun +scala/surround-word-with-option ()
   (interactive)
@@ -2271,6 +2278,11 @@ TODO colors.
       ("C-c i" . indent-region)))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(font-lock-add-keywords 'emacs-lisp-mode
+ '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
+#+end_src
+
 ** Haskell
 #+begin_src emacs-lisp :results none
 (use-package haskell-mode
@@ -2330,6 +2342,12 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package graphql-mode
   :ensure t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package request
+  :ensure t
+  :defer t)
 #+end_src
 
 * Configure =Info=
@@ -2490,7 +2508,8 @@ TODO colors.
 * Configure =winner=
 #+begin_src emacs-lisp :results none
 (use-package winner
-  :hook (after-init-hook . winner-mode))
+  :config 
+    (winner-mode))
 #+end_src
 
 * Configure =string-inflection=
@@ -2755,24 +2774,6 @@ TODO colors.
     :keymaps '(evil-org-mode-map org-mode-map)
     "C-<return>" '+org/c-ret-dwim
     "<return>" '+org/ret-dwim)
-#+end_src
-
-* Emacs App Framework
-#+begin_src emacs-lisp :results none
-;; (use-package eaf
-;;   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" 
-;;   :custom
-;;   (eaf-find-alternate-file-in-dired t)
-;;   :config
-
-;;   (require 'eaf-evil)
-;;   (setq eaf-evil-leader-key "SPC")
-
-;;   (eaf-bind-key persp-next "gt" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key persp-prev "gT" eaf-pdf-viewer-keybinding)
-
-;;   (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding))
 #+end_src
 
 * org-ocr
