@@ -1297,7 +1297,7 @@ Org tag placement.
 (use-package jupyter
  :straight (:no-native-compile t)
  :config
-    (load-file "/home/porcupine/.emacs.d/straight/repos/emacs-jupyter/jupyter-channel.el"))
+    (load-file "~/.emacs.d/straight/repos/emacs-jupyter/jupyter-channel.el"))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2457,54 +2457,23 @@ TODO colors.
 #+end_src
 
 * Configure =elfeed=
-  #+begin_src emacs-lisp :results none
-    (use-package elfeed
-      :defer t
-      :custom
-        (elfeed-search-remain-on-entry t)
-      :config
-        (setq elfeed-feeds 
-              '(("https://michalplachta.com/feed.xml")
-                ("https://www.youtube.com/feeds/videos.xml?channel_id=UC6fXiuFCWAnVPwRhBMztLlQ" youtube) ;; Leeren
-                ("https://degoes.net/feed.xml")
-                ("https://blog.softwaremill.com/feed")
-                ("https://sachachua.com/blog/feed" emacs)
-                ))
-        (setq-default elfeed-search-filter "@6-months-ago +unread")
+#+begin_src emacs-lisp :results none
+(use-package elfeed
+  :defer t
+  :custom
+    (elfeed-search-remain-on-entry t)
+  :config
+    (load-file "~/.emacs.d/config/pelfeed.el")
+    (p/elfeed-setup)
 
-        (evil-collection-define-key 'normal 'elfeed-search-mode-map
-          (kbd "RET") '+elfeed/show-entry
-          "b" '+elfeed/browse-url
-          "G" 'elfeed-update))
+    (setq-default elfeed-search-filter "@6-months-ago +unread")
 
-    ;; (use-package elfeed-goodies
-    ;;   :after elfeed
-    ;;   :config
-    ;;     (elfeed-goodies/setup))
-  #+end_src
+    (evil-collection-define-key 'normal 'elfeed-search-mode-map
+      (kbd "RET") 'p/elfeed-show-entry
+      "b" 'p/elfeed-browse-url
+      "G" 'elfeed-update))
+#+end_src
   
-  #+begin_src emacs-lisp :results none
-    (defun +elfeed/show-entry (entry)
-      (interactive (list (elfeed-search-selected :ignore-region)))
-      (require 'elfeed-show)
-      (when (elfeed-entry-p entry)
-        (elfeed-search-update-entry entry)
-        (unless elfeed-search-remain-on-entry (forward-line))
-        (elfeed-show-entry entry)))
-
-     (defun +elfeed/browse-url (&optional use-generic-p)
-       (interactive "P")
-       (let ((entries (elfeed-search-selected)))
-         (cl-loop for entry in entries
-                  do (elfeed-untag entry 'unread)
-                  when (elfeed-entry-link entry)
-                  do (if use-generic-p
-                         (browse-url-generic it)
-                       (browse-url it)))
-         (unless (or elfeed-search-remain-on-entry (use-region-p))
-           (forward-line))))
-  #+end_src
-
 * Configure =winner=
 #+begin_src emacs-lisp :results none
 (use-package winner
