@@ -17,6 +17,8 @@
           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC0uTPqBCFIpZxlz_Lv1tk_g" youtube emacs) 
 	  ;; SystemCrafters
           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCAiiOTio8Yu69c3XnR7nQBQ" youtube emacs) 
+	  ;; code_report
+          ("https://www.youtube.com/feeds/videos.xml?channel_id=UC1kBxkk2bcG78YBX7LMl9pQ" youtube programming) 
           ("https://degoes.net/feed.xml")
           ("https://blog.softwaremill.com/feed")
           ("https://sachachua.com/blog/feed" emacs))))

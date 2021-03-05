@@ -584,7 +584,7 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(global-set-key (kbd "C-c n b") #'helm-bibtex)
+(global-set-key (kbd "C-c n b") #'ivy-bibtex)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -898,12 +898,14 @@ Recentf configuration.
   #+end_src
 * Configure =ivy-bibtex=
 #+begin_src emacs-lisp :results none
-(use-package helm-bibtex
+(use-package ivy-bibtex
   :ensure t
   :defer t
   :config
     (setq bibtex-completion-bibliography '("~/Dropbox/zotero/zotero.bib"))
-    (setq bibtex-completion-pdf-field "File"))
+    (setq bibtex-completion-pdf-field "File")
+
+    (org-roam-bibtex-mode))
 
     ;; (setq bibtex-completion-format-citation-functions
     ;;   '((default . +bibtex/format-citations-apa7))))
@@ -996,6 +998,7 @@ Recentf configuration.
   :config 
   (require 'org-tempo)
 
+  (setq org-list-allow-alphabetical t)
   (setq org-fontify-done-headline t)
   (setq org-use-fast-todo-selection 'expert)
   (setq org-image-actual-width nil)
@@ -1023,6 +1026,10 @@ Recentf configuration.
                      (push '("<-" . "←") prettify-symbols-alist)
                      (push '("<->" . "←→") prettify-symbols-alist)
                      (push '("---" . "⎯") prettify-symbols-alist)
+                     (push '("#+begin_quote" . ">") prettify-symbols-alist)
+                     (push '("#+end_quote" . "<") prettify-symbols-alist)
+                     (push '("#+BEGIN_QUOTE" . ">") prettify-symbols-alist)
+                     (push '("#+END_QUOTE" . "<") prettify-symbols-alist)
                      (push '("#+begin_src" . ">") prettify-symbols-alist)
                      (push '("#+end_src" . "<") prettify-symbols-alist)
                      (push '("#+BEGIN_SRC" . ">") prettify-symbols-alist)
@@ -1040,7 +1047,8 @@ Recentf configuration.
          ("C-k" . evil-window-up)
          ("C-j" . evil-window-down)
     :map org-mode-map 
-         ("C-c h" . org-toggle-heading))
+         ("C-c h" . org-toggle-heading)
+         ("C-x n S" . org-tree-to-indirect-buffer))
   :hook (org-mode . org-indent-mode)
         (org-mode . variable-pitch-mode)
         (org-mode . auto-fill-mode))
@@ -1211,7 +1219,7 @@ Org tag placement.
 	  (let* ((key (string-remove-prefix "cite:" (+org/property-value "roam_key")))
 	  	(pdf-file (car (bibtex-completion-find-pdf key))))
 	      (if (file-exists-p pdf-file)
-	  	(org-open-file pdf-file)
+	  	(find-file-other-window pdf-file)
 	      (message "No PDF found for %s" key))))
 
     (defun +org-ref/org-ref-open-pdf-at-point ()
@@ -1296,7 +1304,7 @@ Org tag placement.
 #+begin_src emacs-lisp :results none
 (use-package jupyter
  :straight (:no-native-compile t)
- :config
+ :init
     (load-file "~/.emacs.d/straight/repos/emacs-jupyter/jupyter-channel.el"))
 #+end_src
 
@@ -1314,11 +1322,13 @@ Load languages.
    (python . t)
    (ammonite . t)
    (plantuml . t)
-   ;; (jupyter . t)
+   (scheme . t) 
    (js . t)
    (sql . t)
    (http . t)
-   (haskell . t)))
+   (haskell . t)
+;; (jupyter . t)
+))
 #+end_src
 
 Fix tab indentation in source blocks.
@@ -1363,8 +1373,9 @@ Change the image background.
                ("C-c n f" . org-roam-find-file)
                ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n C" . org-roam-db-build-cache)
-               ("C-c n g" . org-roam-graph))
-              :map org-mode-map
+               ("C-c n g" . org-roam-graph)
+               ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
+         :map org-mode-map
               (("C-c C-b" . org-cycle-list-bullet))
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate)))
@@ -1416,7 +1427,7 @@ Change the image background.
 
 (use-package org-roam-bibtex
   :ensure t
-  :after org-roam
+  :defer t
   :custom
     (orb-autokey-format "%a%y")
     (orb-templates
@@ -1594,7 +1605,7 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none 
 (use-package flyspell
   :ensure t
-  :hook (org-mode . flyspell-mode)
+  :defer t
   :config
     (setq ispell-program-name "hunspell")
     (setq ispell-dictionary "english,polish")
@@ -1603,6 +1614,13 @@ Save image and insert it's link at point.
   :bind
      (:map flyspell-mode-map
         ("C-c $" . nil)))
+#+end_src
+
+* Configure =Wucuo=
+#+begin_src emacs-lisp :results none
+(use-package wucuo
+  :ensure t
+  :hook (org-mode . wucuo-mode))
 #+end_src
 * Configure =langtool=
 #+begin_src emacs-lisp :results none
@@ -1771,7 +1789,7 @@ vc-annotate options.
           ("<return>" . +company/custom-complete))
         (:map lsp-mode-map
           ("<tab>" . company-indent-or-complete-common)
-          ("C-c y" . company-yasnippet))
+          ("C-c C-y" . company-yasnippet))
   :config
     (global-company-mode 1)
     (with-eval-after-load 'company
@@ -2148,7 +2166,9 @@ scala-mode
 (use-package scala-mode
   :ensure t
   :mode "\\.s\\(cala\\|bt\\)$"
-  :hook (scala-mode . lsp-deferred))
+  :hook (scala-mode . lsp-deferred)
+  :bind (:map scala-mode-map
+        ("C-c C-c" . +scala/complete-type-param)))
 #+end_src
 
 sbt-mode
@@ -2203,6 +2223,19 @@ sbt-mode
 (defun +scala/surround-word-with-io ()
   (interactive)
   (+core/surround-word-with "IO[" "]"))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/complete-type-param ()
+  (interactive)
+
+  (let ((arg-name (buffer-substring-no-properties
+		   (progn (backward-word) (point))
+		   (progn (forward-word) (point)))))
+    (insert (concat ": "
+                    (upcase (substring arg-name 0 1))
+                    (substring arg-name 1 nil)
+                    ","))))
 #+end_src
 
 TODO colors.
@@ -2281,6 +2314,15 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (font-lock-add-keywords 'emacs-lisp-mode
  '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
+#+end_src
+
+** Scheme
+#+begin_src emacs-lisp :results none
+(use-package geiser
+  :ensure t 
+  :defer t
+  :config 
+    (setq geiser-active-implementations '(guile)))
 #+end_src
 
 ** Haskell
@@ -2437,21 +2479,27 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package vterm
   :defer t
-  :ensure t)
+  :ensure t
+  :config 
+   (setq vterm-buffer-name-string "vterm - %s"))
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (require 'dash)
 
+(defun +vterm/new-session ()
+  (interactive)
+  (vterm))
+
 (defun +vterm/focus-or-create () 
   (interactive)
 
   (let ((vterm-buffers (-filter
-  		      (lambda (b) (s-starts-with-p "vterm" b))
-  		      (-map 'buffer-name (buffer-list)))))
-  
+  			(lambda (b) (s-starts-with-p "vterm" b))
+  			(-map 'buffer-name (buffer-list)))))
+    
     (cond
-     ((length= vterm-buffers 0) (vterm))
+     ((length= vterm-buffers 0) (+vterm/new-session))
      ((length= vterm-buffers 1) (switch-to-buffer (car vterm-buffers)))
      (t (switch-to-buffer (completing-read "Choose: " vterm-buffers))))))
 #+end_src
@@ -2471,7 +2519,7 @@ TODO colors.
     (evil-collection-define-key 'normal 'elfeed-search-mode-map
       (kbd "RET") 'p/elfeed-show-entry
       "b" 'p/elfeed-browse-url
-      "G" 'elfeed-update))
+      "R" 'elfeed-update))
 #+end_src
   
 * Configure =winner=
@@ -2642,7 +2690,7 @@ TODO colors.
     "o P" #'+eshell/open-in-project-root
     "o o" #'porcupine/focus-mode
     "o v" #'+vterm/focus-or-create
-    "o V" #'vterm
+    "o V" #'+vterm/new-session
     "o m" #'mu4e
 
     "p" #'hydra-project/body
@@ -2769,12 +2817,15 @@ TODO colors.
            (+ocr/run-ocr ,path))))))
 
 (defun +ocr/run-ocr (image-path)
-   (let* ((result-dir (file-name-directory image-path))
-          (result-name (file-name-base image-path))
-          (result-path (concat result-dir result-name)))
+  (let* ((result-dir (file-name-directory image-path))
+         (result-name (file-name-base image-path))
+         (result-path (concat result-dir result-name)))
 
-   (call-process "tesseract" nil "*tesseract*" nil "-l" "pol+eng" image-path result-path)
-   (insert-file-contents (concat result-path ".txt"))))
+    (call-process "tesseract" nil "*tesseract*" nil "-l" "pol+eng" image-path result-path)
+    (let ((text (with-temp-buffer 
+                  (insert-file-contents (concat result-path ".txt"))
+		  (buffer-string))))
+      (insert (s-replace "" "" text)))))
 #+end_src
 
 * Work
