@@ -380,10 +380,10 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 	     (org-ellipsis      ((t (,@fmt-none ,@fg-gray))))
 
-	     (org-document-title        ((t (,@fmt-bigger ,@fg-gray ,@bg-base03))))
+	     (org-document-title        ((t (,@fmt-bigger,@fg-gray ,@bg-base03))))
 	     (org-document-info-keyword ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
-             (org-code                  ((t (:inherit fixed-pitch ,@fmt-none ,@fg-green ,@bg-base03))))
-             (org-verbatim              ((t (:inherit fixed-pitch ,@fmt-none ,@fg-yellow ,@bg-base03))))
+             (org-code                  ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-green ,@bg-base03 :height 1.2))))
+             (org-verbatim              ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-yellow ,@bg-base03 :height 1.2))))
 	     (org-block                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-white ,@bg-base03))))
 	     (org-block-begin-line      ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-end-line        ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))

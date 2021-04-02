@@ -1498,6 +1498,7 @@ Change the image background.
   (interactive)
   (let* ((context (org-element-context))
          (type (org-element-type context)))
+
     (pcase type
       (`headline
        (let ((todo-keyword (org-element-property :todo-keyword context)))
@@ -1506,6 +1507,20 @@ Change the image background.
 	   (`"[-]" (org-todo "[X]"))
 	   (`nil (message "+org/ret-dwim - ignore"))
            (default (org-todo)))))
+      (`item
+       (org-toggle-checkbox))
+      (`plain-list
+       (org-toggle-checkbox))
+      (`paragraph
+       (save-excursion
+	 (beginning-of-line)
+	 (forward-char)
+
+	 (let* ((context (org-element-context))
+	        (type (org-element-type context)))
+
+	   (pcase type
+	     (`item (org-toggle-checkbox))))))
       (`link
        (org-open-at-point)))))
 #+end_src
@@ -1649,13 +1664,10 @@ Save image and insert it's link at point.
      (setq projectile-project-search-path '("~/work/monorepo"))
      (setq projectile-enable-caching t)
      (setq projectile-project-root-files-functions #'(projectile-root-top-down
-                                                        projectile-root-top-down-recurring
-                                                        projectile-root-bottom-up
-                                                        projectile-root-local))
+                                                      projectile-root-top-down-recurring
+                                                      projectile-root-bottom-up
+                                                      projectile-root-local))
 
-     ;; (setq projectile-project-root-files-functions #'(projectile-root-bottom-up))
-
-     ;; TODO: think whether this one is needed
      (projectile-register-project-type 'scala '("build.sbt")))
 
  (use-package counsel-projectile
@@ -1702,6 +1714,20 @@ Save image and insert it's link at point.
 vc-annotate options.
 #+begin_src emacs-lisp :results none
 ;; (setq vc-git-annotate-switches '("-c"))
+#+end_src
+
+* Configure =eww=
+#+begin_src emacs-lisp :results none
+(use-package eww
+  :ensure nil)
+
+(defun +eww/browse-url (url &optional arg)
+  (interactive
+   (list
+    (completing-read "Browse: " eww-prompt-history
+		     nil nil nil 'eww-prompt-history)
+    current-prefix-arg))
+  (eww url (if arg 4 nil)))
 #+end_src
 
 * Configure =git-timemachine=
@@ -1781,7 +1807,7 @@ vc-annotate options.
   :defer t
   :custom
     (company-minimum-prefix-length 1)
-    (company-idle-delay 0)
+    (company-idle-delay 0.5)
     (company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
     (company-dabbrev-downcase nil)
   :bind (:map company-active-map
@@ -1850,10 +1876,9 @@ vc-annotate options.
 (use-package emojify 
   :ensure t
   :config
-    ;; TODO: this does not work for some reason
-    (setq emojify-user-emojis '((":check-box-empty:" . (("name" . "Check Box - Empty")
-                                                        ("unicode" . "U+2610")
-                                                        ("style" . "unicode")))))
+    (setq emojify-user-emojis '(
+      (":brain:" . (("name" . "Brain") ("unicode" . "🧠") ("style" . "ascii")))))
+
     (when (featurep 'emojify)
       (emojify-set-emoji-data))
     
@@ -1977,13 +2002,18 @@ Setup =python-mode=.
    (setq python-indent-guess-indent-offset t)  
    (setq python-indent-guess-indent-offset-verbose nil)
 
+   (setq python-shell-interpreter "ipython"
+         python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
+
+   (add-to-list 'python-shell-completion-native-disabled-interpreters "jupyter")
+
+
    (add-hook 'python-mode-hook 
      (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
 #+end_src
    
 #+begin_src emacs-lisp :results none
 (use-package pyenv-mode
-  :after python-mode
   :hook (python-mode . pyenv-mode)
   :config
     (let ((pyenv-path (expand-file-name "~/.pyenv/bin")))
@@ -1993,7 +2023,9 @@ Setup =python-mode=.
 (use-package pyvenv
   :ensure t
   :after pyenv-mode
-  :hook (pyenv-mode . pyvenv-mode))
+  :hook (pyenv-mode . pyvenv-mode)
+  :config
+    (advice-add 'pyenv-mode-set :after (lambda (&rest r) (+pyvenv/set-to-pyenv))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2281,6 +2313,25 @@ TODO colors.
          (root (s-chop-suffix "project/" project-root))
          (path (concat (file-name-as-directory root) path)))
     (find-file path)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defvar +scala/common-imports
+  '("import scala.concurrent.duration._"
+    "import cats.syntax.functor._"
+    "import cats.syntax.apply._"))
+
+
+(defun +scala/insert-common-import (import)
+  (interactive
+   (list
+    (completing-read "" +scala/common-imports)))
+
+  (save-excursion 
+    (goto-line 2)
+    (move-to-column 1)
+    (newline)
+    (insert import)))
 #+end_src
 
 ** Yaml
@@ -2692,6 +2743,7 @@ TODO colors.
     "o v" #'+vterm/focus-or-create
     "o V" #'+vterm/new-session
     "o m" #'mu4e
+    "o w" #'+eww/browse-url
 
     "p" #'hydra-project/body
     "r" #'hydra-resize/body
@@ -2738,6 +2790,7 @@ TODO colors.
   :keymaps 'scala-mode-map
     "i" #'+scala/copy-import
     "s" #'hydra-scala-surround/body
+    "l" #'+scala/insert-common-import
     "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
     "c c" (lambda () (interactive) (+projectile/compile "bl"))
     "c p" (lambda () (interactive) (+projectile/compile "protob"))
@@ -2808,13 +2861,13 @@ TODO colors.
 	(erase-buffer)))
     (setq screenshot-process
 	  (or (+ocr/take-screenshot path)
-	   (error "Unable to start screenshot process")))
+	      (error "Unable to start screenshot process")))
     (when screenshot-process 
-	(message "Click on a window, or select a rectangle...")
+      (message "Click on a window, or select a rectangle...")
       (set-process-sentinel
        screenshot-process
        `(lambda (process event)
-           (+ocr/run-ocr ,path))))))
+          (+ocr/run-ocr ,path))))))
 
 (defun +ocr/run-ocr (image-path)
   (let* ((result-dir (file-name-directory image-path))
@@ -2826,18 +2879,18 @@ TODO colors.
                   (insert-file-contents (concat result-path ".txt"))
 		  (buffer-string))))
       (insert (s-replace "" "" text)))))
-#+end_src
+    #+end_src
 
 * Work
 #+begin_src emacs-lisp :results none
 (defconst +work/monorepo-path "~/work/monorepo")
 
 (defconst +work/proto-paths (list
-  (list "ai" (concat +work/monorepo-path  "/ai/ai-protobufs"))
-  (list "creator" (concat +work/monorepo-path  "/creator/creator-protobufs"))
-  (list "inbox" (concat +work/monorepo-path  "/inbox/inbox-protobufs"))
-  (list "core" (concat +work/monorepo-path  "/core/core-protobufs"))
-  (list "chat" (concat +work/monorepo-path  "/chat/chat-protobufs"))))
+			     (list "ai" (concat +work/monorepo-path  "/ai/ai-protobufs"))
+			     (list "creator" (concat +work/monorepo-path  "/creator/creator-protobufs"))
+			     (list "inbox" (concat +work/monorepo-path  "/inbox/inbox-protobufs"))
+			     (list "core" (concat +work/monorepo-path  "/core/core-protobufs"))
+			     (list "chat" (concat +work/monorepo-path  "/chat/chat-protobufs"))))
 
 (defun +work/goto-proto ()
   (interactive)
@@ -2854,6 +2907,28 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (load-file "~/.emacs.d/config/pagenda.el")
 (load-file "~/.emacs.d/config/pscreenshot.el")
+#+end_src
+
+** RSVP
+#+begin_src emacs-lisp :results none
+(defvar rsvp/wait-for-seconds 0.25)
+
+(defface rsvp/buffer-face 
+  '((t :height 1.5))
+"RSVP buffer face")
+
+(defun rsvp/run (start end)
+  (interactive "r")
+
+  (let ((text (buffer-substring start end)))
+    (with-current-buffer (get-buffer-create "*rsvp*")
+      (buffer-face-set 'rsvp/buffer-face)
+      (erase-buffer)
+
+      (dolist (word (split-string text))
+	(insert word)
+	(sit-for rsvp/wait-for-seconds)
+	(erase-buffer)))))
 #+end_src
 
 * Focus Mode

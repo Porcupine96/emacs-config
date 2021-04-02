@@ -12,13 +12,13 @@
 
 (defun pscreenshot/org-screenshot-take (width)
   (interactive
-    (list 
-      (cond 
-         (current-prefix-arg (read-string "Width: "))
-         (t "500"))))
+   (list 
+    (cond 
+     (current-prefix-arg (read-string "Width: "))
+     (t "500"))))
 
   (when (and (boundp 'org-screenshot-process)
-              org-screenshot-process
+             org-screenshot-process
              (member (process-status org-screenshot-process)
                      '(run stop)))
     (error "screenshot process is still running"))
@@ -38,9 +38,10 @@
     (set-process-sentinel
      org-screenshot-process
      `(lambda (process event)
-      (insert (format "#+ATTR_ORG: :width %s\n" ,width))
-	(org-screenshot-process-done
-	 process event ,file ,(current-buffer) nil ',last-input-event)))))
+	(insert (format "#+ATTR_ORG: :width %s\n" ,width))
+	(let ((org-inline-image-overlays t))
+	  (org-screenshot-process-done
+	   process event ,file ,(current-buffer) nil ',last-input-event))))))
 
 
 (provide 'pscreenshot)
