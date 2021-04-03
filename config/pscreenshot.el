@@ -38,10 +38,38 @@
     (set-process-sentinel
      org-screenshot-process
      `(lambda (process event)
-	(insert (format "#+ATTR_ORG: :width %s\n" ,width))
+	(print event)
 	(let ((org-inline-image-overlays t))
-	  (org-screenshot-process-done
+	  (if (equal event "finished\n")
+	    (insert (format "#+ATTR_ORG: :width %s\n" ,width)))
+	  (pscreenshot/process-done
 	   process event ,file ,(current-buffer) nil ',last-input-event))))))
+
+(defun pscreenshot/process-done (process event file orig-buffer orig-delay orig-event)
+  (setq org-screenshot-process nil)
+  (with-current-buffer (process-buffer process) 
+    (if (not (equal event "finished\n"))
+        (progn 
+          (insert event) 
+          (cond ((save-excursion
+                   (goto-char (point-min))
+                   (re-search-forward "Key was pressed" nil t))
+                 (ding)
+                 (message "Key was pressed, screenshot aborted"))
+                (t 
+                 (display-buffer (process-buffer process))
+                 (message "Error running \"scrot\" program")
+                 (ding))))
+      (with-current-buffer orig-buffer 
+        (let ((link (format "[[file:%s]]" file))) 
+          (setq org-screenshot-last-file (file-name-nondirectory file))
+          (let ((beg (point)))
+            (insert link) 
+            (when org-inline-image-overlays
+              (org-display-inline-images nil t beg (point))))
+          (unless (< orig-delay 3)
+            (ding))
+          (org-screenshot-rotate-continue t orig-event))))))
 
 
 (provide 'pscreenshot)
