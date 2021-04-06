@@ -995,6 +995,7 @@ Recentf configuration.
   :ensure org-plus-contrib
   :custom
     (org-ellipsis " ▾")
+
   :config 
   (require 'org-tempo)
 
