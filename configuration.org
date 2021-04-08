@@ -1291,6 +1291,11 @@ Org tag placement.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(use-package ob-async
+  :ensure t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (use-package ob-ipython
   :ensure t
   :defer t)
@@ -1720,7 +1725,11 @@ vc-annotate options.
 * Configure =eww=
 #+begin_src emacs-lisp :results none
 (use-package eww
-  :ensure nil)
+  :ensure nil
+  :config 
+    (evil-collection-define-key 'normal 'eww-mode-map
+      "gt" #'persp-next
+      "gT" #'persp-prev))
 
 (defun +eww/browse-url (url &optional arg)
   (interactive
