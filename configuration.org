@@ -596,10 +596,10 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(global-set-key (kbd "M-\"") #'helm-show-kill-ring)
+(global-set-key (kbd "M-k") #'helm-show-kill-ring)
 #+end_src
 
-Evaluation commancs.
+Evaluation commands.
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-c e b") #'eval-buffer)
 #+end_src
@@ -2327,7 +2327,7 @@ TODO colors.
 
 #+begin_src emacs-lisp :results none
 (defvar +scala/common-imports
-  '("import scala.concurrent.duration._"
+  '("import scala.concurrent.duration._"d
     "import cats.syntax.functor._"
     "import cats.syntax.apply._"))
 
