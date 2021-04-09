@@ -14,6 +14,7 @@
 (defvar org-notify-key "notify")
 (defvar org-notify--timer nil)
 (defvar org-notify-log-path "~/.emacs.d/org-notify-log.el")
+(defvar org-notify-before-minutes 5)
 
 (defun org-notify--notify-headlines ()
   (org-element-map (org-element-parse-buffer) 'headline
@@ -34,11 +35,8 @@
 
     (let* ((timers (eval (car (read-from-string (buffer-string)))))
 	   (time (gethash id timers))
-	   (time-seconds (string-to-number (org-notify--timestamp-to-seconds scheduled)))
+	   (scheduled (string-to-number (org-notify--timestamp-to-seconds scheduled)))
 	   (now (float-time (current-time))))
-
-      (print time-seconds)
-      (print now)
 
       (if time
 	(progn
