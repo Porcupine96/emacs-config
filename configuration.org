@@ -311,6 +311,7 @@ Compilation settings.
     ("S" (lambda () (interactive) (dired "~/scripts")))
     ("d" (lambda () (interactive) (dired "~/Downloads")))
     ("D" (lambda () (interactive) (dired "~/Dropbox")))
+    ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes")))
     ("w" (lambda () (interactive) (dired "~/work"))))
   #+end_src
 ** File 
@@ -596,7 +597,7 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(global-set-key (kbd "M-k") #'helm-show-kill-ring)
+(global-set-key (kbd "C-M-k") #'helm-show-kill-ring)
 #+end_src
 
 Evaluation commands.
@@ -1426,6 +1427,15 @@ Change the image background.
 (defun +org-roam/find-file-by-title ()
   (interactive)
   (org-roam-find-file (+org/property-value "TITLE")))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org-roam/find-file-next ()
+  (interactive)
+
+  (let ((title (+org/property-value "TITLE")))
+    (when (string-match ".*\\([0-9]+\\)" title)
+      (print (match-string 1)))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2327,10 +2337,9 @@ TODO colors.
 
 #+begin_src emacs-lisp :results none
 (defvar +scala/common-imports
-  '("import scala.concurrent.duration._"d
+  '("import scala.concurrent.duration._"
     "import cats.syntax.functor._"
     "import cats.syntax.apply._"))
-
 
 (defun +scala/insert-common-import (import)
   (interactive
