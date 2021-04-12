@@ -36,24 +36,27 @@
     (let* ((timers (eval (car (read-from-string (buffer-string)))))
 	   (time (gethash id timers))
 	   (scheduled (string-to-number (org-notify--timestamp-to-seconds scheduled)))
-	   (now (float-time (current-time))))
+	   (now (float-time (current-time)))
+           (update (org-notify--try-to-notify title scheduled time now)))
 
-      (org-notify--try-to-notify title scheduled time now)
-      (puthash id now timers)
-      (erase-buffer)
-      (prin1 timers (current-buffer)))))
+      (if update
+	  (progn
+	    (puthash id update timers)
+	    (erase-buffer)
+	    (prin1 timers (current-buffer)))))))
 
 (defun org-notify--try-to-notify (title scheduled last-notification now)
   (if (and
-       (< (- now scheduled) (* org-notify-before-minutes 60))
-       (>= (- scheduled last-notification) (* org-notify-before-minutes 60)))
-      (print "Notifying")))
+       (< (- scheduled now) (* org-notify-before-minutes 60))
+       (or
+	(not last-notification)
+        (>= (- scheduled last-notification) (* org-notify-before-minutes 60))))
 
-(org-notify--process-file (-first-item org-agenda-files))
-
-  ;; (notifications-notify
-  ;;  :title "Notification"
-  ;;  :body title))
+      (progn
+	(notifications-notify
+	 :title (format "Task scheduled in %i minutes" org-notify-before-minutes)
+	 :body title)
+	now)))
 
 (defun org-notify--timestamp-to-seconds (timestamp)
   (let ((org-display-custom-times t)
