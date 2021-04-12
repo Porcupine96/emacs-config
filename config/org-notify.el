@@ -38,15 +38,16 @@
 	   (scheduled (string-to-number (org-notify--timestamp-to-seconds scheduled)))
 	   (now (float-time (current-time))))
 
-      (if time
-	(progn
-	  (print "Found it."))
-	(progn
-	  (print "Not found.")
+      (org-notify--try-to-notify title scheduled time now)
+      (puthash id now timers)
+      (erase-buffer)
+      (prin1 timers (current-buffer)))))
 
-          (puthash id now timers)
-	  (erase-buffer)
-	  (prin1 timers (current-buffer)))))))
+(defun org-notify--try-to-notify (title scheduled last-notification now)
+  (if (and
+       (< (- now scheduled) (* org-notify-before-minutes 60))
+       (>= (- scheduled last-notification) (* org-notify-before-minutes 60)))
+      (print "Notifying")))
 
 (org-notify--process-file (-first-item org-agenda-files))
 
@@ -56,7 +57,7 @@
 
 (defun org-notify--timestamp-to-seconds (timestamp)
   (let ((org-display-custom-times t)
-	(org-time-stamp-custom-formats '("%s")))
+	(org-time-stamp-custom-formats '("%s" . "%s")))
     (org-timestamp-translate timestamp 'start)))
 
 (defun org-notify--process-file (path)
