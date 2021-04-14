@@ -1457,7 +1457,7 @@ Change the image background.
   (let* ((titles (-distinct (-map (lambda (b)
 			 (let* ((file (car b))
 				(title (+org-roam/file-to-title file)))
-			   (cons title file))) (org-roam--get-backlinks test))))
+			   (cons title file))) (org-roam--get-backlinks (buffer-file-name)))))
 
 	 (title (completing-read "" titles))
 	 (file (cdr (assoc title titles))))
