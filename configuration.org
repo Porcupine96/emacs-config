@@ -1559,10 +1559,9 @@ Change the image background.
   (let* ((context (org-element-context))
          (type (org-element-type context)))
     
-    (print type)
-
     (pcase type
       (`item (+org/insert-item-next-line))
+
       (`plain-list (+org/insert-item-next-line))
       (`latex-fragment (org-latex-preview))
       (`paragraph
@@ -1570,6 +1569,16 @@ Change the image background.
          (+org/insert-item-next-line)
          (org-insert-heading-respect-content)))
       (_ (org-insert-heading-respect-content)))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org/s-ret-dwim ()
+  (interactive)
+  (let* ((context (org-element-context))
+         (type (org-element-type context)))
+    
+    (pcase type
+      (_ (+org/open-at-point-other-window)))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2338,7 +2347,13 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (defvar +scala/common-imports
   '("import scala.concurrent.duration._"
+    "import cats.instances.future.catsStdInstancesForFuture"
+    "import cats.instances.list.catsStdInstancesForList"
+    "import cats.implicits.functor._"
     "import cats.syntax.functor._"
+    "import cats.syntax.flatMap._"
+    "import cats.syntax.functor._"
+    "import cats.syntax.traverse._"
     "import cats.syntax.apply._"))
 
 (defun +scala/insert-common-import (import)
@@ -2854,7 +2869,7 @@ TODO colors.
     :states '('normal 'insert)
     :keymaps '(evil-org-mode-map org-mode-map)
     "C-<return>" '+org/c-ret-dwim
-    "S-<return>" '+org/open-at-point-other-window
+    "S-<return>" '+org/s-ret-dwim
     "C-S-<return>" '+org/c-s-ret-dwim
     "C-M-<return>" '+org/c-m-ret-dwim)
 
