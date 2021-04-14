@@ -1377,6 +1377,7 @@ Change the image background.
   :straight (:no-native-compile t)
   :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
+               ("C-c n L" . +org-roam/goto-linked-file)
                ("C-c n f" . org-roam-find-file)
                ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n C" . org-roam-db-build-cache)
@@ -1436,6 +1437,32 @@ Change the image background.
   (let ((title (+org/property-value "TITLE")))
     (when (string-match ".*\\([0-9]+\\)" title)
       (print (match-string 1)))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(require 'dash)
+(require 'org-roam)
+
+(defun +org-roam/file-to-title (file)
+  (-first-item (-flatten (org-roam-db-query
+			  [:select [title]
+			   :from titles
+			   :where (= file $s1)
+			   :limit 1]
+			  file))))
+
+(defun +org-roam/goto-linked-file ()
+  (interactive)
+
+  (let* ((titles (-distinct (-map (lambda (b)
+			 (let* ((file (car b))
+				(title (+org-roam/file-to-title file)))
+			   (cons title file))) (org-roam--get-backlinks test))))
+
+	 (title (completing-read "" titles))
+	 (file (cdr (assoc title titles))))
+
+    (if file (find-file file))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2637,7 +2664,13 @@ TODO colors.
 
 * Configure =pdf-tools=
 #+begin_src emacs-lisp :results none 
+(defun +pdf/open-externally ()
+  (call-process "xdg-open" nil 0 nil (buffer-file-name)))
+
 (defun +pdf/setup ()
+  (evil-collection-define-key 'normal 'pdf-view-mode-map
+     "ge" #'+pdf/open-externally)
+
   (hide-mode-line-mode))
 
 (use-package pdf-tools
