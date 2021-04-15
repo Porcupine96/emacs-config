@@ -1459,8 +1459,9 @@ Change the image background.
 				(title (+org-roam/file-to-title file)))
 			   (cons title file))) (org-roam--get-backlinks (buffer-file-name)))))
 
-	 (title (completing-read "" titles))
-	 (file (cdr (assoc title titles))))
+         (styled-titles (-map (lambda (x) (cons (s-concat "➜ " (car x)) (cdr x))) titles))
+	 (title (completing-read "" styled-titles))
+	 (file (cdr (assoc title styled-titles))))
 
     (if file (find-file file))))
 #+end_src
@@ -2665,6 +2666,7 @@ TODO colors.
 * Configure =pdf-tools=
 #+begin_src emacs-lisp :results none 
 (defun +pdf/open-externally ()
+  (interactive)
   (call-process "xdg-open" nil 0 nil (buffer-file-name)))
 
 (defun +pdf/setup ()
