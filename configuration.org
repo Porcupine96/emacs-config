@@ -3012,16 +3012,21 @@ TODO colors.
 	(erase-buffer)))))
 #+end_src
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
 (defvar rsvp/text-buffer-name "*rsvp-text*")
 
 (defun rsvp/read-from-ocr ()
   (interactive)
 
-  (with-current-buffer (or (get-file-buffer rsvp/text-buffer-name)
-	             	   (find-file-noselect rsvp/text-buffer-name))
+  (with-current-buffer (get-buffer-create rsvp/text-buffer-name)
     (erase-buffer)
     (+ocr/screenshot)
+    (rsvp/run (point-min) (point-max))))
+
+(defun rsvp/read-last-content ()
+  (interactive)
+
+  (with-current-buffer (get-buffer-create rsvp/text-buffer-name)
     (rsvp/run (point-min) (point-max))))
 #+end_src
 
