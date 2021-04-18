@@ -581,7 +581,7 @@ Buffer commands.
 (global-set-key (kbd "C-c b n") #'next-buffer)
 (global-set-key (kbd "C-c b p") #'previous-buffer)
 
-(global-set-key (kbd "C-x b") #'bufler-switch-buffer)
+(global-set-key (kbd "C-x b") #'counsel-switch-buffer)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1442,6 +1442,15 @@ Change the image background.
 #+begin_src emacs-lisp :results none
 (require 'dash)
 (require 'org-roam)
+
+(defun +org-roam/linked-files ()
+  (interactive)
+  (print
+   (org-roam-db-query
+    [:select [title]
+     :from titles
+     :where (= file "/home/porcupine/Dropbox/org-roam/2021-01-20--23-48-21Z--carol_gilligan.org")
+     ])))
 
 (defun +org-roam/file-to-title (file)
   (-first-item (-flatten (org-roam-db-query
@@ -2924,7 +2933,9 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (defun +ocr/screenshot()
   (interactive)
-  (let* ((path (concat (make-temp-name "/tmp/ocr") ".png")))
+ 
+  (let* ((path (concat (make-temp-name "/tmp/ocr") ".png"))
+         (buffer (current-buffer)))
     (when (get-buffer "*screenshot*")
       (with-current-buffer (get-buffer "*screenshot*")
 	(erase-buffer)))
@@ -2936,18 +2947,19 @@ TODO colors.
       (set-process-sentinel
        screenshot-process
        `(lambda (process event)
-          (+ocr/run-ocr ,path))))))
+          (+ocr/run-ocr ,path ,buffer))))))
 
-(defun +ocr/run-ocr (image-path)
-  (let* ((result-dir (file-name-directory image-path))
-         (result-name (file-name-base image-path))
-         (result-path (concat result-dir result-name)))
+(defun +ocr/run-ocr (image-path buffer)
+  (with-current-buffer buffer 
+    (let* ((result-dir (file-name-directory image-path))
+           (result-name (file-name-base image-path))
+           (result-path (concat result-dir result-name)))
 
-    (call-process "tesseract" nil "*tesseract*" nil "-l" "pol+eng" image-path result-path)
-    (let ((text (with-temp-buffer 
-                  (insert-file-contents (concat result-path ".txt"))
-		  (buffer-string))))
-      (insert (s-replace "" "" text)))))
+      (call-process "tesseract" nil "*tesseract*" nil "-l" "pol+eng" image-path result-path)
+      (let ((text (with-temp-buffer 
+                    (insert-file-contents (concat result-path ".txt"))
+		    (buffer-string))))
+	(insert (s-replace "" "" text))))))
     #+end_src
 
 * Work
@@ -2998,6 +3010,19 @@ TODO colors.
 	(insert word)
 	(sit-for rsvp/wait-for-seconds)
 	(erase-buffer)))))
+#+end_src
+
+#+begin_src emacs-lisp
+(defvar rsvp/text-buffer-name "*rsvp-text*")
+
+(defun rsvp/read-from-ocr ()
+  (interactive)
+
+  (with-current-buffer (or (get-file-buffer rsvp/text-buffer-name)
+	             	   (find-file-noselect rsvp/text-buffer-name))
+    (erase-buffer)
+    (+ocr/screenshot)
+    (rsvp/run (point-min) (point-max))))
 #+end_src
 
 * Focus Mode
