@@ -34,3 +34,4 @@
  ;; If there is more than one, they won't work right.
  )
 (put 'list-timers 'disabled nil)
+(put 'narrow-to-region 'disabled nil)

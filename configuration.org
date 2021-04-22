@@ -1000,6 +1000,7 @@ Recentf configuration.
   :config 
   (require 'org-tempo)
 
+  (setq org-hide-emphasis-markers t)
   (setq org-list-allow-alphabetical t)
   (setq org-fontify-done-headline t)
   (setq org-use-fast-todo-selection 'expert)
@@ -1046,6 +1047,7 @@ Recentf configuration.
            :inherit '(org-hide fixed-pitch))))
   :bind
    (:map evil-normal-state-map
+         ("C-c h" . org-toggle-heading)
          ("C-k" . evil-window-up)
          ("C-j" . evil-window-down)
     :map org-mode-map 
@@ -1376,8 +1378,8 @@ Change the image background.
   :ensure t
   :straight (:no-native-compile t)
   :bind (:map org-roam-mode-map
-              (("C-c n l" . org-roam)
-               ("C-c n L" . +org-roam/goto-linked-file)
+              (("C-c n l" . +org-roam/goto-linked-file)
+               ("C-c n L" . org-roam)
                ("C-c n f" . org-roam-find-file)
                ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n C" . org-roam-db-build-cache)
@@ -2039,6 +2041,49 @@ vc-annotate options.
     ("C-c m n" . smerge-next)))
 #+end_src
 
+* Experimental
+** Configure =selectrum=
+#+begin_src emacs-lisp :results none
+(use-package selectrum
+  :ensure t
+  :config
+   (selectrum-mode +1))
+#+end_src
+
+** Configure =embark=
+#+begin_src emacs-lisp :results none
+(use-package marginalia
+  :ensure t
+  :config
+  (marginalia-mode))
+
+(use-package embark
+  :ensure t
+
+  :bind
+  (("C-a" . embark-act))       ;; pick some comfortable binding
+   ;; ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+  :init
+
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  :config
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+#+end_src
+
+** Configure =rg=
+#+begin_src emacs-lisp :results none
+(use-package rg
+  :ensure t)
+#+end_src
+
 * Languages
 ** Common
 #+begin_src emacs-lisp :results none
@@ -2386,8 +2431,6 @@ TODO colors.
   '("import scala.concurrent.duration._"
     "import cats.instances.future.catsStdInstancesForFuture"
     "import cats.instances.list.catsStdInstancesForList"
-    "import cats.implicits.functor._"
-    "import cats.syntax.functor._"
     "import cats.syntax.flatMap._"
     "import cats.syntax.functor._"
     "import cats.syntax.traverse._"
@@ -2852,6 +2895,8 @@ TODO colors.
   :states 'normal
   :keymaps 'org-mode-map
     "o" #'+ocr/screenshot
+    "r" #'rsvp/read-from-ocr
+    "R" #'rsvp/read-last-content
     "s" #'org-schedule
     "S" #'pscreenshot/org-screenshot-take
     "d" #'org-deadline
@@ -2931,6 +2976,8 @@ TODO colors.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defvar +ocr/screenshot-process-hook nil)
+
 (defun +ocr/screenshot()
   (interactive)
  
@@ -2947,7 +2994,8 @@ TODO colors.
       (set-process-sentinel
        screenshot-process
        `(lambda (process event)
-          (+ocr/run-ocr ,path ,buffer))))))
+          (+ocr/run-ocr ,path ,buffer)
+          (run-hooks '+ocr/screenshot-process-hook))))))
 
 (defun +ocr/run-ocr (image-path buffer)
   (with-current-buffer buffer 
@@ -2992,7 +3040,7 @@ TODO colors.
 
 ** RSVP
 #+begin_src emacs-lisp :results none
-(defvar rsvp/wait-for-seconds 0.25)
+(defvar rsvp/wait-for-seconds 0.23)
 
 (defface rsvp/buffer-face 
   '((t :height 1.5))
@@ -3020,8 +3068,10 @@ TODO colors.
 
   (with-current-buffer (get-buffer-create rsvp/text-buffer-name)
     (erase-buffer)
-    (+ocr/screenshot)
-    (rsvp/run (point-min) (point-max))))
+
+    (;; remove-hook '+ocr/screenshot-process-hook (lambda () (rsvp/run (point-min) (point-max))))
+
+    (+ocr/screenshot)))
 
 (defun rsvp/read-last-content ()
   (interactive)
