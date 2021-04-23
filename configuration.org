@@ -314,41 +314,6 @@ Compilation settings.
     ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes")))
     ("w" (lambda () (interactive) (dired "~/work"))))
   #+end_src
-** File 
-#+begin_src emacs-lisp :results none
-(defhydra hydra-file (:color blue)
-  "
-      ^
-      ^File^     
-      ^────^──────────────────────────────────────────────────────────
-      _f_ Find                             _e_ resources.org
-      _r_ Recent                           _i_ inbox.org
-      _d_ dotfiles                         _p_ private.org
-      _D_ dictionary                       _P_ polybar
-      _c_ Config                           _s_ studies.org
-      _C_ Cheatsheet
-      _t_ Theme                            _w_ work.org
-      _x_ Sway config                      _W_ work/work.org
-      ^^        
-      ^^        
-      "
-  ("f" #'counsel-find-file)
-  ("r" #'counsel-recentf)
-  ("i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org")))
-  ("w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org")))
-  ("W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org")))
-  ("p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org")))
-  ("P" (lambda () (interactive)(find-file "~/.config/polybar/config")))
-  ("e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org")))
-  ("C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org")))
-  ("D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org")))
-  ("s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org")))
-  ("d" (lambda () (interactive)(dired "~/dotfiles")))
-  ("c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org")))
-  ("t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el")))
-  ("x" (lambda () (interactive)(find-file "~/.config/sway/config"))))
-  #+end_src
-
 ** Project 
 #+begin_src emacs-lisp :results none
 (defhydra hydra-project (:color blue)
@@ -1471,7 +1436,7 @@ Change the image background.
 			   (cons title file))) (org-roam--get-backlinks (buffer-file-name)))))
 
          (styled-titles (-map (lambda (x) (cons (s-concat "➜ " (car x)) (cdr x))) titles))
-	 (title (completing-read "" styled-titles))
+	 (title (completing-read " " styled-titles))
 	 (file (cdr (assoc title styled-titles))))
 
     (if file (find-file file))))
@@ -2050,6 +2015,14 @@ vc-annotate options.
    (selectrum-mode +1))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(use-package selectrum-prescient
+  :ensure t
+  :config
+   (selectrum-prescient-mode +1)
+   (prescient-persist-mode +1))
+#+end_src
+
 ** Configure =embark=
 #+begin_src emacs-lisp :results none
 (use-package marginalia
@@ -2439,7 +2412,7 @@ TODO colors.
 (defun +scala/insert-common-import (import)
   (interactive
    (list
-    (completing-read "" +scala/common-imports)))
+    (completing-read " " +scala/common-imports)))
 
   (save-excursion 
     (goto-line 2)
@@ -2836,7 +2809,24 @@ TODO colors.
     "c" #'hydra-compile/body
     "d d" #'dockel
     "h" #'hydra-help/body
-    "f" #'hydra-file/body
+
+    ;; "f" #'hydra-file/body
+    "f f" #'counsel-find-file
+    "f r" #'counsel-recentf
+    "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
+    "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
+    "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
+    "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
+    "f P" (lambda () (interactive)(find-file "~/.config/polybar/config"))
+    "f e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org"))
+    "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
+    "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org"))
+    "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
+    "f d" (lambda () (interactive)(dired "~/dotfiles"))
+    "f c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org"))
+    "f t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el"))
+    "f x" (lambda () (interactive)(find-file "~/.config/sway/config"))
+
     "g" #'hydra-git/body
     "k" #'helm-show-kill-ring
 
@@ -3068,9 +3058,6 @@ TODO colors.
 
   (with-current-buffer (get-buffer-create rsvp/text-buffer-name)
     (erase-buffer)
-
-    (;; remove-hook '+ocr/screenshot-process-hook (lambda () (rsvp/run (point-min) (point-max))))
-
     (+ocr/screenshot)))
 
 (defun rsvp/read-last-content ()
