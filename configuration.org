@@ -352,7 +352,7 @@ Buffer commands.
 (global-set-key (kbd "C-c b n") #'next-buffer)
 (global-set-key (kbd "C-c b p") #'previous-buffer)
 
-(global-set-key (kbd "C-x b") #'counsel-switch-buffer)
+(global-set-key (kbd "C-x b") #'switch-to-buffer)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -607,7 +607,6 @@ Default =ivy= configuration.
      (setq ivy-initial-inputs-alist nil)
      (setq enable-recursive-minibuffers t)
      (setq search-default-mode #'char-fold-to-regexp)
-     ;; (setq ivy-read-action-function 'ivy-hydra-read-action)
      (ivy-mode 1)
      (global-set-key (kbd "C-c C-r") 'ivy-resume))
 
@@ -623,7 +622,7 @@ Default =ivy= configuration.
   :custom 
     (counsel-find-file-ignore-regexp "#.*#")
   :config
-    (global-set-key (kbd "M-x") 'counsel-M-x)
+    (global-set-key (kbd "M-x") 'execute-extended-command)
     (global-set-key (kbd "C-x C-f") 'counsel-find-file)
     (global-set-key (kbd "C-c g") 'counsel-git)
     (global-set-key (kbd "C-c k") 'counsel-rg)
@@ -1163,7 +1162,7 @@ Change the image background.
   :config 
   (setq org-roam-directory "/home/porcupine/Dropbox/org-roam")
   (setq org-roam-graph-viewer "/usr/bin/brave")
-  (setq org-roam-completion-system 'ivy)
+  (setq org-roam-completion-system 'default)
 
   (setq org-roam-capture-templates '(
 				     ("d" "default" plain (function org-roam--capture-get-point)
