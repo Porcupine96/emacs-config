@@ -258,43 +258,6 @@ Compilation settings.
      (hydra-key-format-spec "[%s]"))
   #+end_src
 
-** Agenda
-#+begin_src emacs-lisp :results none
-(defhydra hydra-agenda (:color blue)
-  "
-  ^
-  ^Agenda^     
-  ^────^───────────
-  _a_ Agenda
-  _c_ Calendar
-  _w_ Weekly agenda
-  _d_ Daily agenda
-  _t_ Agenda tag view
-  _h_ Agenda hot view
-  ^^        
-  ^^        
-  "
-  ("a" #'org-agenda)
-  ("c" #'open-calendar)
-  ("w" #'+agenda/weekly-agenda)
-  ("d" #'+agenda/daily-agenda)
-  ("t" #'+agenda/filter-by-tag)
-  ("h" #'+agenda/filter-by-tag-hot))
- #+end_src
-** Compile
-  #+begin_src emacs-lisp :results none
-  (defhydra hydra-compile (:color blue)
-    "
-    ──────────────────────────────
-    _x_ Flycheck list errors
-    _c_ Compile
-    _C_ Recompile
-    ^^        
-    "
-    ("x" #'flycheck-list-errors)
-    ("c" #'compile)
-    ("C" #'recompile))
-  #+end_src
 ** Dired
   #+begin_src emacs-lisp :results none
   (defhydra hydra-dired-bookmarks (:color blue)
@@ -314,79 +277,25 @@ Compilation settings.
     ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes")))
     ("w" (lambda () (interactive) (dired "~/work"))))
   #+end_src
-** Project 
+** Forge 
 #+begin_src emacs-lisp :results none
-(defhydra hydra-project (:color blue)
-  "
+  (defhydra hydra-forge (:color blue)
+    "
     ^
-    ^Project^     
+    ^Forge^     
     ^────^───────────
-    _a_ Add project
-    _c_ Compile project
-    _C_ Recompile project
-    _p_ Switch project
-    _f_ Find project file
-    _i_ Invalidate project cache
-    _t_ Add current project to treemacs
-    _T_ TODOs in project
-    _s_ Save project files
-    ^^        
+    _a_ Assign reviewer
+    _b_ Browse
+    _c_ Create PR
+    _p_ Browse PR
     ^^        
     "
-  ("a" #'projectile-add-known-project)
-  ("c" #'projectile-compile-project)
-  ("C" #'projectile-repeat-last-command)
-  ;; ("f" (lambda () (interactive) (counsel-projectile-ag "--nonumbers")))
-  ("f" #'counsel-projectile-ag)
-  ("p" #'counsel-projectile-switch-project)
-  ("i" #'projectile-invalidate-cache)
-  ("t" #'treemacs-add-and-display-current-project)
-  ("T" #'+projectile/search-todos)
-  ("s" #'projectile-save-project-buffers)
-  ("w" #'+projectile/search-word-under-cursor))
+    ("a" #'forge-edit-topic-review-requests)
+    ("b" #'forge-browse-remote)
+    ("c" #'forge-create-pullreq)
+    ("p" #'forge-browse-pullreq))
 #+end_src
-
-** Git 
-   #+begin_src emacs-lisp :results none
-     (defhydra hydra-forge (:color blue)
-       "
-       ^
-       ^Forge^     
-       ^────^───────────
-       _a_ Assign reviewer
-       _b_ Browse
-       _c_ Create PR
-       _p_ Browse PR
-       ^^        
-       "
-       ("a" #'forge-edit-topic-review-requests)
-       ("b" #'forge-browse-remote)
-       ("c" #'forge-create-pullreq)
-       ("p" #'forge-browse-pullreq))
-   #+end_src
    
-   #+begin_src emacs-lisp :results none
-   (defhydra hydra-git (:color blue)
-     "
-     ^
-     ^Git^     
-     ^────^───────────
-     _b_ Magit branch
-     _g_ Magit status
-     _i_ Magit init
-     _p_ Magit push
-     _r_ Remote (forge)
-     _t_ Timemachine
-     ^^        
-     "
-     ("b" #'magit-branch)
-     ("g" #'magit-status)
-     ("i" #'magit-init)
-     ("p" #'magit-push)
-     ("r" #'hydra-forge/body)
-     ("t" #'git-timemachine))
-   #+end_src
-
 ** LSP
 #+begin_src emacs-lisp :results none
  (defhydra hydra-lsp-toggle (:color blue)
@@ -400,109 +309,6 @@ Compilation settings.
     ("m" #'lsp-ui-imenu))
 #+end_src
    
-** Help
-   #+begin_src emacs-lisp :results none
-   (defhydra hydra-help (:color blue)
-     "
-     ^
-     ^Help^     
-     ^────^───────────
-     _b_ Describe bindings
-     _k_ Describe key
-     _f_ Describe function
-     _F_ Describe face
-     _v_ Describe variable
-     _p_ Describe package
-     _m_ Describe mode
-     _M_ Describe macro
-     _e_ Message buffer
-     _l_ Counsel find library
-     ^^        
-     ^^        
-     "
-     ("b" #'counsel-descbinds)
-     ("k" #'helpful-key)
-     ("f" #'helpful-function)
-     ("F" #'describe-face)
-     ("v" #'helpful-variable)
-     ("p" #'helpful-package)
-     ("m" #'describe-mode)
-     ("M" #'helpful-macro)
-     ("e" #'view-echo-area-messages)
-     ("l" #'counsel-find-library))
-   #+end_src
-   
-** Search
-#+begin_src emacs-lisp :results none
- (defhydra hydra-search (:color blue)
-   "
-   ^
-   ^Search^     
-   ^────^───────────
-   _i_ Counsel iMenu
-   _m_ Monorepo Counsel Rg
-   _f_ Monorepo Counsel Find File
-   ^^        
-   "
-   ("i" #'counsel-imenu)
-   ("m" #'+work/counsel-monorepo)
-   ("f" #'+work/counsel-find-file-monorepo))
- #+end_src
-  
-** Workspace
- #+begin_src emacs-lisp :results none 
- (defhydra hydra-workspace (:color blue)
-   "
-   ^
-   ^Workspace^     
-   ^─────────^───────────
-   _c_ Create workspace
-   _d_ Kill workspace
-   _n_ Create named workspace
-   _k_ Kill workspace
-   _r_ Rename workspace
-   ^^        
-   ^^        
-   "
-   ("c" #'persp-switch)
-   ("d" #'persp-kill)
-   ("n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace"))))
-   ("k" #'persp-kill)
-   ("r" #'persp-rename))
- #+end_src
-** Window
-#+begin_src emacs-lisp :results none
-  (defhydra hydra-window (:color blue)
-    "
-    ^ 
-    _u_ Winner undu
-    _r_ Winner redo
-    _f_ Floating window
-    _j_ Regular window at bottom 
-    _l_ Regular window on right
-    ^^
-    ^^ 
-    "
-    ("u" #'winner-undo)
-    ("r" #'winner-redo)
-    ("f" #'+core/to-floating-frame)
-    ("l" #'+core/to-regular-right-window)
-    ("j" #'+core/to-regular-bottom-window))
-#+end_src
-** Resize
-#+begin_src emacs-lisp :results none
- (defhydra hydra-resize (:color blue)
-   "
-   ^
-   ^Resize^     
-   ^────^───────────
-   _h_ evil-window-decrease-width
-   _l_ evil-window-increase-width
-   ^^        
-   "
-   ("h" #'evil-window-decrease-width)
-   ("l" #'evil-window-increase-width))
- #+end_src
 ** Scala
 #+begin_src emacs-lisp :results none
 (defhydra hydra-scala-surround (:color blue)
@@ -2796,7 +2602,12 @@ TODO colors.
 (leader-def
   :states '(normal visual motion)
   :keymaps 'override
-    "a" #'hydra-agenda/body
+    "a a" #'org-agenda
+    "a c" #'open-calendar
+    "a w" #'+agenda/weekly-agenda
+    "a d" #'+agenda/daily-agenda
+    "a t" #'+agenda/filter-by-tag
+    "a h" #'+agenda/filter-by-tag-hot
 
     "b b" #'bufler
     "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
@@ -2806,12 +2617,16 @@ TODO colors.
     "b p" #'previous-buffer
     "b k" #'kill-current-buffer
 
-    "c" #'hydra-compile/body
-    "d d" #'dockel
-    "h" #'hydra-help/body
+    "c x" #'flycheck-list-errors
+    "c c" #'compile
+    "c C" #'recompile
 
-    ;; "f" #'hydra-file/body
-    "f f" #'counsel-find-file
+    "d d" #'dockel
+
+    "e e" #'elfeed
+    "e d" #'ediff
+
+    "f f" #'find-file
     "f r" #'counsel-recentf
     "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
     "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
@@ -2827,7 +2642,24 @@ TODO colors.
     "f t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el"))
     "f x" (lambda () (interactive)(find-file "~/.config/sway/config"))
 
-    "g" #'hydra-git/body
+    "g b" #'magit-branch
+    "g g" #'magit-status
+    "g i" #'magit-init
+    "g p" #'magit-push
+    "g r" #'hydra-forge/body
+    "g t" #'git-timemachine
+
+    "h b" #'counsel-descbinds
+    "h k" #'helpful-key
+    "h f" #'helpful-function
+    "h F" #'describe-face
+    "h v" #'helpful-variable
+    "h p" #'helpful-package
+    "h m" #'describe-mode
+    "h M" #'helpful-macro
+    "h e" #'view-echo-area-messages
+    "h l" #'counsel-find-library
+
     "k" #'helm-show-kill-ring
 
     "l b" #'lsp-metals-build-import
@@ -2856,22 +2688,48 @@ TODO colors.
     "o m" #'mu4e
     "o w" #'+eww/browse-url
 
-    "p" #'hydra-project/body
-    "r" #'hydra-resize/body
+    "p a" #'projectile-add-known-project
+    "p c" #'projectile-compile-project
+    "p C" #'projectile-repeat-last-command
+    "p f" #'counsel-projectile-ag
+    "p p" #'counsel-projectile-switch-project
+    "p i" #'projectile-invalidate-cache
+    "p t" #'treemacs-add-and-display-current-project
+    "p T" #'+projectile/search-todos
+    "p s" #'projectile-save-project-buffers
+    "p w" #'+projectile/search-word-under-cursor
 
-    "s" #'hydra-search/body
-    "u" #'universal-argument
-    "w" #'hydra-window/body
-    "e e" #'elfeed
-    "e d" #'ediff
+    "r h" #'evil-window-decrease-width
+    "r l" #'evil-window-increase-width
+
+    "s i" #'counsel-imenu
+    "s m" #'+work/counsel-monorepo
+    "s f" #'+work/counsel-find-file-monorepo
+
     "t r" #'+core/reload-theme
     "t e" #'treemacs-display-current-project-exclusively
+
+    "u" #'universal-argument
+
+    "w u" #'winner-undo
+    "w r" #'winner-redo
+    "w f" #'+core/to-floating-frame
+    "w l" #'+core/to-regular-right-window
+    "w j" #'+core/to-regular-bottom-window
+
     "y a" #'yas-new-snippet
     "y v" #'yas-visit-snippet-file
     "y c" #'company-yasnippet
     "y p" #'+core/copy-file-path
+
     "RET" #'counsel-bookmark
-    "TAB" #'hydra-workspace/body
+
+    "TAB c" #'persp-switch
+    "TAB d" #'persp-kill
+    "TAB n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace")))
+    "TAB k" #'persp-kill
+    "TAB r" #'persp-rename
+
     "SPC" #'counsel-projectile-find-file
     "," #'counsel-projectile-switch-to-buffer)
 #+end_src

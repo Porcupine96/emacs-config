@@ -364,9 +364,24 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (helm-selection ((t (,@fg-green ,@bg-base01))))
              (helm-source-header ((t (,@fmt-bold ,@fg-cyan))))
              (helm-visible-mark ((t (,@fg-blue ,@bg-base02))))
+
              ;; info
              (info-xref ((t (,@fmt-undr ,@fg-blue))))
              (info-xref-visited ((t (,@fg-magenta :inherit info-xref))))
+
+	     ;; selectrum
+	     (selectrum-prescient-primary-highlight ((t (,@fg-white :background ,gray))))     
+	     (selectrum-current-candidate ((t (,@fg-base03 ,@bg-blue))))     
+
+	     ;; selectrum-prescient-secondary-highlight   
+	     ;; selectrum-mouse-highlight                 
+	     ;; selectrum-completion-docsig               
+	     ;; selectrum-completion-annotation           
+	     ;; selectrum-current-candidate               
+	     ;; selectrum-group-separator                 
+	     ;; selectrum-group-title                     
+	     ;; selectrum-quick-keys-match                
+	     ;; selectrum-quick-keys-highlight            
 
              ;; org
              (org-hide          ((t (,@fg-base03))))
