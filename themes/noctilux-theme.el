@@ -370,6 +370,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (info-xref-visited ((t (,@fg-magenta :inherit info-xref))))
 
 	     ;; selectrum
+	     ;; ---------
 	     (selectrum-prescient-primary-highlight ((t (,@fg-white :background ,gray))))     
 	     (selectrum-current-candidate ((t (,@fg-base03 ,@bg-blue))))     
 
@@ -382,6 +383,29 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; selectrum-group-title                     
 	     ;; selectrum-quick-keys-match                
 	     ;; selectrum-quick-keys-highlight            
+
+	     ;; consult
+	     ;; -------
+
+             ;; consult-buffer
+             ;; consult-key
+             ;; consult-file
+             ;; consult-help
+             ;; consult-bookmark
+             ;; consult-separator
+             ;; consult-line-number
+             ;; consult-async-split
+             ;; consult-preview-line
+             ;; consult-async-failed
+             ;; consult-imenu-prefix
+             ;; consult-preview-error
+             ;; consult-preview-match
+             ;; consult-async-running
+             ;; consult-preview-cursor
+             ;; consult-async-finished
+             ;; consult-narrow-indicator
+             ;; consult-preview-insertion
+             ;; consult-line-number-prefix
 
              ;; org
              (org-hide          ((t (,@fg-base03))))

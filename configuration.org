@@ -351,8 +351,6 @@ Buffer commands.
 (global-set-key (kbd "C-x C-b") #'ibuffer)
 (global-set-key (kbd "C-c b n") #'next-buffer)
 (global-set-key (kbd "C-c b p") #'previous-buffer)
-
-(global-set-key (kbd "C-x b") #'switch-to-buffer)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -471,14 +469,14 @@ Scale text.
  #+begin_src emacs-lisp :results none
 (defun +work/counsel-monorepo ()
   (interactive)
-  (counsel-rg "" "~/work/monorepo" "--iglob !*.lock"))
+  (consult-ripgrep "~/work/monorepo" ""))
 
 (defun +work/counsel-find-file-monorepo ()
   (interactive)
-  (counsel-git))
+  (consult-git-grep))
  #+end_src
  
- Based on excelent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
+ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
  #+begin_src emacs-lisp :results none
    (defun +core/to-floating-frame()
      (interactive)
@@ -611,25 +609,28 @@ Default =ivy= configuration.
      (global-set-key (kbd "C-c C-r") 'ivy-resume))
 
 (use-package swiper
+  :disabled
   :straight (:no-native-compile t)
   :after ivy
   :config
     (global-set-key "\C-s" 'swiper))
 
 (use-package counsel 
+  :disabled
   :straight (:no-native-compile t) 
   :after ivy
   :custom 
     (counsel-find-file-ignore-regexp "#.*#")
   :config
-    (global-set-key (kbd "M-x") 'execute-extended-command)
-    (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-    (global-set-key (kbd "C-c g") 'counsel-git)
-    (global-set-key (kbd "C-c k") 'counsel-rg)
+    ;; (global-set-key (kbd "M-x") 'execute-extended-command)
+    ;; (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+    ;; (global-set-key (kbd "C-c k") 'counsel-rg)
     (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
 
 ;; sorts counsel-M-x by recently used
-(use-package smex :after counsel)
+(use-package smex
+   :disabled
+   :after counsel)
 
 ;; (use-package ivy-prescient
 ;;    :straight (:no-native-compile t) 
@@ -776,6 +777,7 @@ Recentf configuration.
   (setq org-use-fast-todo-selection 'expert)
   (setq org-image-actual-width nil)
   (setq org-src-window-setup 'split-window-right)
+  (setq org-odt-preferred-output-format "docx")
 
   ;; open files in the same window
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
@@ -984,28 +986,28 @@ Org tag placement.
   :straight (:no-native-compile t)
   :after org
   :config 
-    (setq org-ref-default-bibliography '("~/Dropbox/zotero/zotero.bib"))
-    (setq org-ref-bibliography-notes "~/Dropbox/papers/notes.org")
-    (setq org-ref-pdf-directory "~/Dropbox/papers/pdfs")
+  (setq org-ref-default-bibliography '("~/Dropbox/zotero/zotero.bib"))
+  (setq org-ref-bibliography-notes "~/Dropbox/papers/notes.org")
+  (setq org-ref-pdf-directory "~/Dropbox/papers/pdfs")
 
-    (defun +org-ref/org-ref-open-associated-pdf ()
-	  (interactive)
-	  (let* ((key (string-remove-prefix "cite:" (+org/property-value "roam_key")))
-	  	(pdf-file (car (bibtex-completion-find-pdf key))))
-	      (if (file-exists-p pdf-file)
-	  	(find-file-other-window pdf-file)
-	      (message "No PDF found for %s" key))))
+  (defun +org-ref/org-ref-open-associated-pdf ()
+    (interactive)
+    (let* ((key (string-remove-prefix "cite:" (+org/property-value "roam_key")))
+	   (pdf-file (car (bibtex-completion-find-pdf key))))
+      (if (and pdf-file (file-exists-p pdf-file))
+	  (find-file-other-window pdf-file)
+	(message "No PDF found for %s" key))))
 
-    (defun +org-ref/org-ref-open-pdf-at-point ()
-	  (interactive)
-	  (let* ((results (org-ref-get-bibtex-key-and-file))
-	  	(key (car results))
-	  	(pdf-file (car (bibtex-completion-find-pdf key))))
-	      (if (file-exists-p pdf-file)
-	  	(org-open-file pdf-file)
-	      (message "No PDF found for %s" key))))
+  (defun +org-ref/org-ref-open-pdf-at-point ()
+    (interactive)
+    (let* ((results (org-ref-get-bibtex-key-and-file))
+	   (key (car results))
+	   (pdf-file (car (bibtex-completion-find-pdf key))))
+      (if (file-exists-p pdf-file)
+	  (org-open-file pdf-file)
+	(message "No PDF found for %s" key))))
 
-    (setq org-ref-open-pdf-function '+org-ref/org-ref-open-pdf-at-point))
+  (setq org-ref-open-pdf-function '+org-ref/org-ref-open-pdf-at-point))
 #+end_src
  
 #+begin_src emacs-lisp :results none
@@ -1830,17 +1832,13 @@ vc-annotate options.
 
 ** Configure =embark=
 #+begin_src emacs-lisp :results none
-(use-package marginalia
-  :ensure t
-  :config
-  (marginalia-mode))
-
 (use-package embark
   :ensure t
 
   :bind
-  (("C-a" . embark-act))       ;; pick some comfortable binding
-   ;; ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  (("C-a" . embark-act)
+   ("C-," . embark-act)
+   ("C->" . embark-become))
 
   :init
 
@@ -1856,10 +1854,67 @@ vc-annotate options.
                  (window-parameters (mode-line-format . none)))))
 #+end_src
 
+** Configure =marginalia=
+#+begin_src emacs-lisp :results none
+(use-package marginalia
+  :ensure t
+  :config
+    (marginalia-mode))
+#+end_src
+
+** Configure =consult=
+#+begin_src emacs-lisp :results none
+(use-package consult
+  :ensure t
+  :init
+    (setq register-preview-delay 0
+          register-preview-function #'consult-register-format)
+
+    (advice-add #'register-preview :override #'consult-register-window)
+
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
+
+    (global-set-key (kbd "C-c k") #'consult-ripgrep)
+    (global-set-key (kbd "C-x b") #'consult-buffer)
+    (global-set-key (kbd "C-s") #'consult-line) 
+
+    (setq consult-ripgrep-command
+	(concat
+	   "rg "
+	   "--null "
+	   "--line-buffered "
+	   "--color=ansi "
+	   "--max-columns=1000 "
+	   " "
+	   " "
+	   "--no-heading "
+	   "--smart-case "
+	   "--line-number "
+	   ". "
+	   "-e ARG OPTS"))
+
+  :config
+   (setq consult-narrow-key "<")
+
+   (autoload 'projectile-project-root "projectile")
+   (setq consult-project-root-function #'projectile-project-root))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  :demand t 
+  :hook
+    (embark-collect-mode . embark-consult-preview-minor-mode))
+#+end_src
+
 ** Configure =rg=
 #+begin_src emacs-lisp :results none
 (use-package rg
-  :ensure t)
+  :ensure t
+  :defer t)
 #+end_src
 
 * Languages
@@ -2421,8 +2476,8 @@ TODO colors.
 * Configure =vterm=
 #+begin_src emacs-lisp :results none
 (use-package vterm
-  :defer t
   :ensure t
+  :defer t
   :config 
    (setq vterm-buffer-name-string "vterm - %s"))
 #+end_src
@@ -2548,10 +2603,11 @@ TODO colors.
   :defer t)
 #+end_src
 
-* Configure =mu4e=
+* KILL Configure =mu4e=
 #+begin_src emacs-lisp :results none
 (use-package mu4e
   :ensure nil
+  :disabled
 
   :config 
   (setq mu4e-change-filenames-when-moving t)
@@ -2575,7 +2631,9 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package mu4e-alert
   :ensure t
+  :disabled
   :config 
+
 
   (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
 #+end_src
@@ -2721,7 +2779,7 @@ TODO colors.
     "y c" #'company-yasnippet
     "y p" #'+core/copy-file-path
 
-    "RET" #'counsel-bookmark
+    "RET" #'consult-bookmark
 
     "TAB c" #'persp-switch
     "TAB d" #'persp-kill
