@@ -467,7 +467,7 @@ Scale text.
  
  Search Monorepo.
  #+begin_src emacs-lisp :results none
-(defun +work/counsel-monorepo ()
+(defun +work/consult-monorepo ()
   (interactive)
   (consult-ripgrep "~/work/monorepo" ""))
 
@@ -1902,6 +1902,12 @@ vc-annotate options.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(use-package consult-lsp
+  :ensure t
+  :after (consult lsp))
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (use-package embark-consult
   :ensure t
   :after (embark consult)
@@ -2082,6 +2088,7 @@ Setup =python-mode=.
 Use =lsp-ivy=.
 #+begin_src emacs-lisp :results none
 (use-package lsp-ivy
+  :disabled
   :after lsp-mode
   :commands lsp-ivy-workspace-symbol)
 #+end_src
@@ -2684,7 +2691,7 @@ TODO colors.
     "e d" #'ediff
 
     "f f" #'find-file
-    "f r" #'counsel-recentf
+    "f r" #'consult-recent-file
     "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
     "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
     "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
@@ -2724,7 +2731,7 @@ TODO colors.
     "l s" #'lsp-describe-session
     "l e" #'lsp-ui-flycheck-list
     "l f" #'lsp-format-buffer
-    "l l" #'lsp-ivy-workspace-symbol
+    "l l" #'consult-lsp-symbols
     "l t" #'hydra-lsp-toggle/body
     "l T" #'lsp-treemacs-errors-list
     ;; "l r" #'lsp-ui-peek-find-references
@@ -2760,7 +2767,7 @@ TODO colors.
     "r l" #'evil-window-increase-width
 
     "s i" #'counsel-imenu
-    "s m" #'+work/counsel-monorepo
+    "s m" #'+work/consult-monorepo
     "s f" #'+work/counsel-find-file-monorepo
 
     "t r" #'+core/reload-theme
