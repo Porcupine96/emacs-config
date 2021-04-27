@@ -387,8 +387,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; consult
 	     ;; -------
 
-	     (consult-preview-match ((t (,@bg-base03))))     
-	     (consult-preview-cursor ((t (,@bg-base03))))     
+	     (consult-preview-match ((t (,@fmt-none))))     
+	     (consult-preview-cursor ((t (,@fmt-none ,@bg-base03))))     
              ;; consult-preview-match
              ;; consult-preview-cursor
 

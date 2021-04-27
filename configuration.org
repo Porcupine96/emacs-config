@@ -1879,6 +1879,8 @@ vc-annotate options.
     (global-set-key (kbd "C-x b") #'consult-buffer)
     (global-set-key (kbd "C-s") #'consult-line) 
 
+    (setq consult-preview-key (list (kbd "M-n") (kbd "M-p")))
+
     (setq consult-ripgrep-command
 	(concat
 	   "rg "
@@ -2794,7 +2796,7 @@ TODO colors.
     "TAB k" #'persp-kill
     "TAB r" #'persp-rename
 
-    "SPC" #'counsel-projectile-find-file
+    "SPC" #'consult-find
     "," #'counsel-projectile-switch-to-buffer)
 #+end_src
 
