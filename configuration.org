@@ -471,7 +471,7 @@ Scale text.
   (interactive)
   (consult-ripgrep "~/work/monorepo" ""))
 
-(defun +work/counsel-find-file-monorepo ()
+(defun +work/consult-find-file-monorepo ()
   (interactive)
   (consult-git-grep))
  #+end_src
@@ -620,10 +620,10 @@ Default =ivy= configuration.
   :straight (:no-native-compile t) 
   :after ivy
   :custom 
-    (counsel-find-file-ignore-regexp "#.*#")
+    (consult-find-file-ignore-regexp "#.*#")
   :config
     ;; (global-set-key (kbd "M-x") 'execute-extended-command)
-    ;; (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+    ;; (global-set-key (kbd "C-x C-f") 'consult-find-file)
     ;; (global-set-key (kbd "C-c k") 'counsel-rg)
     (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
 
@@ -2724,7 +2724,7 @@ TODO colors.
     "h m" #'describe-mode
     "h M" #'helpful-macro
     "h e" #'view-echo-area-messages
-    "h l" #'counsel-find-library
+    "h l" #'consult-find-library
 
     "k" #'helm-show-kill-ring
 
@@ -2757,7 +2757,7 @@ TODO colors.
     "p a" #'projectile-add-known-project
     "p c" #'projectile-compile-project
     "p C" #'projectile-repeat-last-command
-    "p f" #'counsel-projectile-ag
+    "p f" #'consult-ripgrep
     "p p" #'counsel-projectile-switch-project
     "p i" #'projectile-invalidate-cache
     "p t" #'treemacs-add-and-display-current-project
@@ -2770,7 +2770,7 @@ TODO colors.
 
     "s i" #'counsel-imenu
     "s m" #'+work/consult-monorepo
-    "s f" #'+work/counsel-find-file-monorepo
+    "s f" #'+work/consult-find-file-monorepo
 
     "t r" #'+core/reload-theme
     "t e" #'treemacs-display-current-project-exclusively
