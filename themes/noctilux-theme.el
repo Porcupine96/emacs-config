@@ -372,13 +372,12 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; selectrum
 	     ;; ---------
 	     (selectrum-prescient-primary-highlight ((t (,@fg-white :background ,gray))))     
+	     (selectrum-prescient-secondary-highlight ((t (,@fg-white :background ,gray))))     
 	     (selectrum-current-candidate ((t (,@fg-base03 ,@bg-blue))))     
 
-	     ;; selectrum-prescient-secondary-highlight   
 	     ;; selectrum-mouse-highlight                 
 	     ;; selectrum-completion-docsig               
 	     ;; selectrum-completion-annotation           
-	     ;; selectrum-current-candidate               
 	     ;; selectrum-group-separator                 
 	     ;; selectrum-group-title                     
 	     ;; selectrum-quick-keys-match                

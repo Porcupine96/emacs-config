@@ -76,24 +76,10 @@ Hide all the bezels.
 (blink-cursor-mode -1)
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(use-package modus-operandi-theme
-  :ensure t
-  :config 
-    (setq modus-operandi-theme-section-headings t))
-
-(use-package modus-vivendi-theme
-  :ensure t
-  :config 
-    (setq modus-vivendi-theme-section-headings t))
-#+end_src
-
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 (load-theme 'noctilux t)
-;; (load-theme 'modus-operandi t)
-;; (load-theme 'modus-vivendi t)
 #+end_src
 
 * Sensible settings
@@ -122,8 +108,8 @@ Ask before closing Emacs.
 Use colors in compilation buffer.
 defer?
 #+begin_src emacs-lisp :results none
-(require 'ansi-color)
 (defun colorize-compilation-buffer ()
+  (require 'ansi-color)
   (ansi-color-apply-on-region compilation-filter-start (point)))
   
 (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
@@ -199,10 +185,11 @@ Compilation settings.
     :ensure t
     :demand
     :init
-    (setq evil-want-keybinding nil)
+      (setq evil-want-keybinding nil)
     :config
-        (evil-mode 1)
-        (setq aw-keys '(?h ?j ?k ?l ?a ?s ?d ?f))
+      (setq evil-ex-substitute-global t)
+      (setq aw-keys '(?h ?j ?k ?l ?a ?s ?d ?f))
+      (evil-mode +1)
     :bind (:map evil-motion-state-map
           ("C-w C-U" . winner-undo)
           ("C-w C-w" . ace-window)
@@ -214,14 +201,14 @@ Compilation settings.
     :config
       (evil-collection-init))
     
-  (setq evil-ex-substitute-global t)
   #+end_src
 
   Use =evil-commentary=
   #+begin_src emacs-lisp :results none
   (use-package evil-commentary
-     :after evil)
-  (evil-commentary-mode)
+     :after evil
+     :config
+      (evil-commentary-mode +1))
   #+end_src
   
   Use =evil-surround=
@@ -230,7 +217,7 @@ Compilation settings.
      :ensure t
      :after evil
      :config
-       (global-evil-surround-mode 1))
+       (global-evil-surround-mode +1))
   #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -253,6 +240,8 @@ Compilation settings.
 * Configure =hydra=
   #+begin_src emacs-lisp :results none
   (use-package hydra
+   :ensure t
+   :defer t
    :custom 
      (head-hint nil)
      (hydra-key-format-spec "[%s]"))
@@ -521,23 +510,6 @@ Scale text.
    (yank)
    (insert right))
   #+end_src
-
-* Quelpa
-#+begin_src emacs-lisp :results none
-(unless (package-installed-p 'quelpa)
-  (with-temp-buffer
-    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
-    (eval-buffer)
-    (quelpa-self-upgrade)))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(quelpa
- '(quelpa-use-package
-   :fetcher git
-   :url "https://github.com/quelpa/quelpa-use-package.git"))
-(require 'quelpa-use-package)
-#+end_src
 
 * Configure =which-key=
  #+begin_src emacs-lisp :results none
@@ -1587,32 +1559,20 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package treemacs 
    :ensure t
+   :defer t
    :config 
      (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
      (setq treemacs-width 60))
 
 (use-package treemacs-evil
-  :after treemacs 
+  :after (evil treemacs) 
   :bind (:map evil-treemacs-state-map 
         ("SPC u" . #'universal-argument))
   :config
     (define-key evil-treemacs-state-map (kbd "SPC o p") #'treemacs))
 
 (use-package treemacs-projectile
-  :after treemacs)
-#+end_src
-
-* Configure =bufler=
-#+begin_src emacs-lisp :results none
-(use-package bufler
-  :ensure t
-  :defer t
-  :bind (:map bufler-list-mode-map 
-    ("<return>" . bufler-list-buffer-switch))
-  :config 
-    (evil-collection-define-key 'normal 'bufler-list-mode-map 
-       "D" #'bufler-list-buffer-kill
-       "gp" #'bufler-list-buffer-peek))
+  :after (projectile treemacs))
 #+end_src
 
 * Configure =doom-modeline=
@@ -1697,7 +1657,9 @@ vc-annotate options.
 
 * Configure =helpful=
  #+begin_src emacs-lisp :results none
- (use-package helpful :defer t)
+ (use-package helpful
+   :ensure t
+   :defer t)
  #+end_src
 
 * Configure =keychain=
@@ -1711,9 +1673,11 @@ vc-annotate options.
 * Configure =ox-reveal=
 #+begin_src emacs-lisp :results none
 (use-package ox-reveal
+  :disabled
   :defer t)
   
 (use-package org-re-reveal
+  :disabled
   :defer t)
 #+end_src
 
@@ -1742,7 +1706,7 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package treemacs-icons-dired
-  :after treemacs dired
+  :after (treemacs dired)
   :ensure t
   :config (treemacs-icons-dired-mode))
 #+end_src
@@ -1750,9 +1714,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
   (defun +dired/open-externally ()
     (interactive)
-     
     (call-process "xdg-open" nil 0 nil (dired-get-filename)))
-    ;; (call-process "zathura" nil 0 nil (dired-get-filename))
 
   (evil-collection-define-key 'normal 'dired-mode-map
     "ge" #'+dired/open-externally
@@ -2580,29 +2542,10 @@ TODO colors.
 
 (use-package pdf-tools
   :ensure t
+  :defer t
   :config 
     (pdf-tools-install)
     (add-hook 'pdf-view-mode-hook #'+pdf/setup))
-#+end_src
-
-#+begin_src  emacs-lisp :results none 
-(use-package pdf-continuous-scroll-mode
-  :quelpa (pdf-continuous-scroll-mode :fetcher github :repo "dalanicolai/pdf-continuous-scroll-mode.el")
-  :commands pdf-continuous-scroll-mode
-  :config 
-    (with-eval-after-load 'pdf-view
-        (require 'pdf-continuous-scroll-mode)))
-#+end_src
-
-#+begin_src emacs-lisp :results none 
-(use-package org-pdftools
-  :hook (org-mode . org-pdftools-setup-link))
-
-(use-package org-noter-pdftools
-  :after org-noter
-  :config
-  (with-eval-after-load 'pdf-annot
-    (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
 #+end_src
 
 * Configure =olivetti=
