@@ -136,7 +136,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
                (setf back nil))
               ((eq 'high noctilux-contrast)
                (let ((orig-base3 base3))
-                 (rotatef base01 base00 base0 base1 base2 base3)
+                 (cl-rotatef base01 base00 base0 base1 base2 base3)
                  (setf base3 orig-base3)))
               ((eq 'low noctilux-contrast)
                (setf back      base02
@@ -388,7 +388,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; -------
 
 	     (consult-preview-match ((t (,@fmt-none))))     
-	     (consult-preview-cursor ((t (,@fmt-none ,@bg-base03))))     
+	     (consult-preview-cursor ((t (,@fmt-none))))     
              ;; consult-preview-match
              ;; consult-preview-cursor
 

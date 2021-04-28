@@ -643,7 +643,11 @@ Default =ivy= configuration.
 
 Recentf configuration.
 #+begin_src emacs-lisp :results none
-(setq recentf-max-saved-items 300)
+(use-package recentf
+  :ensure nil
+  :config
+    (setq recentf-max-saved-items 300)
+    (recentf-mode +1))
 #+end_src
 
  #+begin_src emacs-lisp :results none
@@ -1513,8 +1517,10 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (defun +projectile/search-word-under-cursor ()
   (interactive)
-  (let ((counsel-projectile-ag-initial-input (current-word)))
-    (counsel-projectile-ag)))
+  (consult-ripgrep nil (current-word)))
+
+  ;; (let ((counsel-projectile-ag-initial-input (current-word)))
+  ;;   (counsel-projectile-ag)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1888,13 +1894,16 @@ vc-annotate options.
 	   "--line-buffered "
 	   "--color=ansi "
 	   "--max-columns=1000 "
-	   " "
-	   " "
 	   "--no-heading "
 	   "--smart-case "
 	   "--line-number "
 	   ". "
 	   "-e ARG OPTS"))
+
+   (setq consult-find-command
+	 (concat
+	  "fd "
+	  "ARG* OPTS"))
 
   :config
    (setq consult-narrow-key "<")
