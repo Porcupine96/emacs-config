@@ -56,7 +56,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 (setq noctilux-colors           ; ANSI(Noctilux terminal)
   ;; name       sRGB      Gen RGB   256       16              8
-  '((base03    "#202020" "#202020" "#202020" "brightblack"   "black")
+  '((base03    "#1c2128" "#1c2128" "#1c2128" "brightblack"   "black")
     (base02    "#292929" "#292929" "#292929" "black"         "black")
     (base01    "#5f5f5f" "#5f5f5f" "#5f5f5f" "brightgreen"   "green")
     (base00    "#999999" "#999999" "#999999" "brightyellow"  "yellow")
@@ -371,8 +371,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 	     ;; selectrum
 	     ;; ---------
-	     (selectrum-prescient-primary-highlight ((t (,@fg-white :background ,gray))))     
-	     (selectrum-prescient-secondary-highlight ((t (,@fg-white :background ,gray))))     
+
+	     ;; (selectrum-prescient-primary-highlight ((t (,@fg-white :background ,gray))))     
+	     ;; (selectrum-prescient-secondary-highlight ((t (,@fg-white :background ,gray))))     
 	     (selectrum-current-candidate ((t (,@fg-base03 ,@bg-blue))))     
 
 	     ;; selectrum-mouse-highlight                 
@@ -386,8 +387,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; consult
 	     ;; -------
 
-	     (consult-preview-match ((t (,@fmt-none))))     
-	     (consult-preview-cursor ((t (,@fmt-none))))     
+	     ;; (consult-preview-match ((t (,@fmt-none))))     
+	     ;; (consult-preview-cursor ((t (,@fmt-none))))
+
              ;; consult-preview-match
              ;; consult-preview-cursor
 

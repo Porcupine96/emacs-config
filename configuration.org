@@ -2,23 +2,23 @@
 
 * Startup
 #+begin_src emacs-lisp :results none
-  (defvar file-name-handler-alist-old file-name-handler-alist)
+(defvar file-name-handler-alist-old file-name-handler-alist)
 
-  (setq package-enable-at-startup nil
-        file-name-handler-alist nil
-        message-log-max 16384
-        gc-cons-threshold 402653184
-        gc-cons-percentage 0.6
-        auto-window-vscroll nil)
+(setq package-enable-at-startup nil
+      file-name-handler-alist nil
+      message-log-max 16384
+      gc-cons-threshold 402653184
+      gc-cons-percentage 0.6
+      auto-window-vscroll nil)
 
-  (add-hook 'emacs-startup-hook
-            `(lambda ()
-               (setq file-name-handler-alist file-name-handler-alist-old
-                     gc-cons-threshold 800000
-                     gc-cons-percentage 0.1)
-               (message "Emacs started in: %s" (emacs-init-time))
-               (garbage-collect)
-               (display-battery-mode)) t)
+(add-hook 'emacs-startup-hook
+          `(lambda ()
+             (setq file-name-handler-alist file-name-handler-alist-old
+                   gc-cons-threshold 800000
+                   gc-cons-percentage 0.1)
+             (message "Emacs started in: %s" (emacs-init-time))
+             (garbage-collect)
+             (display-battery-mode)) t)
 #+end_src
 
 * Straight
@@ -1440,6 +1440,7 @@ Save image and insert it's link at point.
     (ispell-hunspell-add-multi-dic "english,polish")
   :bind
      (:map flyspell-mode-map
+        ("C-," . nil)
         ("C-c $" . nil)))
 #+end_src
 
@@ -1787,6 +1788,7 @@ vc-annotate options.
 (use-package selectrum
   :ensure t
   :config
+   (setq selectrum-max-window-height 15)
    (selectrum-mode +1))
 #+end_src
 
@@ -1803,7 +1805,7 @@ vc-annotate options.
 (use-package embark
   :ensure t
 
-  :bind
+  :bind*
   (("C-a" . embark-act)
    ("C-," . embark-act)
    ("C->" . embark-become))
@@ -1814,6 +1816,7 @@ vc-annotate options.
   (setq prefix-help-command #'embark-prefix-help-command)
 
   :config
+  (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
 
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
@@ -1887,13 +1890,6 @@ vc-annotate options.
   :demand t 
   :hook
     (embark-collect-mode . embark-consult-preview-minor-mode))
-#+end_src
-
-** Configure =rg=
-#+begin_src emacs-lisp :results none
-(use-package rg
-  :ensure t
-  :defer t)
 #+end_src
 
 * Languages
