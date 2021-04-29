@@ -386,8 +386,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 	     ;; consult
 	     ;; -------
+             (consult-file ((t (,@fg-green))))
+	     (consult-preview-match ((t (,@fmt-none))))     
 
-	     ;; (consult-preview-match ((t (,@fmt-none))))     
 	     ;; (consult-preview-cursor ((t (,@fmt-none))))
 
              ;; consult-preview-match
@@ -395,7 +396,6 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              ;; consult-buffer
              ;; consult-key
-             ;; consult-file
              ;; consult-help
              ;; consult-bookmark
              ;; consult-separator
