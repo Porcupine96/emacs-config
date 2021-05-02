@@ -372,9 +372,10 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; selectrum
 	     ;; ---------
 
-	     ;; (selectrum-prescient-primary-highlight ((t (,@fg-white :background ,gray))))     
-	     ;; (selectrum-prescient-secondary-highlight ((t (,@fg-white :background ,gray))))     
-	     (selectrum-current-candidate ((t (,@fg-base03 ,@bg-blue))))     
+	     ;; (selectrum-prescient-primary-highlight ((t (,@fmt-none ,@fg-base03 ,@bg-blue))))     
+	     ;; (selectrum-prescient-secondary-highlight ((t (,@fmt-none ,@fg-base03 ,@bg-blue))))
+
+	     (selectrum-current-candidate ((t (,@fmt-none ,@fg-base03 ,@bg-blue))))     
 
 	     ;; selectrum-mouse-highlight                 
 	     ;; selectrum-completion-docsig               
@@ -388,8 +389,6 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; -------
              (consult-file ((t (,@fg-green))))
 	     (consult-preview-match ((t (,@fmt-none))))     
-
-	     ;; (consult-preview-cursor ((t (,@fmt-none))))
 
              ;; consult-preview-match
              ;; consult-preview-cursor

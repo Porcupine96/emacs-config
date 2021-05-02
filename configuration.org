@@ -417,11 +417,6 @@ Use =emojify-mode=
 (global-set-key (kbd "C-c n e") #'emojify-insert-emoji)
 #+end_src
 
-Inserting unicode characters.
-#+begin_src emacs-lisp :results none
-(global-set-key (kbd "C-c n u") #'counsel-unicode-char)
-#+end_src
-
 Scale text.
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-+") #'text-scale-increase)
@@ -867,10 +862,6 @@ Org tag placement.
     
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
-
-  ;; TODO: verify whether this is needed
-  ;; :bind (:map evil-org-mode-map 
-  ;;       ("C-S-<return>" . #'org-insert-subheading)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1132,6 +1123,7 @@ Change the image background.
                ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n C" . org-roam-db-build-cache)
                ("C-c n g" . org-roam-graph)
+               ("C-c n w" . writer)
                ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
          :map org-mode-map
               (("C-c C-b" . org-cycle-list-bullet))
@@ -1484,6 +1476,7 @@ Save image and insert it's link at point.
      (projectile-register-project-type 'scala '("build.sbt")))
 
  (use-package counsel-projectile
+    :disabled 
     :after projectile) 
  #+end_src
  
@@ -1890,6 +1883,17 @@ vc-annotate options.
   :demand t 
   :hook
     (embark-collect-mode . embark-consult-preview-minor-mode))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package consult-flycheck
+  :ensure t
+  :after (consult flycheck))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package consult-projectile
+  :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
 #+end_src
 
 * Languages
@@ -2430,7 +2434,7 @@ TODO colors.
 
 #+begin_src emacs-lisp :results none
 (defun +eshell/configure-eshell ()
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
+  ;; (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
   (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-l") '+eshell/clear)
   (evil-normalize-keymaps)
 
@@ -2631,6 +2635,7 @@ TODO colors.
     "b p" #'previous-buffer
     "b k" #'kill-current-buffer
 
+    "c e" #'consult-flycheck
     "c x" #'flycheck-list-errors
     "c c" #'compile
     "c C" #'recompile
@@ -2706,7 +2711,7 @@ TODO colors.
     "p c" #'projectile-compile-project
     "p C" #'projectile-repeat-last-command
     "p f" #'consult-ripgrep
-    "p p" #'counsel-projectile-switch-project
+    "p p" #'consult-projectile
     "p i" #'projectile-invalidate-cache
     "p t" #'treemacs-add-and-display-current-project
     "p T" #'+projectile/search-todos
@@ -2716,7 +2721,6 @@ TODO colors.
     "r h" #'evil-window-decrease-width
     "r l" #'evil-window-increase-width
 
-    "s i" #'counsel-imenu
     "s m" #'+work/consult-monorepo
     "s f" #'+work/consult-find-file-monorepo
 
@@ -2958,6 +2962,18 @@ TODO colors.
     (remove-hook 'prog-mode-hook '+focus/focus-mode-function)
     (olivetti-mode -1)
     (hide-mode-line-mode -1)))
+#+end_src
+
+* Writer
+#+begin_src emacs-lisp :results none
+(defun writer ()
+  (interactive)
+  (let* ((content (with-temp-buffer 
+		    (insert-file-contents "/home/porcupine/.emacs.d/writer/polish_phrases")
+		    (buffer-string)))
+	 (phrases (s-split "\n" content))
+ 	 (choice (completing-read " " phrases)))
+    (if choice (insert choice))))
 #+end_src
 
 * Playing with org-protocol
