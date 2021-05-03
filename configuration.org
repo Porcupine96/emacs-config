@@ -89,6 +89,12 @@ Disable backup and lockfiles.
 (setq create-lockfiles nil)
 #+end_src
 
+MacOS settings
+#+begin_src emacs-lisp :results none
+(setq mac-option-modifier 'meta)
+(setq mac-right-option-modifier nil)
+#+end_src
+
 Disable saving the clipboard after exiting Emacs.
 #+begin_src emacs-lisp :results none
 (setq x-select-enable-clipboard-manager nil)
@@ -1448,8 +1454,8 @@ Save image and insert it's link at point.
   :ensure t
   :defer t
   :config
-    (setq langtool-java-classpath 
-       "/usr/share/languagetool:/usr/share/java/languagetool/*"))
+    (setq langtool-http-server-host "localhost"
+          langtool-http-server-port 8081))
 #+end_src
 * Configure =yasnippet=
 #+begin_src emacs-lisp :results none
@@ -2562,6 +2568,13 @@ TODO colors.
 (use-package hide-mode-line
   :ensure t 
   :defer t)
+#+end_src
+
+* Configure =eros=
+#+begin_src emacs-lisp :results none
+(use-package eros
+  :ensure t
+  :hook (emacs-lisp-mode . eros-mode))
 #+end_src
 
 * KILL Configure =mu4e=
