@@ -369,6 +369,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (info-xref ((t (,@fmt-undr ,@fg-blue))))
              (info-xref-visited ((t (,@fg-magenta :inherit info-xref))))
 
+	     ;; eros
+             (eros-result-overlay-face ((t (,@bg-base03))))
+
 	     ;; selectrum
 	     ;; ---------
 
