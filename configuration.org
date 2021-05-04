@@ -2485,8 +2485,8 @@ TODO colors.
   			(-map 'buffer-name (buffer-list)))))
     
     (cond
-     ((length= vterm-buffers 0) (+vterm/new-session))
-     ((length= vterm-buffers 1) (switch-to-buffer (car vterm-buffers)))
+     ((= (length vterm-buffers) 0) (+vterm/new-session))
+     ((= (length vterm-buffers) 1) (switch-to-buffer (car vterm-buffers)))
      (t (switch-to-buffer (completing-read "Choose: " vterm-buffers))))))
 #+end_src
 
