@@ -573,6 +573,7 @@ Default =ivy= configuration.
 #+begin_src emacs-lisp :results none
 (use-package ivy
    :straight (:no-native-compile t)
+   :disabled
    :config
      (setq ivy-use-virtual-buffers t)
      (setq ivy-initial-inputs-alist nil)
@@ -614,15 +615,6 @@ Default =ivy= configuration.
 ;;      (ivy-prescient-mode 1))
 #+end_src
 
-Recentf configuration.
-#+begin_src emacs-lisp :results none
-(use-package recentf
-  :ensure nil
-  :config
-    (setq recentf-max-saved-items 300)
-    (recentf-mode +1))
-#+end_src
-
  #+begin_src emacs-lisp :results none
 ;; (use-package ivy-posframe
 ;;   :straight (:no-native-compile t) 
@@ -645,6 +637,16 @@ Recentf configuration.
 ;;         (t . ivy-display-function-fallback)))
 ;;         (ivy-posframe-mode 1))
   #+end_src
+* Configure =recentf=  
+Recentf configuration.
+#+begin_src emacs-lisp :results none
+(use-package recentf
+  :ensure nil
+  :config
+    (setq recentf-max-saved-items 300)
+    (recentf-mode +1))
+#+end_src
+
 * Configure =ivy-bibtex=
 #+begin_src emacs-lisp :results none
 (use-package ivy-bibtex
