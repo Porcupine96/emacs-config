@@ -2048,6 +2048,7 @@ Setup =python-mode=.
          (setq lsp-prefer-flymake nil)
          (lsp-enable-which-key-integration t)
          (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+         (lsp-define-conditional-key lsp-command-map "ss" lsp "start server" t)
    :bind (:map evil-normal-state-map 
          ("M-w" . +lsp-ui/toggle-doc-focus)          
          ("C-<return>" . lsp-execute-code-action)))
@@ -2992,10 +2993,10 @@ TODO colors.
 #+end_src
 
 * Playing with org-protocol
-#+begin_src emacs-lisp :results none
-(server-start)
-(require 'org-protocol)
-(require 'org-roam-protocol)
+#+begin_src emacs-lisp :results none 
+;; (server-start)
+;; (require 'org-protocol)
+;; (require 'org-roam-protocol)
 #+end_src
 
 * Test
