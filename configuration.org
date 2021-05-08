@@ -63,9 +63,9 @@ Always compile packages, and use the newest version available.
 * Visuals
 Font.
 #+begin_src emacs-lisp :results none
-(set-face-attribute 'default nil :font "Input Mono Narrow-12")
-(set-face-attribute 'fixed-pitch nil :font "Input Mono Narrow-12")
-(set-face-attribute 'variable-pitch nil :font "DejaVu Sans-15")
+(set-face-attribute 'default nil :font "Iosevka-12")
+(set-face-attribute 'fixed-pitch nil :font "Iosevka-12")
+(set-face-attribute 'variable-pitch nil :font "DejaVu Sans Mono for Powerline-15")
 #+end_src
  
 Hide all the bezels.
@@ -93,6 +93,10 @@ MacOS settings
 #+begin_src emacs-lisp :results none
 (setq mac-option-modifier 'meta)
 (setq mac-right-option-modifier nil)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(setq vc-follow-symlinks t)
 #+end_src
 
 Disable saving the clipboard after exiting Emacs.
