@@ -378,7 +378,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; (selectrum-prescient-primary-highlight ((t (,@fmt-none ,@fg-base03 ,@bg-blue))))     
 	     ;; (selectrum-prescient-secondary-highlight ((t (,@fmt-none ,@fg-base03 ,@bg-blue))))
 
-	     (selectrum-current-candidate ((t (,@fmt-none ,@fg-base03 ,@bg-blue))))     
+	     (selectrum-current-candidate ((t (,@fg-base03 ,@bg-blue :distant-foreground ,base03))))     
 
 	     ;; selectrum-mouse-highlight                 
 	     ;; selectrum-completion-docsig               

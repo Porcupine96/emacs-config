@@ -65,7 +65,8 @@ Font.
 #+begin_src emacs-lisp :results none
 (set-face-attribute 'default nil :font "Iosevka-12")
 (set-face-attribute 'fixed-pitch nil :font "Iosevka-12")
-(set-face-attribute 'variable-pitch nil :font "DejaVu Sans Mono for Powerline-15")
+(set-face-attribute 'variable-pitch nil :font "Iosevka-13")
+;; (set-face-attribute 'variable-pitch nil :font "DejaVu Sans Mono for Powerline-13")
 #+end_src
  
 Hide all the bezels.
@@ -576,8 +577,8 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 Default =ivy= configuration.
 #+begin_src emacs-lisp :results none
 (use-package ivy
-   :straight (:no-native-compile t)
    :disabled
+   :straight (:no-native-compile t)
    :config
      (setq ivy-use-virtual-buffers t)
      (setq ivy-initial-inputs-alist nil)
@@ -641,8 +642,7 @@ Default =ivy= configuration.
 ;;         (t . ivy-display-function-fallback)))
 ;;         (ivy-posframe-mode 1))
   #+end_src
-* Configure =recentf=  
-Recentf configuration.
+* Configure =recentf= 
 #+begin_src emacs-lisp :results none
 (use-package recentf
   :ensure nil
@@ -654,6 +654,7 @@ Recentf configuration.
 * Configure =ivy-bibtex=
 #+begin_src emacs-lisp :results none
 (use-package ivy-bibtex
+  :disabled
   :ensure t
   :defer t
   :config
@@ -1051,6 +1052,7 @@ Org tag placement.
 
 #+begin_src emacs-lisp :results none
 (use-package ob-ipython
+  :disabled
   :ensure t
   :defer t)
 #+end_src
@@ -1078,7 +1080,7 @@ Load languages.
 (org-babel-do-load-languages 'org-babel-load-languages
  '((shell . t)
    (emacs-lisp . t)
-   (ipython . t)
+   ;; (ipython . t)
    (python . t)
    (ammonite . t)
    (plantuml . t)
@@ -1233,6 +1235,7 @@ Change the image background.
 (defvar orb-title-format "${author-or-editor-abbrev} (${date}).  ${title}.")
 
 (use-package org-roam-bibtex
+  :disabled
   :ensure t
   :defer t
   :custom
@@ -1425,7 +1428,7 @@ Save image and insert it's link at point.
 
 #+begin_src emacs-lisp :results none
 (defun +org/property-value (property)
-  (first (mapcar
+  (car (mapcar
       (lambda (prop) (org-element-property :value prop))
       (org-element-map
           (org-element-parse-buffer)
@@ -1467,6 +1470,7 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (use-package yasnippet
   :ensure t
+  :defer 10
   :config 
     (yas-global-mode))
 #+end_src
@@ -1672,7 +1676,7 @@ vc-annotate options.
   #+begin_src emacs-lisp :results none
   (use-package keychain-environment
      :ensure t
-     :defer 5
+     :defer 10
      :config (keychain-refresh-environment))
   #+end_src
 
@@ -2383,6 +2387,12 @@ TODO colors.
   :defer t)
 #+end_src
 
+** Fish
+#+begin_src emacs-lisp :results none
+(use-package fish-mode
+  :mode "\\.fish$")
+#+end_src
+
 * Configure =Info=
 #+begin_src emacs-lisp :results none
 (use-package info
@@ -2679,7 +2689,7 @@ TODO colors.
     "f d" (lambda () (interactive)(dired "~/dotfiles"))
     "f c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org"))
     "f t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el"))
-    "f x" (lambda () (interactive)(find-file "~/.config/sway/config"))
+    "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
 
     "g b" #'magit-branch
     "g g" #'magit-status
