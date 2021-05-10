@@ -219,7 +219,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (escape-glyph-face ((t (,@fg-red))))
              ;; (fringe ((t (,@fg-base01 ,@bg-base02))))
              (fringe ((t (,@fg-base01 ,@bg-base03))))
-             (linum ((t (,@fg-base01 ,@bg-base02))))
+             (linum ((t (,@fg-base01 ,@bg-base03))))
              (header-line ((t (,@fg-base0 ,@bg-base03)))) ; Pmenu
              (highlight ((t (,@bg-base02))))
              (hl-line ((t (:underline ,opt-under ,@bg-base02)))) ; CursorLine

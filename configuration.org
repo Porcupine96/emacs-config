@@ -1987,18 +1987,6 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-;; (use-package lsp-python-ms
-;;   :ensure t
-;;   :after python-mode
-;;   :init (setq lsp-python-ms-auto-install-server t)
-;;   :hook (
-;;          (python-mode . (lambda ()
-;;                           (require 'lsp-python-ms)
-;;                           (lsp)))))
-#+end_src
-
-
-#+begin_src emacs-lisp :results none
 (use-package lsp-pyright
   :ensure t
   :hook (python-mode . (lambda ()
@@ -3004,6 +2992,16 @@ TODO colors.
 	 (phrases (s-split "\n" content))
  	 (choice (completing-read " " phrases)))
     (if choice (insert choice))))
+#+end_src
+
+* Utils
+#+begin_src emacs-lisp :results none
+(defun convert-timestamp-at-point ()
+  (interactive)
+  (let ((word (current-word)))
+    (left-word)
+    (kill-word 1)
+    (insert (format-time-string "\"%d-%m-%Y %H:%M:%S\"" (seconds-to-time (/ (string-to-number word) 1000))))))
 #+end_src
 
 * Playing with org-protocol
