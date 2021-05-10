@@ -2553,7 +2553,7 @@ TODO colors.
 
 (use-package pdf-tools
   :ensure t
-  :defer t
+  :mode "\\.pdf$"
   :config 
     (pdf-tools-install)
     (add-hook 'pdf-view-mode-hook #'+pdf/setup))
