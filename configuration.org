@@ -648,6 +648,7 @@ Default =ivy= configuration.
   :ensure nil
   :config
     (setq recentf-max-saved-items 300)
+    (add-to-list 'recentf-keep 'file-remote-p)
     (recentf-mode +1))
 #+end_src
 
@@ -760,7 +761,7 @@ Default =ivy= configuration.
   (setq org-fontify-done-headline t)
   (setq org-use-fast-todo-selection 'expert)
   (setq org-image-actual-width nil)
-  (setq org-src-window-setup 'split-window-right)
+  (setq org-src-window-setup 'split-window-below)
   (setq org-odt-preferred-output-format "docx")
 
   ;; open files in the same window
@@ -1590,19 +1591,19 @@ vc-annotate options.
 (use-package doom-modeline
   :ensure t 
   :config 
-    (setq doom-modeline-height 35)
+    (setq doom-modeline-height 25)
     (setq doom-modeline-vcs-max-length 40)
     (setq doom-modeline-enable-word-count t)
-    (setq doom-modeline-mu4e t)
+    ;; (setq doom-modeline-mu4e t)
 
-    (set-face-attribute 'mode-line nil :height 115)
+    (set-face-attribute 'mode-line nil :height 100)
 
     (doom-modeline-def-modeline 'pc/modeline
       '(bar matches buffer-info remote-host buffer-position selection-info)
-      '(misc-info minor-modes input-method buffer-encoding major-mode vcs process mu4e battery checker))
+      '(minor-modes major-mode vcs process battery checker bar bar))
 
     (defun pc/setup-modeline ()
-      (doom-modeline-set-modeline 'pc/modeline 'default))
+      (doom-modeline-set-modeline 'pc/modeline))
 
     (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
 
@@ -1798,7 +1799,15 @@ vc-annotate options.
   :ensure t
   :config
    (setq selectrum-max-window-height 15)
+   (setq selectrum-fix-vertical-window-height t)
+   (setq selectrum-highlight-candidates-function #'selectrum-candidates-identity)
    (selectrum-mode +1))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun my/selectrum-highlight-candidates-function (_input candidates)
+  (print candidates)
+  candidates)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1847,6 +1856,8 @@ vc-annotate options.
 (use-package consult
   :ensure t
   :init
+    (setq consult-fontify-preserve t)
+
     (setq register-preview-delay 0
           register-preview-function #'consult-register-format)
 
@@ -2048,6 +2059,41 @@ Setup =python-mode=.
    :bind (:map evil-normal-state-map 
          ("M-w" . +lsp-ui/toggle-doc-focus)          
          ("C-<return>" . lsp-execute-code-action)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun setup-remote-pyright ()
+   (interactive)
+   (setq lsp-log-io t)
+   (setq lsp-pyright-use-library-code-for-types t)
+   (setq lsp-pyright-diagnostic-mode "workspace")
+   (lsp-register-client
+     (make-lsp-client
+       :new-connection (lsp-tramp-connection (lambda ()
+                                       (cons "pyright-langserver"
+                                             lsp-pyright-langserver-command-args)))
+       :major-modes '(python-mode)
+       :remote? t
+       :server-id 'pyright-remote
+       :multi-root t
+       :priority 3
+       :initialization-options (lambda () (let* ((pyright_hash (lsp-configuration-section "pyright"))
+                                               (python_hash (lsp-configuration-section "python"))
+                                               (_ (puthash "pythonPath" (concat (replace-regexp-in-string (file-remote-p default-directory) "" pyvenv-virtual-env) "bin/python") (gethash "python" python_hash))))
+                                          (ht-merge pyright_hash
+                                                    python_hash)))
+       :initialized-fn (lambda (workspace)
+                  (with-lsp-workspace workspace
+                    (lsp--set-configuration
+                    (let* ((pyright_hash (lsp-configuration-section "pyright"))
+                                           (python_hash (lsp-configuration-section "python"))
+                                           (_ (puthash "pythonPath" (concat (replace-regexp-in-string (file-remote-p default-directory) "" pyvenv-virtual-env) "bin/python") (gethash "python" python_hash))))
+                                      (ht-merge pyright_hash
+                                                python_hash)))))
+       :download-server-fn (lambda (_client callback error-callback _update?)
+                             (lsp-package-ensure 'pyright callback error-callback))
+       :notification-handlers (lsp-ht ("pyright/beginProgress" 'lsp-pyright--begin-progress-callback)
+                                     ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2384,7 +2430,11 @@ TODO colors.
 * Configure =Info=
 #+begin_src emacs-lisp :results none
 (use-package info
-  :defer t)
+  :defer t
+  :config
+    (evil-collection-define-key 'normal 'Info-mode-map
+        (kbd "gt") #'persp-next
+        (kbd "gT") #'persp-prev))
   ;; :bind (:map evil-normal-state-map
   ;;   ("RET" . 'Info-follow-nearest-node)))
 #+end_src
@@ -3002,6 +3052,21 @@ TODO colors.
     (left-word)
     (kill-word 1)
     (insert (format-time-string "\"%d-%m-%Y %H:%M:%S\"" (seconds-to-time (/ (string-to-number word) 1000))))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun copy-without-newlines ()
+   (interactive)
+   (mark-paragraph)
+   (kill-ring-save (region-beginning) (region-end))
+   (deactivate-mark)
+
+   (with-temp-buffer
+     (yank)
+     (mark-paragraph)
+     (evil-join (region-beginning) (region-end))
+     (mark-paragraph)
+     (kill-ring-save (region-beginning) (region-end))))
 #+end_src
 
 * Playing with org-protocol

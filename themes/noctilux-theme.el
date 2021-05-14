@@ -375,10 +375,11 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; selectrum
 	     ;; ---------
 
-	     ;; (selectrum-prescient-primary-highlight ((t (,@fmt-none ,@fg-base03 ,@bg-blue))))     
-	     ;; (selectrum-prescient-secondary-highlight ((t (,@fmt-none ,@fg-base03 ,@bg-blue))))
+	     ;; (selectrum-current-candidate ((t (:foreground ,base03 :underline ,gray :overline ,gray))))
+	     (selectrum-current-candidate ((t (:foreground ,white :background ,base02))))
 
-	     (selectrum-current-candidate ((t (,@fg-base03 ,@bg-blue :distant-foreground ,base03))))     
+	     ;; (selectrum-prescient-primary-highlight ((t (,@fmt-none ,@bg-blue))))     
+	     ;; (selectrum-prescient-secondary-highlight ((t (,@fmt-none ,@bg-green))))
 
 	     ;; selectrum-mouse-highlight                 
 	     ;; selectrum-completion-docsig               
@@ -427,8 +428,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 	     (org-document-title        ((t (,@fmt-bigger,@fg-gray ,@bg-base03))))
 	     (org-document-info-keyword ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
-             (org-code                  ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-green ,@bg-base03 :height 1.2))))
-             (org-verbatim              ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-yellow ,@bg-base03 :height 1.2))))
+             (org-code                  ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-green ,@bg-base03))))
+             (org-verbatim              ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-yellow ,@bg-base03))))
 	     (org-block                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-white ,@bg-base03))))
 	     (org-block-begin-line      ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-end-line        ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
