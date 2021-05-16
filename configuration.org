@@ -750,6 +750,7 @@ Default =ivy= configuration.
 #+begin_src emacs-lisp :results none
 (use-package org
   :ensure org-plus-contrib
+  :delight
   :custom
     (org-ellipsis " ▾")
 
@@ -1066,6 +1067,7 @@ Org tag placement.
 
 #+begin_src emacs-lisp :results none
 (use-package jupyter
+ :defer t
  :straight (:no-native-compile t)
  :init
     (load-file "~/.emacs.d/straight/repos/emacs-jupyter/jupyter-channel.el"))
@@ -1491,19 +1493,12 @@ Save image and insert it's link at point.
                                                       projectile-root-local))
 
      (projectile-register-project-type 'scala '("build.sbt")))
-
- (use-package counsel-projectile
-    :disabled 
-    :after projectile) 
  #+end_src
  
 #+begin_src emacs-lisp :results none
 (defun +projectile/search-word-under-cursor ()
   (interactive)
   (consult-ripgrep nil (current-word)))
-
-  ;; (let ((counsel-projectile-ag-initial-input (current-word)))
-  ;;   (counsel-projectile-ag)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1545,6 +1540,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package eww
   :ensure nil
+  :defer t
   :config 
     (evil-collection-define-key 'normal 'eww-mode-map
       "gt" #'persp-next
@@ -1590,22 +1586,26 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package doom-modeline
   :ensure t 
-  :config 
-    (setq doom-modeline-height 25)
-    (setq doom-modeline-vcs-max-length 40)
-    (setq doom-modeline-enable-word-count t)
-    ;; (setq doom-modeline-mu4e t)
-
-    (set-face-attribute 'mode-line nil :height 100)
-
+  :init
     (doom-modeline-def-modeline 'pc/modeline
       '(bar matches buffer-info remote-host buffer-position selection-info)
       '(minor-modes major-mode vcs process battery checker bar bar))
 
     (defun pc/setup-modeline ()
-      (doom-modeline-set-modeline 'pc/modeline))
+      (message "Setting up the modeline!")
+      (doom-modeline-set-modeline 'pc/modeline 'default))
 
-    (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
+    (pc/setup-modeline)
+
+  :config 
+    (setq doom-modeline-height 25)
+    (setq doom-modeline-vcs-max-length 40)
+    (setq doom-modeline-enable-word-count t)
+    (setq doom-modeline-persp-name nil)
+
+    (set-face-attribute 'mode-line nil :height 100)
+
+    ;; (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
 
     (doom-modeline-mode))
 #+end_src
@@ -2632,6 +2632,23 @@ TODO colors.
   :hook (emacs-lisp-mode . eros-mode))
 #+end_src
 
+* Configure =tramp=
+#+begin_src emacs-lisp :results none
+(use-package tramp
+  :ensure nil
+  :config
+   (setq tramp-default-method "ssh"))
+#+end_src
+
+* Configure =diminish=
+#+begin_src emacs-lisp :results none
+(use-package delight
+  :ensure t
+  :defer t
+  :config
+    (delight '((conf-windows-mode "" ""))))
+#+end_src
+
 * KILL Configure =mu4e=
 #+begin_src emacs-lisp :results none
 (use-package mu4e
@@ -2817,7 +2834,7 @@ TODO colors.
     "TAB r" #'persp-rename
 
     "SPC" #'consult-find
-    "," #'counsel-projectile-switch-to-buffer)
+    "," #'consult-projectile)
 #+end_src
 
 ** Local leader
@@ -3078,8 +3095,8 @@ TODO colors.
 
 * Test
 #+begin_src emacs-lisp :results none
-(setq prettify-symbols-unprettify-at-point t)
-(global-prettify-symbols-mode 1)
+;; (setq prettify-symbols-unprettify-at-point t)
+;; (global-prettify-symbols-mode 1)
 #+end_src
 
 

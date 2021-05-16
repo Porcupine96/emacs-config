@@ -1,0 +1,5 @@
+# key: wor
+# name: with open read
+# --
+with open($1, "r") as f:
+     $2
