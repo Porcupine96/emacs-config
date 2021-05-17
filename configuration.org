@@ -1586,7 +1586,12 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package doom-modeline
   :ensure t 
-  :init
+  :config 
+    (setq doom-modeline-height 25)
+    (setq doom-modeline-vcs-max-length 40)
+    (setq doom-modeline-enable-word-count t)
+    (setq doom-modeline-persp-name nil)
+
     (doom-modeline-def-modeline 'pc/modeline
       '(bar matches buffer-info remote-host buffer-position selection-info)
       '(minor-modes major-mode vcs process battery checker bar bar))
@@ -1595,17 +1600,9 @@ vc-annotate options.
       (message "Setting up the modeline!")
       (doom-modeline-set-modeline 'pc/modeline 'default))
 
-    (pc/setup-modeline)
-
-  :config 
-    (setq doom-modeline-height 25)
-    (setq doom-modeline-vcs-max-length 40)
-    (setq doom-modeline-enable-word-count t)
-    (setq doom-modeline-persp-name nil)
-
     (set-face-attribute 'mode-line nil :height 100)
 
-    ;; (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
+    (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
 
     (doom-modeline-mode))
 #+end_src
@@ -2056,6 +2053,7 @@ Setup =python-mode=.
          (lsp-enable-which-key-integration t)
          (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
          (lsp-define-conditional-key lsp-command-map "ss" lsp "start server" t)
+         (setup-remote-pyright)
    :bind (:map evil-normal-state-map 
          ("M-w" . +lsp-ui/toggle-doc-focus)          
          ("C-<return>" . lsp-execute-code-action)))
@@ -2064,36 +2062,29 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (defun setup-remote-pyright ()
    (interactive)
-   (setq lsp-log-io t)
-   (setq lsp-pyright-use-library-code-for-types t)
-   (setq lsp-pyright-diagnostic-mode "workspace")
+
    (lsp-register-client
      (make-lsp-client
-       :new-connection (lsp-tramp-connection (lambda ()
-                                       (cons "pyright-langserver"
-                                             lsp-pyright-langserver-command-args)))
+       :new-connection (lsp-stdio-connection (lambda ()
+       					    (cons (lsp-package-path 'pyright)
+       						   lsp-pyright-langserver-command-args)))
        :major-modes '(python-mode)
-       :remote? t
        :server-id 'pyright-remote
-       :multi-root t
+       :multi-root lsp-pyright-multi-root
+       :remote? t
        :priority 3
-       :initialization-options (lambda () (let* ((pyright_hash (lsp-configuration-section "pyright"))
-                                               (python_hash (lsp-configuration-section "python"))
-                                               (_ (puthash "pythonPath" (concat (replace-regexp-in-string (file-remote-p default-directory) "" pyvenv-virtual-env) "bin/python") (gethash "python" python_hash))))
-                                          (ht-merge pyright_hash
-                                                    python_hash)))
        :initialized-fn (lambda (workspace)
-                  (with-lsp-workspace workspace
-                    (lsp--set-configuration
-                    (let* ((pyright_hash (lsp-configuration-section "pyright"))
-                                           (python_hash (lsp-configuration-section "python"))
-                                           (_ (puthash "pythonPath" (concat (replace-regexp-in-string (file-remote-p default-directory) "" pyvenv-virtual-env) "bin/python") (gethash "python" python_hash))))
-                                      (ht-merge pyright_hash
-                                                python_hash)))))
+       			 (with-lsp-workspace workspace
+       			 ;; we send empty settings initially, LSP server will ask for the
+       			 ;; configuration of each workspace folder later separately
+       			 (lsp--set-configuration
+       			 (make-hash-table :test 'equal))))
        :download-server-fn (lambda (_client callback error-callback _update?)
-                             (lsp-package-ensure 'pyright callback error-callback))
+       			     (lsp-package-ensure 'pyright callback error-callback))
        :notification-handlers (lsp-ht ("pyright/beginProgress" 'lsp-pyright--begin-progress-callback)
-                                     ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)))))
+       				      ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)
+       				      ("pyright/endProgress" 'lsp-pyright--end-progress-callback)))))
+
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2762,7 +2753,7 @@ TODO colors.
     "h m" #'describe-mode
     "h M" #'helpful-macro
     "h e" #'view-echo-area-messages
-    "h l" #'consult-find-library
+    "h l" #'find-library
 
     "k" #'helm-show-kill-ring
 
