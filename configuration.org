@@ -648,7 +648,7 @@ Default =ivy= configuration.
   :ensure nil
   :config
     (setq recentf-max-saved-items 300)
-    (add-to-list 'recentf-keep 'file-remote-p)
+    ;; (add-to-list 'recentf-keep 'file-remote-p)
     (recentf-mode +1))
 #+end_src
 
@@ -1831,13 +1831,18 @@ vc-annotate options.
   (setq prefix-help-command #'embark-prefix-help-command)
 
   :config
-  (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
-
-  ;; Hide the mode line of the Embark live/completions buffers
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none)))))
+    (defun embark-zeal ()
+      (interactive)
+      (call-process "zeal" nil 0 nil "seaborn"))
+  
+    (define-key embark-symbol-map (kbd "z") #'embark-zeal))
+    (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
+  
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                   nil
+                   (window-parameters (mode-line-format . none)))))
 #+end_src
 
 ** Configure =marginalia=
@@ -2040,26 +2045,6 @@ Setup =python-mode=.
    
 ** LSP
 #+begin_src emacs-lisp :results none
-(use-package lsp-mode
-   :hook ((python-mode . lsp-deferred)
-          (c-mode . lsp-deferred)
-          (sh-mode . lsp-deferred))
-   :custom
-         (lsp-headerline-breadcrumb-enable nil)
-   :init
-         (setq lsp-keymap-prefix "C-c l")
-   :config
-         (setq lsp-prefer-flymake nil)
-         (lsp-enable-which-key-integration t)
-         (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
-         (lsp-define-conditional-key lsp-command-map "ss" lsp "start server" t)
-         (setup-remote-pyright)
-   :bind (:map evil-normal-state-map 
-         ("M-w" . +lsp-ui/toggle-doc-focus)          
-         ("C-<return>" . lsp-execute-code-action)))
-#+end_src
-
-#+begin_src emacs-lisp :results none
 (defun setup-remote-pyright ()
    (interactive)
 
@@ -2084,7 +2069,26 @@ Setup =python-mode=.
        :notification-handlers (lsp-ht ("pyright/beginProgress" 'lsp-pyright--begin-progress-callback)
        				      ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)
        				      ("pyright/endProgress" 'lsp-pyright--end-progress-callback)))))
+#+end_src
 
+#+begin_src emacs-lisp :results none
+(use-package lsp-mode
+   :hook ((python-mode . lsp-deferred)
+          (c-mode . lsp-deferred)
+          (sh-mode . lsp-deferred))
+   :custom
+         (lsp-headerline-breadcrumb-enable nil)
+   :init
+         (setq lsp-keymap-prefix "C-c l")
+   :config
+         (setq lsp-prefer-flymake nil)
+         (lsp-enable-which-key-integration t)
+         (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+         (lsp-define-conditional-key lsp-command-map "ss" lsp "start server" t)
+         ;; (setup-remote-pyright)
+   :bind (:map evil-normal-state-map 
+         ("M-w" . +lsp-ui/toggle-doc-focus)          
+         ("C-<return>" . lsp-execute-code-action)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2628,7 +2632,25 @@ TODO colors.
 (use-package tramp
   :ensure nil
   :config
-   (setq tramp-default-method "ssh"))
+  (setq tramp-default-method "rsync")
+
+  (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/bin")
+  (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/plugins/pyenv-virtualenv/shims")
+  (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/shims")
+
+  ;; (setq tramp-remote-path
+  ;;  [
+  ;;   "/home/ubuntu/.pyenv/plugins/pyenv-virtualenv/shims"
+  ;;   "/home/ubuntu/.pyenv/shims"
+  ;;   "/usr/local/sbin"
+  ;;   "/usr/local/bin"
+  ;;   "/usr/sbin"
+  ;;   "/usr/bin"
+  ;;   "/sbin"
+  ;;   "/bin"
+  ;;   "/snap/bin"
+  ;;   ])
+  )
 #+end_src
 
 * Configure =diminish=
