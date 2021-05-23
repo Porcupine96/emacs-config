@@ -648,7 +648,7 @@ Default =ivy= configuration.
   :ensure nil
   :config
     (setq recentf-max-saved-items 300)
-    ;; (add-to-list 'recentf-keep 'file-remote-p)
+    (add-to-list 'recentf-keep 'file-remote-p)
     (recentf-mode +1))
 #+end_src
 
@@ -1621,8 +1621,8 @@ vc-annotate options.
   :defer t
   :custom
     (company-minimum-prefix-length 1)
-    (company-idle-delay 0.5)
-    (company-backends '(company-capf company-yasnippet company-dabbrev company-elisp))
+    (company-idle-delay 0.25)
+    (company-backends '(company-capf company-yasnippet company-dabbrev company-files company-elisp))
     (company-dabbrev-downcase nil)
   :bind (:map company-active-map
           ("<tab>" . +company/custom-complete)
@@ -1833,9 +1833,9 @@ vc-annotate options.
   :config
     (defun embark-zeal ()
       (interactive)
-      (call-process "zeal" nil 0 nil "seaborn"))
+      (call-process "zeal" nil 0 nil (current-word)))
   
-    (define-key embark-symbol-map (kbd "z") #'embark-zeal))
+    (define-key embark-general-map (kbd "z") #'embark-zeal)
     (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
   
     ;; Hide the mode line of the Embark live/completions buffers
@@ -2085,7 +2085,7 @@ Setup =python-mode=.
          (lsp-enable-which-key-integration t)
          (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
          (lsp-define-conditional-key lsp-command-map "ss" lsp "start server" t)
-         ;; (setup-remote-pyright)
+         (setup-remote-pyright)
    :bind (:map evil-normal-state-map 
          ("M-w" . +lsp-ui/toggle-doc-focus)          
          ("C-<return>" . lsp-execute-code-action)))
@@ -2754,6 +2754,7 @@ TODO colors.
     "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
     "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org"))
     "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
+    "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
     "f d" (lambda () (interactive)(dired "~/dotfiles"))
     "f c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org"))
     "f t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el"))

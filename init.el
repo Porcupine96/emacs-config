@@ -15,9 +15,6 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
-(setq comp-deferred-compilation-black-list
-      '("jupyter-channel" "sp-show--pair-function" "magit-branch"))
-
 (org-babel-load-file "~/.emacs.d/configuration.org")
 
 (custom-set-variables
