@@ -1722,7 +1722,12 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
   (defun +dired/open-externally ()
     (interactive)
-    (call-process "xdg-open" nil 0 nil (dired-get-filename)))
+    (let ((filename (dired-get-filename)))
+	  (if (s-starts-with? "/ssh" filename)
+	      (let ((dest (concat "/tmp/" (file-name-nondirectory filename))))
+		(tramp-sh-handle-copy-file filename dest t)
+		(call-process "xdg-open" nil 0 nil dest)))
+       (call-process "xdg-open" nil 0 nil filename)))
 
   (evil-collection-define-key 'normal 'dired-mode-map
     "ge" #'+dired/open-externally
