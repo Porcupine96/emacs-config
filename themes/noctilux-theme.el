@@ -414,6 +414,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              ;; consult-preview-insertion
              ;; consult-line-number-prefix
 
+	     ;; bookmark
+             (bookmark-face     ((t (,@bg-base03))))
+
              ;; org
              (org-hide          ((t (,@fg-base03))))
              (org-todo          ((t (:inherit fixed-pitch :height 1.2 ,@fmt-undr ,@fg-red  ,@bg-base03))))

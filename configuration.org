@@ -1622,7 +1622,7 @@ vc-annotate options.
   :custom
     (company-minimum-prefix-length 1)
     (company-idle-delay 0.25)
-    (company-backends '(company-capf company-yasnippet company-dabbrev company-files company-elisp))
+    (company-backends '(company-capf company-yasnippet  company-dabbrev company-files company-elisp))
     (company-dabbrev-downcase nil)
   :bind (:map company-active-map
           ("<tab>" . +company/custom-complete)
@@ -2091,9 +2091,11 @@ Setup =python-mode=.
          (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
          (lsp-define-conditional-key lsp-command-map "ss" lsp "start server" t)
          (setup-remote-pyright)
-   :bind (:map evil-normal-state-map 
+   :bind ((:map evil-normal-state-map 
          ("M-w" . +lsp-ui/toggle-doc-focus)          
-         ("C-<return>" . lsp-execute-code-action)))
+         ("C-<return>" . lsp-execute-code-action))
+         (:map evil-insert-state-map
+         ("C-<return>" . lsp-execute-code-action))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3000,6 +3002,16 @@ TODO colors.
          (proto-root (nth 1 (assoc module +work/proto-paths))))
 
     (find-file-other-window (concat proto-root "/" proto-name))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +work/read-plot ()
+  (interactive)
+  (let ((filename (dired-get-filename)))
+  (if (s-starts-with? "/ssh" filename)
+      (let ((dest (concat "/tmp/" (file-name-nondirectory filename))))
+        (tramp-sh-handle-copy-file filename dest t)
+        (call-process "/home/porcupine/.pyenv/versions/ai-intent-bert-backend/bin/python" nil nil nil "/home/porcupine/work/monorepo/ai/ai-intent-bert-backend/scripts/read_plt.py" dest)))))
 #+end_src
 
 * My packages
