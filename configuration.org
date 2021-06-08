@@ -79,7 +79,7 @@ Hide all the bezels.
 
 Color theme.
 #+begin_src emacs-lisp :results none
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+(add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
 (load-theme 'noctilux t)
 #+end_src
 
@@ -1070,7 +1070,7 @@ Org tag placement.
  :defer t
  :straight (:no-native-compile t)
  :init
-    (load-file "~/.emacs.d/straight/repos/emacs-jupyter/jupyter-channel.el"))
+    (load-file "~/.emacs.default/straight/repos/emacs-jupyter/jupyter-channel.el"))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1290,7 +1290,7 @@ Change the image background.
     (let* ((dir (ignore-errors (file-name-directory (buffer-file-name))))
            (path (concat dir "style.css"))
            (homestyle (or (null dir) (null (file-exists-p path))))
-           (final (if homestyle "~/.emacs.d/org.css" path)))
+           (final (if homestyle "~/.emacs.default/org.css" path)))
 
       (setq org-html-head-include-default-style nil)
       (setq org-html-head (concat
@@ -1458,6 +1458,7 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (use-package wucuo
   :ensure t
+  :disabled
   :hook (org-mode . wucuo-mode))
 #+end_src
 * Configure =langtool=
@@ -1518,12 +1519,17 @@ Save image and insert it's link at point.
             :save-buffers t)))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun +projectile/goto-project-root ()
+  (interactive)
+  (find-file (projectile-project-root)))
+#+end_src
+
 * Configure =magit=
 #+begin_src emacs-lisp :results none
 (use-package magit
   :defer t
   :config
-    ;; (load-file "/home/porcupine/.emacs.d/elpa/magit-20210203.1158/magit-branch.el")
     (setq magit-list-refs-sortby "committerdate"))
 
 (use-package forge 
@@ -1720,18 +1726,19 @@ vc-annotate options.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-  (defun +dired/open-externally ()
-    (interactive)
-    (let ((filename (dired-get-filename)))
-	  (if (s-starts-with? "/ssh" filename)
-	      (let ((dest (concat "/tmp/" (file-name-nondirectory filename))))
-		(tramp-sh-handle-copy-file filename dest t)
-		(call-process "xdg-open" nil 0 nil dest)))
-       (call-process "xdg-open" nil 0 nil filename)))
+(defun +dired/open-externally ()
+  (interactive)
+  (let ((filename (dired-get-filename)))
+  (if (s-starts-with? "/ssh" filename)
+      (let ((dest (concat "/tmp/" (file-name-nondirectory filename))))
+	(tramp-sh-handle-copy-file filename dest t)
+	(call-process "xdg-open" nil 0 nil dest)))
+     (call-process "xdg-open" nil 0 nil filename)))
 
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "ge" #'+dired/open-externally
-    "'" #'hydra-dired-bookmarks/body)
+(evil-collection-define-key 'normal 'dired-mode-map
+  "_" #'+projectile/goto-project-root
+  "ge" #'+dired/open-externally
+  "'" #'hydra-dired-bookmarks/body)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1864,7 +1871,6 @@ vc-annotate options.
   :ensure t
   :init
     (setq consult-fontify-preserve t)
-
     (setq register-preview-delay 0
           register-preview-function #'consult-register-format)
 
@@ -2206,6 +2212,12 @@ sbt-mode
 
     (message "Copied: %s" import)
     (kill-new import))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/def-in-file ()
+  (interactive)
+  (consult-line "def "))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2552,7 +2564,7 @@ TODO colors.
   :custom
     (elfeed-search-remain-on-entry t)
   :config
-    (load-file "~/.emacs.d/config/pelfeed.el")
+    (load-file "~/.emacs.default/config/pelfeed.el")
     (p/elfeed-setup)
 
     (setq-default elfeed-search-filter "@6-months-ago +unread")
@@ -2763,8 +2775,8 @@ TODO colors.
     "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
     "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
     "f d" (lambda () (interactive)(dired "~/dotfiles"))
-    "f c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org"))
-    "f t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el"))
+    "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
+    "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
     "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
 
     "g b" #'magit-branch
@@ -2886,6 +2898,7 @@ TODO colors.
     "i" #'+scala/copy-import
     "s" #'hydra-scala-surround/body
     "l" #'+scala/insert-common-import
+    "d" #'+scala/def-in-file
     "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
     "c c" (lambda () (interactive) (+projectile/compile "bl"))
     "c p" (lambda () (interactive) (+projectile/compile "protob"))
@@ -3014,10 +3027,22 @@ TODO colors.
         (call-process "/home/porcupine/.pyenv/versions/ai-intent-bert-backend/bin/python" nil nil nil "/home/porcupine/work/monorepo/ai/ai-intent-bert-backend/scripts/read_plt.py" dest)))))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defvar remote-host
+  "ubuntu@34.245.164.252")
+
+(defun +work/sync-nlp ()
+  (interactive)
+
+  (let* ((file-path (s-chop-prefix "/home/porcupine/work/" buffer-file-name)))
+    (call-process "rsync" nil nil nil buffer-file-name (s-concat remote-host ":/home/ubuntu/" file-path))))
+#+end_src
+
+
 * My packages
 #+begin_src emacs-lisp :results none
-(load-file "~/.emacs.d/config/pagenda.el")
-(load-file "~/.emacs.d/config/pscreenshot.el")
+(load-file "~/.emacs.default/config/pagenda.el")
+(load-file "~/.emacs.default/config/pscreenshot.el")
 #+end_src
 
 ** RSVP
@@ -3085,7 +3110,7 @@ TODO colors.
 (defun writer ()
   (interactive)
   (let* ((content (with-temp-buffer 
-		    (insert-file-contents "~/.emacs.d/writer/polish_phrases")
+		    (insert-file-contents "~/.emacs.default/writer/polish_phrases")
 		    (buffer-string)))
 	 (phrases (s-split "\n" content))
  	 (choice (completing-read " " phrases)))

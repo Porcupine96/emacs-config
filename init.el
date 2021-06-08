@@ -6,6 +6,8 @@
 
 (unless package--initialized (package-initialize))
 
+(add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
+
 ;; Ensure that use-package is installed.
 ;;
 ;; If use-package isn't already installed, it's extremely likely that this is a
@@ -15,7 +17,7 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
-(org-babel-load-file "~/.emacs.d/configuration.org")
+(org-babel-load-file "~/.emacs.default/configuration.org")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
