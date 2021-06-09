@@ -161,6 +161,9 @@ Open buffer position
     ("\\*\\(Buffer List\\|Bufler\\)\\*"
      (display-buffer-same-window))
 
+    ("\\*Async Shell Command\\*"
+     (display-buffer-no-window))
+
     ("^magit:.*"
      (display-buffer-same-window))))
 #+end_src
@@ -3035,7 +3038,14 @@ TODO colors.
   (interactive)
 
   (let* ((file-path (s-chop-prefix "/home/porcupine/work/" buffer-file-name)))
-    (call-process "rsync" nil nil nil buffer-file-name (s-concat remote-host ":/home/ubuntu/" file-path))))
+    (async-shell-command (s-concat "rsync " buffer-file-name " " remote-host ":/home/ubuntu/" file-path))))
+    ;; (call-process "rsync" nil nil nil buffer-file-name (s-concat remote-host ":/home/ubuntu/" file-path))
+
+
+(defun +work/setup-nlp-save-hook ()
+  (interactive)
+
+  (add-hook 'after-save-hook '+work/sync-nlp 0 t))
 #+end_src
 
 
