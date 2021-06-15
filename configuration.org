@@ -2909,7 +2909,8 @@ TODO colors.
     "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
     "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
-    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala")))
+    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+    "g p" (lambda () (interactive) (+work/goto-proto)))
 
 (local-leader-def
   :states 'normal
@@ -3039,15 +3040,12 @@ TODO colors.
 
   (let* ((file-path (s-chop-prefix "/home/porcupine/work/" buffer-file-name)))
     (async-shell-command (s-concat "rsync " buffer-file-name " " remote-host ":/home/ubuntu/" file-path))))
-    ;; (call-process "rsync" nil nil nil buffer-file-name (s-concat remote-host ":/home/ubuntu/" file-path))
-
 
 (defun +work/setup-nlp-save-hook ()
   (interactive)
 
   (add-hook 'after-save-hook '+work/sync-nlp 0 t))
 #+end_src
-
 
 * My packages
 #+begin_src emacs-lisp :results none
