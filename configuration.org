@@ -80,7 +80,8 @@ Hide all the bezels.
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
-(load-theme 'noctilux t)
+;; (load-theme 'noctilux t)
+(load-theme 'modus-operandi t)
 #+end_src
 
 * Sensible settings
@@ -1874,6 +1875,8 @@ vc-annotate options.
   :ensure t
   :init
     (setq consult-fontify-preserve t)
+    (setq consult-async-min-input 2)
+
     (setq register-preview-delay 0
           register-preview-function #'consult-register-format)
 
@@ -2215,6 +2218,14 @@ sbt-mode
 
     (message "Copied: %s" import)
     (kill-new import))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/make-s-string ()
+  (interactive)
+  (save-excursion
+    (evil-find-char-backward 1 ?\")
+    (insert "s")))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2986,6 +2997,10 @@ TODO colors.
           (+ocr/run-ocr ,path ,buffer)
           (run-hooks '+ocr/screenshot-process-hook))))))
 
+(defun +ocr/post-process (text)
+  (replace-regexp-in-string "^\*" "-" 
+    (s-replace "" "" text)))
+
 (defun +ocr/run-ocr (image-path buffer)
   (with-current-buffer buffer 
     (let* ((result-dir (file-name-directory image-path))
@@ -2996,7 +3011,7 @@ TODO colors.
       (let ((text (with-temp-buffer 
                     (insert-file-contents (concat result-path ".txt"))
 		    (buffer-string))))
-	(insert (s-replace "" "" text))))))
+	(insert (+ocr/post-process text))))))
     #+end_src
 
 * Work
