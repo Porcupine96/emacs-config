@@ -2921,6 +2921,17 @@ TODO colors.
     "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
     "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+    "g v" (lambda () (interactive) (+scala/goto "project/DependenciesVersions.scala"))
+    "g p" (lambda () (interactive) (+work/goto-proto)))
+
+(general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
+
+(local-leader-def
+  :states 'normal
+  :keymaps 'dired-mode-map
+    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+    "g v" (lambda () (interactive) (+scala/goto "project/DependenciesVersions.scala"))
     "g p" (lambda () (interactive) (+work/goto-proto)))
 
 (local-leader-def
@@ -2999,7 +3010,8 @@ TODO colors.
 
 (defun +ocr/post-process (text)
   (replace-regexp-in-string "^\*" "-" 
-    (s-replace "" "" text)))
+    (s-replace "—" "-"
+      (s-replace "" "" text))))
 
 (defun +ocr/run-ocr (image-path buffer)
   (with-current-buffer buffer 
