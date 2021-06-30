@@ -2434,6 +2434,7 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package typescript-mode
   :mode "\\.\\(ts\\|tsx\\)$"
+  :hook (typescript-mode . prettier-js-mode) 
   :ensure t)
 #+end_src
 
@@ -2921,7 +2922,7 @@ TODO colors.
     "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
     "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
-    "g v" (lambda () (interactive) (+scala/goto "project/DependenciesVersions.scala"))
+    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
     "g p" (lambda () (interactive) (+work/goto-proto)))
 
 (general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
@@ -2931,8 +2932,15 @@ TODO colors.
   :keymaps 'dired-mode-map
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
     "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
-    "g v" (lambda () (interactive) (+scala/goto "project/DependenciesVersions.scala"))
+    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
     "g p" (lambda () (interactive) (+work/goto-proto)))
+
+(local-leader-def
+  :states 'normal
+  :keymaps 'protobuf-mode-map
+    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala")))
 
 (local-leader-def
   :states 'normal
@@ -3072,6 +3080,26 @@ TODO colors.
   (interactive)
 
   (add-hook 'after-save-hook '+work/sync-nlp 0 t))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defvar +work/update-versions-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-c") (lambda () (interactive)(message "Hello there!")))
+   map))
+
+(define-minor-mode +work/update-versions-mode
+  "Update versions mode."
+  :init-value nil
+  :global nil
+  :keymap +work/update-versions-mode-map 
+  (message "Activated"))
+
+(defun +work/update-versions ()
+  (interactive)
+
+  (switch-to-buffer "*update-versions*")
+  (+work/update-versions-mode))
 #+end_src
 
 * My packages
