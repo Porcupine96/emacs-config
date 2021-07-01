@@ -3083,17 +3083,25 @@ TODO colors.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defun +work/apply-changes ()
+  (interactive)
+
+  (kill-region (point-min) (point-max))
+  (kill-buffer)
+  (let* ((raw (pop kill-ring))
+         (images (s-split "\n" raw)))
+    (print images)))
+
 (defvar +work/update-versions-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-c") (lambda () (interactive)(message "Hello there!")))
+    (define-key map (kbd "C-c C-c") #'+work/apply-changes)
    map))
 
 (define-minor-mode +work/update-versions-mode
   "Update versions mode."
   :init-value nil
   :global nil
-  :keymap +work/update-versions-mode-map 
-  (message "Activated"))
+  :keymap +work/update-versions-mode-map)
 
 (defun +work/update-versions ()
   (interactive)
