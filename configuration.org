@@ -3109,7 +3109,7 @@ TODO colors.
 	    (insert (concat "\n"
 			    "  - name: " image
 			    "\n"
-			    "  - newTag: " tag)))))))
+			    "    newTag: " tag)))))))
   (save-buffer))
 
 (defvar +work/update-versions-mode-map
