@@ -2091,6 +2091,7 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (use-package lsp-mode
    :hook ((python-mode . lsp-deferred)
+          (typescript-mode . lsp-deferre)  
           (c-mode . lsp-deferred)
           (sh-mode . lsp-deferred))
    :custom
@@ -3076,10 +3077,20 @@ TODO colors.
   (let* ((file-path (s-chop-prefix "/home/porcupine/work/" buffer-file-name)))
     (async-shell-command (s-concat "rsync " buffer-file-name " " remote-host ":/home/ubuntu/" file-path))))
 
-(defun +work/setup-nlp-save-hook ()
+(defun +work/setup-nlp-file-save-hook ()
   (interactive)
 
   (add-hook 'after-save-hook '+work/sync-nlp 0 t))
+
+(defun +work/setup-nlp-project-save-hook ()
+  (interactive)
+
+  (dolist (file (projectile-current-project-files)) 
+    (with-current-buffer
+      (or (get-file-buffer (concat (projectile-project-root) file))
+          (find-file-noselect (concat (projectile-project-root) file)))
+
+      (+work/setup-nlp-file-save-hook))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
