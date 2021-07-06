@@ -464,6 +464,22 @@ Scale text.
        (load-theme theme t)))
  #+end_src
  
+#+begin_src emacs-lisp :results none
+(defvar +core/dark-theme 'noctilux)
+(defvar +core/light-theme 'modus-operandi)
+
+(defun +core/load-theme (theme)
+   (mapcar #'disable-theme custom-enabled-themes)
+   (load-theme theme t))
+
+(defun +core/toggle-darkmode ()
+  (interactive)
+
+  (if (equal (car custom-enabled-themes) +core/dark-theme)
+     (+core/load-theme +core/light-theme)
+     (+core/load-theme +core/dark-theme)))
+#+end_src
+
  Search Monorepo.
  #+begin_src emacs-lisp :results none
 (defun +work/consult-monorepo ()

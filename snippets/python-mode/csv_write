@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: csv write
+# key: csvw
+# --
+with open($1, "w") as f:
+    writer = csv.writer(f, delimiter=",", quoting=csv.QUOTE_ALL)
+    writer.writerow(["field"])
+    for row in rows:
+	writer.writerow(row)
