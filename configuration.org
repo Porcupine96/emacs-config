@@ -80,8 +80,7 @@ Hide all the bezels.
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
-;; (load-theme 'noctilux t)
-(load-theme 'modus-operandi t)
+(load-theme 'noctilux t)
 #+end_src
 
 * Sensible settings
@@ -1498,7 +1497,23 @@ Save image and insert it's link at point.
   :config 
     (yas-global-mode))
 #+end_src
+
   
+
+#+begin_src emacs-lisp :results none
+(defun yas/proto-messages ()
+  (interactive)
+
+  (let ((content (buffer-substring-no-properties (point-min) (point-max)))
+  	(matches nil))
+  
+      (setq pos 0)
+      (while (string-match "message \\(\\w+\\)" content pos)
+        (push (match-string 1 content) matches)
+        (setq pos (match-end 0)))
+      matches))
+#+end_src
+
 * Configure =projectile=
  #+begin_src emacs-lisp :results none
  (use-package projectile 

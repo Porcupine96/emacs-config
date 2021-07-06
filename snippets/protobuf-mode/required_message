@@ -1,0 +1,4 @@
+# key: rm
+# name: required message
+# --
+required ${1:$$(yas-choose-value (yas/proto-messages))} $2 = $3;

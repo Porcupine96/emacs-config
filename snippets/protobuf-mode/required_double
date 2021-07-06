@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: required double
+# key: rd
+# --
+required double $1 = $2;
