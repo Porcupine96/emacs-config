@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: repeated string
+# key: ls
+# --
+repeated string $1 = $2;

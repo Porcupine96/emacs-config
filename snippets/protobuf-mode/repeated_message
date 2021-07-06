@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: repeated message
+# key: lm
+# --
+repeated ${1:$$(yas-choose-value (yas/proto-messages))} $2 = $3;

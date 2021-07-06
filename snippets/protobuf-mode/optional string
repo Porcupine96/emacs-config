@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: optional string
+# key: os
+# --
+optional string $1 = $2;

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: optional message
+# key: om
+# --
+optional ${1:$$(yas-choose-value (yas/proto-messages))} $2 = $3;
