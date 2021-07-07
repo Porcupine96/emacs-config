@@ -485,6 +485,29 @@ Scale text.
   (interactive)
   (consult-ripgrep "~/work/monorepo" ""))
 
+(defvar +work/consult-monorepo-last-glob "")
+
+(defun +work/consult-monorepo-glob ()
+  (interactive)
+  (let* ((glob (read-string "glob: " +work/consult-monorepo-last-glob))
+         (consult-ripgrep-command
+           (concat
+            "rg "
+            "--null "
+            "--line-buffered "
+            "--color=ansi "
+            "--max-columns=1000 "
+            "--no-heading "
+            "--smart-case "
+            "--line-number "
+            "--glob " "\"" glob "\""
+            ". "
+            "-e ARG OPTS")))
+
+  (setq +work/consult-monorepo-last-glob glob)
+
+  (consult-ripgrep "~/work/monorepo" "")))
+
 (defun +work/consult-find-file-monorepo ()
   (interactive)
   (consult-git-grep))
@@ -1497,8 +1520,6 @@ Save image and insert it's link at point.
   :config 
     (yas-global-mode))
 #+end_src
-
-  
 
 #+begin_src emacs-lisp :results none
 (defun yas/proto-messages ()
@@ -2887,6 +2908,7 @@ TODO colors.
     "r l" #'evil-window-increase-width
 
     "s m" #'+work/consult-monorepo
+    "s M" #'+work/consult-monorepo-glob
     "s f" #'+work/consult-find-file-monorepo
 
     "t r" #'+core/reload-theme
