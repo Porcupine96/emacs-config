@@ -445,6 +445,12 @@ Scale text.
  #+end_src
  
 #+begin_src emacs-lisp :results none
+  (defun +core/refresh-config ()
+    (interactive)
+    (org-babel-tangle-file "~/.emacs.default/configuration.org" "~/.emacs.default/configuration.el"))
+ #+end_src
+  
+#+begin_src emacs-lisp :results none
 (defun +core/summon-scratch ()
    (interactive)
    (switch-to-buffer-other-window "*scratch*"))
@@ -609,12 +615,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
       (define-key evil-normal-state-map (kbd "gT") #'persp-prev))
 #+end_src
 
-* Configure =scratch=
-#+begin_src emacs-lisp :results none
-(use-package scratch 
-  :ensure t
-  :defer t)
-#+end_src
 * Configure =ivy= / =counsel= / =swiper=
 Default =ivy= configuration.
 #+begin_src emacs-lisp :results none
@@ -789,6 +789,18 @@ Default =ivy= configuration.
 #+end_src
 * Configure =org=
 ** Core
+Automatically save archive buffer after archiving a task.
+#+begin_src emacs-lisp :results none
+(defun org-archive-save-buffer ()
+  (let ((afile (car (org-all-archive-files))))
+    (if (file-exists-p afile)
+      (let ((buffer (find-file-noselect afile)))
+          (with-current-buffer buffer
+            (save-buffer)))
+      (message "Ooops ... (%s) does not exist." afile))))
+
+#+end_src
+
 #+begin_src emacs-lisp :results none
 (use-package org
   :ensure org-plus-contrib
@@ -806,6 +818,12 @@ Default =ivy= configuration.
   (setq org-image-actual-width nil)
   (setq org-src-window-setup 'split-window-below)
   (setq org-odt-preferred-output-format "docx")
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-tags-column -1)
+
+  ;; LaTeX options
+  (setq org-format-latex-options 
+    (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.4))
 
   ;; open files in the same window
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
@@ -819,6 +837,37 @@ Default =ivy= configuration.
     (kbd "C-j") 'evil-window-down)
 
   (add-to-list 'org-emphasis-alist '("`" bold :foreground "Orange"))
+
+
+  (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
+
+  (setq org-capture-templates
+        '(("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org")
+            "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n" )
+        ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org")
+        "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n")
+        ("m" "Master" entry (file+headline "~/Dropbox/org/todo/studies.org" "Master Thesis")
+        "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n" )
+        ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
+        "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n" )
+        ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
+        "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n" )
+            ("d" "Dictionary" table-line (file "~/Dropbox/org/todo/dictionary.org") "| %:description | %:initial | %:link |")))
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
@@ -839,6 +888,8 @@ Default =ivy= configuration.
                      (push '("#+END_SRC" . "<") prettify-symbols-alist)
 
                      (prettify-symbols-mode 1))))
+
+  (add-hook 'org-archive-hook 'org-archive-save-buffer)
 
   (add-hook 'after-init-hook
       (lambda ()
@@ -866,36 +917,7 @@ Default =ivy= configuration.
   (org-superstar-remove-leading-stars t)
   (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
 #+end_src
-  
-Do not ask whether it is save to evaluate a snippet of code.
-#+begin_src emacs-lisp :results none 
-(setq org-confirm-babel-evaluate nil)
-#+end_src
-
-Enlarge LaTeX font.
-#+begin_src emacs-lisp :results none
-(setq org-format-latex-options 
-  (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.4))
-#+end_src
-
-Automatically save archive buffer after archiving a task.
-#+begin_src emacs-lisp :results none
-(defun org-archive-save-buffer ()
-  (let ((afile (car (org-all-archive-files))))
-    (if (file-exists-p afile)
-      (let ((buffer (find-file-noselect afile)))
-          (with-current-buffer buffer
-            (save-buffer)))
-      (message "Ooops ... (%s) does not exist." afile))))
-
-(add-hook 'org-archive-hook 'org-archive-save-buffer)
-#+end_src
- 
-Org tag placement.
-#+begin_src emacs-lisp :results none
-(setq org-tags-column -1)
-#+end_src
-
+   
 #+begin_src emacs-lisp :results none
 (defun +org/open-at-point-other-window ()
   (interactive)
@@ -1049,39 +1071,6 @@ Org tag placement.
           org-journal-date-format "%A, %d %B %Y"))
 #+end_src
 
-** Org Capture
-#+begin_src emacs-lisp :results none
-(setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
-
-(setq org-capture-templates
-      '(("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org")
-         "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n" )
-        ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org")
-         "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n")
-        ("m" "Master" entry (file+headline "~/Dropbox/org/todo/studies.org" "Master Thesis")
-         "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n" )
-        ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
-         "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n" )
-        ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
-         "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n" )
-        ("d" "Dictionary" table-line (file "~/Dropbox/org/todo/dictionary.org") "| %:description | %:initial | %:link |")))
-#+end_src
-
 ** Org Babel
 #+begin_src emacs-lisp :results none
 (use-package ob-ammonite
@@ -1111,7 +1100,7 @@ Org tag placement.
 (use-package jupyter
  :defer t
  :straight (:no-native-compile t)
- :init
+ :config
     (load-file "~/.emacs.default/straight/repos/emacs-jupyter/jupyter-channel.el"))
 #+end_src
 
@@ -1683,7 +1672,7 @@ vc-annotate options.
   :defer t
   :custom
     (company-minimum-prefix-length 1)
-    (company-idle-delay 0.25)
+    (company-idle-delay 0.15)
     (company-backends '((company-capf company-yasnippet) company-dabbrev company-files company-elisp))
     (company-dabbrev-downcase nil)
   :bind (:map company-active-map
@@ -2631,6 +2620,7 @@ TODO colors.
 * Configure =elfeed=
 #+begin_src emacs-lisp :results none
 (use-package elfeed
+  :disabled
   :defer t
   :custom
     (elfeed-search-remain-on-entry t)
