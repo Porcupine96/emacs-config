@@ -8,7 +8,7 @@
       file-name-handler-alist nil
       message-log-max 16384
       gc-cons-threshold 402653184
-      gc-cons-percentage 0.6
+      gc-cons-percentage 0.7
       auto-window-vscroll nil)
 
 (add-hook 'emacs-startup-hook
@@ -615,79 +615,11 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
       (define-key evil-normal-state-map (kbd "gT") #'persp-prev))
 #+end_src
 
-* Configure =ivy= / =counsel= / =swiper=
-Default =ivy= configuration.
-#+begin_src emacs-lisp :results none
-(use-package ivy
-   :disabled
-   :straight (:no-native-compile t)
-   :config
-     (setq ivy-use-virtual-buffers t)
-     (setq ivy-initial-inputs-alist nil)
-     (setq enable-recursive-minibuffers t)
-     (setq search-default-mode #'char-fold-to-regexp)
-     (ivy-mode 1)
-     (global-set-key (kbd "C-c C-r") 'ivy-resume))
-
-(use-package swiper
-  :disabled
-  :straight (:no-native-compile t)
-  :after ivy
-  :config
-    (global-set-key "\C-s" 'swiper))
-
-(use-package counsel 
-  :disabled
-  :straight (:no-native-compile t) 
-  :after ivy
-  :custom 
-    (consult-find-file-ignore-regexp "#.*#")
-  :config
-    ;; (global-set-key (kbd "M-x") 'execute-extended-command)
-    ;; (global-set-key (kbd "C-x C-f") 'consult-find-file)
-    ;; (global-set-key (kbd "C-c k") 'counsel-rg)
-    (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
-
-;; sorts counsel-M-x by recently used
-(use-package smex
-   :disabled
-   :after counsel)
-
-;; (use-package ivy-prescient
-;;    :straight (:no-native-compile t) 
-;;    :ensure t
-;;    :disabled
-;;    :after counsel
-;;    :config 
-;;      (ivy-prescient-mode 1))
-#+end_src
-
- #+begin_src emacs-lisp :results none
-;; (use-package ivy-posframe
-;;   :straight (:no-native-compile t) 
-;;   :ensure
-;;   :after ivy
-;;   :config
-;;   (setq ivy-posframe-parameters
-;;         '((no-accept-focus . t)
-;;           (left-fringe . 2)
-;;           (right-fringe . 2)
-;;           (internal-border-width . 2)))
-
-;;   ;; (setq ivy-posframe-display-functions-alist
-;;   ;;       '((complete-symbol . ivy-posframe-display-at-point)
-;;   ;;         (swiper . ivy-display-function-fallback)
-;;   ;;         (t . ivy-posframe-display-at-frame-center)))
-
-;;   (setq ivy-posframe-display-functions-alist
-;;       '((complete-symbol . ivy-posframe-display-at-point)
-;;         (t . ivy-display-function-fallback)))
-;;         (ivy-posframe-mode 1))
-  #+end_src
-* Configure =recentf= 
+* Configure =recentf=
 #+begin_src emacs-lisp :results none
 (use-package recentf
   :ensure nil
+  :defer 2
   :config
     (setq recentf-max-saved-items 300)
     (add-to-list 'recentf-keep 'file-remote-p)
@@ -719,44 +651,6 @@ Default =ivy= configuration.
 #+end_src
 
 * Configure =flycheck=
-
-#+begin_src emacs-lisp :results none
-(defvar arrow (vector 
-                          #b00100000
-                          #b00110000
-                          #b00111000
-                          #b00111100
-                          #b00111110
-                          #b00111100
-                          #b00111000
-                          #b00110000
-                          #b00100000))
-
-(defvar line (vector 
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000
-                          #b00100000))
-#+end_src
-
 #+begin_src emacs-lisp :results none
 (use-package flycheck
   :defer t
@@ -764,6 +658,41 @@ Default =ivy= configuration.
   :config 
     (evil-define-key '(normal) flycheck-mode-map (kbd "] e") 'flycheck-next-error)
     (evil-define-key '(normal) flycheck-mode-map (kbd "[ e") 'flycheck-previous-error)
+
+    (defvar arrow (vector 
+      #b00100000
+      #b00110000
+      #b00111000
+      #b00111100
+      #b00111110
+      #b00111100
+      #b00111000
+      #b00110000
+      #b00100000))
+
+    (defvar line (vector 
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000
+       #b00100000))
 
     (define-fringe-bitmap 'flycheck-fringe-bitmap-ball arrow)
     (define-fringe-bitmap 'flycheck-fringe-bitmap-continuation line)
@@ -1123,7 +1052,6 @@ Load languages.
    (sql . t)
    (http . t)
    (haskell . t)
-;; (jupyter . t)
 ))
 #+end_src
 
@@ -1505,9 +1433,10 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (use-package yasnippet
   :ensure t
-  :defer 10
-  :config 
-    (yas-global-mode))
+  :defer t
+  :hook ((scala-mode . yas-minor-mode)
+         (python-mode . yas-minor-mode)
+         (protobuf-mode . yas-minor-mode)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1746,6 +1675,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package emojify 
   :ensure t
+  :defer 10
   :config
     (setq emojify-user-emojis '(
       (":brain:" . (("name" . "Brain") ("unicode" . "🧠") ("style" . "ascii")))))
@@ -1878,7 +1808,6 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package embark
   :ensure t
-
   :bind*
   (("C-a" . embark-act)
    ("C-," . embark-act)
@@ -1916,6 +1845,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package consult
   :ensure t
+  :defer t
   :init
     (setq consult-fontify-preserve t)
     (setq consult-async-min-input 2)
