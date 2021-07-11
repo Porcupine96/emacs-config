@@ -606,20 +606,20 @@ Scale text.
 * Configure =perspective=
 Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces.
 #+begin_src emacs-lisp :results none
-  (use-package perspective 
-    :defer 5
-    :init
-      (persp-mode)
-    :config 
-      (define-key evil-normal-state-map (kbd "gt") #'persp-next)
-      (define-key evil-normal-state-map (kbd "gT") #'persp-prev))
+(use-package perspective 
+  :defer 5
+  :init
+    (persp-mode)
+  :config 
+    (define-key evil-normal-state-map (kbd "gt") #'persp-next)
+    (define-key evil-normal-state-map (kbd "gT") #'persp-prev))
 #+end_src
 
 * Configure =recentf=
 #+begin_src emacs-lisp :results none
 (use-package recentf
   :ensure nil
-  :defer 2
+  :defer t
   :config
     (setq recentf-max-saved-items 300)
     (add-to-list 'recentf-keep 'file-remote-p)
@@ -1063,9 +1063,12 @@ Automatically save archive buffer after archiving a task.
 #+begin_src emacs-lisp :results none
 (use-package org-roam
   :ensure t
-  :hook (org-mode . org-roam)
+  :commands org-roam-find-file
+  :hook (org-mode . org-roam-mode)
   :straight (:no-native-compile t)
-  :bind (:map org-roam-mode-map
+  :bind (:map global-map
+              (("C-c n f" . org-roam-find-file))
+         :map org-roam-mode-map
               (("C-c n l" . +org-roam/goto-linked-file)
                ("C-c n L" . org-roam)
                ("C-c n f" . org-roam-find-file)
