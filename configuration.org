@@ -733,6 +733,7 @@ Automatically save archive buffer after archiving a task.
 #+begin_src emacs-lisp :results none
 (use-package org
   :ensure org-plus-contrib
+  :defer t
   :delight
   :custom
     (org-ellipsis " ▾")
@@ -749,6 +750,30 @@ Automatically save archive buffer after archiving a task.
   (setq org-odt-preferred-output-format "docx")
   (setq org-confirm-babel-evaluate nil)
   (setq org-tags-column -1)
+
+  (setq org-src-fontify-natively t)
+  (setq org-src-tab-acts-natively t)
+  (setq org-src-preserve-indentation t)
+
+  (org-babel-do-load-languages 'org-babel-load-languages
+    '((shell . t)
+      (emacs-lisp . t)
+      ;; (ipython . t)
+      (python . t)
+      (ammonite . t)
+      (plantuml . t)
+      (scheme . t) 
+      (js . t)
+      (sql . t)
+      (http . t)
+      (haskell . t)))
+
+  (setq org-plantuml-jar-path
+        (expand-file-name "~/tools/plantuml.jar"))
+
+  (setq org-startup-with-inline-images t)
+
+  (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
 
   ;; LaTeX options
   (setq org-format-latex-options 
@@ -1009,6 +1034,7 @@ Automatically save archive buffer after archiving a task.
 
 #+begin_src emacs-lisp :results none
 (use-package ob-async
+  :defer t
   :ensure t)
 #+end_src
 
@@ -1030,67 +1056,14 @@ Automatically save archive buffer after archiving a task.
  :defer t
  :straight (:no-native-compile t)
  :config
-    (load-file "~/.emacs.default/straight/repos/emacs-jupyter/jupyter-channel.el"))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(setq org-plantuml-jar-path
-      (expand-file-name "~/tools/plantuml.jar"))
-#+end_src
-
-Load languages.
-#+begin_src emacs-lisp :results none
-(org-babel-do-load-languages 'org-babel-load-languages
- '((shell . t)
-   (emacs-lisp . t)
-   ;; (ipython . t)
-   (python . t)
-   (ammonite . t)
-   (plantuml . t)
-   (scheme . t) 
-   (js . t)
-   (sql . t)
-   (http . t)
-   (haskell . t)
-))
-#+end_src
-
-Fix tab indentation in source blocks.
-#+begin_src emacs-lisp :results none
-(setq org-src-fontify-natively t)
-(setq org-src-tab-acts-natively t)
-(setq org-src-preserve-indentation t)
-#+end_src
-
-Setup images.
-#+begin_src emacs-lisp :results none
-(setq org-startup-with-inline-images t)
-
-(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
-#+end_src
-
-Change the image background. 
-#+begin_src emacs-lisp :results none
-;; (defun create-image-with-background-color (args)
-;;   "Specify background color of Org-mode inline image through modify `ARGS'."
-;;   (let* ((file (car args))
-;;          (type (cadr args))
-;;          (data-p (caddr args))
-;;          (props (cdddr args)))
-;;     ;; get this return result style from `create-image'
-;;     (append (list file type data-p)
-;;             (list :background  "#FFFFFF")
-;;             ;; (list :background  "#F0E68C")
-;;             props)))
-
-;; (advice-add 'create-image :filter-args
-;;             #'create-image-with-background-color)
+   (load-file "~/.emacs.default/straight/repos/emacs-jupyter/jupyter-channel.el"))
 #+end_src
 
 ** Org Roam
 #+begin_src emacs-lisp :results none
 (use-package org-roam
   :ensure t
+  :hook (org-mode . org-roam)
   :straight (:no-native-compile t)
   :bind (:map org-roam-mode-map
               (("C-c n l" . +org-roam/goto-linked-file)
@@ -1106,27 +1079,28 @@ Change the image background.
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate)))
   :config 
-  (setq org-roam-directory "~/Dropbox/org-roam")
-  (setq org-roam-graph-viewer "/usr/bin/brave")
-  (setq org-roam-completion-system 'default)
+    (setq org-roam-directory "~/Dropbox/org-roam")
+    (setq org-roam-graph-viewer "/usr/bin/brave")
+    (setq org-roam-completion-system 'default)
 
-  (setq org-roam-capture-templates '(
-				     ("d" "default" plain (function org-roam--capture-get-point)
-				      "%?"
-				      :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
-				      :head "#+title: ${title}\n#+roam_tags: \n#+startup: content latexpreview\n"
-				      :unnarrowed t)))
+    (setq org-roam-capture-templates '(
+          			     ("d" "default" plain (function org-roam--capture-get-point)
+          			      "%?"
+          			      :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
+          			      :head "#+title: ${title}\n#+roam_tags: \n#+startup: content latexpreview\n"
+          			      :unnarrowed t)))
 
 
-  (add-hook 'org-capture-after-finalize-hook 'org-roam-db-build-cache)
+    (add-hook 'org-capture-after-finalize-hook 'org-roam-db-build-cache)
 
-  (require 'org-roam-protocol)
-  (org-roam-mode))
+    (require 'org-roam-protocol)
+    (org-roam-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package org-roam-server
   :ensure t
+  :after org-roam
   :commands org-roam-server-mode
   :config
   (setq org-roam-server-host "127.0.0.1"
@@ -1158,11 +1132,13 @@ Change the image background.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(require 'dash)
-(require 'org-roam)
 
 (defun +org-roam/linked-files ()
   (interactive)
+
+  (require 'dash)
+  (require 'org-roam)
+
   (print
    (org-roam-db-query
     [:select [title]
@@ -1217,8 +1193,6 @@ Change the image background.
 #+end_src
 
 #+begin_src emacs-lisp
-(key-chord-define org-mode-map "[[" #'+org/insert-roam-link)
-
 (defun +org/insert-roam-link ()
     "Inserts an Org-roam link."
     (interactive)
@@ -1398,6 +1372,7 @@ Save image and insert it's link at point.
           (lambda (el) (when (string-match property (org-element-property :key el)) el))))))
 #+end_src
 * Configure =flyspell=
+
 #+begin_src emacs-lisp :results none 
 (use-package flyspell
   :ensure t
@@ -1434,9 +1409,9 @@ Save image and insert it's link at point.
 (use-package yasnippet
   :ensure t
   :defer t
-  :hook ((scala-mode . yas-minor-mode)
-         (python-mode . yas-minor-mode)
-         (protobuf-mode . yas-minor-mode)))
+  :hook ((scala-mode . yas-global-mode)
+         (python-mode . yas-global-mode)
+         (protobuf-mode . yas-global-mode)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1744,6 +1719,7 @@ vc-annotate options.
     (setq ediff-split-window-function 'split-window-horizontally)
     (setq ediff-forward-word-function 'forward-char))
 #+end_src
+
 * Configure =calfw=
 #+begin_src emacs-lisp :results none
 (use-package calfw
@@ -3220,18 +3196,4 @@ TODO colors.
      (mark-paragraph)
      (kill-ring-save (region-beginning) (region-end))))
 #+end_src
-
-* Playing with org-protocol
-#+begin_src emacs-lisp :results none 
-;; (server-start)
-;; (require 'org-protocol)
-;; (require 'org-roam-protocol)
-#+end_src
-
-* Test
-#+begin_src emacs-lisp :results none
-;; (setq prettify-symbols-unprettify-at-point t)
-;; (global-prettify-symbols-mode 1)
-#+end_src
-
 
