@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: dto
+# key: dto
+# --
+case class $1DTO() {
+  def toDomain: $1 = ???
+}
+
+object $1DTO {
+  def apply($1: $1): $1DTO = ???
+}

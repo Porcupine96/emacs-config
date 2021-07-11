@@ -1684,7 +1684,7 @@ vc-annotate options.
   :custom
     (company-minimum-prefix-length 1)
     (company-idle-delay 0.25)
-    (company-backends '(company-capf company-yasnippet  company-dabbrev company-files company-elisp))
+    (company-backends '((company-capf company-yasnippet) company-dabbrev company-files company-elisp))
     (company-dabbrev-downcase nil)
   :bind (:map company-active-map
           ("<tab>" . +company/custom-complete)
@@ -1702,7 +1702,9 @@ vc-annotate options.
         (define-key company-active-map (kbd "<return>") #'company-complete-selection)))
 
 (use-package company-box
-  :hook (company-mode . company-box-mode))
+  :hook (company-mode . company-box-mode)
+  :config
+    (setq company-box-doc-enable nil))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2151,6 +2153,7 @@ Setup =python-mode=.
    :init
          (setq lsp-keymap-prefix "C-c l")
    :config
+         (setq lsp-completion-provider :none)
          (setq lsp-prefer-flymake nil)
          (lsp-enable-which-key-integration t)
          (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
@@ -2821,6 +2824,7 @@ TODO colors.
     "b k" #'kill-current-buffer
 
     "c e" #'consult-flycheck
+    "c E" #'consult-compile-error
     "c x" #'flycheck-list-errors
     "c c" #'compile
     "c C" #'recompile
