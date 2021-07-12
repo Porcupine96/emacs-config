@@ -2501,8 +2501,6 @@ TODO colors.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(require 'dash)
-
 (defun +vterm/new-session ()
   (interactive)
   (vterm))
@@ -2542,6 +2540,7 @@ TODO colors.
 * Configure =winner=
 #+begin_src emacs-lisp :results none
 (use-package winner
+  :defer 10
   :config 
     (winner-mode))
 #+end_src
@@ -2581,6 +2580,7 @@ TODO colors.
 
 (use-package pdf-tools
   :ensure t
+  :defer t
   :mode "\\.pdf$"
   :config 
     (pdf-tools-install)
@@ -2615,26 +2615,13 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package tramp
   :ensure nil
+  :deret 5
   :config
-  (setq tramp-default-method "rsync")
+   (setq tramp-default-method "rsync")
 
-  (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/bin")
-  (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/plugins/pyenv-virtualenv/shims")
-  (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/shims")
-
-  ;; (setq tramp-remote-path
-  ;;  [
-  ;;   "/home/ubuntu/.pyenv/plugins/pyenv-virtualenv/shims"
-  ;;   "/home/ubuntu/.pyenv/shims"
-  ;;   "/usr/local/sbin"
-  ;;   "/usr/local/bin"
-  ;;   "/usr/sbin"
-  ;;   "/usr/bin"
-  ;;   "/sbin"
-  ;;   "/bin"
-  ;;   "/snap/bin"
-  ;;   ])
-  )
+   (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/bin")
+   (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/plugins/pyenv-virtualenv/shims")
+   (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/shims"))
 #+end_src
 
 * Configure =diminish=
@@ -2943,7 +2930,7 @@ TODO colors.
 * org-ocr
 #+begin_src emacs-lisp :results none
 (defun +ocr/take-screenshot (path)
-     (start-process "screenshot" "*screenshot*" "screenshot-to-file" path))
+  (start-process "screenshot" "*screenshot*" "screenshot-to-file" path))
 #+end_src
 
 #+begin_src emacs-lisp :results none

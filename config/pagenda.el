@@ -45,16 +45,16 @@
   (setq-local line-spacing 8)
   ;; (org-super-agenda-mode)
   (setq pagenda-transforms
-	  (mapcar (lambda (face-&-spec)
+	(mapcar (lambda (face-&-spec)
 		  (face-remap-add-relative (car face-&-spec) (cadr face-&-spec)))
-		  pagenda-face-remappings))
+		pagenda-face-remappings))
   (message "enabled"))
 
 (defun pagenda--disable()
   (setq-local mode-line-format (default-value 'mode-line-format))
   (setq-local line-spacing (default-value 'line-spacing))
   (mapc #'face-remap-remove-relative
-       pagenda-transforms)
+	pagenda-transforms)
   (message "disabled"))
 
 (define-minor-mode pagenda-mode
