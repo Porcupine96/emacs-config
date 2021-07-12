@@ -193,62 +193,62 @@ Compilation settings.
 #+end_src
 
 * Use =evil-mode=
-  Use =evil-mode=
-  #+begin_src emacs-lisp :results none
-  (use-package evil
-    :ensure t
-    :demand
-    :init
-      (setq evil-want-keybinding nil)
-    :config
-      (setq evil-ex-substitute-global t)
-      (setq aw-keys '(?h ?j ?k ?l ?a ?s ?d ?f))
-      (evil-mode +1)
-    :bind (:map evil-motion-state-map
-          ("C-w C-U" . winner-undo)
-          ("C-w C-w" . ace-window)
-          ("C-w w"   . ace-window)))
-  
-  (use-package evil-collection
-    :after evil
-    :ensure t
-    :config
-      (evil-collection-init))
-    
-  #+end_src
-
-  Use =evil-commentary=
-  #+begin_src emacs-lisp :results none
-  (use-package evil-commentary
-     :after evil
-     :config
-      (evil-commentary-mode +1))
-  #+end_src
-  
-  Use =evil-surround=
-  #+begin_src emacs-lisp :results none
-  (use-package evil-surround
-     :ensure t
-     :after evil
-     :config
-       (global-evil-surround-mode +1))
-  #+end_src
-
+Use =evil-mode=
 #+begin_src emacs-lisp :results none
-(defmacro define-and-bind-text-object (key start-regex end-regex)
-  (let ((inner-name (make-symbol "inner-name"))
-        (outer-name (make-symbol "outer-name")))
-    `(progn
-       (evil-define-text-object ,inner-name (count &optional beg end type)
-         (evil-select-paren ,start-regex ,end-regex beg end type count nil))
-       (evil-define-text-object ,outer-name (count &optional beg end type)
-         (evil-select-paren ,start-regex ,end-regex beg end type count t))
-       (define-key evil-inner-text-objects-map ,key (quote ,inner-name))
-       (define-key evil-outer-text-objects-map ,key (quote ,outer-name)))))
+(use-package evil
+  :ensure t
+  :demand
+  :init
+    (setq evil-want-keybinding nil)
+  :config
+    (setq evil-ex-substitute-global t)
+    (setq aw-keys '(?h ?j ?k ?l ?a ?s ?d ?f))
 
-(define-and-bind-text-object "=" "=" "=")
-(define-and-bind-text-object "~" "~" "~")
-(define-and-bind-text-object "*" "*" "*")
+
+    (defmacro define-and-bind-text-object (key start-regex end-regex)
+      (let ((inner-name (make-symbol "inner-name"))
+            (outer-name (make-symbol "outer-name")))
+        `(progn
+           (evil-define-text-object ,inner-name (count &optional beg end type)
+             (evil-select-paren ,start-regex ,end-regex beg end type count nil))
+           (evil-define-text-object ,outer-name (count &optional beg end type)
+             (evil-select-paren ,start-regex ,end-regex beg end type count t))
+           (define-key evil-inner-text-objects-map ,key (quote ,inner-name))
+           (define-key evil-outer-text-objects-map ,key (quote ,outer-name)))))
+    
+    (define-and-bind-text-object "=" "=" "=")
+    (define-and-bind-text-object "~" "~" "~")
+    (define-and-bind-text-object "*" "*" "*")
+
+    (evil-mode +1)
+  :bind (:map evil-motion-state-map
+        ("C-w C-U" . winner-undo)
+        ("C-w C-w" . ace-window)
+        ("C-w w"   . ace-window)))
+
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
+    (evil-collection-init))
+  
+#+end_src
+
+Use =evil-commentary=
+#+begin_src emacs-lisp :results none
+(use-package evil-commentary
+   :after evil
+   :config
+    (evil-commentary-mode +1))
+#+end_src
+
+Use =evil-surround=
+#+begin_src emacs-lisp :results none
+(use-package evil-surround
+   :ensure t
+   :after evil
+   :config
+     (global-evil-surround-mode +1))
 #+end_src
 
 * Configure =hydra=
@@ -345,7 +345,7 @@ Compilation settings.
    "
    ("l" #'+python/surround-word-with-list)
    ("o" #'+python/surround-word-with-optional))
- #+end_src
+#+end_src
 
 * Global keybindings 
 Buffer commands.
@@ -571,37 +571,30 @@ Scale text.
    :ensure t
    :defer t
    :init (which-key-mode))
-
-;; This should be triggered only in scala-mode.
-;;(which-key-add-key-based-replacements
-;;  "SPC m c c" "bl"
-;;  "SPC m c n" "bl -n"
-;;  "SPC m c p" "protob")
  #+end_src
  
 * Configure =avy= / =evil-easymotion= / =evil-snipe=
-  #+begin_src emacs-lisp :results none
-  (use-package avy 
-    :defer t)
-    
-  (use-package evil-easymotion
-    :defer t)
-  #+end_src
+#+begin_src emacs-lisp :results none
+(use-package avy 
+  :defer t)
   
-  #+begin_src emacs-lisp :results none
-  (define-key evil-motion-state-map (kbd "g s k") #'evilem-motion-previous-line)
-  (define-key evil-motion-state-map (kbd "g s j") #'evilem-motion-next-line)
-  (define-key evil-motion-state-map (kbd "g s f") #'evil-avy-goto-char)
-  (define-key evil-motion-state-map (kbd "g s s") #'evil-avy-goto-char-2)
-  #+end_src
+(use-package evil-easymotion
+  :defer t)
+#+end_src
 
-  Use =evil-snipe=
-  #+begin_src emacs-lisp :results none
-  (use-package evil-snipe 
-     :after evil)
-     
-  ;;(require 'evil-snipe)
-  #+end_src
+#+begin_src emacs-lisp :results none
+(define-key evil-motion-state-map (kbd "g s k") #'evilem-motion-previous-line)
+(define-key evil-motion-state-map (kbd "g s j") #'evilem-motion-next-line)
+(define-key evil-motion-state-map (kbd "g s f") #'evil-avy-goto-char)
+(define-key evil-motion-state-map (kbd "g s s") #'evil-avy-goto-char-2)
+#+end_src
+
+Use =evil-snipe= - do I use it? :thinking:
+#+begin_src emacs-lisp :results none
+(use-package evil-snipe 
+   :disabled
+   :after evil)
+#+end_src
   
 * Configure =perspective=
 Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces.
@@ -888,7 +881,7 @@ Automatically save archive buffer after archiving a task.
 #+begin_src emacs-lisp :results none
 (use-package evil-org
   :ensure t
-  :after org
+  :after (evil org)
   :config
     (add-hook 'org-mode-hook 'evil-org-mode)
     (add-hook 'evil-org-mode-hook 'general-define-org-keys)
@@ -983,6 +976,7 @@ Automatically save archive buffer after archiving a task.
 #+begin_src emacs-lisp :results none
 (use-package org-ref 
   :ensure t
+  :defert t
   :straight (:no-native-compile t)
   :after org
   :config 
@@ -1432,21 +1426,21 @@ Save image and insert it's link at point.
 #+end_src
 
 * Configure =projectile=
- #+begin_src emacs-lisp :results none
- (use-package projectile 
-   :ensure t
-   :defer t
-   :config
-     (projectile-global-mode)
-     (setq projectile-project-search-path '("~/work/monorepo"))
-     (setq projectile-enable-caching t)
-     (setq projectile-project-root-files-functions #'(projectile-root-top-down
-                                                      projectile-root-top-down-recurring
-                                                      projectile-root-bottom-up
-                                                      projectile-root-local))
+#+begin_src emacs-lisp :results none
+(use-package projectile 
+  :ensure t
+  :defer t
+  :config
+    (projectile-global-mode)
+    (setq projectile-project-search-path '("~/work/monorepo"))
+    (setq projectile-enable-caching t)
+    (setq projectile-project-root-files-functions #'(projectile-root-top-down
+                                                     projectile-root-top-down-recurring
+                                                     projectile-root-bottom-up
+                                                     projectile-root-local))
 
-     (projectile-register-project-type 'scala '("build.sbt")))
- #+end_src
+    (projectile-register-project-type 'scala '("build.sbt")))
+#+end_src
  
 #+begin_src emacs-lisp :results none
 (defun +projectile/search-word-under-cursor ()
