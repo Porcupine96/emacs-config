@@ -2615,7 +2615,7 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package tramp
   :ensure nil
-  :deret 5
+  :defer t
   :config
    (setq tramp-default-method "rsync")
 
