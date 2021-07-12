@@ -976,7 +976,7 @@ Automatically save archive buffer after archiving a task.
 #+begin_src emacs-lisp :results none
 (use-package org-ref 
   :ensure t
-  :defert t
+  :defer t
   :straight (:no-native-compile t)
   :after org
   :config 
@@ -2607,6 +2607,7 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package eros
   :ensure t
+  :defer t
   :hook (emacs-lisp-mode . eros-mode))
 #+end_src
 
