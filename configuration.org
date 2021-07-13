@@ -1756,6 +1756,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package selectrum
   :ensure t
+  :defer t
   :config
    (setq selectrum-max-window-height 15)
    (setq selectrum-fix-vertical-window-height t)
@@ -1772,6 +1773,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package selectrum-prescient
   :ensure t
+  :after selectrum
   :config
    (selectrum-prescient-mode +1)
    (prescient-persist-mode +1))
@@ -2989,7 +2991,10 @@ TODO colors.
   (let* ((project-name (projectile-project-name))
          (name-chunks (split-string project-name "-"))
          (module (car name-chunks))
-         (proto-name (string-join (cdr name-chunks) "_"))
+         (is-plugin (equal (cadr name-chunks) "plugin"))
+         (proto-name (if t/is-plugin
+           (concat "plugins/" (string-join (cddr t/chunks) "-"))
+           (string-join (cdr t/chunks) "_")))
          (proto-root (nth 1 (assoc module +work/proto-paths))))
 
     (find-file-other-window (concat proto-root "/" proto-name))))
@@ -3033,6 +3038,9 @@ TODO colors.
 
 #+begin_src emacs-lisp :results none
 (defun +work/apply-changes ()
+  (+work/kubernetes-apply-changes))
+
+(defun +work/kubernetes-apply-changes ()
   (interactive)
 
   (kill-region (point-min) (point-max))
@@ -3059,6 +3067,23 @@ TODO colors.
 			    "  - name: " image
 			    "\n"
 			    "    newTag: " tag)))))))
+  (save-buffer))
+
+(defun +work/swarm-apply-changes ()
+  (interactive)
+
+  (kill-region (point-min) (point-max))
+  (kill-buffer)
+  (let* ((raw (pop kill-ring))
+         (images (s-split "\n" raw)))
+
+    (dolist (image images)
+      (let* ((image-and-tag (s-split ":" image))
+             (image (car image-and-tag))
+             (tag (car (cdr image-and-tag))))
+        (beginning-of-buffer)
+        (if (search-forward image nil t)
+	  (kill-line (insert (concat ":" tag)))))))
   (save-buffer))
 
 (defvar +work/update-versions-mode-map
