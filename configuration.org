@@ -1758,10 +1758,10 @@ vc-annotate options.
   :ensure t
   :defer t
   :config
-   (setq selectrum-max-window-height 15)
-   (setq selectrum-fix-vertical-window-height t)
-   (setq selectrum-highlight-candidates-function #'selectrum-candidates-identity)
-   (selectrum-mode +1))
+    (setq selectrum-max-window-height 15)
+    (setq selectrum-fix-vertical-window-height t)
+    (setq selectrum-highlight-candidates-function #'selectrum-candidates-identity)
+    (selectrum-mode +1))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1821,6 +1821,7 @@ vc-annotate options.
 (use-package consult
   :ensure t
   :defer t
+  :commands (consult-find consult-line)
   :init
     (setq consult-fontify-preserve t)
     (setq consult-async-min-input 2)
@@ -1858,6 +1859,7 @@ vc-annotate options.
 	  "ARG* OPTS"))
 
   :config
+   (selectrum-mode 1)
    (setq consult-narrow-key "<")
 
    (autoload 'projectile-project-root "projectile")
@@ -2528,7 +2530,7 @@ TODO colors.
   :custom
     (elfeed-search-remain-on-entry t)
   :config
-    (load-file "~/.emacs.default/config/pelfeed.el")
+    (load-file "~/.emacs.default/packages/pelfeed.el")
     (p/elfeed-setup)
 
     (setq-default elfeed-search-filter "@6-months-ago +unread")
@@ -2842,6 +2844,11 @@ TODO colors.
     "d" #'org-deadline
     "i" #'+org/save-image-insert-link
     "t" #'org-todo)
+
+(local-leader-def
+  :states 'normal
+  :keymaps 'yaml-mode-map
+    "u" #'+work/update-versions)
     
 (local-leader-def
   :states 'normal
@@ -3036,118 +3043,36 @@ TODO colors.
       (+work/setup-nlp-file-save-hook))))
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(defun +work/apply-changes ()
-  (+work/kubernetes-apply-changes))
-
-(defun +work/kubernetes-apply-changes ()
-  (interactive)
-
-  (kill-region (point-min) (point-max))
-  (kill-buffer)
-  (let* ((raw (pop kill-ring))
-         (images (s-split "\n" raw)))
-
-    (dolist (image images)
-      (let* ((image-and-tag (s-split ":" image))
-             (image (car image-and-tag))
-             (tag (car (cdr image-and-tag))))
-        (beginning-of-buffer)
-        (if (search-forward image nil t)
-	  (progn 
-            ;; update tag for existing image
-            (next-line)
-            (beginning-of-line)
-            (kill-line)
-            (insert (concat "    newTag: " tag)))
-	  (progn
-	    (beginning-of-buffer)
-	    (search-forward "images:")
-	    (insert (concat "\n"
-			    "  - name: " image
-			    "\n"
-			    "    newTag: " tag)))))))
-  (save-buffer))
-
-(defun +work/swarm-apply-changes ()
-  (interactive)
-
-  (kill-region (point-min) (point-max))
-  (kill-buffer)
-  (let* ((raw (pop kill-ring))
-         (images (s-split "\n" raw)))
-
-    (dolist (image images)
-      (let* ((image-and-tag (s-split ":" image))
-             (image (car image-and-tag))
-             (tag (car (cdr image-and-tag))))
-        (beginning-of-buffer)
-        (if (search-forward image nil t)
-	  (kill-line (insert (concat ":" tag)))))))
-  (save-buffer))
-
-(defvar +work/update-versions-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-c") #'+work/apply-changes)
-    map))
-
-(define-minor-mode +work/update-versions-mode
-  "Update versions mode."
-  :init-value nil
-  :global nil
-  :keymap +work/update-versions-mode-map)
-
-(defun +work/update-versions ()
-  (interactive)
-
-  (switch-to-buffer "*update-versions*")
-  (+work/update-versions-mode))
+** Version update
+#+begin_src emacs-lisp results :none
+(use-package version-update
+  :load-path "~/.emacs.default/packages/work/version-update"
+  :defer t
+  :commands (+work/update-versions +work/apply-changes))
 #+end_src
 
 * My packages
 #+begin_src emacs-lisp :results none
-(load-file "~/.emacs.default/config/pagenda.el")
-(load-file "~/.emacs.default/config/pscreenshot.el")
+;; (load-file "~/.emacs.default/packages/pagenda.el")
 #+end_src
 
 ** RSVP
 #+begin_src emacs-lisp :results none
-(defvar rsvp/wait-for-seconds 0.23)
-
-(defface rsvp/buffer-face 
-  '((t :height 1.5))
-"RSVP buffer face")
-
-(defun rsvp/run (start end)
-  (interactive "r")
-
-  (let ((text (buffer-substring start end)))
-    (with-current-buffer (get-buffer-create "*rsvp*")
-      (buffer-face-set 'rsvp/buffer-face)
-      (erase-buffer)
-
-      (dolist (word (split-string text))
-	(insert word)
-	(sit-for rsvp/wait-for-seconds)
-	(erase-buffer)))))
+(use-package prsvp
+  :load-path "~/.emacs.default/packages/prsvp/"
+  :defer t
+  :commands rsvp/run)
 #+end_src
 
+** Pscreenshot
 #+begin_src emacs-lisp :results none
-(defvar rsvp/text-buffer-name "*rsvp-text*")
-
-(defun rsvp/read-from-ocr ()
-  (interactive)
-
-  (with-current-buffer (get-buffer-create rsvp/text-buffer-name)
-    (erase-buffer)
-    (+ocr/screenshot)))
-
-(defun rsvp/read-last-content ()
-  (interactive)
-
-  (with-current-buffer (get-buffer-create rsvp/text-buffer-name)
-    (rsvp/run (point-min) (point-max))))
+(use-package pscreenshot
+  :load-path "~/.emacs.default/packages/pscreenshot/"
+  :defer t
+  :commands pscreenshot/org-screenshot-take)
 #+end_src
+
+** Upgrade versions
 
 * Focus Mode
 #+begin_src emacs-lisp :results none
