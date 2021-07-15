@@ -1821,8 +1821,13 @@ vc-annotate options.
 (use-package consult
   :ensure t
   :defer t
-  :commands (consult-find consult-line)
+  :commands (consult-find consult-line +consult/line)
   :init
+    (defun +consult/line ()
+      (interactive)
+      (call-interactively #'consult-line)
+      (setq isearch-string (car consult--line-history)))
+
     (setq consult-fontify-preserve t)
     (setq consult-async-min-input 2)
 
@@ -1836,7 +1841,7 @@ vc-annotate options.
 
     (global-set-key (kbd "C-c k") #'consult-ripgrep)
     (global-set-key (kbd "C-x b") #'consult-buffer)
-    (global-set-key (kbd "C-s") #'consult-line) 
+    (global-set-key (kbd "C-s") #'+consult/line) 
 
     (setq consult-preview-key (list (kbd "M-n") (kbd "M-p")))
 
