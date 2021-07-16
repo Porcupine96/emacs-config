@@ -486,7 +486,7 @@ Scale text.
 #+end_src
 
  Search Monorepo.
- #+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none
 (defun +work/consult-monorepo ()
   (interactive)
   (consult-ripgrep "~/work/monorepo" ""))
@@ -495,55 +495,56 @@ Scale text.
 
 (defun +work/consult-monorepo-glob ()
   (interactive)
-  (let* ((glob (read-string "glob: " +work/consult-monorepo-last-glob))
+  (let* ((glob (read-string "glob: " (or +work/consult-monorepo-last-glob
+                                          (concat "*." (file-name-extension (buffer-name))))))
          (consult-ripgrep-command
-           (concat
-            "rg "
-            "--null "
-            "--line-buffered "
-            "--color=ansi "
-            "--max-columns=1000 "
-            "--no-heading "
-            "--smart-case "
-            "--line-number "
-            "--glob " "\"" glob "\""
-            ". "
-            "-e ARG OPTS")))
+          (concat
+           "rg "
+           "--null "
+           "--line-buffered "
+           "--color=ansi "
+           "--max-columns=1000 "
+           "--no-heading "
+           "--smart-case "
+           "--line-number "
+           "--glob " "\"" glob "\""
+           ". "
+           "-e ARG OPTS")))
 
-  (setq +work/consult-monorepo-last-glob glob)
+    (setq +work/consult-monorepo-last-glob glob)
 
-  (consult-ripgrep "~/work/monorepo" "")))
+    (consult-ripgrep "~/work/monorepo" "")))
 
 (defun +work/consult-find-file-monorepo ()
   (interactive)
   (consult-git-grep))
- #+end_src
+#+end_src
  
- Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
- #+begin_src emacs-lisp :results none
-   (defun +core/to-floating-frame()
-     (interactive)
-     (delete-window)
-     (make-frame '((name . "floating")
-                   (window-system . x)
-                   (minibuffer . nil))))
+Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
+#+begin_src emacs-lisp :results none
+(defun +core/to-floating-frame()
+  (interactive)
+  (delete-window)
+  (make-frame '((name . "floating")
+                (window-system . x)
+                (minibuffer . nil))))
 
-    (defun +core/to-regular-bottom-window()
-       (interactive)
-       (+core/to-regular-window `bottom))
+ (defun +core/to-regular-bottom-window()
+    (interactive)
+    (+core/to-regular-window `bottom))
 
-   (defun +core/to-regular-right-window()
-      (interactive)
-      (+core/to-regular-window `right))
+(defun +core/to-regular-right-window()
+   (interactive)
+   (+core/to-regular-window `right))
 
-    (defun +core/to-regular-window(position)
-      (let ((buffer (current-buffer)))
-        (with-current-buffer buffer
-          (delete-window)
-          (pcase position
-            (`bottom (display-buffer-at-bottom buffer nil))
-            (`right (display-buffer-in-direction buffer '((direction . right))))))))
- #+end_src
+(defun +core/to-regular-window(position)
+  (let ((buffer (current-buffer)))
+    (with-current-buffer buffer
+      (delete-window)
+      (pcase position
+        (`bottom (display-buffer-at-bottom buffer nil))
+        (`right (display-buffer-in-direction buffer '((direction . right))))))))
+#+end_src
   
 #+begin_src emacs-lisp :results none
 (defun +core/inc-at-point ()
@@ -1451,8 +1452,7 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (defun +projectile/search-todos ()
   (interactive)
-  (let ((counsel-projectile-ag-initial-input "todo:"))
-    (counsel-projectile-ag)))
+  (consult-ripgrep nil "todo:"))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2077,7 +2077,7 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package lsp-metals :after lsp-mode scala-mode)
+(use-package lsp-metals :after (lsp-mode scala-mode))
 #+end_src
 
 Use =lsp-ivy=.
@@ -3004,9 +3004,9 @@ TODO colors.
          (name-chunks (split-string project-name "-"))
          (module (car name-chunks))
          (is-plugin (equal (cadr name-chunks) "plugin"))
-         (proto-name (if t/is-plugin
+         (proto-name (if is-plugin
            (concat "plugins/" (string-join (cddr t/chunks) "-"))
-           (string-join (cdr t/chunks) "_")))
+           (string-join (cdr name-chunks) "_")))
          (proto-root (nth 1 (assoc module +work/proto-paths))))
 
     (find-file-other-window (concat proto-root "/" proto-name))))
