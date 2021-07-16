@@ -29,3 +29,4 @@ quelpa/
 site-lisp/
 org-notify-log.el
 *.log
+history
