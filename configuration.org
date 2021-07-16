@@ -2781,7 +2781,7 @@ TODO colors.
     "o e" #'eshell
     "o E" #'+eshell/open-in-default
     "o P" #'+eshell/open-in-project-root
-    "o o" #'porcupine/focus-mode
+    "o o" #'p/focus-mode
     "o v" #'+vterm/focus-or-create
     "o V" #'+vterm/new-session
     "o m" #'mu4e
@@ -3078,38 +3078,12 @@ TODO colors.
 #+end_src
 
 ** Upgrade versions
-
-* Focus Mode
+** Focus
 #+begin_src emacs-lisp :results none
-(defun +focus/focus-mode-function ()
-    (when (derived-mode-p 'scala-mode) 
-      (setq olivetti-body-width 150))
-    (olivetti-mode)
-    (hide-mode-line-mode))
-
-(define-minor-mode porcupine/focus-mode
-  "Focus mode."
-  :init-value nil
-  :global 't
-  (if porcupine/focus-mode
-      (progn
-    	  (+focus/focus-mode-function)
-  	  (add-hook 'prog-mode-hook '+focus/focus-mode-function))
-    (remove-hook 'prog-mode-hook '+focus/focus-mode-function)
-    (olivetti-mode -1)
-    (hide-mode-line-mode -1)))
-#+end_src
-
-* Writer
-#+begin_src emacs-lisp :results none
-(defun writer ()
-  (interactive)
-  (let* ((content (with-temp-buffer 
-		    (insert-file-contents "~/.emacs.default/writer/polish_phrases")
-		    (buffer-string)))
-	 (phrases (s-split "\n" content))
- 	 (choice (completing-read " " phrases)))
-    (if choice (insert choice))))
+(use-package pfocus
+  :load-path "~/.emacs.default/packages/pfocus/"
+  :defer t
+  :commands p/focus-mode)
 #+end_src
 
 * Utils
