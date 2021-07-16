@@ -1613,7 +1613,7 @@ vc-annotate options.
   #+end_src
 
 * Configure =ox-reveal=
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package ox-reveal
   :disabled
   :defer t)
@@ -1644,7 +1644,12 @@ vc-annotate options.
   :ensure nil
   :hook (dired-mode . dired-hide-details-mode)
   :config
-   (setq dired-dwim-target t))
+   (setq dired-dwim-target t)
+
+   (evil-collection-define-key 'normal 'dired-mode-map
+     "_" #'+projectile/goto-project-root
+     "ge" #'+dired/open-externally
+     "'" #'hydra-dired-bookmarks/body))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1663,11 +1668,6 @@ vc-annotate options.
 	(tramp-sh-handle-copy-file filename dest t)
 	(call-process "xdg-open" nil 0 nil dest)))
      (call-process "xdg-open" nil 0 nil filename)))
-
-(evil-collection-define-key 'normal 'dired-mode-map
-  "_" #'+projectile/goto-project-root
-  "ge" #'+dired/open-externally
-  "'" #'hydra-dired-bookmarks/body)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1810,6 +1810,8 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package marginalia
   :ensure t
+  :defer t
+  :after vertico
   :config
     (marginalia-mode))
 #+end_src
@@ -1929,11 +1931,15 @@ Setup =python-mode=.
          python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
 
    (add-hook 'python-mode-hook 
-     (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
+     (lambda () (push '("lambda" . "λ") prettify-symbols-alist)))
+
+   (font-lock-add-keywords 'python-mode
+     '(("\\(TODO\\):" 1 'todo-comment-face prepend))))
 #+end_src
    
 #+begin_src emacs-lisp :results none
 (use-package pyenv-mode
+  :defer t
   :hook (python-mode . pyenv-mode)
   :config
     (let ((pyenv-path (expand-file-name "~/.pyenv/bin")))
@@ -1941,24 +1947,17 @@ Setup =python-mode=.
          (add-to-list 'exec-path pyenv-path)))
 
 (use-package pyvenv
+  :defer t
   :ensure t
   :after pyenv-mode
   :hook (pyenv-mode . pyvenv-mode)
   :config
-    (advice-add 'pyenv-mode-set :after (lambda (&rest r) (+pyvenv/set-to-pyenv))))
-#+end_src
+    (advice-add 'pyenv-mode-set :after (lambda (&rest r) (+pyvenv/set-to-pyenv)))
 
-#+begin_src emacs-lisp :results none
-(defun +pyvenv/set-to-pyenv ()
-  (interactive)
-  (pyvenv-activate
-     (pyenv-mode-full-path (pyenv-mode-version))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package blacken
-  :ensure t
-  :hook (python-mode . blacken-mode))
+    (defun +pyvenv/set-to-pyenv ()
+      (interactive)
+      (pyvenv-activate
+          (pyenv-mode-full-path (pyenv-mode-version)))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1966,18 +1965,12 @@ Setup =python-mode=.
   :ensure t
   :hook (python-mode . blacken-mode))
 #+end_src
-
 #+begin_src emacs-lisp :results none
 (use-package lsp-pyright
   :ensure t
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp))))  ; or lsp-deferred
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(font-lock-add-keywords 'python-mode
- '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1990,26 +1983,19 @@ Setup =python-mode=.
   (+core/surround-word-with "Optional[" "]"))
 #+end_src
 
-** Clojure
-#+begin_src emacs-lisp :results none
-(use-package clojure-mode
-  :ensure t
-  :defer t)
-#+end_src
-
 ** Protobuf
-   #+begin_src emacs-lisp :results none
-   (use-package protobuf-mode
-     :ensure t 
-     :defer t)
-   
-   (defconst my-protobuf-style
-     '((c-basic-offset . 4)
-      (indent-tabs-mode . nil)))
-
-    (add-hook 'protobuf-mode-hook 
-      (lambda () (c-add-style "my-style" my-protobuf-style t)))
-   #+end_src
+#+begin_src emacs-lisp :results none
+(use-package protobuf-mode
+  :ensure t 
+  :defer t
+  :config
+    (defconst my-protobuf-style
+      '((c-basic-offset . 4)
+       (indent-tabs-mode . nil)))
+    
+     (add-hook 'protobuf-mode-hook 
+       (lambda () (c-add-style "my-style" my-protobuf-style t))))
+#+end_src
    
 ** LSP
 #+begin_src emacs-lisp :results none
@@ -2073,15 +2059,8 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package lsp-metals :after (lsp-mode scala-mode))
-#+end_src
-
-Use =lsp-ivy=.
-#+begin_src emacs-lisp :results none
-(use-package lsp-ivy
-  :disabled
-  :after lsp-mode
-  :commands lsp-ivy-workspace-symbol)
+(use-package lsp-metals
+  :after (lsp-mode scala-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2108,9 +2087,7 @@ Use =lsp-ivy=.
                       (`"ERROR" 1)
                       (`"WARN" 2)
                       (`"INFO" 3)
-                      (`"DEBUG" 5)
-                      ))
-         )
+                      (`"DEBUG" 5))))
     (when severity
       (setq lsp-treemacs-error-list-severity severity))
     (call-interactively 'lsp-treemacs-errors-list)))
@@ -2142,7 +2119,10 @@ scala-mode
   :mode "\\.s\\(cala\\|bt\\)$"
   :hook (scala-mode . lsp-deferred)
   :bind (:map scala-mode-map
-        ("C-c C-c" . +scala/complete-type-param)))
+        ("C-c C-c" . +scala/complete-type-param))
+  :config
+    (font-lock-add-keywords 'scala-mode
+      '(("\\(TODO\\):" 1 'todo-comment-face prepend))))
 #+end_src
 
 sbt-mode
@@ -2224,12 +2204,6 @@ sbt-mode
                     (upcase (substring arg-name 0 1))
                     (substring arg-name 1 nil)
                     ","))))
-#+end_src
-
-TODO colors.
-#+begin_src emacs-lisp :results none
-(font-lock-add-keywords 'scala-mode
- '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2318,12 +2292,10 @@ TODO colors.
 (use-package emacs
   :bind
     (:map emacs-lisp-mode-map
-      ("C-c i" . indent-region)))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(font-lock-add-keywords 'emacs-lisp-mode
- '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
+      ("C-c i" . indent-region))
+  :config
+    (font-lock-add-keywords 'emacs-lisp-mode
+      '(("\\(TODO\\):" 1 'todo-comment-face prepend))))
 #+end_src
 
 ** Scheme
@@ -2341,12 +2313,13 @@ TODO colors.
   :ensure t
   :defer t
   :config
-  (flycheck-haskell-setup))
+    (flycheck-haskell-setup))
 #+end_src
 
 
 #+begin_src emacs-lisp :results none
 (use-package flycheck-haskell
+  :defer t
   :commands flycheck-haskell-setup)
 #+end_src
 
@@ -2354,6 +2327,7 @@ TODO colors.
 #+begin_src emacs-lisp :results none
 (use-package reason-mode
   :ensure t
+  :defer t
   :mode "\\.rei?$"
   :config 
   (require 'lsp-mode)
@@ -2406,6 +2380,7 @@ TODO colors.
 ** Fish
 #+begin_src emacs-lisp :results none
 (use-package fish-mode
+  :defer t
   :mode "\\.fish$")
 #+end_src
 
@@ -2439,11 +2414,10 @@ TODO colors.
 (use-package evil-smartparens
   :ensure t
   :after smartparens
-  :hook (smartparens-mode . evil-smartparens-mode))
-
-(define-key global-map (kbd "<M-l>") nil)
-
-(require 'smartparens-config)
+  :hook (smartparens-mode . evil-smartparens-mode)
+  :config
+    (define-key global-map (kbd "<M-l>") nil)
+    (require 'smartparens-config))
 #+end_src
 
 * Configure =csv-mode=
