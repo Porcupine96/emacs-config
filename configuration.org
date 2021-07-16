@@ -1929,9 +1929,6 @@ Setup =python-mode=.
    (setq python-shell-interpreter "ipython"
          python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
 
-   (add-to-list 'python-shell-completion-native-disabled-interpreters "jupyter")
-
-
    (add-hook 'python-mode-hook 
      (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
 #+end_src
