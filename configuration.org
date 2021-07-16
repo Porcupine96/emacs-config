@@ -491,7 +491,7 @@ Scale text.
   (interactive)
   (consult-ripgrep "~/work/monorepo" ""))
 
-(defvar +work/consult-monorepo-last-glob "")
+(defvar +work/consult-monorepo-last-glob nil)
 
 (defun +work/consult-monorepo-glob ()
   (interactive)
@@ -1751,10 +1751,10 @@ vc-annotate options.
     ("C-c m n" . smerge-next)))
 #+end_src
 
-* Experimental
-** Configure =selectrum=
-#+begin_src emacs-lisp :results none
+* Configure =selectrum=
+#+begin_src emacs-lisp :results none :tangle no
 (use-package selectrum
+  :disabled
   :ensure t
   :defer t
   :config
@@ -1764,22 +1764,40 @@ vc-annotate options.
     (selectrum-mode +1))
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(defun my/selectrum-highlight-candidates-function (_input candidates)
-  (print candidates)
-  candidates)
-#+end_src
-
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package selectrum-prescient
   :ensure t
+  :disabled
   :after selectrum
   :config
    (selectrum-prescient-mode +1)
    (prescient-persist-mode +1))
 #+end_src
 
-** Configure =embark=
+* Configure =vertico=
+#+begin_src emacs-lisp :result none
+(use-package vertico
+  :ensure t
+  :defer t)
+#+end_src
+
+#+begin_src emacs-lisp :result none
+(use-package savehist
+  :after vertico
+  :init
+    (savehist-mode))
+#+end_src
+
+#+begin_src emacs-lisp :result none
+(use-package orderless
+  :after vertico
+  :init
+   (setq completion-styles '(orderless)
+         completion-category-defaults nil
+         completion-category-overrides '((file (styles partial-completion)))))
+#+end_src
+
+* Configure =embark=
 #+begin_src emacs-lisp :results none
 (use-package embark
   :ensure t
@@ -1808,7 +1826,7 @@ vc-annotate options.
                    (window-parameters (mode-line-format . none)))))
 #+end_src
 
-** Configure =marginalia=
+* Configure =marginalia=
 #+begin_src emacs-lisp :results none
 (use-package marginalia
   :ensure t
@@ -1816,7 +1834,7 @@ vc-annotate options.
     (marginalia-mode))
 #+end_src
 
-** Configure =consult=
+* Configure =consult=
 #+begin_src emacs-lisp :results none
 (use-package consult
   :ensure t
@@ -1829,7 +1847,8 @@ vc-annotate options.
       (setq isearch-string (car consult--line-history)))
 
     (setq consult-fontify-preserve t)
-    (setq consult-async-min-input 2)
+    (setq consult-async-min-input 1)
+    (setq consult-async-refresh-delay 0.2)
 
     (setq register-preview-delay 0
           register-preview-function #'consult-register-format)
@@ -1864,11 +1883,11 @@ vc-annotate options.
 	  "ARG* OPTS"))
 
   :config
-   (selectrum-mode 1)
-   (setq consult-narrow-key "<")
+    (vertico-mode 1)
+    (setq consult-narrow-key "<")
 
-   (autoload 'projectile-project-root "projectile")
-   (setq consult-project-root-function #'projectile-project-root))
+    (autoload 'projectile-project-root "projectile")
+    (setq consult-project-root-function #'projectile-project-root))
 #+end_src
 
 #+begin_src emacs-lisp :results none
