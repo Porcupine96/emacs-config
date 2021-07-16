@@ -867,7 +867,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
     (org-open-at-point)))
 #+end_src
 
-** Org Agenda 
+** Org Agenda
 #+begin_src emacs-lisp :results none
 (use-package evil-org
   :ensure t
@@ -896,58 +896,56 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(setq org-agenda-files '(
-   "~/Dropbox/org/todo/private.org"
-   "~/Dropbox/org/todo/studies.org"
-   "~/Dropbox/org/todo/work.org"))
-#+end_src
-
-#+begin_src emacs-lisp :results none
 (use-package org-super-agenda
   :defer t
   :hook
-  (org-agenda-mode . org-super-agenda-mode)
-  (org-agenda-mode . pagenda-mode)
+    (org-agenda-mode . org-super-agenda-mode)
+    (org-agenda-mode . pagenda-mode)
   :bind 
   (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
 	:map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
 	:map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
   :config
-  (add-hook 'org-agenda-mode-hook
-            (lambda () (push '(":@call:" . "☎") prettify-symbols-alist)))
+    (setq org-agenda-files '(
+       "~/Dropbox/org/todo/private.org"
+       "~/Dropbox/org/todo/studies.org"
+       "~/Dropbox/org/todo/work.org"))
 
-  (defun +agenda/show (span)
-    (-let* (((month day year) (calendar-current-date 3))
-            (three-days-from-now (format "%d-%02d-%02d" year month day))
-            (org-agenda-span span)
-            (org-super-agenda-groups
-             `((:name "Today" :time-grid t)
-               (:name "🖥 Work" :and (:category "work"
-					       :todo ("STRT" "TODO" "REVIEW")))
-               (:name "‍🎓 Studies" :and (:category "studies" 
-         					   :todo ("PROJECT" "STRT" "TODO" "REVIEW")
-         					   :scheduled (before ,three-days-from-now)))
-               (:name ":house_with_garden: Private" :and (:category "private"
-								    :todo ("STRT" "TODO" "REVIEW")))
-               (:name ":repeat: Habits" :habit t))))
-      (org-agenda nil "a")
-      (scroll-down)))
+    (add-hook 'org-agenda-mode-hook
+              (lambda () (push '(":@call:" . "☎") prettify-symbols-alist)))
 
-  (defun +agenda/weekly-agenda ()
-    (interactive)
-    (+agenda/show 8))
+    (defun +agenda/show (span)
+      (-let* (((month day year) (calendar-current-date 3))
+              (three-days-from-now (format "%d-%02d-%02d" year month day))
+              (org-agenda-span span)
+              (org-super-agenda-groups
+               `((:name "Today" :time-grid t)
+                 (:name "🖥 Work" :and (:category "work"
+          				       :todo ("STRT" "TODO" "REVIEW")))
+                 (:name "‍🎓 Studies" :and (:category "studies" 
+           					   :todo ("PROJECT" "STRT" "TODO" "REVIEW")
+           					   :scheduled (before ,three-days-from-now)))
+                 (:name ":house_with_garden: Private" :and (:category "private"
+          							    :todo ("STRT" "TODO" "REVIEW")))
+                 (:name ":repeat: Habits" :habit t))))
+        (org-agenda nil "a")
+        (scroll-down)))
 
-  (defun +agenda/daily-agenda ()
-    (interactive)
-    (+agenda/show 1))
+    (defun +agenda/weekly-agenda ()
+      (interactive)
+      (+agenda/show 8))
 
-  (defun +agenda/filter-by-tag ()
-    (interactive)
-    (org-tags-view t nil))
+    (defun +agenda/daily-agenda ()
+      (interactive)
+      (+agenda/show 1))
 
-  (defun +agenda/filter-by-tag-hot ()
-    (interactive)
-    (org-tags-view t "@hot")))
+    (defun +agenda/filter-by-tag ()
+      (interactive)
+      (org-tags-view t nil))
+
+    (defun +agenda/filter-by-tag-hot ()
+      (interactive)
+      (org-tags-view t "@hot")))
 #+end_src
 
 ** Academic
@@ -955,7 +953,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 (use-package org-ref 
   :ensure t
   :defer t
-  ;; :straight (:no-native-compile t)
   :after org
   :config 
   (setq org-ref-default-bibliography '("~/Dropbox/zotero/zotero.bib"))
@@ -979,13 +976,14 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 	  (org-open-file pdf-file)
 	(message "No PDF found for %s" key))))
 
-  (setq org-ref-open-pdf-function '+org-ref/org-ref-open-pdf-at-point))
+(setq org-ref-open-pdf-function '+org-ref/org-ref-open-pdf-at-point))
 #+end_src
  
 #+begin_src emacs-lisp :results none
 (use-package academic-phrases
   :defer t)
 #+end_src
+
 ** Org journal
 #+begin_src emacs-lisp :results none
 (use-package org-journal
@@ -1027,9 +1025,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+begin_src emacs-lisp :results none
 (use-package jupyter
  :defer t
- :straight (:no-native-compile t)
- :config
-   (load-file "~/.emacs.default/straight/repos/emacs-jupyter/jupyter-channel.el"))
+ :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
 #+end_src
 
 ** Org Roam
@@ -1039,7 +1035,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :defer t
   :commands org-roam-find-file
   :hook (org-mode . org-roam-mode)
-  :straight (:no-native-compile t)
   :bind (:map global-map
               (("C-c n f" . org-roam-find-file))
          :map org-roam-mode-map
@@ -1109,19 +1104,18 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+end_src
 
 #+begin_src emacs-lisp :results none
+;; (defun +org-roam/linked-files ()
+;;   (interactive)
 
-(defun +org-roam/linked-files ()
-  (interactive)
+;;   (require 'dash)
+;;   (require 'org-roam)
 
-  (require 'dash)
-  (require 'org-roam)
-
-  (print
-   (org-roam-db-query
-    [:select [title]
-     :from titles
-     :where (= file "/home/porcupine/Dropbox/org-roam/2021-01-20--23-48-21Z--carol_gilligan.org")
-     ])))
+;;   (print
+;;    (org-roam-db-query
+;;     [:select [title]
+;;      :from titles
+;;      :where (= file "/home/porcupine/Dropbox/org-roam/2021-01-20--23-48-21Z--carol_gilligan.org")
+;;      ])))
 
 (defun +org-roam/file-to-title (file)
   (-first-item (-flatten (org-roam-db-query
@@ -1821,7 +1815,7 @@ vc-annotate options.
 (use-package consult
   :ensure t
   :defer t
-  :commands (consult-find consult-line +consult/line)
+  :commands (execute-extended-command consult-find consult-line +consult/line)
   :init
     (defun +consult/line ()
       (interactive)

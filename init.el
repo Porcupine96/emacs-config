@@ -29,6 +29,8 @@
  '(custom-safe-themes
    '("436a604a458968224d520c4f09dd63d5c7a1c9e8500b206405c59fd72e199a8b" "38479f06147afd39cb47fc7b566be9489ce27c6b3da63236b37c9c49021b3c20" default))
  '(helm-minibuffer-history-key "M-p")
+ '(package-selected-packages
+   '(jupyter zoom-window yasnippet yaml-mode wucuo which-key vterm vertico use-package typescript-mode treemacs-projectile treemacs-icons-dired treemacs-evil synosaurus string-inflection selectrum-prescient scratch sbt-mode rust-mode request reason-mode rainbow-mode pyvenv python-mode pyenv-mode protobuf-mode prettier-js perspective origami org-superstar org-super-agenda org-roam-server org-ref org-plus-contrib org-journal org-fancy-priorities orderless olivetti ob-http ob-async ob-ammonite modus-themes marginalia lsp-ui lsp-pyright lsp-metals langtool keychain-environment hide-mode-line helpful graphql-mode git-timemachine general geiser forge flycheck-haskell fish-mode evil-surround evil-snipe evil-smartparens evil-org evil-easymotion evil-commentary evil-collection eval-expr eros emojify embark-consult elfeed doom-modeline dockerfile-mode dired-subtree delight csv-mode consult-lsp consult-flycheck company-box clojure-mode calfw-org calfw blacken auto-compile academic-phrases))
  '(warning-suppress-log-types '((comp) (:warning))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
