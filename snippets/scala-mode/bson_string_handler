@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bson string handler
+# key: bsh
+# --
+implicit val $1Handler: BSONHandler[$1] = BSONStringHandler($1, _.value)

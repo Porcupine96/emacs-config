@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: service
+# key: ser
+# --
+service $1Service {
+
+}
