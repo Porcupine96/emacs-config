@@ -590,13 +590,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (define-key evil-motion-state-map (kbd "g s s") #'evil-avy-goto-char-2)
 #+end_src
 
-Use =evil-snipe= - do I use it? :thinking:
-#+begin_src emacs-lisp :results none
-(use-package evil-snipe 
-   :disabled
-   :after evil)
-#+end_src
-  
 * Configure =perspective=
 Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces.
 #+begin_src emacs-lisp :results none
@@ -613,7 +606,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+begin_src emacs-lisp :results none
 (use-package recentf
   :ensure nil
-  :defer t
+  :defer 10
   :config
     (setq recentf-max-saved-items 300)
     (add-to-list 'recentf-keep 'file-remote-p)
@@ -621,7 +614,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+end_src
 
 * Configure =ivy-bibtex=
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package ivy-bibtex
   :disabled
   :ensure t
@@ -636,7 +629,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
     ;;   '((default . +bibtex/format-citations-apa7))))
 #+end_src
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (defun +bibtex/open-on-scihub ()
   (interactive)
   (let ((url (bibtex-url (point) t))
@@ -712,18 +705,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+end_src
 * Configure =org=
 ** Core
-Automatically save archive buffer after archiving a task.
-#+begin_src emacs-lisp :results none
-(defun org-archive-save-buffer ()
-  (let ((afile (car (org-all-archive-files))))
-    (if (file-exists-p afile)
-      (let ((buffer (find-file-noselect afile)))
-          (with-current-buffer buffer
-            (save-buffer)))
-      (message "Ooops ... (%s) does not exist." afile))))
-
-#+end_src
-
 #+begin_src emacs-lisp :results none
 (use-package org
   :ensure org-plus-contrib
@@ -837,6 +818,14 @@ Automatically save archive buffer after archiving a task.
 
                      (prettify-symbols-mode 1))))
 
+  (defun org-archive-save-buffer ()
+    (let ((afile (car (org-all-archive-files))))
+      (if (file-exists-p afile)
+        (let ((buffer (find-file-noselect afile)))
+            (with-current-buffer buffer
+              (save-buffer)))
+        (message "Ooops ... (%s) does not exist." afile))))
+
   (add-hook 'org-archive-hook 'org-archive-save-buffer)
 
   (add-hook 'after-init-hook
@@ -887,8 +876,8 @@ Automatically save archive buffer after archiving a task.
     (add-hook 'org-mode-hook 'evil-org-mode)
     (add-hook 'evil-org-mode-hook 'general-define-org-keys)
     
-  (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -914,65 +903,53 @@ Automatically save archive buffer after archiving a task.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-  (require 'calendar)
+(use-package org-super-agenda
+  :defer t
+  :hook
+  (org-agenda-mode . org-super-agenda-mode)
+  (org-agenda-mode . pagenda-mode)
+  :bind 
+  (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
+	:map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
+	:map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
+  :config
+  (add-hook 'org-agenda-mode-hook
+            (lambda () (push '(":@call:" . "☎") prettify-symbols-alist)))
 
-  (defun +org-agenda/test (item)
-    (let* ((marker (get-text-property 0 'org-marker item))
-           (scheduled (org-entry-get 0 "SCHDEDULED" marker)))
-      marker))
+  (defun +agenda/show (span)
+    (-let* (((month day year) (calendar-current-date 3))
+            (three-days-from-now (format "%d-%02d-%02d" year month day))
+            (org-agenda-span span)
+            (org-super-agenda-groups
+             `((:name "Today" :time-grid t)
+               (:name "🖥 Work" :and (:category "work"
+					       :todo ("STRT" "TODO" "REVIEW")))
+               (:name "‍🎓 Studies" :and (:category "studies" 
+         					   :todo ("PROJECT" "STRT" "TODO" "REVIEW")
+         					   :scheduled (before ,three-days-from-now)))
+               (:name ":house_with_garden: Private" :and (:category "private"
+								    :todo ("STRT" "TODO" "REVIEW")))
+               (:name ":repeat: Habits" :habit t))))
+      (org-agenda nil "a")
+      (scroll-down)))
 
-  (defun +org-agenda/created-today-group (item)
-    (let* ((marker (get-text-property 0 'org-marker item))
-           (property (org-entry-get marker "CreatedAt")))
-      property))
+  (defun +agenda/weekly-agenda ()
+    (interactive)
+    (+agenda/show 8))
 
-  (use-package org-super-agenda
-    :hook
-      (org-agenda-mode . org-super-agenda-mode)
-      (org-agenda-mode . pagenda-mode)
-    :bind 
-      (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
-       :map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
-       :map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
-    :config
-      (add-hook 'org-agenda-mode-hook
-                  (lambda () (push '(":@call:" . "☎") prettify-symbols-alist))))
+  (defun +agenda/daily-agenda ()
+    (interactive)
+    (+agenda/show 1))
+
+  (defun +agenda/filter-by-tag ()
+    (interactive)
+    (org-tags-view t nil))
+
+  (defun +agenda/filter-by-tag-hot ()
+    (interactive)
+    (org-tags-view t "@hot")))
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(defun +agenda/show (span)
-  (-let* (((month day year) (calendar-current-date 3))
-          (three-days-from-now (format "%d-%02d-%02d" year month day))
-          (org-agenda-span span)
-          (org-super-agenda-groups
-           `((:name "Today" :time-grid t)
-             (:name "🖥 Work" :and (:category "work"
-                                 :todo ("STRT" "TODO" "REVIEW")))
-             (:name "‍🎓 Studies" :and (:category "studies" 
-         				  :todo ("PROJECT" "STRT" "TODO" "REVIEW")
-         				  :scheduled (before ,three-days-from-now)))
-             (:name ":house_with_garden: Private" :and (:category "private"
-                                 :todo ("STRT" "TODO" "REVIEW")))
-             (:name ":repeat: Habits" :habit t))))
-     (org-agenda nil "a")
-     (scroll-down)))
-
-(defun +agenda/weekly-agenda ()
-  (interactive)
-  (+agenda/show 8))
-
-(defun +agenda/daily-agenda ()
-  (interactive)
-  (+agenda/show 1))
-
-(defun +agenda/filter-by-tag ()
-  (interactive)
-  (org-tags-view t nil))
-
-(defun +agenda/filter-by-tag-hot ()
-  (interactive)
-  (org-tags-view t "@hot"))
-#+end_src
 ** Academic
 #+begin_src emacs-lisp :results none
 (use-package org-ref 
@@ -1006,7 +983,8 @@ Automatically save archive buffer after archiving a task.
 #+end_src
  
 #+begin_src emacs-lisp :results none
-(use-package academic-phrases :defer t)
+(use-package academic-phrases
+  :defer t)
 #+end_src
 ** Org journal
 #+begin_src emacs-lisp :results none
@@ -1058,6 +1036,7 @@ Automatically save archive buffer after archiving a task.
 #+begin_src emacs-lisp :results none
 (use-package org-roam
   :ensure t
+  :defer t
   :commands org-roam-find-file
   :hook (org-mode . org-roam-mode)
   :straight (:no-native-compile t)
@@ -1207,6 +1186,7 @@ Automatically save archive buffer after archiving a task.
 #+begin_src emacs-lisp :results none
 (use-package org-fancy-priorities
   :ensure t
+  :defer t
   :hook
     (org-mode . org-fancy-priorities-mode)
   :config
@@ -2281,10 +2261,10 @@ TODO colors.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(require 's)
-
 (defun +scala/goto (path)
   (interactive)
+
+  (require 's)
   (let* ((project-root (file-name-as-directory (projectile-project-root)))
          (root (s-chop-suffix "project/" project-root))
          (path (concat (file-name-as-directory root) path)))
