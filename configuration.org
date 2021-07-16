@@ -955,7 +955,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 (use-package org-ref 
   :ensure t
   :defer t
-  :straight (:no-native-compile t)
+  ;; :straight (:no-native-compile t)
   :after org
   :config 
   (setq org-ref-default-bibliography '("~/Dropbox/zotero/zotero.bib"))
@@ -2368,7 +2368,8 @@ sbt-mode
 ** GraphQL
 #+begin_src emacs-lisp :results none
 (use-package graphql-mode
-  :ensure t)
+  :ensure t
+  :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2429,45 +2430,43 @@ sbt-mode
 
 * Configure =eshell=
 #+begin_src emacs-lisp :results none
-(defun +eshell/clear ()
-   (interactive)
-   (eshell/clear 1)
-   (eshell-send-input)
-   (evil-insert nil))
-
-(defun +eshell/open-in-default ()
-  (interactive)
-  (let ((current-dir default-directory))
-    (eshell)
-    (eshell/cd current-dir)
-    (+eshell/clear)))
-
-(defun +eshell/open-in-project-root ()
-  (interactive)
-  (eshell)
-  (eshell/cd (projectile-project-root))
-  (+eshell/clear))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +eshell/configure-eshell ()
-  ;; (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-l") '+eshell/clear)
-  (evil-normalize-keymaps)
-
-  (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-
-  (setq eshell-history-size              10000
-        eshell-buffer-maximum-lines      10000
-        eshell-hist-ignoredups           t
-        eshell-scroll-to-bottom-on-input t))
-
 (use-package eshell
   :defer t
   :hook (eshell-first-time-mode . +eshell/configure-eshell)
   :config
-    (defalias 'e "find-file-other-window $1")
-    (defalias 'gs "git status"))
+  (defalias 'e "find-file-other-window $1")
+  (defalias 'gs "git status")
+
+  (defun +eshell/clear ()
+    (interactive)
+    (eshell/clear 1)
+    (eshell-send-input)
+    (evil-insert nil))
+
+  (defun +eshell/open-in-default ()
+    (interactive)
+    (let ((current-dir default-directory))
+      (eshell)
+      (eshell/cd current-dir)
+      (+eshell/clear)))
+
+  (defun +eshell/open-in-project-root ()
+    (interactive)
+    (eshell)
+    (eshell/cd (projectile-project-root))
+    (+eshell/clear))
+
+  (defun +eshell/configure-eshell ()
+    ;; (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
+    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-l") '+eshell/clear)
+    (evil-normalize-keymaps)
+
+    (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+    (setq eshell-history-size              10000
+          eshell-buffer-maximum-lines      10000
+          eshell-hist-ignoredups           t
+          eshell-scroll-to-bottom-on-input t)))
 #+end_src
 
 * Configure =vterm=
@@ -2547,23 +2546,23 @@ sbt-mode
 
 * Configure =pdf-tools=
 #+begin_src emacs-lisp :results none 
-(defun +pdf/open-externally ()
-  (interactive)
-  (call-process "xdg-open" nil 0 nil (buffer-file-name)))
-
-(defun +pdf/setup ()
-  (evil-collection-define-key 'normal 'pdf-view-mode-map
-     "ge" #'+pdf/open-externally)
-
-  (hide-mode-line-mode))
-
 (use-package pdf-tools
   :ensure t
   :defer t
   :mode "\\.pdf$"
   :config 
-    (pdf-tools-install)
-    (add-hook 'pdf-view-mode-hook #'+pdf/setup))
+  (pdf-tools-install)
+  (add-hook 'pdf-view-mode-hook #'+pdf/setup)
+
+  (defun +pdf/open-externally ()
+    (interactive)
+    (call-process "xdg-open" nil 0 nil (buffer-file-name)))
+
+  (defun +pdf/setup ()
+    (evil-collection-define-key 'normal 'pdf-view-mode-map
+      "ge" #'+pdf/open-externally)
+
+    (hide-mode-line-mode)))
 #+end_src
 
 * Configure =olivetti=
@@ -2901,52 +2900,6 @@ sbt-mode
    "<return>" '+org/ret-dwim))
 #+end_src
 
-* org-ocr
-#+begin_src emacs-lisp :results none
-(defun +ocr/take-screenshot (path)
-  (start-process "screenshot" "*screenshot*" "screenshot-to-file" path))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defvar +ocr/screenshot-process-hook nil)
-
-(defun +ocr/screenshot()
-  (interactive)
- 
-  (let* ((path (concat (make-temp-name "/tmp/ocr") ".png"))
-         (buffer (current-buffer)))
-    (when (get-buffer "*screenshot*")
-      (with-current-buffer (get-buffer "*screenshot*")
-	(erase-buffer)))
-    (setq screenshot-process
-	  (or (+ocr/take-screenshot path)
-	      (error "Unable to start screenshot process")))
-    (when screenshot-process 
-      (message "Click on a window, or select a rectangle...")
-      (set-process-sentinel
-       screenshot-process
-       `(lambda (process event)
-          (+ocr/run-ocr ,path ,buffer)
-          (run-hooks '+ocr/screenshot-process-hook))))))
-
-(defun +ocr/post-process (text)
-  (replace-regexp-in-string "^\*" "-" 
-    (s-replace "—" "-"
-      (s-replace "" "" text))))
-
-(defun +ocr/run-ocr (image-path buffer)
-  (with-current-buffer buffer 
-    (let* ((result-dir (file-name-directory image-path))
-           (result-name (file-name-base image-path))
-           (result-path (concat result-dir result-name)))
-
-      (call-process "tesseract" nil "*tesseract*" nil "-l" "pol+eng" image-path result-path)
-      (let ((text (with-temp-buffer 
-                    (insert-file-contents (concat result-path ".txt"))
-		    (buffer-string))))
-	(insert (+ocr/post-process text))))))
-    #+end_src
-
 * Work
 #+begin_src emacs-lisp :results none
 (defconst +work/monorepo-path "~/work/monorepo")
@@ -3030,7 +2983,7 @@ sbt-mode
 (use-package pscreenshot
   :load-path "~/.emacs.default/packages/pscreenshot/"
   :defer t
-  :commands pscreenshot/org-screenshot-take)
+  :commands (pscreenshot/org-screenshot-take +ocr/screenshot))
 #+end_src
 
 ** Upgrade versions

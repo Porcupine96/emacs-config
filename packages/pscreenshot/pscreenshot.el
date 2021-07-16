@@ -5,6 +5,47 @@
 
 (defconst pscreenshot/image-directory "./images/")
 
+(defun +ocr/take-screenshot (path)
+  (start-process "screenshot" "*screenshot*" "screenshot-to-file" path))
+
+
+(defvar +ocr/screenshot-process-hook nil)
+
+(defun +ocr/screenshot()
+  (interactive)
+ 
+  (let* ((path (concat (make-temp-name "/tmp/ocr") ".png"))
+         (buffer (current-buffer)))
+    (when (get-buffer "*screenshot*")
+      (with-current-buffer (get-buffer "*screenshot*")
+	(erase-buffer)))
+    (setq screenshot-process
+	  (or (+ocr/take-screenshot path)
+	      (error "Unable to start screenshot process")))
+    (when screenshot-process 
+      (message "Click on a window, or select a rectangle...")
+      (set-process-sentinel
+       screenshot-process
+       `(lambda (process event)
+          (+ocr/run-ocr ,path ,buffer)
+          (run-hooks '+ocr/screenshot-process-hook))))))
+
+(defun +ocr/post-process (text)
+  (replace-regexp-in-string "^\*" "-" 
+    (s-replace "—" "-"
+      (s-replace "" "" text))))
+
+(defun +ocr/run-ocr (image-path buffer)
+  (with-current-buffer buffer 
+    (let* ((result-dir (file-name-directory image-path))
+           (result-name (file-name-base image-path))
+           (result-path (concat result-dir result-name)))
+
+      (call-process "tesseract" nil "*tesseract*" nil "-l" "pol+eng" image-path result-path)
+      (let ((text (with-temp-buffer 
+                    (insert-file-contents (concat result-path ".txt"))
+		    (buffer-string))))
+	(insert (+ocr/post-process text))))))
 
 (defun pscreenshot/generate-file-name (dir)
   (concat (number-to-string (random 10000000)) ".png"))
