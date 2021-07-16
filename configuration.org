@@ -2643,7 +2643,7 @@ TODO colors.
 #+end_src
 
 * KILL Configure =mu4e=
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package mu4e
   :ensure nil
   :disabled
@@ -2678,33 +2678,32 @@ TODO colors.
 #+end_src
 
 * Configure =general=
-** Leader Key
 #+begin_src emacs-lisp :results none
 (use-package general
   :ensure t
   :init
-   (setq general-override-states '(insert
-                                   emacs
-                                   hybrid
-                                   normal
-                                   visual
-                                   motion
-                                   operator
-                                   replace)))
-
-(general-create-definer leader-def 
-  :prefix "SPC")
-
-(leader-def
-  :states '(normal visual motion)
-  :keymaps 'override
+  (setq general-override-states '(insert
+                                  emacs
+                                  hybrid
+                                  normal
+                                  visual
+                                  motion
+                                  operator
+                                  replace))
+  :config
+  (general-create-definer leader-def 
+    :prefix "SPC")
+  
+  (leader-def
+    :states '(normal visual motion)
+    :keymaps 'override
     "a a" #'org-agenda
     "a c" #'open-calendar
     "a w" #'+agenda/weekly-agenda
     "a d" #'+agenda/daily-agenda
     "a t" #'+agenda/filter-by-tag
     "a h" #'+agenda/filter-by-tag-hot
-
+    
     "b b" #'bufler
     "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
     "b n" #'next-buffer
@@ -2712,18 +2711,18 @@ TODO colors.
     "b N" #'+core/scratch-buffer
     "b p" #'previous-buffer
     "b k" #'kill-current-buffer
-
+    
     "c e" #'consult-flycheck
     "c E" #'consult-compile-error
     "c x" #'flycheck-list-errors
     "c c" #'compile
     "c C" #'recompile
-
+    
     "d d" #'dockel
-
+    
     "e e" #'elfeed
     "e d" #'ediff
-
+    
     "f f" #'find-file
     "f r" #'consult-recent-file
     "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
@@ -2740,14 +2739,14 @@ TODO colors.
     "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
     "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
     "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
-
+    
     "g b" #'magit-branch
     "g g" #'magit-status
     "g i" #'magit-init
     "g p" #'magit-push
     "g r" #'hydra-forge/body
     "g t" #'git-timemachine
-
+    
     "h b" #'counsel-descbinds
     "h k" #'helpful-key
     "h f" #'helpful-function
@@ -2758,9 +2757,9 @@ TODO colors.
     "h M" #'helpful-macro
     "h e" #'view-echo-area-messages
     "h l" #'find-library
-
+    
     "k" #'helm-show-kill-ring
-
+    
     "l b" #'lsp-metals-build-import
     "l d" #'lsp-find-definition
     "l s" #'lsp-describe-session
@@ -2775,7 +2774,7 @@ TODO colors.
     "l x" #'+lsp/remove-other-sessions
     "l i" #'lsp-goto-implementation
     "l I" #'+scala/copy-import
-
+    
     "o c" #'cfw:open-org-calendar
     "o p" #'treemacs
     "o e" #'eshell
@@ -2786,7 +2785,7 @@ TODO colors.
     "o V" #'+vterm/new-session
     "o m" #'mu4e
     "o w" #'+eww/browse-url
-
+    
     "p a" #'projectile-add-known-project
     "p c" #'projectile-compile-project
     "p C" #'projectile-repeat-last-command
@@ -2797,50 +2796,47 @@ TODO colors.
     "p T" #'+projectile/search-todos
     "p s" #'projectile-save-project-buffers
     "p w" #'+projectile/search-word-under-cursor
-
+    
     "r h" #'evil-window-decrease-width
     "r l" #'evil-window-increase-width
-
+    
     "s m" #'+work/consult-monorepo
     "s M" #'+work/consult-monorepo-glob
     "s f" #'+work/consult-find-file-monorepo
-
+    
     "t r" #'+core/reload-theme
     "t e" #'treemacs-display-current-project-exclusively
-
+    
     "u" #'universal-argument
-
+    
     "w u" #'winner-undo
     "w r" #'winner-redo
     "w f" #'+core/to-floating-frame
     "w l" #'+core/to-regular-right-window
     "w j" #'+core/to-regular-bottom-window
-
+    
     "y a" #'yas-new-snippet
     "y v" #'yas-visit-snippet-file
     "y c" #'company-yasnippet
     "y p" #'+core/copy-file-path
-
+    
     "RET" #'consult-bookmark
-
+    
     "TAB c" #'persp-switch
     "TAB d" #'persp-kill
     "TAB n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace")))
     "TAB k" #'persp-kill
     "TAB r" #'persp-rename
-
+    
     "SPC" #'consult-find
     "," #'consult-projectile)
-#+end_src
 
-** Local leader
-#+begin_src emacs-lisp :results none
-(general-create-definer local-leader-def
-  :prefix "SPC m")
+  (general-create-definer local-leader-def
+    :prefix "SPC m")
 
-(local-leader-def
-  :states 'normal
-  :keymaps 'org-mode-map
+  (local-leader-def
+    :states 'normal
+    :keymaps 'org-mode-map
     "o" #'+ocr/screenshot
     "r" #'rsvp/read-from-ocr
     "R" #'rsvp/read-last-content
@@ -2850,19 +2846,19 @@ TODO colors.
     "i" #'+org/save-image-insert-link
     "t" #'org-todo)
 
-(local-leader-def
-  :states 'normal
-  :keymaps 'yaml-mode-map
+  (local-leader-def
+    :states 'normal
+    :keymaps 'yaml-mode-map
     "u" #'+work/update-versions)
-    
-(local-leader-def
-  :states 'normal
-  :keymaps 'text-mode-map
+  
+  (local-leader-def
+    :states 'normal
+    :keymaps 'text-mode-map
     "o" #'+ocr/screenshot)
 
-(local-leader-def
-  :states 'normal
-  :keymaps 'scala-mode-map
+  (local-leader-def
+    :states 'normal
+    :keymaps 'scala-mode-map
     "i" #'+scala/copy-import
     "s" #'hydra-scala-surround/body
     "l" #'+scala/insert-common-import
@@ -2878,67 +2874,61 @@ TODO colors.
     "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
     "g p" (lambda () (interactive) (+work/goto-proto)))
 
-(general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
+  (general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
 
-(local-leader-def
-  :states 'normal
-  :keymaps 'dired-mode-map
+  (local-leader-def
+    :states 'normal
+    :keymaps 'dired-mode-map
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
     "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
     "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
     "g p" (lambda () (interactive) (+work/goto-proto)))
 
-(local-leader-def
-  :states 'normal
-  :keymaps 'protobuf-mode-map
+  (local-leader-def
+    :states 'normal
+    :keymaps 'protobuf-mode-map
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
     "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
     "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala")))
 
-(local-leader-def
-  :states 'normal
-  :keymaps 'rust-mode-map
+  (local-leader-def
+    :states 'normal
+    :keymaps 'rust-mode-map
     "c c" #'rust-compile
     "c r" #'rust-run)
 
-(local-leader-def
-  :states 'normal
-  :keymaps 'python-mode-map
+  (local-leader-def
+    :states 'normal
+    :keymaps 'python-mode-map
     "s" #'run-python
     "s" #'hydra-python-surround/body)
-#+end_src
 
-** SPC j (org-mode)
-#+begin_src emacs-lisp :results none
-(general-define-key 
-  :prefix "SPC j"
-  :states 'normal
-  :keymaps 'org-mode-map
-  "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
-  "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
-  "x" #'jupyter-org-kill-block-and-results
-  "c" #'org-babel-remove-result
-  "j" #'org-babel-next-src-block
-  "k" #'org-babel-previous-src-block
-  "r" #'jupyter-run-repl
-  "E" #'jupyter-org-execute-to-point)
-#+end_src
+  (general-define-key 
+   :prefix "SPC j"
+   :states 'normal
+   :keymaps 'org-mode-map
+   "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
+   "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
+   "x" #'jupyter-org-kill-block-and-results
+   "c" #'org-babel-remove-result
+   "j" #'org-babel-next-src-block
+   "k" #'org-babel-previous-src-block
+   "r" #'jupyter-run-repl
+   "E" #'jupyter-org-execute-to-point)
 
-** org-mode
-#+begin_src emacs-lisp :results none
-(general-define-key 
-    :states '('normal 'insert)
-    :keymaps '(evil-org-mode-map org-mode-map)
-    "C-<return>" '+org/c-ret-dwim
-    "S-<return>" '+org/s-ret-dwim
-    "C-S-<return>" '+org/c-s-ret-dwim
-    "C-M-<return>" '+org/c-m-ret-dwim)
+  (general-define-key 
+   :states '('normal 'insert)
+   :keymaps '(evil-org-mode-map org-mode-map)
+   "C-<return>" '+org/c-ret-dwim
+   "S-<return>" '+org/s-ret-dwim
+   "C-S-<return>" '+org/c-s-ret-dwim
+   "C-M-<return>" '+org/c-m-ret-dwim)
 
-(general-define-key 
-    :states '('normal)
-    :keymaps '(evil-org-mode-map org-mode-map)
-    "C-<return>" '+org/c-ret-dwim
-    "<return>" '+org/ret-dwim)
+  (general-define-key 
+   :states '('normal)
+   :keymaps '(evil-org-mode-map org-mode-map)
+   "C-<return>" '+org/c-ret-dwim
+   "<return>" '+org/ret-dwim))
 #+end_src
 
 * org-ocr
@@ -3057,10 +3047,6 @@ TODO colors.
 #+end_src
 
 * My packages
-#+begin_src emacs-lisp :results none
-;; (load-file "~/.emacs.default/packages/pagenda.el")
-#+end_src
-
 ** RSVP
 #+begin_src emacs-lisp :results none
 (use-package prsvp
