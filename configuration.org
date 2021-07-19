@@ -1006,6 +1006,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+begin_src emacs-lisp :results none
 (use-package ob-async
   :defer t
+  :after org
   :ensure t)
 #+end_src
 
@@ -1545,6 +1546,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package company
   :defer t
+  :hook (prog-mode . global-company-mode)
   :custom
     (company-minimum-prefix-length 1)
     (company-idle-delay 0.15)
@@ -1557,7 +1559,6 @@ vc-annotate options.
           ("<tab>" . company-indent-or-complete-common)
           ("C-c C-y" . company-yasnippet))
   :config
-    (global-company-mode 1)
     (with-eval-after-load 'company
         (define-key company-mode-map (kbd "C-SPC") #'company-complete)
         (define-key company-active-map (kbd "<tab>") #'company-complete-common)
@@ -1815,13 +1816,8 @@ vc-annotate options.
 (use-package consult
   :ensure t
   :defer t
-  :commands (execute-extended-command consult-find consult-line +consult/line)
+  :commands (execute-extended-command consult-find consult-line)
   :init
-    (defun +consult/line ()
-      (interactive)
-      (call-interactively #'consult-line)
-      (setq isearch-string (car consult--line-history)))
-
     (setq consult-fontify-preserve t)
     (setq consult-async-min-input 1)
     (setq consult-async-refresh-delay 0.1)
@@ -1830,13 +1826,15 @@ vc-annotate options.
           register-preview-function #'consult-register-format)
 
     (advice-add #'register-preview :override #'consult-register-window)
+    (advice-add #'consult-line :after (lambda (&rest r)
+       (push (car consult--line-history) regexp-search-ring)))
 
     (setq xref-show-xrefs-function #'consult-xref
           xref-show-definitions-function #'consult-xref)
 
     (global-set-key (kbd "C-c k") #'consult-ripgrep)
     (global-set-key (kbd "C-x b") #'consult-buffer)
-    (global-set-key (kbd "C-s") #'+consult/line) 
+    (global-set-key (kbd "C-s") #'consult-line) 
 
     (setq consult-preview-key (list (kbd "M-n") (kbd "M-p")))
 
@@ -1918,7 +1916,8 @@ Setup =python-mode=.
    :defer t
    :config
 
-   (setq python-indent-guess-indent-offset t)  
+   (setq python-indent-guess-indent-offset nil)  
+   (setq python-indent-offset 4)
    (setq python-indent-guess-indent-offset-verbose nil)
 
    (setq python-shell-interpreter "ipython"
