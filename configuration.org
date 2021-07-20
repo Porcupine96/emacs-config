@@ -1035,7 +1035,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :ensure t
   :defer t
   :commands org-roam-find-file
-  :hook (org-mode . org-roam-mode)
+  :hook (org-mode . org-roam-setup)
   :bind (:map global-map
               (("C-c n f" . org-roam-find-file))
          :map org-roam-mode-map
@@ -1064,16 +1064,15 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
           			      :unnarrowed t)))
 
 
-    (add-hook 'org-capture-after-finalize-hook 'org-roam-db-build-cache)
+    (add-hook 'org-capture-after-finalize-hook 'org-roam-db-sync))
 
-    (require 'org-roam-protocol)
-    (org-roam-mode))
+    ;; (require 'org-roam-protocol)
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package org-roam-server
   :ensure t
-  :after org-roam
+  :defer t
   :commands org-roam-server-mode
   :config
   (setq org-roam-server-host "127.0.0.1"
