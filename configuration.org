@@ -1451,7 +1451,9 @@ Save image and insert it's link at point.
 (use-package magit
   :defer t
   :config
-    (setq magit-list-refs-sortby "committerdate"))
+    (setq magit-list-refs-sortby "committerdate")
+    
+    (setq auto-revert-check-vc-info nil))
 
 (use-package forge 
    :ensure t  
@@ -1914,6 +1916,8 @@ Setup =python-mode=.
 (use-package python-mode
    :ensure t
    :defer t
+   :bind (:map python-mode-map
+	       ("C-<backspace>" . backward-kill-word))
    :init
      (font-lock-add-keywords 'python-mode
        '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
