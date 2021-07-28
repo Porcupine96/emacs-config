@@ -369,7 +369,7 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(global-set-key (kbd "C-M-k") #'helm-show-kill-ring)
+(global-set-key (kbd "C-M-k") #'consult-yank-from-kill-ring)
 #+end_src
 
 Evaluation commands.
@@ -1892,6 +1892,17 @@ vc-annotate options.
   :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
 #+end_src
 
+* Configure =popper=
+#+begin_src emacs-lisp :results none
+(use-package popper
+  :ensure t 
+  :commands (popper-toggle-latest popper-toggle-type)
+  :defer t
+  :init
+    (setq popper-display-function (lambda (b x) (display-buffer-in-direction b '(right))))
+    (popper-mode +1))
+#+end_src
+
 * Languages
 ** Common
 #+begin_src emacs-lisp :results none
@@ -2671,7 +2682,7 @@ sbt-mode
     "a t" #'+agenda/filter-by-tag
     "a h" #'+agenda/filter-by-tag-hot
     
-    "b b" #'bufler
+    "b b" #'consult-bookmark
     "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
     "b n" #'next-buffer
     "b s" #'+core/summon-scratch
@@ -2725,7 +2736,7 @@ sbt-mode
     "h e" #'view-echo-area-messages
     "h l" #'find-library
     
-    "k" #'helm-show-kill-ring
+    "k" #'consult-yank-from-kill-ring
     
     "l b" #'lsp-metals-build-import
     "l d" #'lsp-find-definition
@@ -2787,7 +2798,8 @@ sbt-mode
     "y c" #'company-yasnippet
     "y p" #'+core/copy-file-path
     
-    "RET" #'consult-bookmark
+    "RET" #'popper-toggle-latest
+    "`" #'popper-toggle-type
     
     "TAB c" #'persp-switch
     "TAB d" #'persp-kill

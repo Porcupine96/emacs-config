@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: jsonr
+# key: jsonr
+# --
+import json
+
+data = []
+with open($1, "r") as f:
+    data = json.load(f)
