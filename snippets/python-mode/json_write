@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: json write
+# key: jsonw
+# --
+with open("$1", "w") as f:
+     json.dump($2, f, indent=2)

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: optional long
+# key: ol
+# --
+optional int64 $1 = $2;

@@ -445,6 +445,12 @@ Scale text.
  #+end_src
  
 #+begin_src emacs-lisp :results none
+(defun +core/convert-to-list ()
+  (interactive)
+  (evil-ex (concat "'<,'>" "s/" ".*" "/" "\"\\0\"," "/g")))
+#+end_src
+
+#+begin_src emacs-lisp :results none
   (defun +core/refresh-config ()
     (interactive)
     (org-babel-tangle-file "~/.emacs.default/configuration.org" "~/.emacs.default/configuration.el"))
@@ -752,7 +758,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 
   ;; LaTeX options
   (setq org-format-latex-options 
-    (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.4))
+    (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.151))
 
   ;; open files in the same window
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
@@ -1059,10 +1065,11 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
     (setq org-roam-completion-system 'default)
 
     (setq org-roam-capture-templates '(
-          			     ("d" "default" plain (function org-roam--capture-get-point)
+          			     ("d" "default" plain 
           			      "%?"
-          			      :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
-          			      :head "#+title: ${title}\n#+roam_tags: \n#+startup: content latexpreview\n"
+                                 :if-new
+                                  (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
+                                             "#+title: ${title}\n#+roam_tags: \n#+startup: content latexpreview\n")
           			      :unnarrowed t)))
 
     (add-hook 'org-capture-after-finalize-hook 'org-roam-db-sync))
@@ -1382,7 +1389,8 @@ Save image and insert it's link at point.
 (use-package yasnippet
   :ensure t
   :defer t
-  :hook ((scala-mode . yas-global-mode)
+  :hook ((org-mode . yas-global-mode)
+         (scala-mode . yas-global-mode)
          (python-mode . yas-global-mode)
          (protobuf-mode . yas-global-mode)))
 #+end_src
@@ -1807,9 +1815,8 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package marginalia
   :ensure t
-  :defer t
   :after vertico
-  :config
+  :init
     (marginalia-mode))
 #+end_src
 
@@ -1898,7 +1905,7 @@ vc-annotate options.
   :ensure t 
   :commands (popper-toggle-latest popper-toggle-type)
   :defer t
-  :init
+  :config
     (setq popper-display-function (lambda (b x) (display-buffer-in-direction b '(right))))
     (popper-mode +1))
 #+end_src
@@ -2919,6 +2926,7 @@ sbt-mode
 			     (list "creator" (concat +work/monorepo-path  "/creator/creator-protobufs"))
 			     (list "inbox" (concat +work/monorepo-path  "/inbox/inbox-protobufs"))
 			     (list "core" (concat +work/monorepo-path  "/core/core-protobufs"))
+			     (list "crm" (concat +work/monorepo-path  "/crm/crm-protobufs"))
 			     (list "chat" (concat +work/monorepo-path  "/chat/chat-protobufs"))))
 
 (defun +work/goto-proto ()

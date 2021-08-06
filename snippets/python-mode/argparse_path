@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: argparse path
+# key: arp
+# --
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("path", type=str)
+args = parser.parse_args()

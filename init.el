@@ -31,7 +31,25 @@
  '(helm-minibuffer-history-key "M-p")
  '(package-selected-packages
    '(jupyter zoom-window yasnippet yaml-mode wucuo which-key vterm vertico use-package typescript-mode treemacs-projectile treemacs-icons-dired treemacs-evil synosaurus string-inflection selectrum-prescient scratch sbt-mode rust-mode request reason-mode rainbow-mode pyvenv python-mode pyenv-mode protobuf-mode prettier-js perspective origami org-superstar org-super-agenda org-roam-server org-ref org-plus-contrib org-journal org-fancy-priorities orderless olivetti ob-http ob-async ob-ammonite modus-themes marginalia lsp-ui lsp-pyright lsp-metals langtool keychain-environment hide-mode-line helpful graphql-mode git-timemachine general geiser forge flycheck-haskell fish-mode evil-surround evil-snipe evil-smartparens evil-org evil-easymotion evil-commentary evil-collection eval-expr eros emojify embark-consult elfeed doom-modeline dockerfile-mode dired-subtree delight csv-mode consult-lsp consult-flycheck company-box clojure-mode calfw-org calfw blacken auto-compile academic-phrases))
- '(warning-suppress-log-types '((comp) (:warning))))
+ '(safe-local-variable-values
+   '((eval setq projectile-project-compilation-cmd "make" lsp-pyright-extra-paths
+	   ["/home/porcupine/work/monorepo/ai/ai-supervised-clustering-backend/" "/home/porcupine/work/monorepo/ai/ai-supervised-clustering-backend/generated/"])
+     (eval setq lsp-pyright-extra-paths
+	   ["/home/porcupine/work/monorepo/ai/ai-supervised-clustering-backend/" "/home/porcupine/work/monorepo/ai/ai-supervised-clustering-backend/generated/"])
+     (eval setq lsp-pyright-extra-paths
+	   ["/home/porcupine/work/monorepo/ai/ai-supervised-clustering-backend"])
+     (eval setq lsp-pyright-extra-paths
+	   [default-directory])
+     (eval setq lsp-pyright-extra-paths
+	   [(default-directory)])
+     (eval set
+	   (setq lsp-pyright-extra-paths
+		 [(default-directory)]))
+     (eval set
+	   (set lsp-pyright-extra-paths
+		[(default-directory)]))))
+ '(warning-suppress-log-types '((comp) (:warning)))
+ '(zoom-window-mode-line-color "#4682B4"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
