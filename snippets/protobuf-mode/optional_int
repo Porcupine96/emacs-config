@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: optional int
+# key: oi
+# --
+optional int32 $1 = $2;

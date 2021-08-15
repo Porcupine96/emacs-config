@@ -503,19 +503,18 @@ Scale text.
   (interactive)
   (let* ((glob (read-string "glob: " (or +work/consult-monorepo-last-glob
                                           (concat "*." (file-name-extension (buffer-name))))))
-         (consult-ripgrep-command
+         (consult-ripgrep-args
           (concat
            "rg "
-           "--null "
            "--line-buffered "
-           "--color=ansi "
+           "--color=never "
            "--max-columns=1000 "
+           "--path-separator / "
            "--no-heading "
            "--smart-case "
            "--line-number "
            "--glob " "\"" glob "\""
-           ". "
-           "-e ARG OPTS")))
+           ". ")))
 
     (setq +work/consult-monorepo-last-glob glob)
 
@@ -1457,7 +1456,9 @@ Save image and insert it's link at point.
 * Configure =magit=
 #+begin_src emacs-lisp :results none
 (use-package magit
+  :ensure t
   :defer t
+  :commands (magit-status magit-branch magit-init magit-push)
   :config
     (setq magit-list-refs-sortby "committerdate")
     
@@ -1815,7 +1816,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package marginalia
   :ensure t
-  :after vertico
+  :commands (consult-fd execute-extended-command)
   :init
     (marginalia-mode))
 #+end_src
@@ -1847,30 +1848,19 @@ vc-annotate options.
 
     (setq consult-preview-key (list (kbd "M-n") (kbd "M-p")))
 
-    (setq consult-ripgrep-command
-	(concat
-	   "rg "
-	   "--null "
-	   "--line-buffered "
-	   "--color=ansi "
-	   "--max-columns=1000 "
-	   "--no-heading "
-	   "--smart-case "
-	   "--line-number "
-	   ". "
-	   "-e ARG OPTS"))
-
-   (setq consult-find-command
-	 (concat
-	  "fd "
-	  "ARG* OPTS"))
-
   :config
     (vertico-mode 1)
     (setq consult-narrow-key "<")
 
     (autoload 'projectile-project-root "projectile")
     (setq consult-project-root-function #'projectile-project-root))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package consult-fd
+  :load-path "~/.emacs.default/packages/consult-fd/"
+  :defer t
+  :commands (consult-fd))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2167,6 +2157,24 @@ sbt-mode
 
     (message "Copied: %s" import)
     (kill-new import))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/insert-package ()
+  (interactive)
+
+  (let* ((candidate-file (car (directory-files default-directory nil "^[^#]*\\.scala")))
+	 (path (concat default-directory candidate-file))
+         (package (with-current-buffer
+       	    (or (get-file-buffer path)
+       	        (find-file-noselect path))
+       
+               (buffer-substring-no-properties
+       		   (progn (beginning-of-buffer) (point))
+       		   (progn (next-line) (point))))))
+
+    (beginning-of-buffer)
+    (insert package)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2814,7 +2822,7 @@ sbt-mode
     "TAB k" #'persp-kill
     "TAB r" #'persp-rename
     
-    "SPC" #'consult-find
+    "SPC" #'consult-fd
     "," #'consult-projectile)
 
   (general-create-definer local-leader-def

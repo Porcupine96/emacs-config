@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: required int
+# key: ri
+# --
+required int32 $1 = $2;
