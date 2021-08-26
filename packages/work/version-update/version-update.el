@@ -24,12 +24,19 @@
             (insert (concat "    newTag: " tag)))
 	  (progn
 	    (beginning-of-buffer)
-	    (search-forward "images:")
-	    (insert (concat "\n"
+	    (if (search-forward "images:" nil t)
+		(+work/kubernetes--insert-new-image)
+	      (progn
+		(goto-char (point-max))
+		(insert "images:")
+		(+work/kubernetes--insert-new-image))))))))
+  (save-buffer))
+
+(defun +work/kubernetes--insert-new-image ()
+  (insert (concat "\n"
 			    "  - name: " image
 			    "\n"
-			    "    newTag: " tag)))))))
-  (save-buffer))
+			    "    newTag: " tag)))
 
 (defun +work/swarm-apply-changes ()
   (interactive)

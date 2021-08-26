@@ -1816,7 +1816,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package marginalia
   :ensure t
-  :commands (consult-fd execute-extended-command)
+  :commands (execute-extended-command)
   :init
     (marginalia-mode))
 #+end_src
@@ -2857,6 +2857,7 @@ sbt-mode
     "s" #'hydra-scala-surround/body
     "l" #'+scala/insert-common-import
     "d" #'+scala/def-in-file
+    "p" #'+scala/insert-package
     "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
     "c c" (lambda () (interactive) (+projectile/compile "bl"))
     "c p" (lambda () (interactive) (+projectile/compile "protob"))

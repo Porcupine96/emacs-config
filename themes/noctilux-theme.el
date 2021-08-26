@@ -433,6 +433,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-document-info-keyword ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
              (org-code                  ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-green ,@bg-base03))))
              (org-verbatim              ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-yellow ,@bg-base03))))
+	     (org-quote                 ((t (:inherit fixed-pitch  :height 0.9 ,@fmt-none  ,@fg-gray  ,@bg-base03))))
 	     (org-block                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-white ,@bg-base03))))
 	     (org-block-begin-line      ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-end-line        ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
@@ -467,6 +468,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     ;; cfw calendar
 	     (cfw:face-toolbar ((t (,@bg-base03))))
 
+	     ;; embark
+	     (embark-collect-zebra-highlight ((t (:background "#848484"))))
 	     ;; dired
 	     (dired-subtree-depth-1-face ((t (,@fmt-none))))
 	     (dired-subtree-depth-2-face ((t (,@fmt-none))))
