@@ -1,3 +1,5 @@
+(require 's)
+
 (defun +work/apply-changes ()
   (interactive)
   (+work/kubernetes-apply-changes))
@@ -14,25 +16,25 @@
       (let* ((image-and-tag (s-split ":" image))
              (image (car image-and-tag))
              (tag (car (cdr image-and-tag))))
-        (beginning-of-buffer)
+        (goto-char (point-min))
         (if (search-forward image nil t)
 	  (progn 
             ;; update tag for existing image
-            (next-line)
+            (forward-line)
             (beginning-of-line)
             (kill-line)
             (insert (concat "    newTag: " tag)))
 	  (progn
-	    (beginning-of-buffer)
+            (goto-char (point-min))
 	    (if (search-forward "images:" nil t)
-		(+work/kubernetes--insert-new-image)
+		(+work/kubernetes--insert-new-image image tag)
 	      (progn
 		(goto-char (point-max))
 		(insert "images:")
-		(+work/kubernetes--insert-new-image))))))))
+		(+work/kubernetes--insert-new-image image tag))))))))
   (save-buffer))
 
-(defun +work/kubernetes--insert-new-image ()
+(defun +work/kubernetes--insert-new-image (image tag)
   (insert (concat "\n"
 			    "  - name: " image
 			    "\n"
@@ -50,7 +52,7 @@
       (let* ((image-and-tag (s-split ":" image))
              (image (car image-and-tag))
              (tag (car (cdr image-and-tag))))
-        (beginning-of-buffer)
+        (goto-char (point-min))
         (if (search-forward image nil t)
 	  (kill-line (insert (concat ":" tag)))))))
   (save-buffer))

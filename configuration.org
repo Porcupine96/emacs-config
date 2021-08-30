@@ -522,7 +522,7 @@ Scale text.
 
 (defun +work/consult-find-file-monorepo ()
   (interactive)
-  (consult-git-grep))
+  (consult-fd "~/work/monorepo"))
 #+end_src
  
 Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
@@ -1042,7 +1042,9 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :commands org-roam-node-find
   :hook (org-mode . org-roam-setup)
   :bind (:map global-map
-              (("C-c n f" . org-roam-node-find))
+              (("C-c n f" . org-roam-node-find)
+               ("C-c n d n" . org-roam-dailies-capture-today)
+               ("C-c n d d" . org-roam-dailies-goto-today))
          :map org-roam-mode-map
               (("C-c n l" . +org-roam/goto-linked-file)
                ("C-c n L" . org-roam)
@@ -1054,14 +1056,16 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
                ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
          :map org-mode-map
               (("C-c C-b" . org-cycle-list-bullet))
-              (("C-c n i" . org-roam-insert))
-              (("C-c n I" . org-roam-insert-immediate)))
+              (("C-c n i" . org-roam-node-insert)))
   :init
     (setq org-roam-v2-ack t)
   :config 
     (setq org-roam-directory "~/Dropbox/org-roam")
-    (setq org-roam-graph-viewer "/usr/bin/brave")
-    (setq org-roam-completion-system 'default)
+    (setq org-roam-dailies-directory "journal/")
+
+    (setq org-roam-dailies-capture-templates
+       '(("d" "default" entry "* %<%I:%M %p>: %?"
+           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: Journal: %<%Y-%m-%d>\n"))))
 
     (setq org-roam-capture-templates '(
           			     ("d" "default" plain 
@@ -1072,8 +1076,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
           			      :unnarrowed t)))
 
     (add-hook 'org-capture-after-finalize-hook 'org-roam-db-sync))
-
-    ;; (require 'org-roam-protocol)
 #+end_src
 
 #+begin_src emacs-lisp :results none
