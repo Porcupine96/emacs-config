@@ -1923,7 +1923,7 @@ body {
   margin: 2% auto;
   font-size: 14px;
   line-height: 1.4em;
-  font-family: Georgia, serif;
+  font-family: Anonymous Pro;
   color: #333;
 }
 @media screen and (min-width: 600px) {
@@ -2121,7 +2121,7 @@ kbd {
   border-radius: 3px;
   background-clip: padding-box;
   font-size: 80%;
-  font-family: Lucida Console, monospace;
+  font-family: Anonymous Pro, monospace;
   line-height: 1;
 }
 .done {
@@ -2131,18 +2131,18 @@ kbd {
   border-radius: 3px;
   background-clip: padding-box;
   font-size: 80%;
-  font-family: Lucida Console, monospace;
+  font-family: Anonymous Pro, monospace;
   line-height: 1;
 }
 .priority {
   color: orange;
-  font-family: Lucida Console, monospace;
+  font-family: Anonymous Pro, monospace;
 }
 #table-of-contents li {
   clear: both;
 }
 .tag {
-  font-family: Lucida Console, monospace;
+  font-family: Anonymous Pro, monospace;
   font-size: 0.7em;
   font-weight: 400;
 }
@@ -2202,7 +2202,7 @@ p.verse {
 .org-src-container {
   border: 1px solid #ccc;
   box-shadow: 3px 3px 3px #eee;
-  font-family: Lucida Console, monospace;
+  font-family: Anonymous Pro, monospace;
   font-size: 80%;
   margin: 1em auto;
   padding: 0.1em 0.5em;

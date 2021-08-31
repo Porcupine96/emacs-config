@@ -66,7 +66,6 @@ Font.
 (set-face-attribute 'default nil :font "Iosevka-12")
 (set-face-attribute 'fixed-pitch nil :font "Iosevka-12")
 (set-face-attribute 'variable-pitch nil :font "Iosevka-13")
-;; (set-face-attribute 'variable-pitch nil :font "DejaVu Sans Mono for Powerline-13")
 #+end_src
  
 Hide all the bezels.
@@ -2635,6 +2634,16 @@ sbt-mode
   :defer t
   :config
     (delight '((conf-windows-mode "" ""))))
+#+end_src
+
+* Configure =org-jira=
+#+begin_src emacs-lisp :results none
+(use-package org-jira
+  :ensure t
+  :defer t
+  :commands (org-jira-get-issues)
+  :config
+   (setq jiralib-url "https://chatbotize.atlassian.net"))
 #+end_src
 
 * KILL Configure =mu4e=
