@@ -1351,6 +1351,23 @@ Save image and insert it's link at point.
           'keyword
           (lambda (el) (when (string-match property (org-element-property :key el)) el))))))
 #+end_src
+
+** org-publish
+#+begin_src emacs-lisp :results none :tangle no
+(use-package publish
+  :load-path "~/.emacs.default/packages/publish"
+  :defer t
+  :commands (p/force-publish-current-file)
+  :config
+    (p/publish-configure))
+#+end_src
+
+** ox-hugo
+#+begin_src emacs-lisp :results none
+(use-package ox-hugo
+  :ensure t)
+#+end_src
+
 * Configure =flyspell=
 
 #+begin_src emacs-lisp :results none 
@@ -1389,8 +1406,7 @@ Save image and insert it's link at point.
 (use-package yasnippet
   :ensure t
   :defer t
-  :hook ((org-mode . yas-global-mode)
-         (scala-mode . yas-global-mode)
+  :hook ((scala-mode . yas-global-mode)
          (python-mode . yas-global-mode)
          (protobuf-mode . yas-global-mode)))
 #+end_src
@@ -2367,10 +2383,21 @@ sbt-mode
 
 ** JavaScript
 #+begin_src emacs-lisp :results none
+(use-package js-mode
+  :ensure nil
+  :defer t
+  :config
+    (font-lock-add-keywords 'js-mode
+       '(("\\(TODO\\):" 1 'todo-comment-face prepend))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (use-package prettier-js
   :ensure t
   :hook (js-mode . prettier-js-mode) 
-  :defer t)
+  :defer t
+  :config
+    (setq js-indent-level 2))
 #+end_src
 
 ** Rust
@@ -2643,7 +2670,14 @@ sbt-mode
   :defer t
   :commands (org-jira-get-issues)
   :config
-   (setq jiralib-url "https://chatbotize.atlassian.net"))
+   (setq jiralib-url "https://chatbotize.atlassian.net")
+
+   (setq org-jira-default-jql "project = CD and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
+
+   (setq org-jira-custom-jqls
+     '(
+       (:jql " project = CD and assignee = currentUser() and status in (TODO, 'In Progress') ORDER BY\n  status DESC, created ASC "
+        :filename "CD-working-on"))))
 #+end_src
 
 * KILL Configure =mu4e=
@@ -2848,6 +2882,7 @@ sbt-mode
     "s" #'org-schedule
     "S" #'pscreenshot/org-screenshot-take
     "d" #'org-deadline
+    "p" #'p/force-publish-current-file
     "i" #'+org/save-image-insert-link
     "t" #'org-todo)
 
