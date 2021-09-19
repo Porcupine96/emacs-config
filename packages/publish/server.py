@@ -1,9 +1,17 @@
-from http.server import HTTPServer, SimpleHTTPRequestHandler, test
+import os
+from flask import Flask, jsonify, send_from_directory
 
-class CORSRequestHandler (SimpleHTTPRequestHandler):
-    def end_headers (self):
-        self.send_header('Access-Control-Allow-Origin', '*')
-        SimpleHTTPRequestHandler.end_headers(self)
+app = Flask(__name__)
 
-if __name__ == '__main__':
-    test(CORSRequestHandler, HTTPServer, port=8000)
+@app.route("/image/<path:path>")
+def image(path):
+    return send_from_directory('./images/', path)
+
+@app.route("/file/<path:path>")
+def file(path):
+    return send_from_directory('.', path)
+
+@app.route("/files")
+def files():
+    html_files = [p for p in os.listdir(".") if p.endswith(".html")]
+    return jsonify(html_files)

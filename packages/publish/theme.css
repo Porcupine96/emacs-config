@@ -89,6 +89,14 @@ blockquote {
   padding: 0px 8px 0px 8px;
 }
 
+.todo {
+  background: #e58b88;
+  padding: 2px 4px;
+  border-radius: 3px;
+  display: inline-block;
+  margin: 3px 0px;
+}
+
 #postamble {
   display: none;
 }
@@ -101,9 +109,9 @@ blockquote {
   height: 7%;
   border: dotted 3px;
   border-radius: 10px;
-  border-color: #e58b88;
+  border-color: #808080;
   background: white;
-  margin: 10px 20px;
+  margin: 10px 10px;
 }
 
 .header a {
@@ -121,16 +129,16 @@ blockquote {
   text-align: justify;
   width: 625px;
   min-width: 625px;
-  margin: 10px 20px 10px 20px;
+  margin: 10px 10px;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
   display: inline-block;
   border: dotted 3px;
   border-radius: 10px;
-  border-color: #e58b88;
+  border-color: #808080;
   background: white;
-  padding: 10px;
+  padding: 10px 15px;
 }
 
 .outline-2 {

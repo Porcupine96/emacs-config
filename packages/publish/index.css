@@ -1,0 +1,15 @@
+
+.index {
+  text-align: justify;
+  min-width: 50%;
+  margin: 10px 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  display: inline-block;
+  border: dotted 3px;
+  border-radius: 10px;
+  border-color: #808080;
+  background: white;
+  padding: 10px 15px;
+}
