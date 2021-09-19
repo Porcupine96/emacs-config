@@ -44,6 +44,10 @@ h3 {
   padding: 1px 5px;
 }
 
+h4 {
+  margin-top: 8px;
+}
+
 .section-number-1,
 .section-number-2,
 .section-number-3,
@@ -105,18 +109,8 @@ blockquote {
   display: none;
 }
 
-.header {
-  height: 7%;
-  border: dotted 3px;
-  border-radius: 10px;
-  border-color: #808080;
-  background: white;
-  margin: 10px 10px;
-}
-
-.header a {
-  height: 100%;
-  width: 100%;
+.underline {
+  text-decoration: underline;
 }
 
 .grid {

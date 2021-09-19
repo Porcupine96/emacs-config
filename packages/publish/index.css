@@ -1,7 +1,31 @@
+.header {
+  height: 7%;
+  border: dotted 3px;
+  border-radius: 10px;
+  border-color: #808080;
+  background: white;
+  margin: 10px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0px 20px;
+}
+
+.toggle-index {
+  background-color: #c1e1c1;
+  text-align: center;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 14px;
+}
 
 .index {
   text-align: justify;
-  min-width: 50%;
+  min-width: 30%;
+  max-width: 30%;
   margin: 10px 10px;
   overflow-y: auto;
   overflow-x: hidden;
