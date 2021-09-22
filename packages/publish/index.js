@@ -1,14 +1,19 @@
 const serverUrl = "http://localhost:5000";
 
-function toggleIndex() {
-  const display = $("div.index").css("display");
+function indexVisible() {
+  const visible = getQuery("indexVisible");
+  return visible === undefined || visible == "true";
+}
 
-  if (display === "none") {
+function toggleIndex() {
+  if (!indexVisible()) {
     $("button.toggle-index").css("background-color", "#c1e1c1");
     $("div.index").css("display", "inline-block");
+    setQuery("indexVisible", "true");
   } else {
     $("button.toggle-index").css("background-color", "#e58b88");
     $("div.index").css("display", "none");
+    setQuery("indexVisible", "false");
   }
 }
 
@@ -42,6 +47,14 @@ async function showIndex() {
   indexPage.appendTo("div.grid");
 
   overrideOnClick($("div.index")[0], 0);
+
+  if (indexVisible()) {
+    $("button.toggle-index").css("background-color", "#c1e1c1");
+    $("div.index").css("display", "inline-block");
+  } else {
+    $("button.toggle-index").css("background-color", "#e58b88");
+    $("div.index").css("display", "none");
+  }
 }
 
 async function showPage(note, level) {
@@ -94,14 +107,28 @@ function fixImages() {
   });
 }
 
-// TODO: make it work with other query params present
-function updateQuery(key, value) {
+function getQuery(key) {
+  const url = new URL(window.location);
+  const params = Object.fromEntries(url.searchParams.entries());
+  return params[key];
+}
+
+function setQuery(key, value) {
+  const url = new URL(window.location);
+  const params = Object.fromEntries(url.searchParams.entries());
+  params[key] = value;
+
+  const paramList = Object.entries(params);
+
+  let newQuery = `?${paramList[0][0]}=${paramList[0][1]}`;
+  paramList.slice(1).map((p) => (newQuery += `&${p[0]}=${p[1]}`));
+
   const newUrl =
     window.location.protocol +
     "//" +
     window.location.host +
     window.location.pathname +
-    `?${key}=${value}`;
+    newQuery;
 
   window.history.pushState({ path: newUrl }, "", newUrl);
 }
@@ -125,10 +152,9 @@ function overrideOnClick(element, level) {
         const note = location.split("#")[0];
         const level = parseInt(this.dataset.level);
 
-        const url = new URL(window.location);
-        const urlQuery = Object.fromEntries(url.searchParams.entries());
-        const currentNotes = urlQuery["notes"]
-          ? urlQuery["notes"].split(",").slice(0, level)
+        const notesString = getQuery("notes");
+        const currentNotes = notesString
+          ? notesString.split(",").slice(0, level)
           : [];
 
         const notes =
@@ -136,7 +162,7 @@ function overrideOnClick(element, level) {
             ? note
             : currentNotes.join(",") + "," + note;
 
-        updateQuery("notes", notes);
+        setQuery("notes", notes);
 
         showPage(note, level);
 

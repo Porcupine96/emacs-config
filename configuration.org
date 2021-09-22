@@ -486,8 +486,16 @@ Scale text.
   (interactive)
 
   (if (equal (car custom-enabled-themes) +core/dark-theme)
-     (+core/load-theme +core/light-theme)
-     (+core/load-theme +core/dark-theme)))
+     ;; TODO: could be improved by extracting background directly from theme
+     (progn
+       (+core/load-theme +core/light-theme)
+       (setq org-format-latex-options (plist-put org-format-latex-options :background "white")))
+     (progn
+       (+core/load-theme +core/dark-theme)
+       (setq org-format-latex-options (plist-put org-format-latex-options :background "#202020"))))
+
+  (treemacs-icons-dired-mode -1)
+  (treemacs-icons-dired-mode 1))
 #+end_src
 
  Search Monorepo.
@@ -737,7 +745,6 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   (org-babel-do-load-languages 'org-babel-load-languages
     '((shell . t)
       (emacs-lisp . t)
-      ;; (ipython . t)
       (python . t)
       (ammonite . t)
       (plantuml . t)
@@ -745,7 +752,8 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
       (js . t)
       (sql . t)
       (http . t)
-      (haskell . t)))
+      (haskell . t)
+      (jupyter . t)))
 
   (setq org-plantuml-jar-path
         (expand-file-name "~/tools/plantuml.jar"))
@@ -756,7 +764,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 
   ;; LaTeX options
   (setq org-format-latex-options 
-    (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.151))
+    (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.5))
 
   ;; open files in the same window
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
@@ -1033,6 +1041,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
  :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
 #+end_src
 
+
 ** Org Roam
 #+begin_src emacs-lisp :results none
 (use-package org-roam
@@ -1071,7 +1080,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
           			      "%?"
                                  :if-new
                                   (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
-                                             "#+title: ${title}\n#+roam_tags: \n#+startup: content latexpreview\n")
+                                             "#+title: ${title}\n#+filetags: \n#+startup: content latexpreview\n")
           			      :unnarrowed t)))
 
     (add-hook 'org-capture-after-finalize-hook 'org-roam-db-sync))
@@ -1192,7 +1201,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :hook
     (org-mode . org-fancy-priorities-mode)
   :config
-    (setq org-fancy-priorities-list '("❗" "❕" "🆙")))
+    (setq org-fancy-priorities-list '("❗" "❕" "🔽")))
 #+end_src
 
 ** Export CSS
@@ -1353,7 +1362,7 @@ Save image and insert it's link at point.
 #+end_src
 
 ** org-publish
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none 
 (use-package publish
   :load-path "~/.emacs.default/packages/publish"
   :defer t
