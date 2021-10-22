@@ -272,7 +272,7 @@ Use =evil-surround=
     _w_ ~/codeheroes/chatbotize
     ^^        
     "
-    ("s" (lambda () (interactive) (dired "~/studies")))
+    ("s" (lambda () (interactive) (dired "~/Dropbox/org/resources/studies")))
     ("S" (lambda () (interactive) (dired "~/scripts")))
     ("d" (lambda () (interactive) (dired "~/Downloads")))
     ("D" (lambda () (interactive) (dired "~/Dropbox")))
@@ -353,6 +353,10 @@ Buffer commands.
 (global-set-key (kbd "C-x C-b") #'ibuffer)
 (global-set-key (kbd "C-c b n") #'next-buffer)
 (global-set-key (kbd "C-c b p") #'previous-buffer)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-x r k") #'consult-bookmark)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -482,6 +486,12 @@ Scale text.
    (mapcar #'disable-theme custom-enabled-themes)
    (load-theme theme t))
 
+(defun +core/redraw-dired-buffers ()
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (if (equal major-mode #'dired-mode)
+	  (revert-buffer)))))
+
 (defun +core/toggle-darkmode ()
   (interactive)
 
@@ -495,7 +505,8 @@ Scale text.
        (setq org-format-latex-options (plist-put org-format-latex-options :background "#202020"))))
 
   (treemacs-icons-dired-mode -1)
-  (treemacs-icons-dired-mode 1))
+  (treemacs-icons-dired-mode 1)
+  (+core/redraw-dired-buffers))
 #+end_src
 
  Search Monorepo.
@@ -764,7 +775,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 
   ;; LaTeX options
   (setq org-format-latex-options 
-    (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.5))
+    (plist-put (plist-put org-format-latex-options :background "#202020") :scale 2.0))
 
   ;; open files in the same window
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
@@ -855,7 +866,8 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
          ("C-x n S" . org-tree-to-indirect-buffer))
   :hook (org-mode . org-indent-mode)
         (org-mode . variable-pitch-mode)
-        (org-mode . auto-fill-mode))
+        (org-mode . auto-fill-mode)
+        (org-mode . wucuo-start))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1059,12 +1071,13 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
                ("C-c n f" . org-roam-find-file)
                ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n C" . org-roam-db-build-cache)
-               ("C-c n g" . org-roam-graph)
+               ("C-c n g" . org-roam-buffer-toggle)
                ("C-c n w" . writer)
                ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
          :map org-mode-map
-              (("C-c C-b" . org-cycle-list-bullet))
-              (("C-c n i" . org-roam-node-insert)))
+              (("C-c C-b" . org-cycle-list-bullet)
+               ("C-c n l" . +org-roam/goto-linked-file)
+               ("C-c n i" . org-roam-node-insert)))
   :init
     (setq org-roam-v2-ack t)
   :config 
@@ -1121,40 +1134,17 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+end_src
 
 #+begin_src emacs-lisp :results none
-;; (defun +org-roam/linked-files ()
-;;   (interactive)
-
-;;   (require 'dash)
-;;   (require 'org-roam)
-
-;;   (print
-;;    (org-roam-db-query
-;;     [:select [title]
-;;      :from titles
-;;      :where (= file "/home/porcupine/Dropbox/org-roam/2021-01-20--23-48-21Z--carol_gilligan.org")
-;;      ])))
-
-(defun +org-roam/file-to-title (file)
-  (-first-item (-flatten (org-roam-db-query
-			  [:select [title]
-			   :from titles
-			   :where (= file $s1)
-			   :limit 1]
-			  file))))
-
 (defun +org-roam/goto-linked-file ()
   (interactive)
 
-  (let* ((titles (-distinct (-map (lambda (b)
-			 (let* ((file (car b))
-				(title (+org-roam/file-to-title file)))
-			   (cons title file))) (org-roam--get-backlinks (buffer-file-name)))))
+  (let* (
+	 (titles (-map (lambda (link) (org-roam-node-title (org-roam-backlink-source-node link)))
+                       (org-roam-backlinks-get (org-roam-node-at-point 'assert))))
 
-         (styled-titles (-map (lambda (x) (cons (s-concat "➜ " (car x)) (cdr x))) titles))
-	 (title (completing-read " " styled-titles))
-	 (file (cdr (assoc title styled-titles))))
-
-    (if file (find-file file))))
+	 (title (completing-read " " titles))
+     (file (org-roam-node-file (org-roam-node-from-title-or-alias title))))
+    
+    (find-file file)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1365,9 +1355,8 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none 
 (use-package publish
   :load-path "~/.emacs.default/packages/publish"
-  :defer t
-  :commands (p/force-publish-current-file)
-  :config
+  :commands (p/publish-configure p/force-publish-current-file)
+  :init
     (p/publish-configure))
 #+end_src
 
@@ -1586,7 +1575,7 @@ vc-annotate options.
   :hook (prog-mode . global-company-mode)
   :custom
     (company-minimum-prefix-length 1)
-    (company-idle-delay 0.15)
+    (company-idle-delay 0.1)
     (company-backends '((company-capf company-yasnippet) company-dabbrev company-files company-elisp))
     (company-dabbrev-downcase nil)
   :bind (:map company-active-map
@@ -1676,11 +1665,16 @@ vc-annotate options.
   :ensure nil
   :hook (dired-mode . dired-hide-details-mode)
   :config
+   (defun +dired/copy-directory ()
+     (interactive)
+     (kill-new dired-directory))
+
    (setq dired-dwim-target t)
 
    (evil-collection-define-key 'normal 'dired-mode-map
      "_" #'+projectile/goto-project-root
      "ge" #'+dired/open-externally
+     "gn" #'+dired/open-nautilus
      "'" #'hydra-dired-bookmarks/body))
 #+end_src
 
@@ -1700,6 +1694,10 @@ vc-annotate options.
 	(tramp-sh-handle-copy-file filename dest t)
 	(call-process "xdg-open" nil 0 nil dest)))
      (call-process "xdg-open" nil 0 nil filename)))
+
+(defun +dired/open-nautilus ()
+  (interactive)
+  (call-process "nautilus" nil 0 nil (expand-file-name default-directory)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1827,8 +1825,18 @@ vc-annotate options.
     (defun embark-zeal ()
       (interactive)
       (call-process "zeal" nil 0 nil (current-word)))
+
+      (defun +embark/insert-grep-line (line)
+          (interactive "sInsert: ")
+          (let ((trimmed (->> (s-split ":" line) (-drop 2) (s-join ":"))))
+
+          (if buffer-read-only
+              (with-selected-window (other-window-for-scrolling)
+                  (insert trimmed))
+              (insert trimmed))))
   
     (define-key embark-general-map (kbd "z") #'embark-zeal)
+    (define-key embark-general-map (kbd "I") #'+embark/insert-grep-line)
     (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
   
     ;; Hide the mode line of the Embark live/completions buffers
@@ -1958,7 +1966,9 @@ Setup =python-mode=.
    :config
 
    (setq python-indent-guess-indent-offset nil)  
+   (setq python-guess-indent nil)  
    (setq python-indent-offset 4)
+   (setq python-indent 4)
    (setq python-indent-guess-indent-offset-verbose nil)
 
    (setq python-shell-interpreter "ipython"
@@ -2059,7 +2069,7 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (use-package lsp-mode
    :hook ((python-mode . lsp-deferred)
-          (typescript-mode . lsp-deferre)  
+          (typescript-mode . lsp-deferred)  
           (c-mode . lsp-deferred)
           (sh-mode . lsp-deferred))
    :custom
@@ -2151,7 +2161,7 @@ scala-mode
   ;; :hook (scala-mode . lsp-deferred)
   :hook (scala-mode . lsp)
   :bind (:map scala-mode-map
-        ("C-c C-c" . +scala/complete-type-param))
+        ("C-c C-c" . +scala/dwim-at-point))
   :config
     (font-lock-add-keywords 'scala-mode
       '(("\\(TODO\\):" 1 'todo-comment-face prepend))))
@@ -2244,6 +2254,27 @@ sbt-mode
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defun +scala/dwim-at-point ()
+  (interactive)
+ 
+  (let ((word
+           (save-excursion
+             (beginning-of-line)
+             (current-word))))
+
+      (if (equal word "package")
+	  (+scala/package-to-import)
+	  (+scala/complete-type-param))))
+  
+(defun +scala/package-to-import ()
+  (interactive)
+
+  (beginning-of-line)
+  (kill-word 1)
+  (insert "import")
+  (end-of-line)
+  (delete-char -1))
+    
 (defun +scala/complete-type-param ()
   (interactive)
 
@@ -2439,6 +2470,16 @@ sbt-mode
   :defer t)
 #+end_src
 
+** PlantUML
+#+begin_src emacs-lisp :results none
+(use-package plantuml-mode
+  :ensure t
+  :defer t 
+  :config
+    (setq plantuml-jar-path "/home/porcupine/tools/plantuml.jar")
+    (setq plantuml-default-exec-mode 'jar))
+#+end_src
+
 ** Fish
 #+begin_src emacs-lisp :results none
 (use-package fish-mode
@@ -2495,6 +2536,9 @@ sbt-mode
   :defer t
   :hook (eshell-first-time-mode . +eshell/configure-eshell)
   :config
+
+  (company-mode -1)
+
   (defalias 'e "find-file-other-window $1")
   (defalias 'gs "git status")
 
@@ -2523,6 +2567,8 @@ sbt-mode
     (evil-normalize-keymaps)
 
     (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+    (company-mode -1)
 
     (setq eshell-history-size              10000
           eshell-buffer-maximum-lines      10000
@@ -2892,6 +2938,7 @@ sbt-mode
     "S" #'pscreenshot/org-screenshot-take
     "d" #'org-deadline
     "p" #'p/force-publish-current-file
+    "P" #'p/show-current-currently-published-file
     "i" #'+org/save-image-insert-link
     "t" #'org-todo)
 
@@ -3000,7 +3047,7 @@ sbt-mode
          (module (car name-chunks))
          (is-plugin (equal (cadr name-chunks) "plugin"))
          (proto-name (if is-plugin
-           (concat "plugins/" (string-join (cddr t/chunks) "-"))
+           (concat "plugins/" (string-join (cddr name-chunks) "-"))
            (string-join (cdr name-chunks) "_")))
          (proto-root (nth 1 (assoc module +work/proto-paths))))
 
@@ -3020,6 +3067,10 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (defvar remote-host
   "ubuntu@34.245.164.252")
+
+(defun +work/run-nlp ()
+  (interactive)
+  (async-shell-command (s-concat "ssh -i ~/.ssh/NLP.pem ubuntu@34.245.164.252 'tmux send-keys -t 0 \"clear; python " (buffer-name) "\" ENTER'")))
 
 (defun +work/sync-nlp ()
   (interactive)

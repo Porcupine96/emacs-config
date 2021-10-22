@@ -2,7 +2,8 @@
 
 (defun +work/apply-changes ()
   (interactive)
-  (+work/kubernetes-apply-changes))
+  ;; (+work/swarm-apply-changes)
+  (+work/kubernetes-apply-changes))  
 
 (defun +work/kubernetes-apply-changes ()
   (interactive)

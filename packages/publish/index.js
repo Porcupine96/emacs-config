@@ -57,13 +57,16 @@ async function showIndex() {
   }
 }
 
-async function showPage(note, level) {
+async function showPage(note, level, removeRight) {
   const noteUrl = serverUrl + "/file/" + note;
   const content = await fetchNote(noteUrl);
-  const old = $("div.grid")
-    .children()
-    .slice(level + 1);
-  old.remove();
+
+  if (removeRight) {
+    const old = $("div.grid")
+      .children()
+      .slice(level + 1);
+    old.remove();
+  }
 
   const nextPage = $("<div class=page>");
   nextPage.append($(content).filter("#content")[0].outerHTML);
@@ -103,7 +106,17 @@ async function showPages(query) {
 function fixImages() {
   $("img").each(function () {
     const source = $(this).attr("src");
-    $(this).attr("src", source.replace("./images/", serverUrl + "/image/"));
+    $(this).attr(
+      "src",
+      source
+        .replace("./images/", serverUrl + "/image/")
+        .replace("./.ob-jupyter/", serverUrl + "/image/")
+    );
+
+    $(this).click(function () {
+      // TODO: open a modal with the picture
+      alert("test");
+    });
   });
 }
 
@@ -140,7 +153,7 @@ function overrideOnClick(element, level) {
     link.dataset.level = level;
 
     if (!link.href.startsWith("http")) {
-      link.onclick = function () {
+      link.onclick = function (event) {
         // TODO: refactor
         const location = link.href
           .replace(
@@ -164,7 +177,12 @@ function overrideOnClick(element, level) {
 
         setQuery("notes", notes);
 
-        showPage(note, level);
+        if (event.ctrlKey) {
+          // TODO: adjust level
+          showPage(note, level, false);
+        } else {
+          showPage(note, level, true);
+        }
 
         return false;
       };

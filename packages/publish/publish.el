@@ -12,7 +12,18 @@
 
 (defun p/force-publish-current-file ()
   (interactive)
-  (org-publish-current-file t))
+  ;; make sure images are published 
+  ;; TODO: it maybe necessary to optimize that someday
+  (org-publish-current-file t)
+  (org-publish-project "jupyter" t))
+
+(defun p/show-current-currently-published-file ()
+  (interactive)
+
+  (let* ((prefix "file:///home/porcupine/.emacs.default/packages/publish/index.html?indexVisible=false&notes=")
+	 (note (s-replace ".org" ".html" (buffer-name)))
+	 (path (s-concat prefix note)))
+    (call-process "firefox" nil 0 nil path)))
 
 
 (defun p/org-roam--resolve-link (node-id)
@@ -38,6 +49,8 @@
 
 
 (defun p/publish-configure ()
+  (message "Running p/publish-configure")
+
   (setq org-html-htmlize-output-type 'css)
 
   (setq org-publish-project-alist
@@ -53,6 +66,12 @@
   
           ("images"
            :base-directory "/home/porcupine/Dropbox/org-roam/images/"
+           :base-extension "jpg\\|gif\\|png"
+           :publishing-directory "/home/porcupine/kb/images"
+           :publishing-function org-publish-attachment)
+
+          ("jupyter"
+           :base-directory "/home/porcupine/Dropbox/org-roam/.ob-jupyter/"
            :base-extension "jpg\\|gif\\|png"
            :publishing-directory "/home/porcupine/kb/images"
            :publishing-function org-publish-attachment))))

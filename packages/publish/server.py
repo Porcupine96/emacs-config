@@ -1,7 +1,10 @@
 import os
 from flask import Flask, jsonify, send_from_directory
+from flask_cors import CORS
 
 app = Flask(__name__)
+app.config['CORS_HEADERS'] = 'Content-Type'
+cors = CORS(app)
 
 @app.route("/image/<path:path>")
 def image(path):

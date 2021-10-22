@@ -1,5 +1,6 @@
 .header {
   height: 7%;
+  max-height: 65px;
   border: dotted 3px;
   border-radius: 10px;
   border-color: #808080;
