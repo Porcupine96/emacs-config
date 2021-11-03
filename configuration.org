@@ -60,6 +60,10 @@ Always compile packages, and use the newest version available.
 (setq load-prefer-newer t)
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(setq enable-recursive-minibuffers t)
+#+end_src
+
 * Visuals
 Font.
 #+begin_src emacs-lisp :results none
@@ -614,10 +618,10 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 * Configure =perspective=
-Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces.
 #+begin_src emacs-lisp :results none
 (use-package perspective 
   :defer 5
+  :ensure t
   :init
     (persp-mode)
   :config 
@@ -1063,9 +1067,10 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
   :hook (org-mode . org-roam-setup)
   :bind (:map global-map
               (("C-c n f" . org-roam-node-find)
+               ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n d n" . org-roam-dailies-capture-today)
                ("C-c n d d" . org-roam-dailies-goto-today))
-         :map org-roam-mode-map
+         :map org-roam-node-map
               (("C-c n l" . +org-roam/goto-linked-file)
                ("C-c n L" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -1121,7 +1126,7 @@ Use [[https://github.com/nex3/perspective-el][perspective]] to manage workspaces
 #+begin_src emacs-lisp :results none
 (defun +org-roam/find-file-by-title ()
   (interactive)
-  (org-roam-find-file (+org/property-value "TITLE")))
+  (org-roam-node-find nil (+org/property-value "TITLE")))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1828,7 +1833,7 @@ vc-annotate options.
 
       (defun +embark/insert-grep-line (line)
           (interactive "sInsert: ")
-          (let ((trimmed (->> (s-split ":" line) (-drop 2) (s-join ":"))))
+          (let ((trimmed (s-trim (->> (s-split ":" line) (-drop 2) (s-join ":")))))
 
           (if buffer-read-only
               (with-selected-window (other-window-for-scrolling)
@@ -1836,6 +1841,7 @@ vc-annotate options.
               (insert trimmed))))
   
     (define-key embark-general-map (kbd "z") #'embark-zeal)
+    (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
     (define-key embark-general-map (kbd "I") #'+embark/insert-grep-line)
     (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
   
@@ -2658,8 +2664,8 @@ sbt-mode
   :defer t
   :mode "\\.pdf$"
   :config 
-  (pdf-tools-install)
-  (add-hook 'pdf-view-mode-hook #'+pdf/setup)
+   (pdf-tools-install)
+   (add-hook 'pdf-view-mode-hook #'+pdf/setup)
 
   (defun +pdf/open-externally ()
     (interactive)
@@ -2669,6 +2675,7 @@ sbt-mode
     (evil-collection-define-key 'normal 'pdf-view-mode-map
       "ge" #'+pdf/open-externally)
 
+    (pdf-tools-install)
     (hide-mode-line-mode)))
 #+end_src
 
@@ -2797,6 +2804,7 @@ sbt-mode
     "a t" #'+agenda/filter-by-tag
     "a h" #'+agenda/filter-by-tag-hot
     
+    "b a" #'bookmark-set
     "b b" #'consult-bookmark
     "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
     "b n" #'next-buffer
