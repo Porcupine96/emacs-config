@@ -10,6 +10,10 @@
   (interactive)
   (org-publish-all t))
 
+(defun p/publish-setup-save-file-hook ()
+  (interactive)
+  (add-hook 'after-save-hook 'p/force-publish-current-file 0 t))
+
 (defun p/force-publish-current-file ()
   (interactive)
   ;; make sure images are published 

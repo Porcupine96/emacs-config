@@ -2,9 +2,9 @@
 # name: typeclass
 # key: tc
 # --
-import simulacrum.typeclass
+import cats.tagless.finalAlg
 
-@typeclass
+@finalAlg
 trait $1[F[_]] {
 
 }

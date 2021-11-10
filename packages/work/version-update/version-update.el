@@ -2,8 +2,10 @@
 
 (defun +work/apply-changes ()
   (interactive)
-  ;; (+work/swarm-apply-changes)
-  (+work/kubernetes-apply-changes))  
+
+  (if (s-contains? "dev-cluster-conf" default-directory)
+    (+work/kubernetes-apply-changes)
+    (+work/swarm-apply-changes)))
 
 (defun +work/kubernetes-apply-changes ()
   (interactive)

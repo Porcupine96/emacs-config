@@ -207,7 +207,6 @@ Use =evil-mode=
     (setq evil-ex-substitute-global t)
     (setq aw-keys '(?h ?j ?k ?l ?a ?s ?d ?f))
 
-
     (defmacro define-and-bind-text-object (key start-regex end-regex)
       (let ((inner-name (make-symbol "inner-name"))
             (outer-name (make-symbol "outer-name")))
@@ -651,9 +650,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     (setq bibtex-completion-pdf-field "File")
 
     (org-roam-bibtex-mode))
-
-    ;; (setq bibtex-completion-format-citation-functions
-    ;;   '((default . +bibtex/format-citations-apa7))))
 #+end_src
 
 #+begin_src emacs-lisp :results none :tangle no
@@ -870,8 +866,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
          ("C-x n S" . org-tree-to-indirect-buffer))
   :hook (org-mode . org-indent-mode)
         (org-mode . variable-pitch-mode)
-        (org-mode . auto-fill-mode)
-        (org-mode . wucuo-start))
+        (org-mode . auto-fill-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -924,56 +919,31 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(use-package pagenda
+  :load-path "~/.emacs.default/packages/pagenda/"
+  :hook (org-agenda-mode . pagenda-mode)
+  :commands (pagenda-mode +agenda/daily-agenda +agenda/weekly-agenda)
+  :defer t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (use-package org-super-agenda
   :defer t
   :hook
     (org-agenda-mode . org-super-agenda-mode)
-    (org-agenda-mode . pagenda-mode)
   :bind 
   (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
 	:map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
 	:map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
   :config
     (setq org-agenda-files '(
-       "~/Dropbox/org/todo/private.org"
-       "~/Dropbox/org/todo/studies.org"
-       "~/Dropbox/org/todo/work.org"))
-
-    (add-hook 'org-agenda-mode-hook
-              (lambda () (push '(":@call:" . "☎") prettify-symbols-alist)))
-
-    (defun +agenda/show (span)
-      (-let* (((month day year) (calendar-current-date 3))
-              (three-days-from-now (format "%d-%02d-%02d" year month day))
-              (org-agenda-span span)
-              (org-super-agenda-groups
-               `((:name "Today" :time-grid t)
-                 (:name "🖥 Work" :and (:category "work"
-          				       :todo ("STRT" "TODO" "REVIEW")))
-                 (:name "‍🎓 Studies" :and (:category "studies" 
-           					   :todo ("PROJECT" "STRT" "TODO" "REVIEW")
-           					   :scheduled (before ,three-days-from-now)))
-                 (:name ":house_with_garden: Private" :and (:category "private"
-          							    :todo ("STRT" "TODO" "REVIEW")))
-                 (:name ":repeat: Habits" :habit t))))
-        (org-agenda nil "a")
-        (scroll-down)))
-
-    (defun +agenda/weekly-agenda ()
-      (interactive)
-      (+agenda/show 8))
-
-    (defun +agenda/daily-agenda ()
-      (interactive)
-      (+agenda/show 1))
-
-    (defun +agenda/filter-by-tag ()
-      (interactive)
-      (org-tags-view t nil))
-
-    (defun +agenda/filter-by-tag-hot ()
-      (interactive)
-      (org-tags-view t "@hot")))
+       "~/Dropbox/org-roam/2021-10-03--10-45-46Z--psychologia_społeczna_i_zajęcia.org"
+       "~/Dropbox/org-roam/2021-10-03--10-45-26Z--psychologia_osobowosci_zajęcia.org"
+       "~/Dropbox/org-roam/2021-10-03--10-46-50Z--psychologia_roznic_indywidualnych_zajęcia.org"
+       "~/Dropbox/org-roam/2021-10-03--10-47-42Z--psychologia_poznawcza_ii_zajęcia.org"
+       "~/Dropbox/org-roam/2021-10-03--10-47-21Z--psychologia_rozwoju_w_biegu_zycia_i_zajęcia.org"
+       "~/Dropbox/org-roam/2021-10-03--10-46-11Z--język_angielski_zajęcia.org"
+       "~/Dropbox/org/todo/work.org")))
 #+end_src
 
 ** Academic
@@ -1372,7 +1342,6 @@ Save image and insert it's link at point.
 #+end_src
 
 * Configure =flyspell=
-
 #+begin_src emacs-lisp :results none 
 (use-package flyspell
   :ensure t
@@ -1392,8 +1361,8 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (use-package wucuo
   :ensure t
-  :disabled
-  :hook (org-mode . wucuo-mode))
+  :defer t)
+  ;; :hook (org-roam-mode . wucuo-mode))
 #+end_src
 * Configure =langtool=
 #+begin_src emacs-lisp :results none
@@ -1833,15 +1802,16 @@ vc-annotate options.
 
       (defun +embark/insert-grep-line (line)
           (interactive "sInsert: ")
-          (let ((trimmed (s-trim (->> (s-split ":" line) (-drop 2) (s-join ":")))))
+          (let* ((trimmed (s-trim (->> (s-split ":" line) (-drop 2) (s-join ":"))))
+                 (result (if (equal "" trimmed) line trimmed)))
 
           (if buffer-read-only
               (with-selected-window (other-window-for-scrolling)
-                  (insert trimmed))
-              (insert trimmed))))
+                  (insert result))
+              (insert result))))
   
     (define-key embark-general-map (kbd "z") #'embark-zeal)
-    (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
+    (define-key embark-general-map (kbd "i") #''+embark/insert-grep-line)
     (define-key embark-general-map (kbd "I") #'+embark/insert-grep-line)
     (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
   
@@ -2330,6 +2300,18 @@ sbt-mode
          (root (s-chop-suffix "project/" project-root))
          (path (concat (file-name-as-directory root) path)))
     (find-file path)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/fill-imports-from-side-buffers ()
+  (interactive)
+
+  (let* ((errors (-map #'flycheck-error-message flycheck-current-errors))
+         (not-found (-filter (apply-partially #'s-starts-with? "not found:")  errors))
+         (symbols (-map (-compose #'car (apply-partially #'-take-last 1) (apply-partially #'s-split " ")) not-found))
+         (visible-buffers (-filter (lambda (b): (not (equal (buffer-name b) (buffer-name (current-buffer))))) (mapcar 'window-buffer (window-list)))))
+
+    (print visible-buffers)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2964,6 +2946,7 @@ sbt-mode
     :states 'normal
     :keymaps 'scala-mode-map
     "i" #'+scala/copy-import
+    "y" #'+scala/fill-imports-from-side-buffers
     "s" #'hydra-scala-surround/body
     "l" #'+scala/insert-common-import
     "d" #'+scala/def-in-file
