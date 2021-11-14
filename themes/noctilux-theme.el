@@ -462,7 +462,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-agenda-date-today ((t (,@fmt-none ,@fg-purple))))
 	     (org-super-agenda-header ((t (,@fmt-big ,@fg-purple))))
 	     (org-scheduled-previously ((t (,@fg-white))))
-	     (org-scheduled-today ((t (,@fg-white))))
+	     (org-scheduled-today ((t (,@fmt-none ,@fg-white))))
+	     (org-upcoming-deadline ((t (,@fmt-none ,@fg-white))))
+	     (org-upcoming-distant-deadline ((t (,@fmt-none ,@fg-white))))
 	     (org-time-grid ((t (,@fg-white))))
 
 	     ;; cfw calendar

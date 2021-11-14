@@ -1798,20 +1798,10 @@ vc-annotate options.
   :config
     (defun embark-zeal ()
       (interactive)
-      (call-process "zeal" nil 0 nil (current-word)))
-
-      (defun +embark/insert-grep-line (line)
-          (interactive "sInsert: ")
-          (let* ((trimmed (s-trim (->> (s-split ":" line) (-drop 2) (s-join ":"))))
-                 (result (if (equal "" trimmed) line trimmed)))
-
-          (if buffer-read-only
-              (with-selected-window (other-window-for-scrolling)
-                  (insert result))
-              (insert result))))
+      (call-process "zeal" nil 0 nil (current-word)))      
   
     (define-key embark-general-map (kbd "z") #'embark-zeal)
-    (define-key embark-general-map (kbd "i") #''+embark/insert-grep-line)
+    (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
     (define-key embark-general-map (kbd "I") #'+embark/insert-grep-line)
     (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
   
@@ -1820,6 +1810,16 @@ vc-annotate options.
                  '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                    nil
                    (window-parameters (mode-line-format . none)))))
+
+(defun +embark/insert-grep-line (line)
+          (interactive "sInsert: ")
+          (let* ((trimmed (s-trim (->> (s-split ":" line) (-drop 2) (s-join ":"))))
+                 (result (if (equal "" trimmed) line trimmed)))
+
+          (if buffer-read-only
+              (with-selected-window (other-window-for-scrolling)
+                  (insert result))
+              (insert result))))
 #+end_src
 
 * Configure =marginalia=
@@ -2715,6 +2715,11 @@ sbt-mode
   :commands (org-jira-get-issues)
   :config
    (setq jiralib-url "https://chatbotize.atlassian.net")
+   (setq org-jira-verbosity 'info)
+   (setq org-jira-jira-status-to-org-keyword-alist
+     '(("In Progress" . "STRT")
+       ("In Review" . "REVIEW")
+       ("IN TEST" . "WAIT")))
 
    (setq org-jira-default-jql "project = CD and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
 
@@ -2722,6 +2727,17 @@ sbt-mode
      '(
        (:jql " project = CD and assignee = currentUser() and status in (TODO, 'In Progress') ORDER BY\n  status DESC, created ASC "
         :filename "CD-working-on"))))
+
+(defun +org-jira/get-issues ()
+  (interactive)
+
+  (let ((path (concat org-jira-working-dir "/CD.org")))
+    (with-current-buffer
+	(or (get-file-buffer (concat (projectile-project-root) path))
+          (find-file-noselect (concat (projectile-project-root) path)))
+
+      (erase-buffer))
+      (call-interactively #'org-jira-get-issues)))
 #+end_src
 
 * KILL Configure =mu4e=
@@ -2868,6 +2884,7 @@ sbt-mode
     "o V" #'+vterm/new-session
     "o m" #'mu4e
     "o w" #'+eww/browse-url
+    "o i" #'+org-jira/get-issues
     
     "p a" #'projectile-add-known-project
     "p c" #'projectile-compile-project

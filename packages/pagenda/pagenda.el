@@ -31,23 +31,35 @@
   org-agenda-show-future-repeats nil
   org-agenda-start-on-weekday nil
   org-agenda-start-day "today"
-  org-deadline-warning-days 7
+  org-deadline-warning-days 30
   org-log-done 'time
   org-agenda-block-separator 9472  ;; straight line
   org-agenda-tags-column -100
   org-agenda-compact-blocks t
   diary-show-holidays-flag nil
+  org-agenda-skip-deadline-prewarning-if-scheduled nil
+  org-agenda-skip-scheduled-if-deadline-is-shown t
   org-agenda-hide-tags-regexp ".*"
   org-agenda-breadcrumbs-separator " ❯ "
   org-agenda-scheduled-leaders '("" "")
   org-agenda-current-time-string "→"
   org-agenda-todo-keyword-format "%-1s"
-  org-agenda-prefix-format '((agenda . " %b %?-12t% s")
+  org-agenda-prefix-format '((agenda . " %?-20b %?-10t%s")
                              (timeline . "  % s")
                              (todo . "%i %-12:c%b")
                              (tags . "%i %-12:c%b")
                              (search . " %i %-12:c")))
 
+;; (propertize "\\1 days left " 'face '(:foreground "green" :weight bold))
+
+(defun pagenda--transform (item)
+  (let* ((days-string (replace-regexp-in-string ".*In\s+\\([0-9]+\\) d\.:.*" "\\1" item))
+	 (days (string-to-number (substring-no-properties days-string)))
+	 (item-stripped (replace-regexp-in-string " In\s+[0-9]+ d\.:" "" item)))
+
+    (if (equal days 0)
+	item
+        (s-concat (s-pad-right 70 " " item-stripped) " " (number-to-string days) " " (if (equal days 1) "day" " days") " left"))))
 
 (defun +agenda/show (span)
   (interactive)
@@ -58,9 +70,9 @@
 		    :and (:category "work"
 				    :todo ("STRT" "TODO" "WAIT" "REVIEW")))
 	     (:name "‍📖 Studies"
+	      :transformer #'pagenda--transform
 		    :and (:category "studies" 
-				    :todo ("PROJECT" "STRT" "TODO" "REVIEW")
-				    :deadline t)
+				    :todo ("PROJECT" "STRT" "TODO" "REVIEW"))
 		    ))))
     (org-agenda nil "a")
     (scroll-down)))
@@ -99,7 +111,9 @@
 (defvar pagenda-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "q") #'winner-undo)
-    map))
+    (define-key map (kbd "RET") #'winner-undo)
+    map)
+  )
 
 (define-minor-mode pagenda-mode
   "pagenda-mode"
