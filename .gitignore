@@ -3,6 +3,7 @@ var/
 backup/
 elpa/
 transient/
+request/
 recentf
 .lsp-session-*
 .org-id-locations

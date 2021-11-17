@@ -119,6 +119,10 @@ Ask before closing Emacs.
 (setq confirm-kill-emacs 'y-or-n-p)
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(setq bookmark-save-flag 1)
+#+end_src
+
 Use colors in compilation buffer.
 defer?
 #+begin_src emacs-lisp :results none
@@ -1072,25 +1076,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
           			      :unnarrowed t)))
 
     (add-hook 'org-capture-after-finalize-hook 'org-roam-db-sync))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package org-roam-server
-  :ensure t
-  :defer t
-  :commands org-roam-server-mode
-  :config
-  (setq org-roam-server-host "127.0.0.1"
-        org-roam-server-port 5555
-        org-roam-server-authenticate nil
-        org-roam-server-export-inline-images t
-        org-roam-server-serve-files nil
-        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
-        org-roam-server-network-poll t
-        org-roam-server-network-arrows nil
-        org-roam-server-network-label-truncate t
-        org-roam-server-network-label-truncate-length 60
-        org-roam-server-network-label-wrap-length 20))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2716,6 +2701,7 @@ sbt-mode
   :config
    (setq jiralib-url "https://chatbotize.atlassian.net")
    (setq org-jira-verbosity 'info)
+   (setq org-jira-working-dir "~/.org-jira")
    (setq org-jira-jira-status-to-org-keyword-alist
      '(("In Progress" . "STRT")
        ("In Review" . "REVIEW")
@@ -2738,6 +2724,13 @@ sbt-mode
 
       (erase-buffer))
       (call-interactively #'org-jira-get-issues)))
+#+end_src
+
+* Configure =svg-lib=
+#+begin_src emacs-lisp :results none
+(use-package svg-lib
+ :ensure t
+ :defer t)
 #+end_src
 
 * KILL Configure =mu4e=
@@ -2765,14 +2758,12 @@ sbt-mode
         ("/[Gmail]/All Mail"  . ?a))))
 #+end_src
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package mu4e-alert
   :ensure t
   :disabled
   :config 
-
-
-  (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
+    (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
 #+end_src
 
 * Configure =general=

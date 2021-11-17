@@ -4,6 +4,7 @@
 (require 'org-super-agenda)
 (require 'face-remap)
 (require 'winner)
+;; (require 'svg-lib)
 
 (defvar-local pagenda-transforms nil "A list of faces and their associated specs.")
 (defcustom pagenda-font "Input Mono" "The font to use in an elegant agenda buffer")
