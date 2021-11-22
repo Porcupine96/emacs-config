@@ -53,14 +53,26 @@
 
 ;; (propertize "\\1 days left " 'face '(:foreground "green" :weight bold))
 
+(defun pagenda-change-status ()
+  (interactive)
+  (message "Hello from pagenda-change-status")
+  (org-agenda-todo))
+
+(defun pagenda--format-days-left (days)
+  (let* ((format (cond ((eql days 1) '(:foreground "#ff5555" :weight bold))
+ 		      ((<= days 3) '(:foreground  "yellow"))
+		      (t '(:foreground  "white"))))
+	(label (s-concat (number-to-string days) " " (if (equal days 1) "day" " days") " left")))
+    (propertize label 'face format)))
+
 (defun pagenda--transform (item)
   (let* ((days-string (replace-regexp-in-string ".*In\s+\\([0-9]+\\) d\.:.*" "\\1" item))
 	 (days (string-to-number (substring-no-properties days-string)))
 	 (item-stripped (replace-regexp-in-string " In\s+[0-9]+ d\.:" "" item)))
 
     (if (equal days 0)
-	item
-        (s-concat (s-pad-right 70 " " item-stripped) " " (number-to-string days) " " (if (equal days 1) "day" " days") " left"))))
+	(replace-regexp-in-string "Deadline:\s+" "" item)
+      (s-concat (s-pad-right 70 " " item-stripped) " " (pagenda--format-days-left days)))))
 
 (defun +agenda/show (span)
   (interactive)
@@ -68,11 +80,17 @@
 	  (org-super-agenda-groups
 	   `((:discard (:todo ("DONE" "SOMEDAY")))
 	     (:name "👔 Work"
+		    :transformer #'pagenda--transform
 		    :and (:category "work"
 				    :todo ("STRT" "TODO" "WAIT" "REVIEW")))
 	     (:name "‍📖 Studies"
-	      :transformer #'pagenda--transform
+		    :transformer #'pagenda--transform
 		    :and (:category "studies" 
+				    :todo ("PROJECT" "STRT" "TODO" "REVIEW"))
+		    )
+	     (:name "‍👦🏻 Private"
+		    :transformer #'pagenda--transform
+		    :and (:category "private" 
 				    :todo ("PROJECT" "STRT" "TODO" "REVIEW"))
 		    ))))
     (org-agenda nil "a")
@@ -98,6 +116,7 @@
   (setq-local mode-line-format nil)
   (setq-local line-spacing 8)
   (org-super-agenda-mode)
+
   (setq pagenda-transforms
 	(mapcar (lambda (face-&-spec)
 		  (face-remap-add-relative (car face-&-spec) (cadr face-&-spec)))
@@ -109,12 +128,13 @@
   (mapc #'face-remap-remove-relative
 	pagenda-transforms))
 
+
 (defvar pagenda-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "q") #'winner-undo)
+    (define-key map (kbd "t") #'pagenda-change-status)
     (define-key map (kbd "RET") #'winner-undo)
-    map)
-  )
+    map))
 
 (define-minor-mode pagenda-mode
   "pagenda-mode"

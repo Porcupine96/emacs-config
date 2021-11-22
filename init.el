@@ -62,6 +62,7 @@
 	   (set lsp-pyright-extra-paths
 		[(default-directory)]))))
  '(warning-suppress-log-types '((comp) (:warning)))
+ '(warning-suppress-types '(((defvaralias losing-value woman-topic-history))))
  '(zoom-window-mode-line-color "#4682B4"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

@@ -947,7 +947,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
        "~/Dropbox/org-roam/2021-10-03--10-47-42Z--psychologia_poznawcza_ii_zajęcia.org"
        "~/Dropbox/org-roam/2021-10-03--10-47-21Z--psychologia_rozwoju_w_biegu_zycia_i_zajęcia.org"
        "~/Dropbox/org-roam/2021-10-03--10-46-11Z--język_angielski_zajęcia.org"
-       "~/Dropbox/org/todo/work.org")))
+       "~/Dropbox/org/todo/work.org"
+       "~/Dropbox/org/todo/private.org")))
 #+end_src
 
 ** Academic
@@ -2697,6 +2698,7 @@ sbt-mode
 (use-package org-jira
   :ensure t
   :defer t
+  :straight (org-jira :type git :host github :repo "Porcupine96/org-jira" :branch "master")
   :commands (org-jira-get-issues)
   :config
    (setq jiralib-url "https://chatbotize.atlassian.net")
@@ -2704,8 +2706,9 @@ sbt-mode
    (setq org-jira-working-dir "~/.org-jira")
    (setq org-jira-jira-status-to-org-keyword-alist
      '(("In Progress" . "STRT")
-       ("In Review" . "REVIEW")
-       ("IN TEST" . "WAIT")))
+       ("IN REVIEW" . "REVIEW")
+       ("IN TEST" . "WAIT")
+       ("Scheduled for deployment" . "WAIT")))
 
    (setq org-jira-default-jql "project = CD and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
 
