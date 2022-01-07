@@ -51,7 +51,6 @@
                              (tags . "%i %-12:c%b")
                              (search . " %i %-12:c")))
 
-;; (propertize "\\1 days left " 'face '(:foreground "green" :weight bold))
 
 (defun pagenda-change-status ()
   (interactive)
@@ -60,7 +59,7 @@
 
 (defun pagenda--format-days-left (days)
   (let* ((format (cond ((eql days 1) '(:foreground "#ff5555" :weight bold))
- 		      ((<= days 3) '(:foreground  "yellow"))
+ 		      ((<= days 3) '(:foreground  "yellow" :weight bold))
 		      (t '(:foreground  "white"))))
 	(label (s-concat (number-to-string days) " " (if (equal days 1) "day" " days") " left")))
     (propertize label 'face format)))
@@ -111,6 +110,15 @@
 (defun +agenda/filter-by-tag-hot ()
     (interactive)
     (org-tags-view t "@hot"))
+
+(defun pagenda/save-at-point ()
+  (interactive)
+  (let* ((marker (or (org-get-at-bol 'org-marker)
+	             (error "Invalid marker!")))
+	 (buffer (marker-buffer marker)))
+
+    (with-current-buffer buffer)
+       (save-buffer)))
 
 (defun pagenda--enable()
   (setq-local mode-line-format nil)

@@ -734,7 +734,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 ** Core
 #+begin_src emacs-lisp :results none
 (use-package org
-  :ensure org-plus-contrib
+  ;; :ensure org-plus-contrib
+  :ensure t
   :defer t
   :delight
   :custom
@@ -871,6 +872,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :hook (org-mode . org-indent-mode)
         (org-mode . variable-pitch-mode)
         (org-mode . auto-fill-mode))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package org-contrib
+  :after org
+  :ensure t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1838,7 +1845,7 @@ vc-annotate options.
     (setq xref-show-xrefs-function #'consult-xref
           xref-show-definitions-function #'consult-xref)
 
-    (global-set-key (kbd "C-c k") #'consult-ripgrep)
+    (global-set-key (kbd "C-c k") (lambda () (interactive) (consult-ripgrep default-directory)))
     (global-set-key (kbd "C-x b") #'consult-buffer)
     (global-set-key (kbd "C-s") #'consult-line) 
 
@@ -2045,11 +2052,16 @@ Setup =python-mode=.
          (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
          (lsp-define-conditional-key lsp-command-map "ss" lsp "start server" t)
          (setup-remote-pyright)
-   :bind ((:map evil-normal-state-map 
-         ("M-w" . +lsp-ui/toggle-doc-focus)          
-         ("C-<return>" . lsp-execute-code-action))
+   :bind (
+         (:map lsp-mode-map
+           ("C-t" . lsp-signature-activate))
+         (:map evil-normal-state-map 
+           ("C-t" . lsp-signature-activate)
+           ("M-w" . +lsp-ui/toggle-doc-focus)          
+           ("C-<return>" . lsp-execute-code-action))
          (:map evil-insert-state-map
-         ("C-<return>" . lsp-execute-code-action))))
+           ("C-t" . lsp-signature-activate)
+           ("C-<return>" . lsp-execute-code-action))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2075,11 +2087,32 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defun +lsp/fill-signature--handle (signature)
+  (let* ((signatures (gethash "signatures" signature))
+         (signature (elt signatures 0))
+         (params (gethash "parameters" signature))
+         (labels (mapcar (lambda (p) (gethash "label" p)) params))
+         (label-names (mapcar (lambda (l) (car (s-split ":" l))) labels)))
+
+    (insert (s-join "\n" (mapcar (lambda (n) (s-concat n " = ???,")) label-names)))))
+
+(defun +lsp/fill-signature ()
+  (interactive)
+  (if (and lsp--signature-last-buffer
+          (not (equal (current-buffer) lsp--signature-last-buffer)))
+      (lsp-signature-stop)
+      (lsp-request-async "textDocument/signatureHelp"
+                      (lsp--text-document-position-params)
+                      #'+lsp/fill-signature--handle
+                      :cancel-token :signature)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (defun +lsp/references ()
   (interactive)
   (let ((loc (lsp-request "textDocument/references"
                           ((lsp--text-document-position-params) (list :context `(:includeDeclaration nil))))))
-     (print (lsp--locations-to-xref-items loc))))
+     ((lsp--locations-to-xref-items loc))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2307,6 +2340,7 @@ sbt-mode
     "import cats.instances.list.catsStdInstancesForList"
     "import cats.syntax.flatMap._"
     "import cats.syntax.functor._"
+    "import cats.syntax.bifunctor._"
     "import cats.syntax.traverse._"
     "import cats.syntax.apply._"))
 
@@ -2700,14 +2734,16 @@ sbt-mode
   :defer t
   :straight (org-jira :type git :host github :repo "Porcupine96/org-jira" :branch "master")
   :commands (org-jira-get-issues)
+  :init
+   (setq org-jira-working-dir "~/.org-jira")
   :config
    (setq jiralib-url "https://chatbotize.atlassian.net")
    (setq org-jira-verbosity 'info)
-   (setq org-jira-working-dir "~/.org-jira")
    (setq org-jira-jira-status-to-org-keyword-alist
      '(("In Progress" . "STRT")
        ("IN REVIEW" . "REVIEW")
        ("IN TEST" . "WAIT")
+       ("BLOCKED" . "WAIT")
        ("Scheduled for deployment" . "WAIT")))
 
    (setq org-jira-default-jql "project = CD and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
