@@ -712,6 +712,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     (define-fringe-bitmap 'flycheck-fringe-bitmap-continuation line)
     ;; flycheck-fringe-bitmap-continuation (?)
 
+    ;; TODO: bookmarks
+    (define-fringe-bitmap 'bookmark-fringe-mark arrow)
+
     (flycheck-define-error-level 'error
       :severity 100
       :compilation-level 2
@@ -1035,7 +1038,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
 #+begin_src emacs-lisp :results none
 (use-package jupyter
- :defer t
+ ;; :defer t
  :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
 #+end_src
 
@@ -1889,7 +1892,9 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package consult-projectile
-  :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
+  :ensure t
+  :defer t)
+  ;; :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
 #+end_src
 
 * Configure =popper=
@@ -2087,14 +2092,43 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defun +lsp/current-param-lookup ()
+  (interactive)
+  (let* ((beg (save-excursion (backward-up-list) (right-char) (point)))
+         (end (save-excursion (up-list) (left-char) (point)))
+         (region-str (s-trim (buffer-substring-no-properties beg end)))
+         (param-strs (mapcar (lambda (p) (s-trim p)) (s-split "," region-str)))
+         (lookup (mapcar (lambda (p) (s-split " = " p)) param-strs)))
+
+    lookup))
+
+(defun +lsp/fill-signature--clean ()
+  (let* ((beg (save-excursion (backward-up-list) (right-char) (point)))
+         (end (save-excursion (up-list) (left-char) (point))))
+    (kill-region beg end)))
+
+(defun +lsp/fill-signature--param-value (name lookup)
+  (s-concat
+     name
+     " = "
+     (or (nth 1 (assoc name lookup)) "???")
+      ","))
+
 (defun +lsp/fill-signature--handle (signature)
   (let* ((signatures (gethash "signatures" signature))
          (signature (elt signatures 0))
          (params (gethash "parameters" signature))
          (labels (mapcar (lambda (p) (gethash "label" p)) params))
-         (label-names (mapcar (lambda (l) (car (s-split ":" l))) labels)))
+         (label-names (mapcar (lambda (l) (s-replace "<" "" (car (s-split ":" l)))) labels))
+         (lookup (+lsp/current-param-lookup)))
 
-    (insert (s-join "\n" (mapcar (lambda (n) (s-concat n " = ???,")) label-names)))))
+    (+lsp/fill-signature--clean)
+    
+    (insert
+      (s-concat
+        "\n"
+        (s-join "\n" (mapcar (lambda (n) (+lsp/fill-signature--param-value n lookup)) label-names))
+        "\n"))))
 
 (defun +lsp/fill-signature ()
   (interactive)
@@ -2118,7 +2152,7 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (defun +lsp/lsp-select-log-level()
   (interactive)
-  (let* ((level-string   (ivy-read "Lsp log level" '("ERROR" "WARN" "INFO" "DEBUG")))
+  (let* ((level-string (ivy-read "Lsp log level" '("ERROR" "WARN" "INFO" "DEBUG")))
          (severity  (pcase level-string
                       (`"ERROR" 1)
                       (`"WARN" 2)

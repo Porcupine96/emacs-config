@@ -415,7 +415,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              ;; consult-line-number-prefix
 
 	     ;; bookmark
-             (bookmark-face     ((t (,@bg-base03))))
+             (bookmark-face     ((t (,@bg-base03 ,@fg-green))))
 
              ;; org
              (org-hide          ((t (,@fg-base03))))

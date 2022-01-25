@@ -7,7 +7,7 @@
 ;; (require 'svg-lib)
 
 (defvar-local pagenda-transforms nil "A list of faces and their associated specs.")
-(defcustom pagenda-font "Input Mono" "The font to use in an elegant agenda buffer")
+(defcustom pagenda-font "Roboto Mono Light for Powerline" "The font to use in an elegant agenda buffer")
 
 (defvar pagenda-face-remappings
   (let ((face-height (face-attribute 'default :height)))
@@ -18,8 +18,8 @@
                               :height (* face-height 1.5) :weight 'thin
                               :underline nil  :overline nil :box nil))
      (list 'org-agenda-date-today (list :weight 'bold))
-     (list 'org-agenda-structure (list :weight 'regular))
-     (list 'bold (list :height (ceiling (* face-height 1.1)) :weight 'thin))))
+     (list 'org-agenda-structure (list :family pagenda-font :weight 'regular))
+     (list 'bold (list :family pagenda-font :height (ceiling (* face-height 1.1)) :weight 'bold))))
   "A list of faces and the associated specs that will be remapped
   when pagenda-mode is enabled")
 
