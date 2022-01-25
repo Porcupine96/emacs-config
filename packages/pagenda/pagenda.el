@@ -77,7 +77,7 @@
   (interactive)
   (-let* ((org-agenda-span span)
 	  (org-super-agenda-groups
-	   `((:discard (:todo ("DONE" "SOMEDAY")))
+	   `((:discard (:todo ("DONE" "SOMEDAY" "KILL")))
 	     (:name "👔 Work"
 		    :transformer #'pagenda--transform
 		    :and (:category "work"

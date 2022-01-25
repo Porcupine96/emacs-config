@@ -1892,9 +1892,9 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package consult-projectile
-  :ensure t
-  :defer t)
-  ;; :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
+  :load-path "~/.emacs.default/packages/consult-projectile/"
+  :defer t
+  :commands (consult-projectile))
 #+end_src
 
 * Configure =popper=
