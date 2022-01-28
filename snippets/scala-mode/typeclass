@@ -2,9 +2,10 @@
 # name: typeclass
 # key: tc
 # --
-import cats.tagless.finalAlg
-
-@finalAlg
 trait $1[F[_]] {
 
+}
+
+object $1 {
+  def apply[F[_]](implicit ev: $1[F]): $1[F] = ev
 }

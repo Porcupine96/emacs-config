@@ -1898,7 +1898,7 @@ vc-annotate options.
 #+end_src
 
 * Configure =popper=
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package popper
   :ensure t 
   :commands (popper-toggle-latest popper-toggle-type)
@@ -2048,6 +2048,7 @@ Setup =python-mode=.
           (sh-mode . lsp-deferred))
    :custom
          (lsp-headerline-breadcrumb-enable nil)
+         (lsp-diagnostic-clean-after-change t)
    :init
          (setq lsp-keymap-prefix "C-c l")
    :config
@@ -2058,8 +2059,9 @@ Setup =python-mode=.
          (lsp-define-conditional-key lsp-command-map "ss" lsp "start server" t)
          (setup-remote-pyright)
    :bind (
-         (:map lsp-mode-map
-           ("C-t" . lsp-signature-activate))
+         (:map lsp-command-map
+           ("a" . lsp-execute-code-action)
+           ("f" . +lsp/fill-signature))
          (:map evil-normal-state-map 
            ("C-t" . lsp-signature-activate)
            ("M-w" . +lsp-ui/toggle-doc-focus)          
@@ -2147,6 +2149,13 @@ Setup =python-mode=.
   (let ((loc (lsp-request "textDocument/references"
                           ((lsp--text-document-position-params) (list :context `(:includeDeclaration nil))))))
      ((lsp--locations-to-xref-items loc))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +lsp/consult-errors ()
+  (interactive)
+
+  (eval-expr 'lsp-diagnostics))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2984,7 +2993,7 @@ sbt-mode
     "y c" #'company-yasnippet
     "y p" #'+core/copy-file-path
     
-    "RET" #'popper-toggle-latest
+    "RET" #'consult-bookmark
     "`" #'popper-toggle-type
     
     "TAB c" #'persp-switch

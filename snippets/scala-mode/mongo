@@ -3,19 +3,18 @@
 # key: mongo
 # --
 
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hero.common.mongo.MongoRepository
-import reactivemongo.api.DefaultDB
+import reactivemongo.api.DB
 
 import scala.concurrent.ExecutionContext
-import reactivemongo.bson.BSONDocument
+import reactivemongo.api.bson.BSONDocument
 import reactivemongo.api.bson.Macros.Annotations.Key
-import reactivemongo.api.bson.compat._
 
 import hero.common.util.LazyFunctionK.implicits._
 
-class Mongo$1Repository(db: DefaultDB)(implicit ec: ExecutionContext, cs: ContextShift[IO])
-    extends MongoRepository[IO](db, $2)
+class Mongo$1Repository(db: DB)(implicit ec: ExecutionContext)
+    extends MongoRepository[IO](db, Mongo$1Repository.collectionName)
     with $1Repository[IO] {
 
   import MongoWRs._
@@ -25,6 +24,8 @@ class Mongo$1Repository(db: DefaultDB)(implicit ec: ExecutionContext, cs: Contex
 }
 
 object Mongo$1Repository {
+ val collectionName = ""
+
   case class $1DTO(
       @Key("_id") id: String,
   ) {

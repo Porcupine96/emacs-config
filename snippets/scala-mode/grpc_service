@@ -1,0 +1,27 @@
+# key: grpc
+# name: gRPC service
+# --
+import cats.Functor
+import cats.effect.Async
+import cats.effect.Resource
+import cats.effect.std.Dispatcher
+import cats.syntax.functor.toFunctorOps
+import hero.common.grpc.GrpcChannelCreator
+import hero.common.grpc.GrpcUtils
+import io.opentracing.Tracer
+import io.opentracing.Span
+import hero.common.tracing.SpanManager.Implicits._
+
+class Grpc$1Service[F[_]: Functor](stub: $1GrpcF[F, Unit])(implicit tracer: Tracer)
+    extends $1Service[F] {
+
+}
+
+object Grpc$1Service {
+  def resource[F[_]: Async](config: ServiceConfig)(implicit tracer: Tracer): Resource[F, Grpc$1Service[F]] =
+    for {
+      dispatcher <- Dispatcher[F]
+      channel <- GrpcChannelCreator.defaultChannelResource[F](config.host, config.port)
+      client = $1ServiceGrpcF.client(dispatcher, channel, GrpcUtils.createEmptyMetadata)
+    } yield new Grpc$1Service[F](client)
+}
