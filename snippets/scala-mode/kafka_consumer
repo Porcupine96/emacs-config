@@ -1,0 +1,44 @@
+# -*- mode: snippet -*-
+# name: kafka_consumer
+# key: consumer
+# --
+import cats.effect.kernel.Async
+import cats.effect.kernel.Sync
+import fs2.Stream
+import fs2.kafka._
+
+class Kafka$1Source[F[_]: Async](groupId: String, clientId: String, bootstrapServers: String, topic: String)
+    extends $1Source[F] {
+
+  private val settings =
+    Kafka$1Source.consumerSettings(bootstrapServers, groupId, clientId)
+
+  def source: Stream[F, Stream[F, CommittableConsumerRecord[F, String, $1]]] =
+    KafkaConsumer[F]
+      .stream(settings)
+      .evalTap(_.subscribeTo(topic))
+      .flatMap(_.partitionedStream)
+
+}
+
+object Kafka$1Source {
+
+  def deserializer[F[_]: Sync]: Deserializer[F, $1] =
+    Deserializer.lift(bytes => Sync[F].catchNonFatal($1.parseFrom(bytes)))
+
+  def consumerSettings[F[_]: Sync](
+      bootstrapServers: String,
+      groupId: String,
+      clientId: String
+  ): ConsumerSettings[F, String, $1] =
+    ConsumerSettings
+      .apply(
+        Deserializer.string[F],
+        deserializer[F]
+      )
+      .withBootstrapServers(bootstrapServers)
+      .withClientId(clientId)
+      .withGroupId(groupId)
+      .withAutoOffsetReset(AutoOffsetReset.Latest)
+
+}

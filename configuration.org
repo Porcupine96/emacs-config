@@ -2094,6 +2094,27 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+
+;; (defun +lsp/sort--code-actions-cmp (a1 a2)
+;;   (let ((n1 (gethash "title" a1))
+;;         (n2 (gethash "title" a2)))
+;;       (if (and (s-starts-with? "Import" n1) (not (s-starts-with? "Import" n2))) t
+;;       (if (and (s-starts-with? "Import" n2) (not (s-starts-with? "Import" n1))) nil
+;;       (s-less? n1 n2)))))
+
+;; (defun +lsp/sort--code-actions (actions)
+;;   (sort actions '+lsp/sort--code-actions-cmp))
+
+;; (lsp-defun +lsp/execute-code-action ((action &as &CodeAction :command? :edit?))
+;;   (interactive (list (lsp--select-action (+lsp/sort--code-actions (lsp-code-actions-at-point)))))
+;;   (if (and (lsp-feature? "codeAction/resolve")
+;;            (not command?)
+;;            (not edit?))
+;;       (lsp--execute-code-action (lsp-request "codeAction/resolve" action))
+;;     (lsp--execute-code-action action)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (defun +lsp/current-param-lookup ()
   (interactive)
   (let* ((beg (save-excursion (backward-up-list) (right-char) (point)))
@@ -2385,6 +2406,10 @@ sbt-mode
     "import cats.syntax.functor._"
     "import cats.syntax.bifunctor._"
     "import cats.syntax.traverse._"
+    "import cats.syntax.monad._"
+    "import cats.syntax.applicativeError._"
+    "import cats.syntax.monadError._"
+    "import cats.syntax.applicative._"
     "import cats.syntax.apply._"))
 
 (defun +scala/insert-common-import (import)
