@@ -81,12 +81,12 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 
 (setq org-todo-keyword-faces '(
-    ("PROJECT" . (:inherit fixed-pitch :height 1.2 :foreground "#ffffff" :weight normal :underline t))
-    ("STRT"    . (:inherit fixed-pitch :height 1.2 :foreground "#0198e1" :weight normal :underline t))
-    ("SOMEDAY" . (:inherit fixed-pitch :height 1.2 :foreground "#ff8888" :weight normal :underline t))
-    ("REVIEW"  . (:inherit fixed-pitch :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-    ("DEPLOY"  . (:inherit fixed-pitch :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-    ("WAIT"    . (:inherit fixed-pitch :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
+    ("PROJECT" . (:inherit default :height 1.2 :foreground "#ffffff" :weight normal :underline t))
+    ("STRT"    . (:inherit default :height 1.2 :foreground "#0198e1" :weight normal :underline t))
+    ("SOMEDAY" . (:inherit default :height 1.2 :foreground "#ff8888" :weight normal :underline t))
+    ("REVIEW"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+    ("DEPLOY"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+    ("WAIT"    . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
 
 (defmacro noct-flet (specs &rest body)
   (let ((flet (if (fboundp 'cl-flet) 'cl-flet 'flet)))
@@ -419,10 +419,10 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              ;; org
              (org-hide          ((t (,@fg-base03))))
-             (org-todo          ((t (:inherit fixed-pitch :height 1.2 ,@fmt-undr ,@fg-red  ,@bg-base03))))
-             (org-done          ((t (:inherit fixed-pitch :height 1.2 ,@fmt-none ,@fg-gray ,@bg-base03))))
+             (org-todo          ((t (:inherit default :height 1.2 ,@fmt-undr ,@fg-red  ,@bg-base03))))
+             (org-done          ((t (:inherit default :height 1.2 ,@fmt-none ,@fg-gray ,@bg-base03))))
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray ,@bg-base03))))
-             (org-date          ((t (:inherit fixed-pitch ,@fmt-none ,@fg-yellow ,@bg-base03))))
+             (org-date          ((t (:inherit default ,@fmt-none ,@fg-yellow ,@bg-base03))))
 
 	     (org-checkbox-statistics-todo  ((t (,@fmt-none ,@fg-red ,@bg-base03))))
 	     (org-checkbox-statistics-done  ((t (,@fmt-none ,@fg-gray ,@bg-base03))))
@@ -430,21 +430,21 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-ellipsis      ((t (,@fmt-none ,@fg-gray))))
 
 	     (org-document-title        ((t (,@fmt-bigger,@fg-gray ,@bg-base03))))
-	     (org-document-info-keyword ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
-             (org-code                  ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-green ,@bg-base03))))
-             (org-verbatim              ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-yellow ,@bg-base03))))
-	     (org-quote                 ((t (:inherit fixed-pitch  :height 0.9 ,@fmt-none  ,@fg-gray  ,@bg-base03))))
-	     (org-block                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-white ,@bg-base03))))
-	     (org-block-begin-line      ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
-	     (org-block-end-line        ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
-	     (org-drawer                ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
-	     (org-meta-line             ((t (:inherit fixed-pitch ,@fmt-small ,@fg-gray  ,@bg-base03))))
-	     (org-special-keyword       ((t (:inherit fixed-pitch ,@fg-green))))
+	     (org-document-info-keyword ((t (:inherit default ,@fmt-small ,@fg-gray  ,@bg-base03))))
+             (org-code                  ((t (:inherit default ,@fmt-none  ,@fg-green ,@bg-base03))))
+             (org-verbatim              ((t (:inherit default ,@fmt-none  ,@fg-yellow ,@bg-base03))))
+	     (org-quote                 ((t (:inherit default  :height 0.9 ,@fmt-none  ,@fg-gray  ,@bg-base03))))
+	     (org-block                 ((t (:inherit default ,@fmt-none  ,@fg-white ,@bg-base03))))
+	     (org-block-begin-line      ((t (:inherit default ,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-block-end-line        ((t (:inherit default ,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-drawer                ((t (:inherit default ,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-meta-line             ((t (:inherit default ,@fmt-small ,@fg-gray  ,@bg-base03))))
+	     (org-special-keyword       ((t (:inherit default ,@fg-green))))
 
-	     (org-table                 ((t (:inherit fixed-pitch ,@fmt-none  ,@fg-blue ,@bg-base03))))
+	     (org-table                 ((t (:inherit default ,@fmt-none  ,@fg-blue ,@bg-base03))))
 
              (org-link ((t (,@fmt-undr ,@fg-darkblue ,@bg-base03))))
-             (org-tag ((t (:inherit fixed-pitch :height 1.2 ,@fg-orange ,@bg-base03))))
+             (org-tag ((t (:inherit default :height 1.2 ,@fg-orange ,@bg-base03))))
 
 	     (org-level-1 ((t (,@fmt-big ,@fg-purple ,@bg-base03))))
 	     (org-level-2 ((t (,@fmt-sbig ,@fg-pink ,@bg-base03))))
@@ -729,10 +729,10 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (erc-timestamp-face ((t (:foreground ,base01))))
 
 	     ;; avy
-             (avy-lead-face   ((t (:inherit fixed-pitch ,@fg-base03 ,@bg-red))))
-             (avy-lead-face-0 ((t (:inherit fixed-pitch ,@fg-base03 ,@bg-purple))))
-             (avy-lead-face-1 ((t (:inherit fixed-pitch))))
-             (avy-lead-face-2 ((t (:inherit fixed-pitch))))
+             (avy-lead-face   ((t (:inherit default ,@fg-base03 ,@bg-red))))
+             (avy-lead-face-0 ((t (:inherit default ,@fg-base03 ,@bg-purple))))
+             (avy-lead-face-1 ((t (:inherit default))))
+             (avy-lead-face-2 ((t (:inherit default))))
 
 	     ;; tab-line
 	     (tab-line ((t (,@bg-base03))))

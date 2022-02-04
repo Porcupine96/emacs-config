@@ -889,7 +889,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :hook (org-mode . org-superstar-mode)
   :custom
   (org-superstar-remove-leading-stars t)
-  (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
+  (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●"))
+  (org-superstar-item-bullet-alist '((?* . ?•) (?+ . ?⚬) (?- . ?–))))
 #+end_src
    
 #+begin_src emacs-lisp :results none
@@ -1025,7 +1026,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
 #+begin_src emacs-lisp :results none
 (use-package ob-ipython
-  :disabled
   :ensure t
   :defer t)
 #+end_src
@@ -1805,7 +1805,33 @@ vc-annotate options.
     (add-to-list 'display-buffer-alist
                  '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                    nil
-                   (window-parameters (mode-line-format . none)))))
+                   (window-parameters (mode-line-format . none))))
+
+
+                   (require 'org-element)
+                   
+    (defun org-link-finder ()
+      (let ((context (org-element-context)))
+        (if (equal (org-element-type context) 'link)
+    	(let* ((ctx (cadr context))
+                 (beg (plist-get ctx :begin))
+                 (end (plist-get ctx :end))
+                 (content-beg (plist-get ctx :contents-begin))
+                 (content-end (plist-get ctx :contents-end))
+                 (link-text (buffer-substring-no-properties content-beg content-end)))
+    	  `(link ,link-text ,beg . ,end)))))
+    
+    (embark-define-keymap embark-link-map
+      "Keymap to work with links"
+      ("o" +org-open-at-point-other-window))
+    
+    
+    (defun +org-open-at-point-other-window (x)
+      (let ((org-link-frame-setup '((file . find-file-other-window))))
+        (org-open-at-point)))
+    
+    (add-to-list 'embark-target-finders 'org-link-finder)
+    (add-to-list 'embark-keymap-alist '(link . embark-link-map)))
 
 (defun +embark/insert-grep-line (line)
           (interactive "sInsert: ")
