@@ -214,6 +214,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
               (fmt-orangewave `(:underline (:color ,orange :style wave) :inherit default)))
           `((;; basic
              (default ((t (,@fg-base0 ,@bg-back)))) ; Normal
+	     (italic ((t (:underline nil :italic t))))
              (cursor ((t (,@fg-base03 ,@bg-orange)))) ; Cursor
              (error ((t (,@fmt-bold ,@fg-red)))) ; Error
              (escape-glyph-face ((t (,@fg-red))))
@@ -433,7 +434,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-document-info-keyword ((t (:inherit default ,@fmt-small ,@fg-gray  ,@bg-base03))))
              (org-code                  ((t (:inherit default ,@fmt-none  ,@fg-green ,@bg-base03))))
              (org-verbatim              ((t (:inherit default ,@fmt-none  ,@fg-yellow ,@bg-base03))))
-	     (org-quote                 ((t (:inherit default  :height 0.9 ,@fmt-none  ,@fg-gray  ,@bg-base03))))
+	     (org-quote                 ((t (:inherit default ,@fmt-ital  ,@fg-gray  ,@bg-base03))))
 	     (org-block                 ((t (:inherit default ,@fmt-none  ,@fg-white ,@bg-base03))))
 	     (org-block-begin-line      ((t (:inherit default ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-block-end-line        ((t (:inherit default ,@fmt-small ,@fg-gray  ,@bg-base03))))

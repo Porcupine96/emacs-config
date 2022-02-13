@@ -384,6 +384,7 @@ Buffer commands.
 
 Evaluation commands.
 #+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c e d") #'eval-defun)
 (global-set-key (kbd "C-c e b") #'eval-buffer)
 #+end_src
 
@@ -761,6 +762,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq org-src-tab-acts-natively t)
   (setq org-src-preserve-indentation t)
 
+  (setq org-fontify-quote-and-verse-blocks t)
+
   (org-babel-do-load-languages 'org-babel-load-languages
     '((shell . t)
       (emacs-lisp . t)
@@ -782,8 +785,14 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
 
   ;; LaTeX options
+  (defun +latex-rescale ()
+     (interactive)
+     (org-latex-preview '(64))
+     (plist-put org-format-latex-options :scale (if (= (x-display-pixel-width) 5560) 2.5 1.5))
+     (org-latex-preview '(16)))
+
   (setq org-format-latex-options 
-    (plist-put (plist-put org-format-latex-options :background "#202020") :scale 2.0))
+    (plist-put (plist-put org-format-latex-options :background "#202020") :scale 1.5))
 
   ;; open files in the same window
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
@@ -1808,7 +1817,7 @@ vc-annotate options.
                    (window-parameters (mode-line-format . none))))
 
 
-                   (require 'org-element)
+    (require 'org-element)
                    
     (defun org-link-finder ()
       (let ((context (org-element-context)))
@@ -3052,6 +3061,7 @@ sbt-mode
     "TAB n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace")))
     "TAB k" #'persp-kill
     "TAB r" #'persp-rename
+    "TAB TAB" #'persp-switch
     
     "SPC" #'consult-fd
     "," #'consult-projectile)
