@@ -5,6 +5,7 @@
 (require 'json)
 (require 'request)
 (require 'org-element)
+(require 'ox-html)
 
 (defconst flash-directory "/home/porcupine/Dropbox/org-roam/flash")
 
@@ -21,7 +22,6 @@
   :group 'flash)
 
 (defconst flash-anki-prop-note-id "ANKI_NOTE_ID")
-(defconst flash-anki-prop-note-type "ANKI_TYPE")
 (defconst flash-anki-prop-deck "ANKI_DECK")
 
 
@@ -68,47 +68,61 @@
 	    (front . ,front)
 	    (back . ,back)))))))
 
-(defun flash-anki--on-success (data)
-  (let ((result (cdr (assoc 'result data))))
+(defun flash-anki--add-note-success (data)
+  (let ((note-id (cdr (assoc 'result data))))
 
-    (if result
-	(print result)
-      (error "on-success callback with error"))))
+    (if note-id
+	(org-set-property flash-anki-prop-note-id (number-to-string note-id))
+      (error (concat "on-success callback with error: " (cdr (assoc 'error data)))))))
 
-(defun flash-anki--sync-note-at-point ()
-  (let* ((note (flash-anki--headline-to-note (org-element-at-point))))
-	 ;; (note-id (cdr (assq 'note-id note)))
-	 ;; (headline-start (org-element-property :begin headline)))
+(defun flash-anki-sync-note-at-point (callback)
+  (interactive "i")
 
-  (flash-anki--anki-connect-add-note
-     note
-     (cl-function (lambda (&key data &allow-other-keys) (flash-anki--on-success data)))
-     (cl-function (lambda (&key _ &key error-thrown &allow-other-keys) (print error-thrown))))))
+  (let* ((note (flash-anki--headline-to-note (org-element-at-point)))
+	 (note-id (cdr (assq 'note-id note))))
+    (if note-id
+	(progn
+	  (print "todo: update instead")
+	  (if callback (funcall callback)))
+	(flash-anki--anki-connect-add-note
+	    note
+	    (cl-function (lambda (&key data &allow-other-keys)
+			   (progn (flash-anki--add-note-success data)
+				  (if callback (funcall callback)))))
+	    (cl-function (lambda (&key _ &key error-thrown &allow-other-keys)
+			   (error (concat "error when syncing a note: " error-thrown))))))))
 
 
-(defun flash-traverse-top-level (fun)
-  (save-excursion
-    (goto-char (point-min))
-    (let ((element (org-element-at-point)))
-      (if (eq (org-element-type element) 'headline)
-	  (flash-traverse-top-level-next (org-element-property :begin element) fun)))))
-
-(defun flash-traverse-top-level-next (current-point fun)
-  (funcall fun)
-  (org-forward-heading-same-level nil)
-
-  (let* ((element (org-element-at-point))
-	 (headline-begin (org-element-property :begin element)))
-    (if (not (eq headline-begin current-point))
-	(flash-traverse-top-level-next headline-begin fun))))
-
-(defun flash/test ()
-  (interactive))
-
+(defun flash-anki--sync-next (current-point step)
+  (if step
+      (progn
+	(org-forward-heading-same-level nil)
+	(let* ((element (org-element-at-point))
+	       (headline-begin (org-element-property :begin element)))
+	  (if (not (eq headline-begin current-point))
+	      (flash-anki--sync-next headline-begin nil))))
+    (flash-anki-sync-note-at-point (lambda ()
+				     (flash-anki--sync-next current-point t)))))
 
 (defun flash-anki-sync ()
   (interactive)
-  (flash-traverse-top-level 'flash-anki--sync-note-at-point))
+  (goto-char (point-min))
+  (save-excursion
+    (let ((element (org-element-at-point)))
+      (if (eq (org-element-type element) 'headline)
+	  (flash-anki--sync-next (org-element-property :begin element) nil)))))
+
+(defun flash-insert-skeleton ()
+  (interactive)
+  (goto-char (point-max))
+  (org-insert-heading nil nil t)
+  (save-excursion
+    (insert "Flashcard")
+    (org-insert-subheading nil)
+    (insert "Front")
+    (org-insert-heading nil)
+    (insert "Back"))
+  (org-set-property flash-anki-prop-deck "Default"))
 
 (defun flash-open-notes ()
   (interactive)
@@ -118,6 +132,7 @@
 (defvar flash-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c a s") #'flash-anki-sync)
+    (define-key map (kbd "C-c a n") #'flash-insert-skeleton)
     (define-key map (kbd "C-c o n") #'flash-open-notes)
     map))
 
@@ -128,3 +143,22 @@
   :keymap flash-mode-map)
 
 (provide 'flash)
+
+
+;; MAY COME USEFUL
+;; ---
+;; (defun flash-traverse-top-level (fun)
+;;   (save-excursion
+;;     (goto-char (point-min))
+;;     (let ((element (org-element-at-point)))
+;;       (if (eq (org-element-type element) 'headline)
+;; 	  (flash-traverse-top-level-next (org-element-property :begin element) fun)))))
+
+;; (defun flash-traverse-top-level-next (current-point fun)
+;;   (funcall fun)
+;;   (org-forward-heading-same-level nil)
+
+;;   (let* ((element (org-element-at-point))
+;; 	 (headline-begin (org-element-property :begin element)))
+;;     (if (not (eq headline-begin current-point))
+;; 	(flash-traverse-top-level-next headline-begin fun))))
