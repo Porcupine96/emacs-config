@@ -2400,11 +2400,16 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package emacs
   :bind
-    (:map emacs-lisp-mode-map
-      ("C-c i" . indent-region))
+  (:map emacs-lisp-mode-map
+	("C-c i" . indent-region))
   :config
-    (font-lock-add-keywords 'emacs-lisp-mode
-      '(("\\(TODO\\):" 1 'todo-comment-face prepend))))
+  (font-lock-add-keywords 'emacs-lisp-mode
+			  '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
+
+  (add-hook 'emacs-lisp-mode-hook 
+	    (lambda () (progn
+			 (push '("lambda" . "λ") prettify-symbols-alist)
+			 (prettify-symbols-mode 1)))))
 #+end_src
 
 ** Scheme

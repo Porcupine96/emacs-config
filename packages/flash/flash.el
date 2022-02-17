@@ -33,10 +33,9 @@
     (`(,id . nil) (expand-file-name (s-concat id ".org") flash-directory))
     (_ (error "Couldn't find org ID property."))))
 
-(defun flash-anki--content-at-point ()
-  (let* ((heading (org-element-at-point))
-	 (start (org-element-property :contents-begin heading))
-	 (end (org-element-property :contents-end heading)))
+(defun flash-anki--headline-content (headline)
+  (let ((start (org-element-property :contents-begin headline))
+	(end (org-element-property :contents-end headline)))
 
     (s-trim (buffer-substring-no-properties start end))))
 
@@ -57,16 +56,15 @@
     :success on-success
     :error on-error))
 
-(defun flash-anki--headline-to-note (headline)
-  (save-excursion
-    (when (org-goto-first-child)
-      (let ((front (flash-anki--content-at-point)))
-	(org-forward-heading-same-level nil)
-	(let ((back (flash-anki--content-at-point)))
-	  `((note-id . ,(org-element-property :ANKI_NOTE_ID headline))
-	    (deck . ,(org-element-property :ANKI_DECK headline))
-	    (front . ,front)
-	    (back . ,back)))))))
+(defun flash-anki--headline-to-note ()
+  (pcase (org-map-entries (lambda () (org-element-at-point)) nil 'tree)
+    (`(,top ,front ,back . nil)
+     `((note-id . ,(org-element-property :ANKI_NOTE_ID top))
+       (deck . ,(org-element-property :ANKI_DECK top))
+       (front . ,(flash-anki--headline-content front))
+       (back . ,(flash-anki--headline-content back))))
+    (_ (error "couldn't parse map headline to note"))))
+
 
 (defun flash-anki--add-note-success (data)
   (let ((note-id (cdr (assoc 'result data))))
@@ -78,7 +76,7 @@
 (defun flash-anki-sync-note-at-point (callback)
   (interactive "i")
 
-  (let* ((note (flash-anki--headline-to-note (org-element-at-point)))
+  (let* ((note (flash-anki--headline-to-note))
 	 (note-id (cdr (assq 'note-id note))))
     (if note-id
 	(progn
