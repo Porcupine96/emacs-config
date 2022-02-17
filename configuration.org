@@ -123,6 +123,10 @@ Ask before closing Emacs.
 (setq bookmark-save-flag 1)
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(setq require-final-newline nil)
+#+end_src
+
 Use colors in compilation buffer.
 defer?
 #+begin_src emacs-lisp :results none
@@ -517,40 +521,6 @@ Scale text.
   (+core/redraw-dired-buffers))
 #+end_src
 
- Search Monorepo.
-#+begin_src emacs-lisp :results none
-(defun +work/consult-monorepo ()
-  (interactive)
-  (consult-ripgrep "~/work/monorepo" ""))
-
-(defvar +work/consult-monorepo-last-glob nil)
-
-(defun +work/consult-monorepo-glob ()
-  (interactive)
-  (let* ((glob (read-string "glob: " (or +work/consult-monorepo-last-glob
-                                          (concat "*." (file-name-extension (buffer-name))))))
-         (consult-ripgrep-args
-          (concat
-           "rg "
-           "--line-buffered "
-           "--color=never "
-           "--max-columns=1000 "
-           "--path-separator / "
-           "--no-heading "
-           "--smart-case "
-           "--line-number "
-           "--glob " "\"" glob "\""
-           ". ")))
-
-    (setq +work/consult-monorepo-last-glob glob)
-
-    (consult-ripgrep "~/work/monorepo" "")))
-
-(defun +work/consult-find-file-monorepo ()
-  (interactive)
-  (consult-fd "~/work/monorepo"))
-#+end_src
- 
 Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-a040-018ee9b5b2f2][LINK]]
 #+begin_src emacs-lisp :results none
 (defun +core/to-floating-frame()
@@ -578,24 +548,14 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
   
 #+begin_src emacs-lisp :results none
-(defun +core/inc-at-point ()
-  (interactive)
-  (let ((word (current-word)))
-    (kill-word 1)
-    (message (string-to-number word) ) 
-    (message "hello")
-    (insert (+ 1 (string-to-number word)))))
-#+end_src
-
-  #+begin_src emacs-lisp :results none
- (defun +core/surround-word-with (left right)
+(defun +core/surround-word-with (left right)
    (backward-to-word 1)
    (forward-to-word 1)
    (kill-word 1)
    (insert left)
    (yank)
    (insert right))
-  #+end_src
+#+end_src
 
 * Configure =which-key=
  #+begin_src emacs-lisp :results none
@@ -1623,6 +1583,12 @@ vc-annotate options.
   :defer t)
 #+end_src
 
+* Configure =ox-slack=
+#+begin_src emacs-lisp :results none :tangle no
+(use-package ox-slack
+  :defer t)
+#+end_src
+
 * Configure =emojify=
 #+begin_src emacs-lisp :results none
 (use-package emojify 
@@ -2049,33 +2015,6 @@ Setup =python-mode=.
    
 ** LSP
 #+begin_src emacs-lisp :results none
-(defun setup-remote-pyright ()
-   (interactive)
-
-   (lsp-register-client
-     (make-lsp-client
-       :new-connection (lsp-stdio-connection (lambda ()
-       					    (cons (lsp-package-path 'pyright)
-       						   lsp-pyright-langserver-command-args)))
-       :major-modes '(python-mode)
-       :server-id 'pyright-remote
-       :multi-root lsp-pyright-multi-root
-       :remote? t
-       :priority 3
-       :initialized-fn (lambda (workspace)
-       			 (with-lsp-workspace workspace
-       			 ;; we send empty settings initially, LSP server will ask for the
-       			 ;; configuration of each workspace folder later separately
-       			 (lsp--set-configuration
-       			 (make-hash-table :test 'equal))))
-       :download-server-fn (lambda (_client callback error-callback _update?)
-       			     (lsp-package-ensure 'pyright callback error-callback))
-       :notification-handlers (lsp-ht ("pyright/beginProgress" 'lsp-pyright--begin-progress-callback)
-       				      ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)
-       				      ("pyright/endProgress" 'lsp-pyright--end-progress-callback)))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
 (use-package lsp-mode
    :hook ((python-mode . lsp-deferred)
           (typescript-mode . lsp-deferred)  
@@ -2092,7 +2031,6 @@ Setup =python-mode=.
          (lsp-enable-which-key-integration t)
          (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
          (lsp-define-conditional-key lsp-command-map "ss" lsp "start server" t)
-         (setup-remote-pyright)
    :bind (
          (:map lsp-command-map
            ("a" . lsp-execute-code-action)
@@ -2126,27 +2064,6 @@ Setup =python-mode=.
   (if (lsp-ui-doc--visible-p)
       (lsp-ui-doc-focus-frame)
       (lsp-ui-doc-unfocus-frame)))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-
-;; (defun +lsp/sort--code-actions-cmp (a1 a2)
-;;   (let ((n1 (gethash "title" a1))
-;;         (n2 (gethash "title" a2)))
-;;       (if (and (s-starts-with? "Import" n1) (not (s-starts-with? "Import" n2))) t
-;;       (if (and (s-starts-with? "Import" n2) (not (s-starts-with? "Import" n1))) nil
-;;       (s-less? n1 n2)))))
-
-;; (defun +lsp/sort--code-actions (actions)
-;;   (sort actions '+lsp/sort--code-actions-cmp))
-
-;; (lsp-defun +lsp/execute-code-action ((action &as &CodeAction :command? :edit?))
-;;   (interactive (list (lsp--select-action (+lsp/sort--code-actions (lsp-code-actions-at-point)))))
-;;   (if (and (lsp-feature? "codeAction/resolve")
-;;            (not command?)
-;;            (not edit?))
-;;       (lsp--execute-code-action (lsp-request "codeAction/resolve" action))
-;;     (lsp--execute-code-action action)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3174,6 +3091,12 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (defconst +work/monorepo-path "~/work/monorepo")
 
+(defun update-monorepo-path ()
+  (interactive)
+  
+  (setq +work/monorepo-path
+	(completing-read "" '("~/work/monorepo" "~/work/monorepo-email-automation"))))
+
 (defconst +work/proto-paths (list
 			     (list "ai" (concat +work/monorepo-path  "/ai/ai-protobufs"))
 			     (list "creator" (concat +work/monorepo-path  "/creator/creator-protobufs"))
@@ -3194,16 +3117,37 @@ sbt-mode
          (proto-root (nth 1 (assoc module +work/proto-paths))))
 
     (find-file-other-window (concat proto-root "/" proto-name))))
-#+end_src
 
-#+begin_src emacs-lisp :results none
-(defun +work/read-plot ()
+(defun +work/consult-monorepo ()
   (interactive)
-  (let ((filename (dired-get-filename)))
-  (if (s-starts-with? "/ssh" filename)
-      (let ((dest (concat "/tmp/" (file-name-nondirectory filename))))
-        (tramp-sh-handle-copy-file filename dest t)
-        (call-process "/home/porcupine/.pyenv/versions/ai-intent-bert-backend/bin/python" nil nil nil "/home/porcupine/work/monorepo/ai/ai-intent-bert-backend/scripts/read_plt.py" dest)))))
+  (consult-ripgrep +work/monorepo-path ""))
+
+(defvar +work/consult-monorepo-last-glob nil)
+
+(defun +work/consult-monorepo-glob ()
+  (interactive)
+  (let* ((glob (read-string "glob: " (or +work/consult-monorepo-last-glob
+                                          (concat "*." (file-name-extension (buffer-name))))))
+         (consult-ripgrep-args
+          (concat
+           "rg "
+           "--line-buffered "
+           "--color=never "
+           "--max-columns=1000 "
+           "--path-separator / "
+           "--no-heading "
+           "--smart-case "
+           "--line-number "
+           "--glob " "\"" glob "\""
+           ". ")))
+
+    (setq +work/consult-monorepo-last-glob glob)
+
+    (consult-ripgrep +work/monorepo-path "")))
+
+(defun +work/consult-find-file-monorepo ()
+  (interactive)
+  (consult-fd +work/monorepo-path))
 #+end_src
 
 #+begin_src emacs-lisp :results none
