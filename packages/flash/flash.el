@@ -24,7 +24,6 @@
 (defconst flash-anki-prop-note-id "ANKI_NOTE_ID")
 (defconst flash-anki-prop-deck "ANKI_DECK")
 
-
 (defun flash--set-note-id (id)
   (org-set-property flash-anki-prop-note-id (number-to-string id)))
 
@@ -42,19 +41,47 @@
 (defun flash-anki--anki-connect-uri ()
   (concat "http://" flash-anki-host ":" (number-to-string flash-anki-port)))
 
-(defun flash-anki--anki-connect-add-note (note on-success on-error)
+(defun flash-anki--anki-connect-format (text)
+  (with-temp-buffer
+    (insert text)
+    (set-mark (point-min))
+    (goto-char (point-max))
+    (activate-mark)
+    (org-html-convert-region-to-html)
+    (buffer-substring-no-properties (point-min) (point-max))))
+
+(defun flash-anki--anki-connect-make-request (action params on-success on-error)
   (request (flash-anki--anki-connect-uri)
-    :type "POST"
-    :data (json-encode `(("action" . "addNote")
-			 ("version" . 6)
-			 ("params" ("note" ("deckName" . ,(cdr (assoc 'deck note)))
-				    ("modelName" . "Basic")
-				    ("fields"
-				     ("Front" .  ,(cdr (assoc 'front note)))
-				     ("Back" . ,(cdr (assoc 'back note))))))))
-    :parser 'json-read
-    :success on-success
-    :error on-error))
+	   :type "POST"
+	   :data (json-encode `(("action" . ,action)
+				("version" . 6)
+				("params" ,params)))
+	   :parser 'json-read
+	   :success on-success
+	   :error on-error))
+
+(defun flash-anki--anki-connect-add-note (note on-success on-error)
+  (flash-anki--anki-connect-make-request
+   "addNote"
+   `("note"
+     ("deckName" . ,(cdr (assoc 'deck note)))
+     ("modelName" . "Basic")
+     ("fields"
+      ("Front" . ,(flash-anki--anki-connect-format (cdr (assoc 'front note))))
+      ("Back" . ,(flash-anki--anki-connect-format (cdr (assoc 'back note))))))
+   on-success
+   on-error))
+
+(defun flash-anki--anki-connect-update-note (note on-success on-error)
+  (flash-anki--anki-connect-make-request
+   "updateNoteFields"
+   `("note"
+     ("id" . ,(string-to-number (cdr (assoc 'note-id note))))
+     ("fields"
+      ("Front" . ,(flash-anki--anki-connect-format (cdr (assoc 'front note))))
+      ("Back" . ,(flash-anki--anki-connect-format (cdr (assoc 'back note))))))
+   on-success
+   on-error))
 
 (defun flash-anki--headline-to-note ()
   (pcase (org-map-entries (lambda () (org-element-at-point)) nil 'tree)
@@ -80,15 +107,21 @@
 	 (note-id (cdr (assq 'note-id note))))
     (if note-id
 	(progn
-	  (print "todo: update instead")
-	  (if callback (funcall callback)))
-	(flash-anki--anki-connect-add-note
-	    note
-	    (cl-function (lambda (&key data &allow-other-keys)
-			   (progn (flash-anki--add-note-success data)
-				  (if callback (funcall callback)))))
-	    (cl-function (lambda (&key _ &key error-thrown &allow-other-keys)
-			   (error (concat "error when syncing a note: " error-thrown))))))))
+	  (flash-anki--anki-connect-update-note
+	   note
+	   (cl-function (lambda (&key _ &allow-other-keys)
+			  (progn
+			    (if callback (funcall callback)))))
+	   (cl-function (lambda (&key _ &key error-thrown &allow-other-keys)
+			  (error (concat "error when updating a note: " error-thrown))))))
+
+      (flash-anki--anki-connect-add-note
+       note
+       (cl-function (lambda (&key data &allow-other-keys)
+		      (progn (flash-anki--add-note-success data)
+			     (if callback (funcall callback)))))
+       (cl-function (lambda (&key _ &key error-thrown &allow-other-keys)
+		      (error (concat "error when creating a note: " error-thrown))))))))
 
 
 (defun flash-anki--sync-next (current-point step)
@@ -141,22 +174,3 @@
   :keymap flash-mode-map)
 
 (provide 'flash)
-
-
-;; MAY COME USEFUL
-;; ---
-;; (defun flash-traverse-top-level (fun)
-;;   (save-excursion
-;;     (goto-char (point-min))
-;;     (let ((element (org-element-at-point)))
-;;       (if (eq (org-element-type element) 'headline)
-;; 	  (flash-traverse-top-level-next (org-element-property :begin element) fun)))))
-
-;; (defun flash-traverse-top-level-next (current-point fun)
-;;   (funcall fun)
-;;   (org-forward-heading-same-level nil)
-
-;;   (let* ((element (org-element-at-point))
-;; 	 (headline-begin (org-element-property :begin element)))
-;;     (if (not (eq headline-begin current-point))
-;; 	(flash-traverse-top-level-next headline-begin fun))))

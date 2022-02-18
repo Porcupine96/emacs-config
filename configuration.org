@@ -1011,14 +1011,13 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
  :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
 #+end_src
 
-
 ** Org Roam
 #+begin_src emacs-lisp :results none
 (use-package org-roam
   :ensure t
   :defer t
   :commands org-roam-node-find
-  :hook (org-mode . org-roam-setup)
+  ;; :hook (org-mode . org-roam-setup)
   :bind (:map global-map
               (("C-c n f" . org-roam-node-find)
                ("C-c n F" . +org-roam/find-file-by-title)
@@ -1626,8 +1625,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package treemacs-icons-dired
   :after (treemacs dired)
-  :ensure t
-  :config (treemacs-icons-dired-mode))
+  :hook (dired-mode . treemacs-icons-dired-enable-once))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1786,15 +1784,16 @@ vc-annotate options.
     (require 'org-element)
                    
     (defun org-link-finder ()
-      (let ((context (org-element-context)))
-        (if (equal (org-element-type context) 'link)
-    	(let* ((ctx (cadr context))
-                 (beg (plist-get ctx :begin))
-                 (end (plist-get ctx :end))
-                 (content-beg (plist-get ctx :contents-begin))
-                 (content-end (plist-get ctx :contents-end))
-                 (link-text (buffer-substring-no-properties content-beg content-end)))
-    	  `(link ,link-text ,beg . ,end)))))
+      (if (eq major-mode 'org-mode) 
+        (let ((context (org-element-context)))
+          (if (equal (org-element-type context) 'link)
+          (let* ((ctx (cadr context))
+                   (beg (plist-get ctx :begin))
+                   (end (plist-get ctx :end))
+                   (content-beg (plist-get ctx :contents-begin))
+                   (content-end (plist-get ctx :contents-end))
+                   (link-text (buffer-substring-no-properties content-beg content-end)))
+            `(link ,link-text ,beg . ,end))))))
     
     (embark-define-keymap embark-link-map
       "Keymap to work with links"
@@ -2055,6 +2054,7 @@ Setup =python-mode=.
 
 #+begin_src emacs-lisp :results none
 (use-package lsp-metals
+  :ensure t
   :after (lsp-mode scala-mode))
 #+end_src
 
