@@ -108,6 +108,10 @@ MacOS settings
 (load custom-file 'noerror 'nomessage)
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(setq use-dialog-box nil)
+#+end_src
+
 Disable saving the clipboard after exiting Emacs.
 #+begin_src emacs-lisp :results none
 (setq x-select-enable-clipboard-manager nil)
