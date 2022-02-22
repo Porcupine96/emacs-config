@@ -112,6 +112,11 @@ MacOS settings
 (setq use-dialog-box nil)
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(setq global-auto-revert-non-file-buffers t)
+(global-auto-revert-mode 1)
+#+end_src
+
 Disable saving the clipboard after exiting Emacs.
 #+begin_src emacs-lisp :results none
 (setq x-select-enable-clipboard-manager nil)
