@@ -60,6 +60,13 @@
 	   :success on-success
 	   :error on-error))
 
+(defun flash-anki--anki-connect-ensure-deck (name on-success on-error)
+  (flash-anki--anki-connect-make-request
+   "createDeck"
+   `("deck" . ,name)
+   on-success
+   on-error))
+
 (defun flash-anki--anki-connect-add-note (note on-success on-error)
   (flash-anki--anki-connect-make-request
    "addNote"
@@ -104,7 +111,8 @@
   (interactive "i")
 
   (let* ((note (flash-anki--headline-to-note))
-	 (note-id (cdr (assq 'note-id note))))
+	 (note-id (cdr (assq 'note-id note)))
+	 (deck-name (cdr (assoc 'deck note))))
     (if note-id
 	(progn
 	  (flash-anki--anki-connect-update-note
@@ -115,14 +123,18 @@
 	   (cl-function (lambda (&key _ &key error-thrown &allow-other-keys)
 			  (error (concat "error when updating a note: " error-thrown))))))
 
-      (flash-anki--anki-connect-add-note
-       note
-       (cl-function (lambda (&key data &allow-other-keys)
-		      (progn (flash-anki--add-note-success data)
-			     (if callback (funcall callback)))))
+      (flash-anki--anki-connect-ensure-deck
+       deck-name
+       (cl-function (lambda (&key _ &allow-other-keys)
+		      (flash-anki--anki-connect-add-note
+		       note
+		       (cl-function (lambda (&key data &allow-other-keys)
+				      (progn (flash-anki--add-note-success data)
+					     (if callback (funcall callback)))))
+		       (cl-function (lambda (&key _ &key error-thrown &allow-other-keys)
+				      (error (concat "error when creating a note: " error-thrown)))))))
        (cl-function (lambda (&key _ &key error-thrown &allow-other-keys)
-		      (error (concat "error when creating a note: " error-thrown))))))))
-
+		      (error (concat "failed to ensure deck" error-thrown))))))))
 
 (defun flash-anki--sync-next (current-point step)
   (if step
@@ -141,7 +153,8 @@
   (save-excursion
     (let ((element (org-element-at-point)))
       (if (eq (org-element-type element) 'headline)
-	  (flash-anki--sync-next (org-element-property :begin element) nil)))))
+	  (flash-anki--sync-next (org-element-property :begin element) nil))))
+  (save-buffer))
 
 (defun flash-insert-skeleton ()
   (interactive)
@@ -157,14 +170,14 @@
 
 (defun flash-open-notes ()
   (interactive)
-  (find-file-other-window (flash--notes-path)))
+  (find-file-other-window (flash--notes-path))
+  (flash-mode 1))
 
 ;;;###autoload
 (defvar flash-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c a s") #'flash-anki-sync)
-    (define-key map (kbd "C-c a n") #'flash-insert-skeleton)
-    (define-key map (kbd "C-c o n") #'flash-open-notes)
+    (define-key map (kbd "C-c C-c") #'flash-insert-skeleton)
     map))
 
 (define-minor-mode flash-mode

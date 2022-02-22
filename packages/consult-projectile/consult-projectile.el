@@ -30,6 +30,7 @@ See `consult--multi' for a description of the source values."
   "Create the list of files for the consult chooser based on
    projectile's notion of files for the project at ROOT."
   (let* ((inv-root (propertize root 'invisible t))
+         (projectile-enable-caching nil) 
          (files (projectile-project-files root)))
     (mapcar (lambda (f) (concat inv-root f)) files)))
 

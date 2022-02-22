@@ -12,30 +12,9 @@
 
   (kill-region (point-min) (point-max))
   (kill-buffer)
-  (let* ((raw (pop kill-ring))
-         (images (s-split "\n" raw)))
 
-    (dolist (image images)
-      (let* ((image-and-tag (s-split ":" image))
-             (image (car image-and-tag))
-             (tag (car (cdr image-and-tag))))
-        (goto-char (point-min))
-        (if (search-forward image nil t)
-	  (progn 
-            ;; update tag for existing image
-            (forward-line)
-            (beginning-of-line)
-            (kill-line)
-            (insert (concat "    newTag: " tag)))
-	  (progn
-            (goto-char (point-min))
-	    (if (search-forward "images:" nil t)
-		(+work/kubernetes--insert-new-image image tag)
-	      (progn
-		(goto-char (point-max))
-		(insert "images:")
-		(+work/kubernetes--insert-new-image image tag))))))))
-  (save-buffer))
+  (let* ((images-raw (pop kill-ring)))
+    (call-process "docker-bump" nil 0 nil images-raw)))
 
 (defun +work/kubernetes--insert-new-image (image tag)
   (insert (concat "\n"
