@@ -1640,7 +1640,7 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package treemacs-icons-dired
-  :after (treemacs dired)
+  :after dired
   :hook (dired-mode . treemacs-icons-dired-enable-once))
 #+end_src
 
@@ -1783,57 +1783,64 @@ vc-annotate options.
   (setq prefix-help-command #'embark-prefix-help-command)
 
   :config
-    (defun embark-zeal ()
-      (interactive)
-      (call-process "zeal" nil 0 nil (current-word)))      
+  (defun embark-zeal ()
+    (interactive)
+    (call-process "zeal" nil 0 nil (current-word)))      
   
-    (define-key embark-general-map (kbd "z") #'embark-zeal)
-    (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
-    (define-key embark-general-map (kbd "I") #'+embark/insert-grep-line)
-    (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
+  (define-key embark-general-map (kbd "z") #'embark-zeal)
+  (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
+  (define-key embark-general-map (kbd "I") #'+embark/insert-grep-line)
+  (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
   
-    ;; Hide the mode line of the Embark live/completions buffers
-    (add-to-list 'display-buffer-alist
-                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                   nil
-                   (window-parameters (mode-line-format . none))))
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none))))
 
 
-    (require 'org-element)
-                   
-    (defun org-link-finder ()
-      (if (eq major-mode 'org-mode) 
+  (require 'org-element)
+  
+  (defun org-link-finder ()
+    (if (eq major-mode 'org-mode) 
         (let ((context (org-element-context)))
           (if (equal (org-element-type context) 'link)
-          (let* ((ctx (cadr context))
-                   (beg (plist-get ctx :begin))
-                   (end (plist-get ctx :end))
-                   (content-beg (plist-get ctx :contents-begin))
-                   (content-end (plist-get ctx :contents-end))
-                   (link-text (buffer-substring-no-properties content-beg content-end)))
-            `(link ,link-text ,beg . ,end))))))
-    
-    (embark-define-keymap embark-link-map
-      "Keymap to work with links"
-      ("o" +org-open-at-point-other-window))
-    
-    
-    (defun +org-open-at-point-other-window (x)
-      (let ((org-link-frame-setup '((file . find-file-other-window))))
-        (org-open-at-point)))
-    
-    (add-to-list 'embark-target-finders 'org-link-finder)
-    (add-to-list 'embark-keymap-alist '(link . embark-link-map)))
+              (let* ((ctx (cadr context))
+                     (beg (plist-get ctx :begin))
+                     (end (plist-get ctx :end))
+                     (content-beg (plist-get ctx :contents-begin))
+                     (content-end (plist-get ctx :contents-end))
+                     (link-text (buffer-substring-no-properties
+			 (or content-beg beg) (or content-end end))))
+		`(link ,link-text ,beg . ,end))))))
+  
+  (embark-define-keymap embark-link-map
+    "Keymap to work with links"
+    ("o" +org-open-at-point-other-window)
+    ("y" +org-copy-link-at-point))
+  
+  (defun +org-copy-link-at-point (_)
+    (let* ((context (org-element-context))
+           (ctx (cadr context))
+           (link (plist-get ctx :raw-link)))
+      (kill-new link)))
+  
+  (defun +org-open-at-point-other-window (_)
+    (let ((org-link-frame-setup '((file . find-file-other-window))))
+      (org-open-at-point)))
+  
+  (add-to-list 'embark-target-finders 'org-link-finder)
+  (add-to-list 'embark-keymap-alist '(link . embark-link-map)))
 
 (defun +embark/insert-grep-line (line)
-          (interactive "sInsert: ")
-          (let* ((trimmed (s-trim (->> (s-split ":" line) (-drop 2) (s-join ":"))))
-                 (result (if (equal "" trimmed) line trimmed)))
+  (interactive "sInsert: ")
+  (let* ((trimmed (s-trim (->> (s-split ":" line) (-drop 2) (s-join ":"))))
+         (result (if (equal "" trimmed) line trimmed)))
 
-          (if buffer-read-only
-              (with-selected-window (other-window-for-scrolling)
-                  (insert result))
-              (insert result))))
+    (if buffer-read-only
+        (with-selected-window (other-window-for-scrolling)
+          (insert result))
+      (insert result))))
 #+end_src
 
 * Configure =marginalia=

@@ -150,6 +150,10 @@
 (defun flash-anki-sync ()
   (interactive)
   (goto-char (point-min))
+
+  (unless (looking-at-p "\*.*")
+    (org-next-visible-heading 1))
+  
   (save-excursion
     (let ((element (org-element-at-point)))
       (if (eq (org-element-type element) 'headline)
