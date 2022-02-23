@@ -255,7 +255,6 @@ Use =evil-mode=
   :ensure t
   :config
     (evil-collection-init))
-  
 #+end_src
 
 Use =evil-commentary=
@@ -276,64 +275,65 @@ Use =evil-surround=
 #+end_src
 
 * Configure =hydra=
-  #+begin_src emacs-lisp :results none
-  (use-package hydra
-   :ensure t
-   :defer t
-   :custom 
-     (head-hint nil)
-     (hydra-key-format-spec "[%s]"))
-  #+end_src
+#+begin_src emacs-lisp :results none
+(use-package hydra
+ :ensure t
+ :defer t
+ :custom 
+   (head-hint nil)
+   (hydra-key-format-spec "[%s]"))
+#+end_src
 
 ** Dired
-  #+begin_src emacs-lisp :results none
-  (defhydra hydra-dired-bookmarks (:color blue)
-    "
-    ──────────────────────────────
-    _s_ ~/studies
-    _S_ ~/scripts
-    _d_ ~/Downloads
-    _D_ ~/Dropbox
-    _w_ ~/codeheroes/chatbotize
-    ^^        
-    "
-    ("s" (lambda () (interactive) (dired "~/Dropbox/org/resources/studies")))
-    ("S" (lambda () (interactive) (dired "~/scripts")))
-    ("d" (lambda () (interactive) (dired "~/Downloads")))
-    ("D" (lambda () (interactive) (dired "~/Dropbox")))
-    ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes")))
-    ("w" (lambda () (interactive) (dired "~/work"))))
-  #+end_src
+#+begin_src emacs-lisp :results none
+(defhydra hydra-dired-bookmarks (:color blue)
+  "
+  ──────────────────────────────
+  _s_ ~/studies
+  _S_ ~/scripts
+  _d_ ~/Downloads
+  _D_ ~/Dropbox
+  _w_ ~/codeheroes/chatbotize
+  ^^        
+  "
+  ("s" (lambda () (interactive) (dired "~/Dropbox/org/resources/studies")))
+  ("S" (lambda () (interactive) (dired "~/scripts")))
+  ("d" (lambda () (interactive) (dired "~/Downloads")))
+  ("D" (lambda () (interactive) (dired "~/Dropbox")))
+  ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes")))
+  ("w" (lambda () (interactive) (dired "~/work"))))
+#+end_src
+
 ** Forge 
 #+begin_src emacs-lisp :results none
-  (defhydra hydra-forge (:color blue)
-    "
-    ^
-    ^Forge^     
-    ^────^───────────
-    _a_ Assign reviewer
-    _b_ Browse
-    _c_ Create PR
-    _p_ Browse PR
-    ^^        
-    "
-    ("a" #'forge-edit-topic-review-requests)
-    ("b" #'forge-browse-remote)
-    ("c" #'forge-create-pullreq)
-    ("p" #'forge-browse-pullreq))
+(defhydra hydra-forge (:color blue)
+  "
+  ^
+  ^Forge^     
+  ^────^───────────
+  _a_ Assign reviewer
+  _b_ Browse
+  _c_ Create PR
+  _p_ Browse PR
+  ^^        
+  "
+  ("a" #'forge-edit-topic-review-requests)
+  ("b" #'forge-browse-remote)
+  ("c" #'forge-create-pullreq)
+  ("p" #'forge-browse-pullreq))
 #+end_src
    
 ** LSP
 #+begin_src emacs-lisp :results none
- (defhydra hydra-lsp-toggle (:color blue)
-    "
-    ^
-    ^Toggle^     
-    ^────^───────────
-    _m_ iMenu
-    ^^        
-    "
-    ("m" #'lsp-ui-imenu))
+(defhydra hydra-lsp-toggle (:color blue)
+   "
+   ^
+   ^Toggle^     
+   ^────^───────────
+   _m_ iMenu
+   ^^        
+   "
+   ("m" #'lsp-ui-imenu))
 #+end_src
    
 ** Scala
@@ -356,6 +356,7 @@ Use =evil-surround=
    ("f" #'+scala/surround-word-with-future)
    ("s" #'+scala/surround-word-with-future-successful))
  #+end_src
+ 
 ** Python
 #+begin_src emacs-lisp :results none
 (defhydra hydra-python-surround (:color blue)
@@ -467,11 +468,11 @@ Scale text.
 #+end_src
   
 * Misc Functions
- #+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none
 (defun +core/scratch-buffer () 
    (interactive)
    (switch-to-buffer (generate-new-buffer "*scratch*")))
- #+end_src
+#+end_src
  
 #+begin_src emacs-lisp :results none
 (defun +core/convert-to-list ()
@@ -491,18 +492,18 @@ Scale text.
    (switch-to-buffer-other-window "*scratch*"))
 #+end_src
 
- #+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none
 (defun +core/copy-file-path ()
   (interactive)
   (kill-new (buffer-file-name)))
- #+end_src
+#+end_src
  
- #+begin_src emacs-lisp :results none
- (defun +core/reload-theme ()
-    (interactive)
-    (let ((theme (-first-item custom-enabled-themes)))
-       (load-theme theme t)))
- #+end_src
+#+begin_src emacs-lisp :results none
+(defun +core/reload-theme ()
+   (interactive)
+   (let ((theme (-first-item custom-enabled-themes)))
+      (load-theme theme t)))
+#+end_src
  
 #+begin_src emacs-lisp :results none
 (defvar +core/dark-theme 'noctilux)
@@ -572,12 +573,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 * Configure =which-key=
- #+begin_src emacs-lisp :results none
- (use-package which-key
-   :ensure t
-   :defer t
-   :init (which-key-mode))
- #+end_src
+#+begin_src emacs-lisp :results none
+(use-package which-key
+  :ensure t
+  :defer t
+  :init (which-key-mode))
+#+end_src
  
 * Configure =avy= / =evil-easymotion= / =evil-snipe=
 #+begin_src emacs-lisp :results none

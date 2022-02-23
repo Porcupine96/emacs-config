@@ -158,6 +158,7 @@
     (let ((element (org-element-at-point)))
       (if (eq (org-element-type element) 'headline)
 	  (flash-anki--sync-next (org-element-property :begin element) nil))))
+  ;; TODO: saving the buffer should happen in a callback
   (save-buffer))
 
 (defun flash-insert-skeleton ()
