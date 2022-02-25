@@ -167,11 +167,9 @@
   (goto-char (point-max))
   (org-insert-heading nil nil t)
   (save-excursion
-    (insert "Flashcard")
-    (org-insert-subheading nil)
-    (insert "Front")
-    (org-insert-heading nil)
-    (insert "Back")
+    (insert "Flashcard\n")
+    (insert "** Front\n\n")
+    (insert "** Back\n")
   (unless (car (org-property-values flash-anki-prop-deck))
     (org-set-property flash-anki-prop-deck "Default"))))
 

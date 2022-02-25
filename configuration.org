@@ -55,9 +55,13 @@ that, but we're gettin' close.
 Always compile packages, and use the newest version available.
 #+begin_src emacs-lisp :results none
 (use-package auto-compile
-  :config (auto-compile-on-load-mode))
-
-(setq load-prefer-newer t)
+  :straight t
+  :init 
+    (setq load-prefer-newer t)
+    (setq auto-compile-display-buffer nil)
+    (setq auto-compile-mode-line-counter t)
+  :config
+    (auto-compile-on-load-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -230,7 +234,7 @@ Compilation settings.
 Use =evil-mode=
 #+begin_src emacs-lisp :results none
 (use-package evil
-  :ensure t
+  :straight t
   :demand
   :init
     (setq evil-want-keybinding nil)
@@ -261,7 +265,7 @@ Use =evil-mode=
 
 (use-package evil-collection
   :after evil
-  :ensure t
+  :straight t
   :config
     (evil-collection-init))
 #+end_src
@@ -270,6 +274,7 @@ Use =evil-commentary=
 #+begin_src emacs-lisp :results none
 (use-package evil-commentary
    :after evil
+   :straight t
    :config
     (evil-commentary-mode +1))
 #+end_src
@@ -277,7 +282,7 @@ Use =evil-commentary=
 Use =evil-surround=
 #+begin_src emacs-lisp :results none
 (use-package evil-surround
-   :ensure t
+   :straight t
    :after evil
    :config
      (global-evil-surround-mode +1))
@@ -286,7 +291,7 @@ Use =evil-surround=
 * Configure =hydra=
 #+begin_src emacs-lisp :results none
 (use-package hydra
- :ensure t
+ :straight t
  :defer t
  :custom 
    (head-hint nil)
@@ -584,7 +589,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 * Configure =which-key=
 #+begin_src emacs-lisp :results none
 (use-package which-key
-  :ensure t
+  :straight t
   :defer t
   :init (which-key-mode))
 #+end_src
@@ -592,9 +597,11 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 * Configure =avy= / =evil-easymotion= / =evil-snipe=
 #+begin_src emacs-lisp :results none
 (use-package avy 
+  :straight t
   :defer t)
   
 (use-package evil-easymotion
+  :straight t
   :defer t)
 #+end_src
 
@@ -609,7 +616,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+begin_src emacs-lisp :results none
 (use-package perspective 
   :defer 5
-  :ensure t
+  :straight t
   :init
     (persp-mode)
   :config 
@@ -632,7 +639,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+begin_src emacs-lisp :results none :tangle no
 (use-package ivy-bibtex
   :disabled
-  :ensure t
+  :straight t
   :defer t
   :config
     (setq bibtex-completion-bibliography '("~/Dropbox/zotero/zotero.bib"))
@@ -653,6 +660,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+begin_src emacs-lisp :results none
 (use-package flycheck
   :defer t
+  :straight t
   :init (global-flycheck-mode)
   :config 
     (evil-define-key '(normal) flycheck-mode-map (kbd "] e") 'flycheck-next-error)
@@ -723,7 +731,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+begin_src emacs-lisp :results none
 (use-package org
   ;; :ensure org-plus-contrib
-  :ensure t
+  :straight t
   :defer t
   :delight
   :custom
@@ -873,11 +881,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+begin_src emacs-lisp :results none
 (use-package org-contrib
   :after org
-  :ensure t)
+  :straight t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package org-superstar
+  :straight t
   :after org
   :hook (org-mode . org-superstar-mode)
   :custom
@@ -901,7 +910,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 ** Org Agenda
 #+begin_src emacs-lisp :results none
 (use-package evil-org
-  :ensure t
+  :straight t
   :after (evil org)
   :config
     (add-hook 'org-mode-hook 'evil-org-mode)
@@ -937,6 +946,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
 #+begin_src emacs-lisp :results none
 (use-package org-super-agenda
+  :straight t
   :defer t
   :hook
     (org-agenda-mode . org-super-agenda-mode)
@@ -955,7 +965,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 ** Academic
 #+begin_src emacs-lisp :results none
 (use-package org-ref 
-  :ensure t
+  :straight t
   :defer t
   :after org
   :config 
@@ -983,15 +993,16 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (setq org-ref-open-pdf-function '+org-ref/org-ref-open-pdf-at-point))
 #+end_src
  
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package academic-phrases
+  :straight t
   :defer t)
 #+end_src
 
 ** Org journal
 #+begin_src emacs-lisp :results none
 (use-package org-journal
-  :ensure t
+  :straight t
   :defer t
   :init
     (setq org-journal-prefix-key "C-c j")
@@ -1005,29 +1016,30 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (use-package ob-async
   :defer t
   :after org
-  :ensure t)
+  :straight t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package ob-mongo
   :defer t
-  :ensure t)
+  :straight t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package ob-ipython
-  :ensure t
+  :straight t
   :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package ob-http
-  :ensure t
+  :straight t
   :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package jupyter
+ :straight t
  ;; :defer t
  :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
 #+end_src
@@ -1035,7 +1047,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 ** Org Roam
 #+begin_src emacs-lisp :results none
 (use-package org-roam
-  :ensure t
+  :straight t
   :defer t
   :commands org-roam-node-find
   ;; :hook (org-mode . org-roam-setup)
@@ -1109,7 +1121,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
 (use-package org-roam-bibtex
   :disabled
-  :ensure t
+  :straight t
   :defer t
   :custom
     (orb-autokey-format "%a%y")
@@ -1143,7 +1155,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 ** Org Fancy Priorities
 #+begin_src emacs-lisp :results none
 (use-package org-fancy-priorities
-  :ensure t
+  :straight t
   :defer t
   :hook
     (org-mode . org-fancy-priorities-mode)
@@ -1321,13 +1333,13 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (use-package ox-slack
   :defer t
-  :ensure t)
+  :straight t)
 #+end_src
 
 * Configure =flyspell=
 #+begin_src emacs-lisp :results none 
 (use-package flyspell
-  :ensure t
+  :straight t
   :defer t
   :config
     (setq ispell-program-name "hunspell")
@@ -1343,14 +1355,14 @@ Save image and insert it's link at point.
 * Configure =Wucuo=
 #+begin_src emacs-lisp :results none
 (use-package wucuo
-  :ensure t
+  :straight t
   :defer t)
   ;; :hook (org-roam-mode . wucuo-mode))
 #+end_src
 * Configure =langtool=
 #+begin_src emacs-lisp :results none
 (use-package langtool
-  :ensure t
+  :straight t
   :defer t
   :config
     (setq langtool-http-server-host "localhost"
@@ -1359,7 +1371,7 @@ Save image and insert it's link at point.
 * Configure =yasnippet=
 #+begin_src emacs-lisp :results none
 (use-package yasnippet
-  :ensure t
+  :straight t
   :defer t
   :hook ((scala-mode . yas-global-mode)
          (python-mode . yas-global-mode)
@@ -1383,7 +1395,7 @@ Save image and insert it's link at point.
 * Configure =projectile=
 #+begin_src emacs-lisp :results none
 (use-package projectile 
-  :ensure t
+  :straight t
   :defer t
   :config
     (projectile-global-mode)
@@ -1428,7 +1440,7 @@ Save image and insert it's link at point.
 * Configure =magit=
 #+begin_src emacs-lisp :results none
 (use-package magit
-  :ensure t
+  :straight t
   :defer t
   :commands (magit-status magit-branch magit-init magit-push)
   :config
@@ -1437,7 +1449,7 @@ Save image and insert it's link at point.
     (setq auto-revert-check-vc-info nil))
 
 (use-package forge 
-   :ensure t  
+   :straight t  
    :after magit)
 #+end_src
  
@@ -1468,20 +1480,21 @@ vc-annotate options.
 * Configure =git-timemachine=
  #+begin_src emacs-lisp :results none
 (use-package git-timemachine 
-  :ensure t
+  :straight t
   :defer t)
  #+end_src
 
 * Configure =treemacs=
 #+begin_src emacs-lisp :results none
 (use-package treemacs 
-   :ensure t
+   :straight t
    :defer t
    :config 
      (define-key treemacs-mode-map (kbd "SPC o p") #'treemacs)
      (setq treemacs-width 60))
 
 (use-package treemacs-evil
+  :straight t
   :after (evil treemacs) 
   :bind (:map evil-treemacs-state-map 
         ("SPC u" . #'universal-argument))
@@ -1489,13 +1502,14 @@ vc-annotate options.
     (define-key evil-treemacs-state-map (kbd "SPC o p") #'treemacs))
 
 (use-package treemacs-projectile
+  :straight t
   :after (projectile treemacs))
 #+end_src
 
 * Configure =doom-modeline=
 #+begin_src emacs-lisp :results none
 (use-package doom-modeline
-  :ensure t 
+  :straight t 
   :config 
     (setq doom-modeline-height 25)
     (setq doom-modeline-vcs-max-length 40)
@@ -1519,7 +1533,7 @@ vc-annotate options.
 * Configure =zoom-window=
  #+begin_src emacs-lisp :results none
 (use-package zoom-window 
-   :ensure t
+   :straight t
    :defer t
    :config
      (custom-set-variables
@@ -1528,6 +1542,7 @@ vc-annotate options.
 * Configure =company=
 #+begin_src emacs-lisp :results none
 (use-package company
+  :straight t
   :defer t
   :hook (prog-mode . global-company-mode)
   :custom
@@ -1551,6 +1566,7 @@ vc-annotate options.
         (define-key company-active-map (kbd "<return>") #'company-complete-selection)))
 
 (use-package company-box
+  :straight t
   :hook (company-mode . company-box-mode)
   :config
     (setq company-box-doc-enable nil))
@@ -1579,14 +1595,14 @@ vc-annotate options.
 * Configure =helpful=
  #+begin_src emacs-lisp :results none
  (use-package helpful
-   :ensure t
+   :straight t
    :defer t)
  #+end_src
 
 * Configure =keychain=
   #+begin_src emacs-lisp :results none
   (use-package keychain-environment
-     :ensure t
+     :straight t
      :defer 10
      :config (keychain-refresh-environment))
   #+end_src
@@ -1594,10 +1610,12 @@ vc-annotate options.
 * Configure =ox-reveal=
 #+begin_src emacs-lisp :results none :tangle no
 (use-package ox-reveal
+  :straight t
   :disabled
   :defer t)
   
 (use-package org-re-reveal
+  :straight t
   :disabled
   :defer t)
 #+end_src
@@ -1605,13 +1623,14 @@ vc-annotate options.
 * Configure =ox-slack=
 #+begin_src emacs-lisp :results none :tangle no
 (use-package ox-slack
+  :straight t
   :defer t)
 #+end_src
 
 * Configure =emojify=
 #+begin_src emacs-lisp :results none
 (use-package emojify 
-  :ensure t
+  :straight t
   :defer 10
   :config
     (setq emojify-user-emojis '(
@@ -1644,6 +1663,7 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package treemacs-icons-dired
+  :straight t
   :after dired
   :hook (dired-mode . treemacs-icons-dired-enable-once))
 #+end_src
@@ -1665,7 +1685,7 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package dired-subtree
-  :ensure t
+  :straight t
   :after dired
   :bind (:map dired-mode-map
               ("<tab>" . dired-subtree-toggle)
@@ -1682,7 +1702,7 @@ vc-annotate options.
 * Configure =ediff=
 #+begin_src emacs-lisp :results none
 (use-package ediff
-  :ensure t 
+  :straight t 
   :defer t
   :config
     (setq ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -1693,14 +1713,14 @@ vc-annotate options.
 * Configure =calfw=
 #+begin_src emacs-lisp :results none
 (use-package calfw
-  :ensure t
+  :straight t
   :defer t
   :config
     (setq cfw:display-calendar-holidays nil))
 
 (use-package calfw-org
   :defer t
-  :ensure t)
+  :straight t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1714,7 +1734,7 @@ vc-annotate options.
 * Configure =smerge=
 #+begin_src emacs-lisp :results none
 (use-package smerge-mode
-  :ensure t
+  :straight t
   :defer t
   :bind (:map smerge-mode-map 
     ("C-c m u" . smerge-keep-upper)
@@ -1728,7 +1748,7 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none :tangle no
 (use-package selectrum
   :disabled
-  :ensure t
+  :straight t
   :defer t
   :config
     (setq selectrum-max-window-height 15)
@@ -1739,7 +1759,7 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none :tangle no
 (use-package selectrum-prescient
-  :ensure t
+  :straight t
   :disabled
   :after selectrum
   :config
@@ -1750,12 +1770,13 @@ vc-annotate options.
 * Configure =vertico=
 #+begin_src emacs-lisp :result none
 (use-package vertico
-  :ensure t
+  :straight t
   :init (vertico-mode))
 #+end_src
 
 #+begin_src emacs-lisp :result none
 (use-package savehist
+  :straight t
   :after vertico
   :init
     (savehist-mode)
@@ -1765,6 +1786,7 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :result none
 (use-package orderless
+  :straight t
   :after vertico
   :init
    (setq completion-styles '(orderless)
@@ -1775,7 +1797,7 @@ vc-annotate options.
 * Configure =embark=
 #+begin_src emacs-lisp :results none
 (use-package embark
-  :ensure t
+  :straight t
   :bind*
   (("C-a" . embark-act)
    ("C-," . embark-act)
@@ -1850,7 +1872,7 @@ vc-annotate options.
 * Configure =marginalia=
 #+begin_src emacs-lisp :results none
 (use-package marginalia
-  :ensure t
+  :straight t
   :commands (execute-extended-command)
   :init
     (marginalia-mode))
@@ -1859,7 +1881,7 @@ vc-annotate options.
 * Configure =consult=
 #+begin_src emacs-lisp :results none
 (use-package consult
-  :ensure t
+  :straight t
   :defer t
   :commands (execute-extended-command consult-find consult-line)
   :init
@@ -1899,13 +1921,13 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package consult-lsp
-  :ensure t
+  :straight t
   :after (consult lsp))
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package embark-consult
-  :ensure t
+  :straight t
   :after (embark consult)
   :demand t 
   :hook
@@ -1914,7 +1936,7 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package consult-flycheck
-  :ensure t
+  :straight t
   :after (consult flycheck))
 #+end_src
 
@@ -1928,7 +1950,7 @@ vc-annotate options.
 * Configure =popper=
 #+begin_src emacs-lisp :results none :tangle no
 (use-package popper
-  :ensure t 
+  :straight t 
   :commands (popper-toggle-latest popper-toggle-type)
   :defer t
   :config
@@ -1950,6 +1972,7 @@ vc-annotate options.
 ** Dockerfile
 #+begin_src emacs-lisp :results none
 (use-package dockerfile-mode
+  :straight t
   :defer t
   :config
     (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
@@ -1958,7 +1981,7 @@ vc-annotate options.
 Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (use-package python-mode
-   :ensure t
+   :straight t
    :defer t
    :bind (:map python-mode-map
 	       ("C-<backspace>" . backward-kill-word))
@@ -1982,6 +2005,7 @@ Setup =python-mode=.
    
 #+begin_src emacs-lisp :results none
 (use-package pyenv-mode
+  :straight t
   :defer t
   :hook (python-mode . pyenv-mode)
   :config
@@ -1991,7 +2015,7 @@ Setup =python-mode=.
 
 (use-package pyvenv
   :defer t
-  :ensure t
+  :straight t
   :after pyenv-mode
   :hook (pyenv-mode . pyvenv-mode)
   :config
@@ -2005,12 +2029,12 @@ Setup =python-mode=.
 
 #+begin_src emacs-lisp :results none
 (use-package blacken
-  :ensure t
+  :straight t
   :hook (python-mode . blacken-mode))
 #+end_src
 #+begin_src emacs-lisp :results none
 (use-package lsp-pyright
-  :ensure t
+  :straight t
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp))))  ; or lsp-deferred
@@ -2029,7 +2053,7 @@ Setup =python-mode=.
 ** Protobuf
 #+begin_src emacs-lisp :results none
 (use-package protobuf-mode
-  :ensure t 
+  :straight t 
   :defer t
   :config
     (defconst my-protobuf-style
@@ -2073,6 +2097,7 @@ Setup =python-mode=.
 
 #+begin_src emacs-lisp :results none
 (use-package lsp-ui
+  :straight t
   :after lsp-mode
   :config 
     (setq lsp-ui-doc-use-childframe nil)
@@ -2082,7 +2107,7 @@ Setup =python-mode=.
 
 #+begin_src emacs-lisp :results none
 (use-package lsp-metals
-  :ensure t
+  :straight t
   :after (lsp-mode scala-mode))
 #+end_src
 
@@ -2195,7 +2220,7 @@ Remove other LSP sessions.
 scala-mode
 #+begin_src emacs-lisp :results none
 (use-package scala-mode
-  :ensure t
+  :straight t
   :mode "\\.s\\(cala\\|bt\\)$"
   ;; :hook (scala-mode . lsp-deferred)
   :hook (scala-mode . lsp)
@@ -2209,6 +2234,7 @@ scala-mode
 sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package sbt-mode
+  :straight t
   :after scala-mode
   :commands sbt-start sbt-command
   :config
@@ -2407,6 +2433,7 @@ sbt-mode
 ** Yaml
 #+begin_src emacs-lisp :results none
 (use-package yaml-mode 
+  :straight t
   :defer t)
 #+end_src
 
@@ -2427,49 +2454,54 @@ sbt-mode
 ** Elisp
 #+begin_src emacs-lisp :results none
 (use-package emacs
+  :ensure nil
   :bind
-  (:map emacs-lisp-mode-map
-	("C-c i" . indent-region))
+    (:map emacs-lisp-mode-map
+      ("C-c i" . indent-region))
   :config
-  (font-lock-add-keywords 'emacs-lisp-mode
-			  '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
+    (font-lock-add-keywords 'emacs-lisp-mode
+          		  '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
 
-  (add-hook 'emacs-lisp-mode-hook 
-	    (lambda () (progn
-			 (push '("lambda" . "λ") prettify-symbols-alist)
-			 (prettify-symbols-mode 1)))))
+    (add-hook 'emacs-lisp-mode-hook 
+              (lambda () (progn
+          		 (push '("lambda" . "λ") prettify-symbols-alist)
+          		 (prettify-symbols-mode 1)))))
 #+end_src
 
 ** Scheme
 #+begin_src emacs-lisp :results none
 (use-package geiser
-  :ensure t 
+  :straight t 
   :defer t
   :config 
     (setq geiser-active-implementations '(guile)))
 #+end_src
 
-** Haskell
-#+begin_src emacs-lisp :results none
+** askell
+#+begin_src emacs-lisp :results none :tangle no
 (use-package haskell-mode
-  :ensure t
+  :straight t
+  :diabled
   :defer t
   :config
     (flycheck-haskell-setup))
 #+end_src
 
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package flycheck-haskell
+  :straight t
   :defer t
+  :disabled
   :commands flycheck-haskell-setup)
 #+end_src
 
 ** ReasonML
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package reason-mode
-  :ensure t
+  :straight t
   :defer t
+  :disabled
   :mode "\\.rei?$"
   :config 
   (require 'lsp-mode)
@@ -2494,7 +2526,7 @@ sbt-mode
 
 #+begin_src emacs-lisp :results none
 (use-package prettier-js
-  :ensure t
+  :straight t
   :hook (js-mode . prettier-js-mode) 
   :defer t
   :config
@@ -2502,9 +2534,10 @@ sbt-mode
 #+end_src
 
 ** Rust
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package rust-mode
-  :ensure t
+  :disabled
+  :straight t
   :init
     (setq rust-format-on-save t)
   :hook ((rust-mode . lsp-deferred)))
@@ -2513,28 +2546,28 @@ sbt-mode
 ** TypeScript
 #+begin_src emacs-lisp :results none
 (use-package typescript-mode
+  :straight t
   :mode "\\.\\(ts\\|tsx\\)$"
-  :hook (typescript-mode . prettier-js-mode) 
-  :ensure t)
+  :hook (typescript-mode . prettier-js-mode))
 #+end_src
 
 ** GraphQL
 #+begin_src emacs-lisp :results none
 (use-package graphql-mode
-  :ensure t
+  :straight t
   :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package request
-  :ensure t
+  :straight t
   :defer t)
 #+end_src
 
 ** PlantUML
 #+begin_src emacs-lisp :results none
 (use-package plantuml-mode
-  :ensure t
+  :straight t
   :defer t 
   :config
     (setq plantuml-jar-path "/home/porcupine/tools/plantuml.jar")
@@ -2544,19 +2577,20 @@ sbt-mode
 ** tree-sitter
 #+begin_src emacs-lisp :results none
 (use-package tree-sitter
-  :ensure t
+  :straight t
   :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package tree-sitter-langs
-  :ensure t
+  :straight t
   :defer t)
 #+end_src
 
 ** Fish
 #+begin_src emacs-lisp :results none
 (use-package fish-mode
+  :straight t
   :defer t
   :mode "\\.fish$")
 #+end_src
@@ -2564,7 +2598,7 @@ sbt-mode
 * Configure =dumb-jump=
 #+begin_src emacs-lisp :results none
 (use-package dumb-jump
-  :ensure t
+  :straight t
   :init
     (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 #+end_src
@@ -2572,6 +2606,7 @@ sbt-mode
 * Configure =Info=
 #+begin_src emacs-lisp :results none
 (use-package info
+  :ensure nil
   :defer t
   :config
     (evil-collection-define-key 'normal 'Info-mode-map
@@ -2584,7 +2619,7 @@ sbt-mode
 * Configure =smartparens=
 #+begin_src emacs-lisp :results none
 (use-package smartparens
-  :ensure t
+  :straight t
   :hook (prog-mode . smartparens-mode)
   :config
     (smartparens-global-mode t)
@@ -2597,7 +2632,7 @@ sbt-mode
     ("M-S-h" . sp-backward-barf-sexp)))
 
 (use-package evil-smartparens
-  :ensure t
+  :straight t
   :after smartparens
   :hook (smartparens-mode . evil-smartparens-mode)
   :config
@@ -2608,60 +2643,60 @@ sbt-mode
 * Configure =csv-mode=
 #+begin_src emacs-lisp :results none
 (use-package csv-mode
-  :ensure t
+  :straight t
   :defer t)
 #+end_src
 
 * Configure =eshell=
 #+begin_src emacs-lisp :results none
 (use-package eshell
+  :ensure nil 
   :defer t
   :hook (eshell-first-time-mode . +eshell/configure-eshell)
   :config
-
-  (company-mode -1)
-
-  (defalias 'e "find-file-other-window $1")
-  (defalias 'gs "git status")
-
-  (defun +eshell/clear ()
-    (interactive)
-    (eshell/clear 1)
-    (eshell-send-input)
-    (evil-insert nil))
-
-  (defun +eshell/open-in-default ()
-    (interactive)
-    (let ((current-dir default-directory))
-      (eshell)
-      (eshell/cd current-dir)
-      (+eshell/clear)))
-
-  (defun +eshell/open-in-project-root ()
-    (interactive)
-    (eshell)
-    (eshell/cd (projectile-project-root))
-    (+eshell/clear))
-
-  (defun +eshell/configure-eshell ()
-    ;; (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
-    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-l") '+eshell/clear)
-    (evil-normalize-keymaps)
-
-    (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-
     (company-mode -1)
 
-    (setq eshell-history-size              10000
-          eshell-buffer-maximum-lines      10000
-          eshell-hist-ignoredups           t
-          eshell-scroll-to-bottom-on-input t)))
+    (defalias 'e "find-file-other-window $1")
+    (defalias 'gs "git status")
+
+    (defun +eshell/clear ()
+      (interactive)
+      (eshell/clear 1)
+      (eshell-send-input)
+      (evil-insert nil))
+
+    (defun +eshell/open-in-default ()
+      (interactive)
+      (let ((current-dir default-directory))
+        (eshell)
+        (eshell/cd current-dir)
+        (+eshell/clear)))
+
+    (defun +eshell/open-in-project-root ()
+      (interactive)
+      (eshell)
+      (eshell/cd (projectile-project-root))
+      (+eshell/clear))
+
+    (defun +eshell/configure-eshell ()
+      ;; (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
+      (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-l") '+eshell/clear)
+      (evil-normalize-keymaps)
+
+      (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+      (company-mode -1)
+
+      (setq eshell-history-size              10000
+            eshell-buffer-maximum-lines      10000
+            eshell-hist-ignoredups           t
+            eshell-scroll-to-bottom-on-input t)))
 #+end_src
 
 * Configure =vterm=
 #+begin_src emacs-lisp :results none
 (use-package vterm
-  :ensure t
+  :straight t
   :defer t
   :config 
    (setq vterm-buffer-name-string "vterm - %s"))
@@ -2686,7 +2721,7 @@ sbt-mode
 #+end_src
 
 * Configure =elfeed=
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package elfeed
   :disabled
   :defer t
@@ -2707,6 +2742,7 @@ sbt-mode
 * Configure =winner=
 #+begin_src emacs-lisp :results none
 (use-package winner
+  :ensure nil
   :defer 10
   :config 
     (winner-mode))
@@ -2715,28 +2751,28 @@ sbt-mode
 * Configure =string-inflection=
 #+begin_src emacs-lisp :results none
 (use-package string-inflection 
-  :ensure t
+  :straight t
   :defer t)
 #+end_src
 
 * Configure =eval-expr=
 #+begin_src emacs-lisp :results none
 (use-package eval-expr
-   :ensure t
+   :straight t
    :defer t)
 #+end_src
 
 * Configure =synosaurus=
 #+begin_src emacs-lisp :results none
 (use-package synosaurus
-  :ensure t
+  :straight t
   :defer t)
 #+end_src
 
 * Configure =pdf-tools=
 #+begin_src emacs-lisp :results none 
 (use-package pdf-tools
-  :ensure t
+  :straight t
   :defer t
   :mode "\\.pdf$"
   :config 
@@ -2745,7 +2781,9 @@ sbt-mode
     (add-hook 'pdf-view-mode-hook #'+pdf/setup)
 
     (add-hook 'pdf-view-mode-hook
-      (lambda () (internal-show-cursor nil nil)))
+      (lambda ()
+        (setq cursor-in-non-selected-windows nil)
+        (internal-show-cursor nil nil)))
 
     (defun +pdf/open-externally ()
       (interactive)
@@ -2762,7 +2800,7 @@ sbt-mode
 * Configure =olivetti=
 #+begin_src emacs-lisp :results none
 (use-package olivetti
-  :ensure t
+  :straight t
   :defer t
   :config 
     (custom-set-variables '(olivetti-body-width 120))
@@ -2771,14 +2809,14 @@ sbt-mode
 
 #+begin_src emacs-lisp :results none
 (use-package hide-mode-line
-  :ensure t 
+  :straight t 
   :defer t)
 #+end_src
 
 * Configure =eros=
 #+begin_src emacs-lisp :results none
 (use-package eros
-  :ensure t
+  :straight t
   :defer t
   :hook (emacs-lisp-mode . eros-mode))
 #+end_src
@@ -2789,17 +2827,17 @@ sbt-mode
   :ensure nil
   :defer t
   :config
-   (setq tramp-default-method "rsync")
+    (setq tramp-default-method "rsync")
 
-   (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/bin")
-   (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/plugins/pyenv-virtualenv/shims")
-   (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/shims"))
+    (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/bin")
+    (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/plugins/pyenv-virtualenv/shims")
+    (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/shims"))
 #+end_src
 
 * Configure =diminish=
 #+begin_src emacs-lisp :results none
 (use-package delight
-  :ensure t
+  :straight t
   :defer t
   :config
     (delight '((conf-windows-mode "" ""))))
@@ -2808,53 +2846,52 @@ sbt-mode
 * Configure =org-jira=
 #+begin_src emacs-lisp :results none
 (use-package org-jira
-  :ensure t
   :defer t
   :straight (org-jira :type git :host github :repo "Porcupine96/org-jira" :branch "master")
   :commands (org-jira-get-issues)
   :init
-   (setq org-jira-working-dir "~/.org-jira")
+    (setq org-jira-working-dir "~/.org-jira")
   :config
-   (setq jiralib-url "https://chatbotize.atlassian.net")
-   (setq org-jira-verbosity 'info)
-   (setq org-jira-jira-status-to-org-keyword-alist
-     '(("In Progress" . "STRT")
-       ("IN REVIEW" . "REVIEW")
-       ("IN TEST" . "WAIT")
-       ("BLOCKED" . "WAIT")
-       ("Scheduled for deployment" . "WAIT")))
+    (setq jiralib-url "https://chatbotize.atlassian.net")
+    (setq org-jira-verbosity 'info)
+    (setq org-jira-jira-status-to-org-keyword-alist
+      '(("In Progress" . "STRT")
+        ("IN REVIEW" . "REVIEW")
+        ("IN TEST" . "WAIT")
+        ("BLOCKED" . "WAIT")
+        ("Scheduled for deployment" . "WAIT")))
+  
+    (setq org-jira-default-jql "project = CD and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
+  
+    (setq org-jira-custom-jqls
+      '(
+        (:jql " project = CD and assignee = currentUser() and status in (TODO, 'In Progress') ORDER BY\n  status DESC, created ASC "
+         :filename "CD-working-on"))))
 
-   (setq org-jira-default-jql "project = CD and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
-
-   (setq org-jira-custom-jqls
-     '(
-       (:jql " project = CD and assignee = currentUser() and status in (TODO, 'In Progress') ORDER BY\n  status DESC, created ASC "
-        :filename "CD-working-on"))))
-
-(defun +org-jira/get-issues ()
-  (interactive)
-
-  (let ((path (concat org-jira-working-dir "/CD.org")))
-    (with-current-buffer
-	(or (get-file-buffer (concat (projectile-project-root) path))
-          (find-file-noselect (concat (projectile-project-root) path)))
-
-      (erase-buffer))
-      (call-interactively #'org-jira-get-issues)))
+    (defun +org-jira/get-issues ()
+      (interactive)
+    
+      (let ((path (concat org-jira-working-dir "/CD.org")))
+        (with-current-buffer
+    	(or (get-file-buffer (concat (projectile-project-root) path))
+              (find-file-noselect (concat (projectile-project-root) path)))
+    
+          (erase-buffer))
+          (call-interactively #'org-jira-get-issues)))
 #+end_src
 
 * Configure =svg-lib=
 #+begin_src emacs-lisp :results none
 (use-package svg-lib
- :ensure t
+ :straight t
  :defer t)
 #+end_src
 
 * KILL Configure =mu4e=
 #+begin_src emacs-lisp :results none :tangle no
 (use-package mu4e
-  :ensure nil
   :disabled
+  :ensure nil
 
   :config 
   (setq mu4e-change-filenames-when-moving t)
@@ -2877,7 +2914,7 @@ sbt-mode
 
 #+begin_src emacs-lisp :results none :tangle no
 (use-package mu4e-alert
-  :ensure t
+  :straight t
   :disabled
   :config 
     (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
@@ -2886,263 +2923,263 @@ sbt-mode
 * Configure =general=
 #+begin_src emacs-lisp :results none
 (use-package general
-  :ensure t
+  :straight t
   :init
-  (setq general-override-states '(insert
-                                  emacs
-                                  hybrid
-                                  normal
-                                  visual
-                                  motion
-                                  operator
-                                  replace))
+    (setq general-override-states '(insert
+                                    emacs
+                                    hybrid
+                                    normal
+                                    visual
+                                    motion
+                                    operator
+                                    replace))
   :config
-  (general-create-definer leader-def 
-    :prefix "SPC")
-  
-  (leader-def
-    :states '(normal visual motion)
-    :keymaps 'override
-    "a a" #'org-agenda
-    "a c" #'open-calendar
-    "a w" #'+agenda/weekly-agenda
-    "a d" #'+agenda/daily-agenda
-    "a t" #'+agenda/filter-by-tag
-    "a h" #'+agenda/filter-by-tag-hot
+    (general-create-definer leader-def 
+      :prefix "SPC")
     
-    "b a" #'bookmark-set
-    "b b" #'consult-bookmark
-    "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
-    "b n" #'next-buffer
-    "b s" #'+core/summon-scratch
-    "b N" #'+core/scratch-buffer
-    "b p" #'previous-buffer
-    "b k" #'kill-current-buffer
-    
-    "c e" #'consult-flycheck
-    "c E" #'consult-compile-error
-    "c x" #'flycheck-list-errors
-    "c c" #'compile
-    "c C" #'recompile
-    
-    "d d" #'dockel
-    
-    "e e" #'elfeed
-    "e d" #'ediff
-    
-    "f f" #'find-file
-    "f r" #'consult-recent-file
-    "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
-    "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
-    "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
-    "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
-    "f P" (lambda () (interactive)(find-file "~/.config/polybar/config"))
-    "f e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org"))
-    "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
-    "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org"))
-    "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
-    "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
-    "f d" (lambda () (interactive)(dired "~/dotfiles"))
-    "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
-    "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
-    "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
-    
-    "g b" #'magit-branch
-    "g g" #'magit-status
-    "g i" #'magit-init
-    "g p" #'magit-push
-    "g r" #'hydra-forge/body
-    "g t" #'git-timemachine
-    
-    "h b" #'counsel-descbinds
-    "h k" #'helpful-key
-    "h f" #'helpful-function
-    "h F" #'describe-face
-    "h v" #'helpful-variable
-    "h p" #'helpful-package
-    "h m" #'describe-mode
-    "h M" #'helpful-macro
-    "h e" #'view-echo-area-messages
-    "h l" #'find-library
-    
-    "k" #'consult-yank-from-kill-ring
-    
-    "l b" #'lsp-metals-build-import
-    "l d" #'lsp-find-definition
-    "l s" #'lsp-describe-session
-    "l e" #'lsp-ui-flycheck-list
-    "l f" #'lsp-format-buffer
-    "l l" #'consult-lsp-symbols
-    "l t" #'hydra-lsp-toggle/body
-    "l T" #'lsp-treemacs-errors-list
-    ;; "l r" #'lsp-ui-peek-find-references
-    "l r" #'lsp-find-references
-    "l R" #'lsp-rename
-    "l x" #'+lsp/remove-other-sessions
-    "l i" #'lsp-goto-implementation
-    "l I" #'+scala/copy-import
-    
-    "o c" #'cfw:open-org-calendar
-    "o p" #'treemacs
-    "o e" #'eshell
-    "o E" #'+eshell/open-in-default
-    "o P" #'+eshell/open-in-project-root
-    "o o" #'p/focus-mode
-    "o v" #'+vterm/focus-or-create
-    "o V" #'+vterm/new-session
-    "o m" #'mu4e
-    "o w" #'+eww/browse-url
-    "o i" #'+org-jira/get-issues
-    
-    "p a" #'projectile-add-known-project
-    "p c" #'projectile-compile-project
-    "p C" #'projectile-repeat-last-command
-    "p f" #'consult-ripgrep
-    "p p" #'consult-projectile
-    "p i" #'projectile-invalidate-cache
-    "p t" #'treemacs-add-and-display-current-project
-    "p T" #'+projectile/search-todos
-    "p s" #'projectile-save-project-buffers
-    "p w" #'+projectile/search-word-under-cursor
-    
-    "r h" #'evil-window-decrease-width
-    "r l" #'evil-window-increase-width
-    
-    "s m" #'+work/consult-monorepo
-    "s M" #'+work/consult-monorepo-glob
-    "s f" #'+work/consult-find-file-monorepo
-    
-    "t r" #'+core/reload-theme
-    "t e" #'treemacs-display-current-project-exclusively
-    
-    "u" #'universal-argument
-    
-    "w u" #'winner-undo
-    "w r" #'winner-redo
-    "w f" #'+core/to-floating-frame
-    "w l" #'+core/to-regular-right-window
-    "w j" #'+core/to-regular-bottom-window
-    
-    "y a" #'yas-new-snippet
-    "y v" #'yas-visit-snippet-file
-    "y c" #'company-yasnippet
-    "y p" #'+core/copy-file-path
-    
-    "RET" #'consult-bookmark
-    "`" #'popper-toggle-type
-    
-    "TAB c" #'persp-switch
-    "TAB d" #'persp-kill
-    "TAB n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace")))
-    "TAB k" #'persp-kill
-    "TAB r" #'persp-rename
-    "TAB TAB" #'persp-switch
-    
-    "SPC" #'consult-fd
-    "," #'consult-projectile)
+    (leader-def
+      :states '(normal visual motion)
+      :keymaps 'override
+      "a a" #'org-agenda
+      "a c" #'open-calendar
+      "a w" #'+agenda/weekly-agenda
+      "a d" #'+agenda/daily-agenda
+      "a t" #'+agenda/filter-by-tag
+      "a h" #'+agenda/filter-by-tag-hot
+      
+      "b a" #'bookmark-set
+      "b b" #'consult-bookmark
+      "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
+      "b n" #'next-buffer
+      "b s" #'+core/summon-scratch
+      "b N" #'+core/scratch-buffer
+      "b p" #'previous-buffer
+      "b k" #'kill-current-buffer
+      
+      "c e" #'consult-flycheck
+      "c E" #'consult-compile-error
+      "c x" #'flycheck-list-errors
+      "c c" #'compile
+      "c C" #'recompile
+      
+      "d d" #'dockel
+      
+      "e e" #'elfeed
+      "e d" #'ediff
+      
+      "f f" #'find-file
+      "f r" #'consult-recent-file
+      "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
+      "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
+      "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
+      "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
+      "f P" (lambda () (interactive)(find-file "~/.config/polybar/config"))
+      "f e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org"))
+      "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
+      "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org"))
+      "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
+      "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
+      "f d" (lambda () (interactive)(dired "~/dotfiles"))
+      "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
+      "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
+      "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
+      
+      "g b" #'magit-branch
+      "g g" #'magit-status
+      "g i" #'magit-init
+      "g p" #'magit-push
+      "g r" #'hydra-forge/body
+      "g t" #'git-timemachine
+      
+      "h b" #'counsel-descbinds
+      "h k" #'helpful-key
+      "h f" #'helpful-function
+      "h F" #'describe-face
+      "h v" #'helpful-variable
+      "h p" #'helpful-package
+      "h m" #'describe-mode
+      "h M" #'helpful-macro
+      "h e" #'view-echo-area-messages
+      "h l" #'find-library
+      
+      "k" #'consult-yank-from-kill-ring
+      
+      "l b" #'lsp-metals-build-import
+      "l d" #'lsp-find-definition
+      "l s" #'lsp-describe-session
+      "l e" #'lsp-ui-flycheck-list
+      "l f" #'lsp-format-buffer
+      "l l" #'consult-lsp-symbols
+      "l t" #'hydra-lsp-toggle/body
+      "l T" #'lsp-treemacs-errors-list
+      ;; "l r" #'lsp-ui-peek-find-references
+      "l r" #'lsp-find-references
+      "l R" #'lsp-rename
+      "l x" #'+lsp/remove-other-sessions
+      "l i" #'lsp-goto-implementation
+      "l I" #'+scala/copy-import
+      
+      "o c" #'cfw:open-org-calendar
+      "o p" #'treemacs
+      "o e" #'eshell
+      "o E" #'+eshell/open-in-default
+      "o P" #'+eshell/open-in-project-root
+      "o o" #'p/focus-mode
+      "o v" #'+vterm/focus-or-create
+      "o V" #'+vterm/new-session
+      "o m" #'mu4e
+      "o w" #'+eww/browse-url
+      "o i" #'+org-jira/get-issues
+      
+      "p a" #'projectile-add-known-project
+      "p c" #'projectile-compile-project
+      "p C" #'projectile-repeat-last-command
+      "p f" #'consult-ripgrep
+      "p p" #'consult-projectile
+      "p i" #'projectile-invalidate-cache
+      "p t" #'treemacs-add-and-display-current-project
+      "p T" #'+projectile/search-todos
+      "p s" #'projectile-save-project-buffers
+      "p w" #'+projectile/search-word-under-cursor
+      
+      "r h" #'evil-window-decrease-width
+      "r l" #'evil-window-increase-width
+      
+      "s m" #'+work/consult-monorepo
+      "s M" #'+work/consult-monorepo-glob
+      "s f" #'+work/consult-find-file-monorepo
+      
+      "t r" #'+core/reload-theme
+      "t e" #'treemacs-display-current-project-exclusively
+      
+      "u" #'universal-argument
+      
+      "w u" #'winner-undo
+      "w r" #'winner-redo
+      "w f" #'+core/to-floating-frame
+      "w l" #'+core/to-regular-right-window
+      "w j" #'+core/to-regular-bottom-window
+      
+      "y a" #'yas-new-snippet
+      "y v" #'yas-visit-snippet-file
+      "y c" #'company-yasnippet
+      "y p" #'+core/copy-file-path
+      
+      "RET" #'consult-bookmark
+      "`" #'popper-toggle-type
+      
+      "TAB c" #'persp-switch
+      "TAB d" #'persp-kill
+      "TAB n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace")))
+      "TAB k" #'persp-kill
+      "TAB r" #'persp-rename
+      "TAB TAB" #'persp-switch
+      
+      "SPC" #'consult-fd
+      "," #'consult-projectile)
 
-  (general-create-definer local-leader-def
-    :prefix "SPC m")
+    (general-create-definer local-leader-def
+      :prefix "SPC m")
 
-  (local-leader-def
-    :states 'normal
-    :keymaps 'org-mode-map
-    "o" #'+ocr/screenshot
-    "r" #'rsvp/read-from-ocr
-    "R" #'rsvp/read-last-content
-    "s" #'org-schedule
-    "S" #'pscreenshot/org-screenshot-take
-    "d" #'org-deadline
-    "p" #'p/force-publish-current-file
-    "P" #'p/show-current-currently-published-file
-    "i" #'+org/save-image-insert-link
-    "t" #'org-todo)
+    (local-leader-def
+      :states 'normal
+      :keymaps 'org-mode-map
+      "o" #'+ocr/screenshot
+      "r" #'rsvp/read-from-ocr
+      "R" #'rsvp/read-last-content
+      "s" #'org-schedule
+      "S" #'pscreenshot/org-screenshot-take
+      "d" #'org-deadline
+      "p" #'p/force-publish-current-file
+      "P" #'p/show-current-currently-published-file
+      "i" #'+org/save-image-insert-link
+      "t" #'org-todo)
 
-  (local-leader-def
-    :states 'normal
-    :keymaps 'yaml-mode-map
-    "u" #'+work/update-versions)
-  
-  (local-leader-def
-    :states 'normal
-    :keymaps 'text-mode-map
-    "o" #'+ocr/screenshot)
+    (local-leader-def
+      :states 'normal
+      :keymaps 'yaml-mode-map
+      "u" #'+work/update-versions)
+    
+    (local-leader-def
+      :states 'normal
+      :keymaps 'text-mode-map
+      "o" #'+ocr/screenshot)
 
-  (local-leader-def
-    :states 'normal
-    :keymaps 'scala-mode-map
-    "i" #'+scala/copy-import
-    "y" #'+scala/fill-imports-from-side-buffers
-    "s" #'hydra-scala-surround/body
-    "l" #'+scala/insert-common-import
-    "d" #'+scala/def-in-file
-    "p" #'+scala/insert-package
-    "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
-    "c c" (lambda () (interactive) (+projectile/compile "bl"))
-    "c p" (lambda () (interactive) (+projectile/compile "protob"))
-    "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
-    "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
-    "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
-    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
-    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
-    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
-    "g p" (lambda () (interactive) (+work/goto-proto)))
+    (local-leader-def
+      :states 'normal
+      :keymaps 'scala-mode-map
+      "i" #'+scala/copy-import
+      "y" #'+scala/fill-imports-from-side-buffers
+      "s" #'hydra-scala-surround/body
+      "l" #'+scala/insert-common-import
+      "d" #'+scala/def-in-file
+      "p" #'+scala/insert-package
+      "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
+      "c c" (lambda () (interactive) (+projectile/compile "bl"))
+      "c p" (lambda () (interactive) (+projectile/compile "protob"))
+      "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
+      "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
+      "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
+      "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+      "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+      "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
+      "g p" (lambda () (interactive) (+work/goto-proto)))
 
-  (general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
+    (general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
 
-  (local-leader-def
-    :states 'normal
-    :keymaps 'dired-mode-map
-    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
-    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
-    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
-    "g p" (lambda () (interactive) (+work/goto-proto)))
+    (local-leader-def
+      :states 'normal
+      :keymaps 'dired-mode-map
+      "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+      "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+      "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
+      "g p" (lambda () (interactive) (+work/goto-proto)))
 
-  (local-leader-def
-    :states 'normal
-    :keymaps 'protobuf-mode-map
-    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
-    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
-    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala")))
+    (local-leader-def
+      :states 'normal
+      :keymaps 'protobuf-mode-map
+      "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+      "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+      "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala")))
 
-  (local-leader-def
-    :states 'normal
-    :keymaps 'rust-mode-map
-    "c c" #'rust-compile
-    "c r" #'rust-run)
+    (local-leader-def
+      :states 'normal
+      :keymaps 'rust-mode-map
+      "c c" #'rust-compile
+      "c r" #'rust-run)
 
-  (local-leader-def
-    :states 'normal
-    :keymaps 'python-mode-map
-    "s" #'run-python
-    "s" #'hydra-python-surround/body)
+    (local-leader-def
+      :states 'normal
+      :keymaps 'python-mode-map
+      "s" #'run-python
+      "s" #'hydra-python-surround/body)
 
-  (general-define-key 
-   :prefix "SPC j"
-   :states 'normal
-   :keymaps 'org-mode-map
-   "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
-   "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
-   "x" #'jupyter-org-kill-block-and-results
-   "c" #'org-babel-remove-result
-   "j" #'org-babel-next-src-block
-   "k" #'org-babel-previous-src-block
-   "r" #'jupyter-run-repl
-   "E" #'jupyter-org-execute-to-point)
+    (general-define-key 
+     :prefix "SPC j"
+     :states 'normal
+     :keymaps 'org-mode-map
+     "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
+     "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
+     "x" #'jupyter-org-kill-block-and-results
+     "c" #'org-babel-remove-result
+     "j" #'org-babel-next-src-block
+     "k" #'org-babel-previous-src-block
+     "r" #'jupyter-run-repl
+     "E" #'jupyter-org-execute-to-point)
 
-  (general-define-key 
-   :states '('normal 'insert)
-   :keymaps '(evil-org-mode-map org-mode-map)
-   "C-<return>" '+org/c-ret-dwim
-   "S-<return>" '+org/s-ret-dwim
-   "C-S-<return>" '+org/c-s-ret-dwim
-   "C-M-<return>" '+org/c-m-ret-dwim)
+    (general-define-key 
+     :states '('normal 'insert)
+     :keymaps '(evil-org-mode-map org-mode-map)
+     "C-<return>" '+org/c-ret-dwim
+     "S-<return>" '+org/s-ret-dwim
+     "C-S-<return>" '+org/c-s-ret-dwim
+     "C-M-<return>" '+org/c-m-ret-dwim)
 
-  (general-define-key 
-   :states '('normal)
-   :keymaps '(evil-org-mode-map org-mode-map)
-   "C-<return>" '+org/c-ret-dwim
-   "<return>" '+org/ret-dwim))
+    (general-define-key 
+     :states '('normal)
+     :keymaps '(evil-org-mode-map org-mode-map)
+     "C-<return>" '+org/c-ret-dwim
+     "<return>" '+org/ret-dwim))
 #+end_src
 
 * Work
@@ -3268,7 +3305,7 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package flash
   :load-path "~/.emacs.default/packages/flash/"
-  :commands (flash-open-notes))
+  :commands (flash-open-notes flash-mode))
 #+end_src
 
 ** Focus
