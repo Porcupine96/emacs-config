@@ -78,12 +78,21 @@ Hide all the bezels.
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
 (blink-cursor-mode -1)
+(setq cursor-in-non-selected-windows nil)
 #+end_src
 
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
 (load-theme 'noctilux t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun toggle-cursor-visibility ()
+  (interactive)
+  (if (internal-show-cursor-p)
+    (internal-show-cursor nil nil)
+    (internal-show-cursor nil t)))
 #+end_src
 
 * Sensible settings
@@ -910,7 +919,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
       "C-<return>" '+org/c-ret-dwim
       "C-S-<return>" '+org/c-s-ret-dwim
       "C-M-<return>" '+org/c-m-ret-dwim
-      "C-c a n" 'flash-open-notes)
+      "C-c f o" 'flash-open-notes)
 
   (general-define-key 
       :states '(normal)
@@ -937,11 +946,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 	:map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
   :config
     (setq org-agenda-files '(
-       "~/Dropbox/org-roam/2021-10-03--10-45-46Z--psychologia_społeczna_i_zajęcia.org"
-       "~/Dropbox/org-roam/2021-10-03--10-45-26Z--psychologia_osobowosci_zajęcia.org"
-       "~/Dropbox/org-roam/2021-10-03--10-46-50Z--psychologia_roznic_indywidualnych_zajęcia.org"
-       "~/Dropbox/org-roam/2021-10-03--10-47-42Z--psychologia_poznawcza_ii_zajęcia.org"
-       "~/Dropbox/org-roam/2021-10-03--10-47-21Z--psychologia_rozwoju_w_biegu_zycia_i_zajęcia.org"
+       "~/Dropbox/org-roam/2022-02-23--18-45-30Z--psychologia_społeczna_ii_zajęcia.org"
        "~/Dropbox/org-roam/2021-10-03--10-46-11Z--język_angielski_zajęcia.org"
        "~/Dropbox/org/todo/work.org"
        "~/Dropbox/org/todo/private.org")))
@@ -1044,7 +1049,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
                ("C-c n L" . org-roam)
                ("C-c n f" . org-roam-find-file)
                ("C-c n F" . +org-roam/find-file-by-title)
-               ("C-c n C" . org-roam-db-build-cache)
+               ("C-c n C" . org-roam-db-sync)
                ("C-c n g" . org-roam-buffer-toggle)
                ("C-c n w" . writer)
                ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
@@ -1092,13 +1097,10 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (defun +org-roam/goto-linked-file ()
   (interactive)
 
-  (let* (
-	 (titles (-map (lambda (link) (org-roam-node-title (org-roam-backlink-source-node link)))
+  (let* ((titles (-map (lambda (link) (org-roam-node-title (org-roam-backlink-source-node link)))
                        (org-roam-backlinks-get (org-roam-node-at-point 'assert))))
-
-	 (title (completing-read " " titles))
-     (file (org-roam-node-file (org-roam-node-from-title-or-alias title))))
-    
+         (title (completing-read " " titles))
+         (file (org-roam-node-file (org-roam-node-from-title-or-alias title))))
     (find-file file)))
 #+end_src
 
@@ -1315,9 +1317,10 @@ Save image and insert it's link at point.
     (p/publish-configure))
 #+end_src
 
-** ox-hugo
+** ox-slack
 #+begin_src emacs-lisp :results none
-(use-package ox-hugo
+(use-package ox-slack
+  :defer t
   :ensure t)
 #+end_src
 
@@ -2538,11 +2541,32 @@ sbt-mode
     (setq plantuml-default-exec-mode 'jar))
 #+end_src
 
+** tree-sitter
+#+begin_src emacs-lisp :results none
+(use-package tree-sitter
+  :ensure t
+  :defer t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package tree-sitter-langs
+  :ensure t
+  :defer t)
+#+end_src
+
 ** Fish
 #+begin_src emacs-lisp :results none
 (use-package fish-mode
   :defer t
   :mode "\\.fish$")
+#+end_src
+
+* Configure =dumb-jump=
+#+begin_src emacs-lisp :results none
+(use-package dumb-jump
+  :ensure t
+  :init
+    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 #+end_src
 
 * Configure =Info=
@@ -2716,19 +2740,23 @@ sbt-mode
   :defer t
   :mode "\\.pdf$"
   :config 
-   (pdf-tools-install)
-   (add-hook 'pdf-view-mode-hook #'+pdf/setup)
-
-  (defun +pdf/open-externally ()
-    (interactive)
-    (call-process "xdg-open" nil 0 nil (buffer-file-name)))
-
-  (defun +pdf/setup ()
-    (evil-collection-define-key 'normal 'pdf-view-mode-map
-      "ge" #'+pdf/open-externally)
-
+    (setq pdf-view-midnight-colors '("#839496" . "#1c2128")) 
     (pdf-tools-install)
-    (hide-mode-line-mode)))
+    (add-hook 'pdf-view-mode-hook #'+pdf/setup)
+
+    (add-hook 'pdf-view-mode-hook
+      (lambda () (internal-show-cursor nil nil)))
+
+    (defun +pdf/open-externally ()
+      (interactive)
+      (call-process "xdg-open" nil 0 nil (buffer-file-name)))
+
+    (defun +pdf/setup ()
+      (evil-collection-define-key 'normal 'pdf-view-mode-map
+        "ge" #'+pdf/open-externally)
+
+      (pdf-tools-install)
+      (hide-mode-line-mode)))
 #+end_src
 
 * Configure =olivetti=
@@ -3127,13 +3155,13 @@ sbt-mode
   (setq +work/monorepo-path
 	(completing-read "" '("~/work/monorepo" "~/work/monorepo-email-automation"))))
 
-(defconst +work/proto-paths (list
-			     (list "ai" (concat +work/monorepo-path  "/ai/ai-protobufs"))
-			     (list "creator" (concat +work/monorepo-path  "/creator/creator-protobufs"))
-			     (list "inbox" (concat +work/monorepo-path  "/inbox/inbox-protobufs"))
-			     (list "core" (concat +work/monorepo-path  "/core/core-protobufs"))
-			     (list "crm" (concat +work/monorepo-path  "/crm/crm-protobufs"))
-			     (list "chat" (concat +work/monorepo-path  "/chat/chat-protobufs"))))
+(defun +work/proto-paths ()
+  `(("ai" ,(concat +work/monorepo-path "/ai/ai-protobufs"))
+    ("creator" ,(concat +work/monorepo-path "/creator/creator-protobufs"))
+    ("inbox" ,(concat +work/monorepo-path "/inbox/inbox-protobufs"))
+    ("core" ,(concat +work/monorepo-path "/core/core-protobufs"))
+    ("crm" ,(concat +work/monorepo-path "/crm/crm-protobufs"))
+    ("chat" ,(concat +work/monorepo-path "/chat/chat-protobufs"))))
 
 (defun +work/goto-proto ()
   (interactive)
@@ -3144,7 +3172,7 @@ sbt-mode
          (proto-name (if is-plugin
            (concat "plugins/" (string-join (cddr name-chunks) "-"))
            (string-join (cdr name-chunks) "_")))
-         (proto-root (nth 1 (assoc module +work/proto-paths))))
+         (proto-root (nth 1 (assoc module (+work/proto-paths)))))
 
     (find-file-other-window (concat proto-root "/" proto-name))))
 
