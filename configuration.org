@@ -749,6 +749,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq org-odt-preferred-output-format "docx")
   (setq org-confirm-babel-evaluate nil)
   (setq org-tags-column -1)
+  (setq org-capture-bookmark nil)
 
   (setq org-src-fontify-natively t)
   (setq org-src-tab-acts-natively t)
@@ -3282,6 +3283,42 @@ sbt-mode
   :defer t
   :commands (+work/update-versions +work/apply-changes))
 #+end_src
+
+* School
+#+begin_src emacs-lisp :results none
+(defun school/next-class ()
+  (interactive)
+
+  (let* ((subject (car (s-split " - " (+org/property-value "TITLE"))))
+         (date (pcase (s-split "-" (org-read-date))
+                 (`(,year ,month ,day . nil) (s-join "." `(,day ,month ,year)))
+                 (_ (error "Could not parse date."))))
+         (count (-reduce '+ (org-element-map (org-element-parse-buffer) 'headline
+                              (lambda (h)
+                                (if (equal "Ćwiczenia" (org-element-property :raw-value
+                                                                             (org-element-property :parent h)))
+                                    1 0)))))
+         (title (concat subject " - ćwiczenia " (number-to-string (+ 1 count)) " (" date ")")))
+
+    (pcase 
+        (car 
+         (remove nil
+                 (org-map-entries (lambda ()
+                                    (let ((elem (org-element-at-point)))
+                                      (if (equal "Ćwiczenia" (s-trim (org-element-property :raw-value elem)))
+                                          (progn
+                                            (org-insert-heading-after-current)
+                                            (org-demote)
+                                            (let ((beg (point)))
+                                              (insert title)
+                                              `(,beg ,(point))))))))))
+      (`(,beg ,end . nil)
+       (set-mark beg)
+       (goto-char end)
+       (activate-mark)
+       (org-roam-node-insert))
+      (_ (error "Couldn't mark region.")))))
+      #+end_src
 
 * My packages
 ** RSVP
