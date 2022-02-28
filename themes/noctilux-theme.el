@@ -3,7 +3,8 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl-lib))
+  (require 'cl-lib)
+  (require 'org))
 
 (defconst noctilux-description
   "A Light Table inspired color theme based on Solarized's definitions.")
@@ -54,7 +55,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
   :type 'boolean
   :group 'lt)
 
-(setq noctilux-colors           ; ANSI(Noctilux terminal)
+(defvar noctilux-colors           ; ANSI(Noctilux terminal)
   ;; name       sRGB      Gen RGB   256       16              8
   '((base03    "#1c2128" "#1c2128" "#1c2128" "brightblack"   "black")
     (base02    "#292929" "#292929" "#292929" "black"         "black")

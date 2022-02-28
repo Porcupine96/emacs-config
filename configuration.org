@@ -36,36 +36,26 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 #+end_src
+
+#+begin_src emacs-lisp :results none
+(straight-use-package 'use-package)
+#+end_src
+
 * Configure =use-package=
-I use =use-package= to install and configure my packages. My =init.el=
-includes the initial setup for =package.el= and ensures that
-=use-package= is installed, since I wanna do that right away.
-
-This makes sure that =use-package= will install the package if it's
-not already available. It also means that I should be able to open
-Emacs for the first time on a fresh Debian box and have my whole
-environment automatically installed. I'm not /totally/ sure about
-that, but we're gettin' close.
-
-#+begin_src emacs-lisp :results none
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)
-#+end_src
-
 Always compile packages, and use the newest version available.
-#+begin_src emacs-lisp :results none
-(use-package auto-compile
-  :straight t
-  :init 
-    (setq load-prefer-newer t)
-    (setq auto-compile-display-buffer nil)
-    (setq auto-compile-mode-line-counter t)
-  :config
-    (auto-compile-on-load-mode))
+#+begin_src emacs-lisp :results none :tangle no
+;; (use-package auto-compile
+;;   :straight t
+;;   :init 
+;;     (setq load-prefer-newer t)
+;;     (setq auto-compile-display-buffer nil)
+;;     (setq auto-compile-mode-line-counter t)
+;;   :config
+;;     (auto-compile-on-load-mode))
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(setq enable-recursive-minibuffers t)
+#+begin_src emacs-lisp :results none :tangle no
+;; (setq enable-recursive-minibuffers t)
 #+end_src
 
 * Visuals
@@ -730,18 +720,23 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 ** Core
 #+begin_src emacs-lisp :results none
 (use-package org
-  ;; :ensure org-plus-contrib
   :straight t
   :defer t
   :delight
   :custom
     (org-ellipsis " ▾")
-
+    (org-todo-keyword-faces '(
+      ("PROJECT" . (:inherit default :height 1.2 :foreground "#ffffff" :weight normal :underline t))
+      ("STRT"    . (:inherit default :height 1.2 :foreground "#0198e1" :weight normal :underline t))
+      ("SOMEDAY" . (:inherit default :height 1.2 :foreground "#ff8888" :weight normal :underline t))
+      ("REVIEW"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+      ("DEPLOY"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+      ("WAIT"    . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
   :config 
   (require 'org-tempo)
 
   (setq org-hide-emphasis-markers t)
-  (setq org-list-allow-alphabetical t)
+  (setq korg-list-allow-alphabetical t)
   (setq org-fontify-done-headline t)
   (setq org-use-fast-todo-selection 'expert)
   (setq org-image-actual-width nil)
@@ -765,10 +760,10 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
       (scheme . t) 
       (js . t)
       (sql . t)
-      (http . t)
-      (mongo . t)
-      (haskell . t)
-      (jupyter . t)))
+      ;; (http . t)
+      ;; (jupyter . t)
+      ;; (mongo . t)
+      (haskell . t)))
 
   (setq org-plantuml-jar-path
         (expand-file-name "~/tools/plantuml.jar"))
@@ -958,6 +953,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :config
     (setq org-agenda-files '(
        "~/Dropbox/org-roam/2022-02-23--18-45-30Z--psychologia_społeczna_ii_zajęcia.org"
+       "~/Dropbox/org-roam/2022-02-25--10-17-45Z--psychologia_edukacji.org"
+       "~/Dropbox/org-roam/2022-02-27--13-15-43Z--psychologia_zaburzen_zajęcia.org"
        "~/Dropbox/org-roam/2021-10-03--10-46-11Z--język_angielski_zajęcia.org"
        "~/Dropbox/org/todo/work.org"
        "~/Dropbox/org/todo/private.org")))
@@ -1022,8 +1019,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
 #+begin_src emacs-lisp :results none
 (use-package ob-mongo
-  :defer t
-  :straight t)
+  :straight t
+  :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1032,17 +1029,17 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :defer t)
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(use-package ob-http
-  :straight t
-  :defer t)
+#+begin_src emacs-lisp :results none :tangle no
+;;(use-package ob-http
+;;  :straight t
+;;  :defer t)
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(use-package jupyter
- :straight t
- ;; :defer t
- :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
+#+begin_src emacs-lisp :results none :tangle no
+;; (use-package jupyter
+;;  :straight t
+;;  ;; :defer t
+;;  :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
 #+end_src
 
 ** Org Roam
@@ -1522,7 +1519,6 @@ vc-annotate options.
       '(minor-modes major-mode vcs process battery checker bar bar))
 
     (defun pc/setup-modeline ()
-      (message "Setting up the modeline!")
       (doom-modeline-set-modeline 'pc/modeline 'default))
 
     (set-face-attribute 'mode-line nil :height 100)
@@ -2068,6 +2064,7 @@ Setup =python-mode=.
 ** LSP
 #+begin_src emacs-lisp :results none
 (use-package lsp-mode
+   :straight t
    :hook ((python-mode . lsp-deferred)
           (typescript-mode . lsp-deferred)  
           (c-mode . lsp-deferred)
@@ -2596,6 +2593,13 @@ sbt-mode
   :mode "\\.fish$")
 #+end_src
 
+** Nix
+#+begin_src emacs-lisp :results none
+(use-package nix-mode
+  :straight t
+  :mode "\\.nix$")
+#+end_src
+
 * Configure =dumb-jump=
 #+begin_src emacs-lisp :results none
 (use-package dumb-jump
@@ -2835,7 +2839,7 @@ sbt-mode
     (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/shims"))
 #+end_src
 
-* Configure =diminish=
+* Configure =delight=
 #+begin_src emacs-lisp :results none
 (use-package delight
   :straight t
@@ -2926,261 +2930,261 @@ sbt-mode
 (use-package general
   :straight t
   :init
-    (setq general-override-states '(insert
-                                    emacs
-                                    hybrid
-                                    normal
-                                    visual
-                                    motion
-                                    operator
-                                    replace))
+  (setq general-override-states '(insert
+                                  emacs
+                                  hybrid
+                                  normal
+                                  visual
+                                  motion
+                                  operator
+                                  replace))
   :config
-    (general-create-definer leader-def 
-      :prefix "SPC")
+  (general-create-definer leader-def 
+    :prefix "SPC")
+  
+  (leader-def
+    :states '(normal visual motion)
+    :keymaps 'override
+    "a a" #'org-agenda
+    "a c" #'open-calendar
+    "a w" #'+agenda/weekly-agenda
+    "a d" #'+agenda/daily-agenda
+    "a t" #'+agenda/filter-by-tag
+    "a h" #'+agenda/filter-by-tag-hot
     
-    (leader-def
-      :states '(normal visual motion)
-      :keymaps 'override
-      "a a" #'org-agenda
-      "a c" #'open-calendar
-      "a w" #'+agenda/weekly-agenda
-      "a d" #'+agenda/daily-agenda
-      "a t" #'+agenda/filter-by-tag
-      "a h" #'+agenda/filter-by-tag-hot
-      
-      "b a" #'bookmark-set
-      "b b" #'consult-bookmark
-      "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
-      "b n" #'next-buffer
-      "b s" #'+core/summon-scratch
-      "b N" #'+core/scratch-buffer
-      "b p" #'previous-buffer
-      "b k" #'kill-current-buffer
-      
-      "c e" #'consult-flycheck
-      "c E" #'consult-compile-error
-      "c x" #'flycheck-list-errors
-      "c c" #'compile
-      "c C" #'recompile
-      
-      "d d" #'dockel
-      
-      "e e" #'elfeed
-      "e d" #'ediff
-      
-      "f f" #'find-file
-      "f r" #'consult-recent-file
-      "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
-      "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
-      "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
-      "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
-      "f P" (lambda () (interactive)(find-file "~/.config/polybar/config"))
-      "f e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org"))
-      "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
-      "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org"))
-      "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
-      "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
-      "f d" (lambda () (interactive)(dired "~/dotfiles"))
-      "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
-      "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
-      "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
-      
-      "g b" #'magit-branch
-      "g g" #'magit-status
-      "g i" #'magit-init
-      "g p" #'magit-push
-      "g r" #'hydra-forge/body
-      "g t" #'git-timemachine
-      
-      "h b" #'counsel-descbinds
-      "h k" #'helpful-key
-      "h f" #'helpful-function
-      "h F" #'describe-face
-      "h v" #'helpful-variable
-      "h p" #'helpful-package
-      "h m" #'describe-mode
-      "h M" #'helpful-macro
-      "h e" #'view-echo-area-messages
-      "h l" #'find-library
-      
-      "k" #'consult-yank-from-kill-ring
-      
-      "l b" #'lsp-metals-build-import
-      "l d" #'lsp-find-definition
-      "l s" #'lsp-describe-session
-      "l e" #'lsp-ui-flycheck-list
-      "l f" #'lsp-format-buffer
-      "l l" #'consult-lsp-symbols
-      "l t" #'hydra-lsp-toggle/body
-      "l T" #'lsp-treemacs-errors-list
-      ;; "l r" #'lsp-ui-peek-find-references
-      "l r" #'lsp-find-references
-      "l R" #'lsp-rename
-      "l x" #'+lsp/remove-other-sessions
-      "l i" #'lsp-goto-implementation
-      "l I" #'+scala/copy-import
-      
-      "o c" #'cfw:open-org-calendar
-      "o p" #'treemacs
-      "o e" #'eshell
-      "o E" #'+eshell/open-in-default
-      "o P" #'+eshell/open-in-project-root
-      "o o" #'p/focus-mode
-      "o v" #'+vterm/focus-or-create
-      "o V" #'+vterm/new-session
-      "o m" #'mu4e
-      "o w" #'+eww/browse-url
-      "o i" #'+org-jira/get-issues
-      
-      "p a" #'projectile-add-known-project
-      "p c" #'projectile-compile-project
-      "p C" #'projectile-repeat-last-command
-      "p f" #'consult-ripgrep
-      "p p" #'consult-projectile
-      "p i" #'projectile-invalidate-cache
-      "p t" #'treemacs-add-and-display-current-project
-      "p T" #'+projectile/search-todos
-      "p s" #'projectile-save-project-buffers
-      "p w" #'+projectile/search-word-under-cursor
-      
-      "r h" #'evil-window-decrease-width
-      "r l" #'evil-window-increase-width
-      
-      "s m" #'+work/consult-monorepo
-      "s M" #'+work/consult-monorepo-glob
-      "s f" #'+work/consult-find-file-monorepo
-      
-      "t r" #'+core/reload-theme
-      "t e" #'treemacs-display-current-project-exclusively
-      
-      "u" #'universal-argument
-      
-      "w u" #'winner-undo
-      "w r" #'winner-redo
-      "w f" #'+core/to-floating-frame
-      "w l" #'+core/to-regular-right-window
-      "w j" #'+core/to-regular-bottom-window
-      
-      "y a" #'yas-new-snippet
-      "y v" #'yas-visit-snippet-file
-      "y c" #'company-yasnippet
-      "y p" #'+core/copy-file-path
-      
-      "RET" #'consult-bookmark
-      "`" #'popper-toggle-type
-      
-      "TAB c" #'persp-switch
-      "TAB d" #'persp-kill
-      "TAB n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace")))
-      "TAB k" #'persp-kill
-      "TAB r" #'persp-rename
-      "TAB TAB" #'persp-switch
-      
-      "SPC" #'consult-fd
-      "," #'consult-projectile)
-
-    (general-create-definer local-leader-def
-      :prefix "SPC m")
-
-    (local-leader-def
-      :states 'normal
-      :keymaps 'org-mode-map
-      "o" #'+ocr/screenshot
-      "r" #'rsvp/read-from-ocr
-      "R" #'rsvp/read-last-content
-      "s" #'org-schedule
-      "S" #'pscreenshot/org-screenshot-take
-      "d" #'org-deadline
-      "p" #'p/force-publish-current-file
-      "P" #'p/show-current-currently-published-file
-      "i" #'+org/save-image-insert-link
-      "t" #'org-todo)
-
-    (local-leader-def
-      :states 'normal
-      :keymaps 'yaml-mode-map
-      "u" #'+work/update-versions)
+    "b a" #'bookmark-set
+    "b b" #'consult-bookmark
+    "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
+    "b n" #'next-buffer
+    "b s" #'+core/summon-scratch
+    "b N" #'+core/scratch-buffer
+    "b p" #'previous-buffer
+    "b k" #'kill-current-buffer
     
-    (local-leader-def
-      :states 'normal
-      :keymaps 'text-mode-map
-      "o" #'+ocr/screenshot)
+    "c e" #'consult-flycheck
+    "c E" #'consult-compile-error
+    "c x" #'flycheck-list-errors
+    "c c" #'compile
+    "c C" #'recompile
+    
+    "d d" #'dockel
+    
+    "e e" #'elfeed
+    "e d" #'ediff
+    
+    "f f" #'find-file
+    "f r" #'consult-recent-file
+    "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
+    "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
+    "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
+    "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
+    "f P" (lambda () (interactive)(find-file "~/.config/polybar/config"))
+    "f e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org"))
+    "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
+    "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org"))
+    "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
+    "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
+    "f d" (lambda () (interactive)(dired "~/dotfiles"))
+    "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
+    "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
+    "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
+    
+    "g b" #'magit-branch
+    "g g" #'magit-status
+    "g i" #'magit-init
+    "g p" #'magit-push
+    "g r" #'hydra-forge/body
+    "g t" #'git-timemachine
+    
+    "h b" #'counsel-descbinds
+    "h k" #'helpful-key
+    "h f" #'helpful-function
+    "h F" #'describe-face
+    "h v" #'helpful-variable
+    "h p" #'helpful-package
+    "h m" #'describe-mode
+    "h M" #'helpful-macro
+    "h e" #'view-echo-area-messages
+    "h l" #'find-library
+    
+    "k" #'consult-yank-from-kill-ring
+    
+    "l b" #'lsp-metals-build-import
+    "l d" #'lsp-find-definition
+    "l s" #'lsp-describe-session
+    "l e" #'lsp-ui-flycheck-list
+    "l f" #'lsp-format-buffer
+    "l l" #'consult-lsp-symbols
+    "l t" #'hydra-lsp-toggle/body
+    "l T" #'lsp-treemacs-errors-list
+    ;; "l r" #'lsp-ui-peek-find-references
+    "l r" #'lsp-find-references
+    "l R" #'lsp-rename
+    "l x" #'+lsp/remove-other-sessions
+    "l i" #'lsp-goto-implementation
+    "l I" #'+scala/copy-import
+    
+    "o c" #'cfw:open-org-calendar
+    "o p" #'treemacs
+    "o e" #'eshell
+    "o E" #'+eshell/open-in-default
+    "o P" #'+eshell/open-in-project-root
+    "o o" #'p/focus-mode
+    "o v" #'+vterm/focus-or-create
+    "o V" #'+vterm/new-session
+    "o m" #'mu4e
+    "o w" #'+eww/browse-url
+    "o i" #'+org-jira/get-issues
+    
+    "p a" #'projectile-add-known-project
+    "p c" #'projectile-compile-project
+    "p C" #'projectile-repeat-last-command
+    "p f" (lambda () (interactive) (consult-ripgrep (projectile-project-root)))
+    "p p" #'consult-projectile
+    "p i" #'projectile-invalidate-cache
+    "p t" #'treemacs-add-and-display-current-project
+    "p T" #'+projectile/search-todos
+    "p s" #'projectile-save-project-buffers
+    "p w" #'+projectile/search-word-under-cursor
+    
+    "r h" #'evil-window-decrease-width
+    "r l" #'evil-window-increase-width
+    
+    "s m" #'+work/consult-monorepo
+    "s M" #'+work/consult-monorepo-glob
+    "s f" #'+work/consult-find-file-monorepo
+    
+    "t r" #'+core/reload-theme
+    "t e" #'treemacs-display-current-project-exclusively
+    
+    "u" #'universal-argument
+    
+    "w u" #'winner-undo
+    "w r" #'winner-redo
+    "w f" #'+core/to-floating-frame
+    "w l" #'+core/to-regular-right-window
+    "w j" #'+core/to-regular-bottom-window
+    
+    "y a" #'yas-new-snippet
+    "y v" #'yas-visit-snippet-file
+    "y c" #'company-yasnippet
+    "y p" #'+core/copy-file-path
+    
+    "RET" #'consult-bookmark
+    "`" #'popper-toggle-type
+    
+    "TAB c" #'persp-switch
+    "TAB d" #'persp-kill
+    "TAB n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace")))
+    "TAB k" #'persp-kill
+    "TAB r" #'persp-rename
+    "TAB TAB" #'persp-switch
+    
+    "SPC" (lambda () (interactive) (consult-fd (projectile-project-root)))
+    "," #'consult-projectile)
 
-    (local-leader-def
-      :states 'normal
-      :keymaps 'scala-mode-map
-      "i" #'+scala/copy-import
-      "y" #'+scala/fill-imports-from-side-buffers
-      "s" #'hydra-scala-surround/body
-      "l" #'+scala/insert-common-import
-      "d" #'+scala/def-in-file
-      "p" #'+scala/insert-package
-      "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
-      "c c" (lambda () (interactive) (+projectile/compile "bl"))
-      "c p" (lambda () (interactive) (+projectile/compile "protob"))
-      "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
-      "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
-      "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
-      "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
-      "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
-      "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
-      "g p" (lambda () (interactive) (+work/goto-proto)))
+  (general-create-definer local-leader-def
+    :prefix "SPC m")
 
-    (general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
+  (local-leader-def
+    :states 'normal
+    :keymaps 'org-mode-map
+    "o" #'+ocr/screenshot
+    "r" #'rsvp/read-from-ocr
+    "R" #'rsvp/read-last-content
+    "s" #'org-schedule
+    "S" #'pscreenshot/org-screenshot-take
+    "d" #'org-deadline
+    "p" #'p/force-publish-current-file
+    "P" #'p/show-current-currently-published-file
+    "i" #'+org/save-image-insert-link
+    "t" #'org-todo)
 
-    (local-leader-def
-      :states 'normal
-      :keymaps 'dired-mode-map
-      "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
-      "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
-      "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
-      "g p" (lambda () (interactive) (+work/goto-proto)))
+  (local-leader-def
+    :states 'normal
+    :keymaps 'yaml-mode-map
+    "u" #'+work/update-versions)
+  
+  (local-leader-def
+    :states 'normal
+    :keymaps 'text-mode-map
+    "o" #'+ocr/screenshot)
 
-    (local-leader-def
-      :states 'normal
-      :keymaps 'protobuf-mode-map
-      "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
-      "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
-      "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala")))
+  (local-leader-def
+    :states 'normal
+    :keymaps 'scala-mode-map
+    "i" #'+scala/copy-import
+    "y" #'+scala/fill-imports-from-side-buffers
+    "s" #'hydra-scala-surround/body
+    "l" #'+scala/insert-common-import
+    "d" #'+scala/def-in-file
+    "p" #'+scala/insert-package
+    "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
+    "c c" (lambda () (interactive) (+projectile/compile "bl"))
+    "c p" (lambda () (interactive) (+projectile/compile "protob"))
+    "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
+    "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
+    "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
+    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
+    "g p" (lambda () (interactive) (+work/goto-proto)))
 
-    (local-leader-def
-      :states 'normal
-      :keymaps 'rust-mode-map
-      "c c" #'rust-compile
-      "c r" #'rust-run)
+  (general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
 
-    (local-leader-def
-      :states 'normal
-      :keymaps 'python-mode-map
-      "s" #'run-python
-      "s" #'hydra-python-surround/body)
+  (local-leader-def
+    :states 'normal
+    :keymaps 'dired-mode-map
+    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
+    "g p" (lambda () (interactive) (+work/goto-proto)))
 
-    (general-define-key 
-     :prefix "SPC j"
-     :states 'normal
-     :keymaps 'org-mode-map
-     "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
-     "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
-     "x" #'jupyter-org-kill-block-and-results
-     "c" #'org-babel-remove-result
-     "j" #'org-babel-next-src-block
-     "k" #'org-babel-previous-src-block
-     "r" #'jupyter-run-repl
-     "E" #'jupyter-org-execute-to-point)
+  (local-leader-def
+    :states 'normal
+    :keymaps 'protobuf-mode-map
+    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala")))
 
-    (general-define-key 
-     :states '('normal 'insert)
-     :keymaps '(evil-org-mode-map org-mode-map)
-     "C-<return>" '+org/c-ret-dwim
-     "S-<return>" '+org/s-ret-dwim
-     "C-S-<return>" '+org/c-s-ret-dwim
-     "C-M-<return>" '+org/c-m-ret-dwim)
+  (local-leader-def
+    :states 'normal
+    :keymaps 'rust-mode-map
+    "c c" #'rust-compile
+    "c r" #'rust-run)
 
-    (general-define-key 
-     :states '('normal)
-     :keymaps '(evil-org-mode-map org-mode-map)
-     "C-<return>" '+org/c-ret-dwim
-     "<return>" '+org/ret-dwim))
+  (local-leader-def
+    :states 'normal
+    :keymaps 'python-mode-map
+    "s" #'run-python
+    "s" #'hydra-python-surround/body)
+
+  (general-define-key 
+   :prefix "SPC j"
+   :states 'normal
+   :keymaps 'org-mode-map
+   "a" (lambda () (interactive) (jupyter-org-insert-src-block nil current-prefix-arg))
+   "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
+   "x" #'jupyter-org-kill-block-and-results
+   "c" #'org-babel-remove-result
+   "j" #'org-babel-next-src-block
+   "k" #'org-babel-previous-src-block
+   "r" #'jupyter-run-repl
+   "E" #'jupyter-org-execute-to-point)
+
+  (general-define-key 
+   :states '('normal 'insert)
+   :keymaps '(evil-org-mode-map org-mode-map)
+   "C-<return>" '+org/c-ret-dwim
+   "S-<return>" '+org/s-ret-dwim
+   "C-S-<return>" '+org/c-s-ret-dwim
+   "C-M-<return>" '+org/c-m-ret-dwim)
+
+  (general-define-key 
+   :states '('normal)
+   :keymaps '(evil-org-mode-map org-mode-map)
+   "C-<return>" '+org/c-ret-dwim
+   "<return>" '+org/ret-dwim))
 #+end_src
 
 * Work
@@ -3318,7 +3322,7 @@ sbt-mode
        (activate-mark)
        (org-roam-node-insert))
       (_ (error "Couldn't mark region.")))))
-      #+end_src
+#+end_src
 
 * My packages
 ** RSVP

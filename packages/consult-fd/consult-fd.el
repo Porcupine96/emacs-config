@@ -4,7 +4,8 @@
   (pcase-let* ((cmd (split-string-and-unquote consult-find-args))
                (type (consult--find-regexp-type (car cmd)))
                (`(,arg . ,opts) (consult--command-split input))
-               (`(,re . ,hl) (funcall consult--regexp-compiler arg type))
+               (`(,re . ,hl) (funcall consult--regexp-compiler arg type
+				      (member "--ignore-case" cmd)))
 	       (command (list "fd" (car re) ".")))
 
     (when re
