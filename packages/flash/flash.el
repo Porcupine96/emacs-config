@@ -23,6 +23,7 @@
 
 (defconst flash-anki-prop-note-id "ANKI_NOTE_ID")
 (defconst flash-anki-prop-deck "ANKI_DECK")
+(defconst flash-anki-prop-model-name "ANKI_MODEL_NAME")
 
 (defun flash--set-note-id (id)
   (org-set-property flash-anki-prop-note-id (number-to-string id)))
@@ -72,7 +73,7 @@
    "addNote"
    `("note"
      ("deckName" . ,(cdr (assoc 'deck note)))
-     ("modelName" . "Basic")
+     ("modelName" . ,(cdr (assoc 'model-name note)))
      ("fields"
       ("Front" . ,(flash-anki--anki-connect-format (cdr (assoc 'front note))))
       ("Back" . ,(flash-anki--anki-connect-format (cdr (assoc 'back note))))))
@@ -96,6 +97,8 @@
      `((note-id . ,(org-element-property :ANKI_NOTE_ID top))
        (deck . ,(or (org-element-property :ANKI_DECK top)
 	            (car (org-property-values flash-anki-prop-deck))))
+       (model-name . ,(or (org-element-property :ANKI_MODEL_NAME top)
+			  "Basic"))
        (front . ,(flash-anki--headline-content front))
        (back . ,(flash-anki--headline-content back))))
     (_ (error "couldn't parse map headline to note"))))

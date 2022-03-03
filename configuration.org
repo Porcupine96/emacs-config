@@ -41,23 +41,6 @@
 (straight-use-package 'use-package)
 #+end_src
 
-* Configure =use-package=
-Always compile packages, and use the newest version available.
-#+begin_src emacs-lisp :results none :tangle no
-;; (use-package auto-compile
-;;   :straight t
-;;   :init 
-;;     (setq load-prefer-newer t)
-;;     (setq auto-compile-display-buffer nil)
-;;     (setq auto-compile-mode-line-counter t)
-;;   :config
-;;     (auto-compile-on-load-mode))
-#+end_src
-
-#+begin_src emacs-lisp :results none :tangle no
-;; (setq enable-recursive-minibuffers t)
-#+end_src
-
 * Visuals
 Font.
 #+begin_src emacs-lisp :results none
@@ -144,8 +127,7 @@ Ask before closing Emacs.
 (setq require-final-newline nil)
 #+end_src
 
-Use colors in compilation buffer.
-defer?
+Use colors in compilation buffer. defer?
 #+begin_src emacs-lisp :results none
 (defun colorize-compilation-buffer ()
   (require 'ansi-color)
@@ -617,7 +599,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 * Configure =recentf=
 #+begin_src emacs-lisp :results none
 (use-package recentf
-  :ensure nil
+  :straight nil
   :defer 10
   :config
     (setq recentf-max-saved-items 300)
@@ -908,6 +890,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (use-package evil-org
   :straight t
   :after (evil org)
+  :init  
+    ;; HACK: it doesn't load for some reason
+    (load "/home/porcupine/.emacs.default/straight/repos/org/lisp/org-compat.el")
   :config
     (add-hook 'org-mode-hook 'evil-org-mode)
     (add-hook 'evil-org-mode-hook 'general-define-org-keys)
@@ -1319,7 +1304,7 @@ Save image and insert it's link at point.
 #+end_src
 
 ** org-publish
-#+begin_src emacs-lisp :results none 
+#+begin_src emacs-lisp :results none :tangle no
 (use-package publish
   :load-path "~/.emacs.default/packages/publish"
   :commands (p/publish-configure p/force-publish-current-file)
@@ -1459,7 +1444,7 @@ vc-annotate options.
 * Configure =eww=
 #+begin_src emacs-lisp :results none
 (use-package eww
-  :ensure nil
+  :straight nil
   :defer t
   :config 
     (evil-collection-define-key 'normal 'eww-mode-map
@@ -1642,7 +1627,7 @@ vc-annotate options.
 * Configure =dired=
 #+begin_src emacs-lisp :results none
 (use-package dired 
-  :ensure nil
+  :straight nil
   :hook (dired-mode . dired-hide-details-mode)
   :config
    (defun +dired/copy-directory ()
@@ -2452,7 +2437,7 @@ sbt-mode
 ** Elisp
 #+begin_src emacs-lisp :results none
 (use-package emacs
-  :ensure nil
+  :straight nil
   :bind
     (:map emacs-lisp-mode-map
       ("C-c i" . indent-region))
@@ -2515,7 +2500,7 @@ sbt-mode
 ** JavaScript
 #+begin_src emacs-lisp :results none
 (use-package js-mode
-  :ensure nil
+  :straight nil
   :defer t
   :config
     (font-lock-add-keywords 'js-mode
@@ -2611,7 +2596,7 @@ sbt-mode
 * Configure =Info=
 #+begin_src emacs-lisp :results none
 (use-package info
-  :ensure nil
+  :straight nil
   :defer t
   :config
     (evil-collection-define-key 'normal 'Info-mode-map
@@ -2655,7 +2640,7 @@ sbt-mode
 * Configure =eshell=
 #+begin_src emacs-lisp :results none
 (use-package eshell
-  :ensure nil 
+  :straight nil 
   :defer t
   :hook (eshell-first-time-mode . +eshell/configure-eshell)
   :config
@@ -2747,7 +2732,7 @@ sbt-mode
 * Configure =winner=
 #+begin_src emacs-lisp :results none
 (use-package winner
-  :ensure nil
+  :straight nil
   :defer 10
   :config 
     (winner-mode))
@@ -2829,7 +2814,7 @@ sbt-mode
 * Configure =tramp=
 #+begin_src emacs-lisp :results none
 (use-package tramp
-  :ensure nil
+  :straight nil
   :defer t
   :config
     (setq tramp-default-method "rsync")
@@ -2896,7 +2881,7 @@ sbt-mode
 #+begin_src emacs-lisp :results none :tangle no
 (use-package mu4e
   :disabled
-  :ensure nil
+  :straight nil
 
   :config 
   (setq mu4e-change-filenames-when-moving t)
@@ -3293,23 +3278,26 @@ sbt-mode
 (defun school/next-class ()
   (interactive)
 
-  (let* ((subject (car (s-split " - " (+org/property-value "TITLE"))))
+  (let* ((class-type (completing-read "Type: " '("Ćwiczenia" "Wykład")))
+         (subject (car (s-split " - " (+org/property-value "TITLE"))))
          (date (pcase (s-split "-" (org-read-date))
                  (`(,year ,month ,day . nil) (s-join "." `(,day ,month ,year)))
                  (_ (error "Could not parse date."))))
+         (header (if (equal class-type "Ćwiczenia") "Ćwiczenia" "Wykłady"))
          (count (-reduce '+ (org-element-map (org-element-parse-buffer) 'headline
                               (lambda (h)
-                                (if (equal "Ćwiczenia" (org-element-property :raw-value
+                                (if (equal header (org-element-property :raw-value
                                                                              (org-element-property :parent h)))
                                     1 0)))))
-         (title (concat subject " - ćwiczenia " (number-to-string (+ 1 count)) " (" date ")")))
+         (ctype-str (if (equal class-type "Ćwiczenia") " - ćwiczenia " " - wykład ") )
+         (title (concat subject ctype-str (number-to-string (+ 1 count)) " (" date ")")))
 
     (pcase 
         (car 
          (remove nil
                  (org-map-entries (lambda ()
                                     (let ((elem (org-element-at-point)))
-                                      (if (equal "Ćwiczenia" (s-trim (org-element-property :raw-value elem)))
+                                      (if (equal header (s-trim (org-element-property :raw-value elem)))
                                           (progn
                                             (org-insert-heading-after-current)
                                             (org-demote)
