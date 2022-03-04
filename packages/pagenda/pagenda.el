@@ -1,27 +1,27 @@
 ;;; agenda.el --- description -*- lexical-binding: t; -*-
 
 (require 'org-agenda)
-(require 'org-super-agenda)
+;; (require 'org-super-agenda)
 (require 'face-remap)
 (require 'winner)
 ;; (require 'svg-lib)
 
-(defvar-local pagenda-transforms nil "A list of faces and their associated specs.")
+;; (defvar-local pagenda-transforms nil "A list of faces and their associated specs.")
 (defcustom pagenda-font "Roboto Mono Light for Powerline" "The font to use in an elegant agenda buffer")
 
-(defvar pagenda-face-remappings
-  (let ((face-height (face-attribute 'default :height)))
-    (list
-     (list 'default (list :family pagenda-font
-                          :height (ceiling (* face-height 1.25)) :weight 'thin))
-     (list 'header-line (list :family pagenda-font
-                              :height (* face-height 1.5) :weight 'thin
-                              :underline nil  :overline nil :box nil))
-     (list 'org-agenda-date-today (list :weight 'bold))
-     (list 'org-agenda-structure (list :family pagenda-font :weight 'regular))
-     (list 'bold (list :family pagenda-font :height (ceiling (* face-height 1.1)) :weight 'bold))))
-  "A list of faces and the associated specs that will be remapped
-  when pagenda-mode is enabled")
+;; (defvar pagenda-face-remappings
+;;   (let ((face-height (face-attribute 'default :height)))
+;;     (list
+;;      (list 'default (list :family pagenda-font
+;;                           :height (ceiling (* face-height 1.25)) :weight 'thin))
+;;      (list 'header-line (list :family pagenda-font
+;;                               :height (* face-height 1.5) :weight 'thin
+;;                               :underline nil  :overline nil :box nil))
+;;      (list 'org-agenda-date-today (list :weight 'bold))
+;;      (list 'org-agenda-structure (list :family pagenda-font :weight 'regular))
+;;      (list 'bold (list :family pagenda-font :height (ceiling (* face-height 1.1)) :weight 'bold))))
+;;   "A list of faces and the associated specs that will be remapped
+;;   when pagenda-mode is enabled")
 
 (defun pagenda--file-tag (test)
   (print test)
@@ -123,18 +123,20 @@
 (defun pagenda--enable()
   (setq-local mode-line-format nil)
   (setq-local line-spacing 8)
-  (org-super-agenda-mode)
+  ;; (org-super-agenda-mode)
 
-  (setq pagenda-transforms
-	(mapcar (lambda (face-&-spec)
-		  (face-remap-add-relative (car face-&-spec) (cadr face-&-spec)))
-		pagenda-face-remappings)))
+  ;; (setq pagenda-transforms
+  ;; 	(mapcar (lambda (face-&-spec)
+  ;; 		  (face-remap-add-relative (car face-&-spec) (cadr face-&-spec)))
+  ;; 		pagenda-face-remappings))
+  )
 
 (defun pagenda--disable()
   (setq-local mode-line-format (default-value 'mode-line-format))
   (setq-local line-spacing (default-value 'line-spacing))
-  (mapc #'face-remap-remove-relative
-	pagenda-transforms))
+  ;; (mapc #'face-remap-remove-relative
+  ;; 	pagenda-transforms)
+  )
 
 
 (defvar pagenda-mode-map

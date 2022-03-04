@@ -932,7 +932,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :hook
     (org-agenda-mode . org-super-agenda-mode)
   :bind 
-  (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
+    (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
 	:map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
 	:map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
   :config
@@ -1799,12 +1799,25 @@ vc-annotate options.
   (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
   (define-key embark-general-map (kbd "I") #'+embark/insert-grep-line)
   (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
+  (define-key embark-file-map (kbd "l") #'+embark/create-link)
   
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                  nil
                  (window-parameters (mode-line-format . none))))
+
+
+  (defun +embark/create-link (link)
+    (let* ((beg-raw (re-search-backward " \\|^"))
+           (_ (forward-char))
+           (beg (if (looking-at-p " ")) (+ beg-raw 1) beg-raw)
+           (end-raw (re-search-forward " \\|$"))
+           (_ (backward-char))
+           (end (if (looking-at-p " ") (- end-raw 1) end-raw))
+
+	(kill-region beg end)
+      (org-insert-link link link (read-string "Description: " "")))
 
 
   (require 'org-element)
@@ -1819,7 +1832,7 @@ vc-annotate options.
                      (content-beg (plist-get ctx :contents-begin))
                      (content-end (plist-get ctx :contents-end))
                      (link-text (buffer-substring-no-properties
-			 (or content-beg beg) (or content-end end))))
+				 (or content-beg beg) (or content-end end))))
 		`(link ,link-text ,beg . ,end))))))
   
   (embark-define-keymap embark-link-map
