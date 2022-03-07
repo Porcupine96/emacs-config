@@ -228,6 +228,8 @@ Use =evil-mode=
     (define-and-bind-text-object "=" "=" "=")
     (define-and-bind-text-object "~" "~" "~")
     (define-and-bind-text-object "*" "*" "*")
+    (define-and-bind-text-object "_" "_" "_")
+    (define-and-bind-text-object "/" "/" "/")
 
     (evil-mode +1)
   :bind (:map evil-motion-state-map
@@ -2008,27 +2010,9 @@ Setup =python-mode=.
 #+end_src
    
 #+begin_src emacs-lisp :results none
-(use-package pyenv-mode
-  :straight t
-  :defer t
-  :hook (python-mode . pyenv-mode)
-  :config
-    (let ((pyenv-path (expand-file-name "~/.pyenv/bin")))
-         (setenv "PATH" (concat pyenv-path ":" (getenv "PATH")))
-         (add-to-list 'exec-path pyenv-path)))
-
 (use-package pyvenv
-  :defer t
   :straight t
-  :after pyenv-mode
-  :hook (pyenv-mode . pyvenv-mode)
-  :config
-    (advice-add 'pyenv-mode-set :after (lambda (&rest r) (+pyvenv/set-to-pyenv)))
-
-    (defun +pyvenv/set-to-pyenv ()
-      (interactive)
-      (pyvenv-activate
-          (pyenv-mode-full-path (pyenv-mode-version)))))
+  :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2615,6 +2599,14 @@ sbt-mode
     (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 #+end_src
 
+* Configure =direnev=
+#+begin_src emacs-lisp :results none
+(use-package direnv
+ :straight t
+ :config
+   (direnv-mode))
+#+end_src
+
 * Configure =Info=
 #+begin_src emacs-lisp :results none
 (use-package info
@@ -2839,11 +2831,7 @@ sbt-mode
   :straight nil
   :defer t
   :config
-    (setq tramp-default-method "rsync")
-
-    (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/bin")
-    (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/plugins/pyenv-virtualenv/shims")
-    (add-to-list 'tramp-remote-path "/home/ubuntu/.pyenv/shims"))
+    (setq tramp-default-method "rsync"))
 #+end_src
 
 * Configure =delight=
