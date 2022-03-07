@@ -1032,10 +1032,10 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 #+begin_src emacs-lisp :results none :tangle no
-;; (use-package jupyter
-;;  :straight t
-;;  ;; :defer t
-;;  :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
+(use-package jupyter
+ :straight t
+ :defer t
+ :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
 #+end_src
 
 ** Org Roam
@@ -2779,9 +2779,11 @@ sbt-mode
   :straight t
   :defer t
   :mode "\\.pdf$"
+  :init
+    (pdf-loader-install)
   :config 
     (setq pdf-view-midnight-colors '("#839496" . "#1c2128")) 
-    (pdf-tools-install)
+    ;; (pdf-tools-install)
     (add-hook 'pdf-view-mode-hook #'+pdf/setup)
 
     (add-hook 'pdf-view-mode-hook
