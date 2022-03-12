@@ -2860,6 +2860,14 @@ sbt-mode
  :defer t)
 #+end_src
 
+* Configure =origami-mode=
+#+begin_src emacs-lisp :results none
+(use-package origami
+  :straight t
+  :defer t
+  :hook (js-mode . origami-mode))
+#+end_src
+
 * Configure =mu4e=
 #+begin_src emacs-lisp :results none
 (use-package mu4e
