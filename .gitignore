@@ -32,3 +32,4 @@ org-notify-log.el
 *.log
 history
 multisession/
+/network-security.data
