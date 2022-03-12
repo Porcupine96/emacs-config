@@ -872,9 +872,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (use-package evil-org
   :straight t
   :after org
-  :init  
-    ;; HACK: it doesn't load for some reason
-    (load "/home/porcupine/.emacs.default/straight/repos/org/lisp/org-compat.el")
   :config
     (add-hook 'org-mode-hook 'evil-org-mode)
     (add-hook 'evil-org-mode-hook 'general-define-org-keys)
@@ -908,15 +905,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(setq org-agenda-files '(
-       "~/Dropbox/org-roam/2022-02-23--18-45-30Z--psychologia_społeczna_ii_zajęcia.org"
-       "~/Dropbox/org-roam/2022-02-25--10-17-45Z--psychologia_edukacji.org"
-       "~/Dropbox/org-roam/2022-02-27--13-15-43Z--psychologia_zaburzen_zajęcia.org"
-       "~/Dropbox/org-roam/2021-10-03--10-46-11Z--język_angielski_zajęcia.org"
-       "~/Dropbox/org/todo/work.org"
-       "~/Dropbox/org/todo/private.org"
-))
-
 (use-package org-super-agenda
   :straight t
   :defer t
@@ -1805,10 +1793,10 @@ vc-annotate options.
            (beg (if (looking-at-p " ")) (+ beg-raw 1) beg-raw)
            (end-raw (re-search-forward " \\|$"))
            (_ (backward-char))
-           (end (if (looking-at-p " ") (- end-raw 1) end-raw))
+           (end (if (looking-at-p " ") (- end-raw 1) end-raw)))
 
 	(kill-region beg end)
-      (org-insert-link link link (read-string "Description: " "")))))
+      (org-insert-link link link (read-string "Description: " ""))))
 
 
   (require 'org-element)
@@ -2770,8 +2758,9 @@ sbt-mode
 
     (add-hook 'pdf-view-mode-hook
       (lambda ()
-        (setq cursor-in-non-selected-windows nil)
-        (internal-show-cursor nil nil)))
+        (setq cursor-in-non-selected-windows nil)))
+        ;; TODO: need to find a way to disable it
+        ;; (internal-show-cursor nil nil))
 
     (defun +pdf/open-externally ()
       (interactive)
