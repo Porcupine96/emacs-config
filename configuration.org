@@ -24,8 +24,8 @@
 * Visuals
 Font.
 #+begin_src emacs-lisp :results none
-(set-face-attribute 'default nil :font "Iosevka-12")
-(set-face-attribute 'fixed-pitch nil :font "Iosevka-12")
+(set-face-attribute 'default nil :font "Noto Sans Mono-12")
+(set-face-attribute 'fixed-pitch nil :font "Noto Sans Mono-12")
 (set-face-attribute 'variable-pitch nil :font "Iosevka-13")
 #+end_src
  
@@ -80,6 +80,7 @@ MacOS settings
 
 #+begin_src emacs-lisp :results none
 (setq global-auto-revert-non-file-buffers t)
+(setq auto-revert-verbose nil)
 (global-auto-revert-mode 1)
 #+end_src
 
@@ -153,6 +154,11 @@ Open buffer position
 
     ("\\*Async Shell Command\\*"
      (display-buffer-no-window))
+
+    ("\\*Man .*\\*"
+     (display-buffer-in-side-window)
+     (side           . right)
+     (window-width   . 0.5))
 
     ("^magit:.*"
      (display-buffer-same-window))))
@@ -265,6 +271,8 @@ Use =evil-surround=
   ^^        
   "
   ("s" (lambda () (interactive) (dired "~/Dropbox/org/resources/studies")))
+  ("c" (lambda () (interactive) (dired "~/studies/sem4")))
+  ("h" (lambda () (interactive) (dired "~/")))
   ("S" (lambda () (interactive) (dired "~/scripts")))
   ("d" (lambda () (interactive) (dired "~/Downloads")))
   ("D" (lambda () (interactive) (dired "~/Dropbox")))
@@ -540,6 +548,14 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
    (insert right))
 #+end_src
 
+* Configure =exec-path-from-shell=
+#+begin_src emacs-lisp :results none
+(use-package exec-path-from-shell
+  :straight t
+  :init
+    (exec-path-from-shell-initialize))
+#+end_src
+
 * Configure =which-key=
 #+begin_src emacs-lisp :results none
 (use-package which-key
@@ -709,6 +725,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq org-confirm-babel-evaluate nil)
   (setq org-tags-column -1)
   (setq org-capture-bookmark nil)
+  (setq org-export-with-sub-superscripts nil)
 
   (setq org-src-fontify-natively t)
   (setq org-src-tab-acts-natively t)
@@ -724,6 +741,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
       (scheme . t) 
       (js . t)
       (sql . t)
+      ;; (ammonite . t)
       ;; (http . t)
       ;; (jupyter . t)
       ;; (mongo . t)
@@ -741,7 +759,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
      (interactive)
      (org-latex-preview '(64))
      (plist-put (plist-put org-format-latex-options :background "#1c2128")
-                  :scale (if (= (x-display-pixel-width) 1920) 1.5 1.8))
+                  :scale (if (= (x-display-pixel-width) 1920) 1.5 2.0))
      (org-latex-preview '(16)))
 
   (setq org-format-latex-options 
@@ -764,32 +782,15 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
 
   (setq org-capture-templates
-        '(("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org")
-            "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n" )
-        ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org")
-        "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n")
-        ("m" "Master" entry (file+headline "~/Dropbox/org/todo/studies.org" "Master Thesis")
+        '(("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
         "* TODO %?
 :PROPERTIES:
 :CreatedAt: %T
 :END:\n" )
-        ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
-        "* TODO %?
+         ("j" "Work Journal" entry (file+olp+datetree "~/Dropbox/org/todo/work-journal.org") "*** %?
 :PROPERTIES:
-:CreatedAt: %T
-:END:\n" )
-        ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
-        "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n" )
-            ("d" "Dictionary" table-line (file "~/Dropbox/org/todo/dictionary.org") "| %:description | %:initial | %:link |")))
+:Effort:   %?
+:END:\n")))
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
@@ -965,8 +966,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 ** Org journal
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package org-journal
+  :disbled
   :straight t
   :defer t
   :init
@@ -996,13 +998,19 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :defer t)
 #+end_src
 
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none
 (use-package ob-http
  :straight t
  :defer t
  :config
    (add-to-list 'org-babel-load-languages '(http . t))
    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package ob-ammonite
+  :straight t
+  :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none :tangle no
@@ -1024,7 +1032,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
                ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n d n" . org-roam-dailies-capture-today)
                ("C-c n d d" . org-roam-dailies-goto-today))
-         :map org-roam-node-map
+              :map org-roam-node-map
               (("C-c n l" . +org-roam/goto-linked-file)
                ("C-c n L" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -1033,29 +1041,28 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
                ("C-c n g" . org-roam-buffer-toggle)
                ("C-c n w" . writer)
                ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
-         :map org-mode-map
+              :map org-mode-map
               (("C-c C-b" . org-cycle-list-bullet)
                ("C-c n l" . +org-roam/goto-linked-file)
                ("C-c n i" . org-roam-node-insert)))
   :init
-    (setq org-roam-v2-ack t)
+  (setq org-roam-v2-ack t)
   :config 
-    (setq org-roam-directory "~/Dropbox/org-roam")
-    (setq org-roam-dailies-directory "journal/")
+  (org-roam-db-autosync-mode)
+  (setq org-roam-directory "~/Dropbox/org-roam")
+  (setq org-roam-dailies-directory "journal/")
 
-    (setq org-roam-dailies-capture-templates
-       '(("d" "default" entry "* %<%I:%M %p>: %?"
+  (setq org-roam-dailies-capture-templates
+	'(("d" "default" entry "* %<%I:%M %p>: %?"
            :if-new (file+head "%<%Y-%m-%d>.org" "#+title: Journal: %<%Y-%m-%d>\n"))))
 
-    (setq org-roam-capture-templates '(
+  (setq org-roam-capture-templates '(
           			     ("d" "default" plain 
           			      "%?"
-                                 :if-new
-                                  (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
-                                             "#+title: ${title}\n#+filetags: \n#+startup: content latexpreview\n")
-          			      :unnarrowed t)))
-
-    (add-hook 'org-capture-after-finalize-hook 'org-roam-db-sync))
+                                      :if-new
+                                      (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
+						 "#+title: ${title}\n#+filetags: \n#+startup: content latexpreview\n")
+          			      :unnarrowed t))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1128,7 +1135,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :hook
     (org-mode . org-fancy-priorities-mode)
   :config
-    (setq org-fancy-priorities-list '("❗" "❕" "🔽")))
+    (setq org-fancy-priorities-list '("❗" "❕" "⇓")))
 #+end_src
 
 ** Export CSS
@@ -1304,6 +1311,14 @@ Save image and insert it's link at point.
   :straight t)
 #+end_src
 
+* Configure =org-noter=
+
+#+begin_src emacs-lisp :results none
+(use-package org-noter
+  :straight t
+  :defer t)
+#+end_src
+
 * Configure =flyspell=
 #+begin_src emacs-lisp :results none 
 (use-package flyspell
@@ -1314,6 +1329,7 @@ Save image and insert it's link at point.
     (setq ispell-dictionary "english,polish")
     (ispell-set-spellchecker-params)
     (ispell-hunspell-add-multi-dic "english,polish")
+
   :bind
      (:map flyspell-mode-map
         ("C-," . nil)
@@ -1782,7 +1798,6 @@ vc-annotate options.
   
   (define-key embark-general-map (kbd "z") #'embark-zeal)
   (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
-  (define-key embark-general-map (kbd "I") #'+embark/insert-grep-line)
   (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
   (define-key embark-file-map (kbd "l") #'+embark/create-link)
   
@@ -2191,7 +2206,8 @@ scala-mode
         ("C-c C-c" . +scala/dwim-at-point))
   :config
     (font-lock-add-keywords 'scala-mode
-      '(("\\(TODO\\):" 1 'todo-comment-face prepend))))
+      '(("\\(TODO\\):" 1 'todo-comment-face prepend)
+        ("\\(NOTE\\):" 1 'bookmark-face prepend))))
 #+end_src
 
 sbt-mode
@@ -2464,7 +2480,6 @@ sbt-mode
 (use-package reason-mode
   :straight t
   :defer t
-  :disabled
   :mode "\\.rei?$"
   :config 
   (require 'lsp-mode)
@@ -2565,6 +2580,13 @@ sbt-mode
   :mode "\\.nix$")
 #+end_src
 
+** Elastic
+#+begin_src emacs-lisp :results none
+(use-package es-mode 
+  :straight t
+  :defer t)
+#+end_src
+
 * Configure =dumb-jump=
 #+begin_src emacs-lisp :results none
 (use-package dumb-jump
@@ -2575,12 +2597,17 @@ sbt-mode
 
 * Configure =direnev=
 #+begin_src emacs-lisp :results none
-(use-package direnv
- :straight t
- :config
-   (setq direnv-always-show-summary nil)
+;; (use-package direnv
+;;  :straight t
+;;  :config
+;;    (setq direnv-always-show-summary nil)
    
-   (direnv-mode))
+;;    (direnv-mode))
+
+(use-package envrc
+  :straight t
+  :init
+    (envrc-global-mode))
 #+end_src
 
 * Configure =Info=
@@ -2701,10 +2728,12 @@ sbt-mode
 #+end_src
 
 * Configure =elfeed=
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none 
 (use-package elfeed
-  :disabled
+  :straight t
   :defer t
+  :commands
+    (elfeed)
   :custom
     (elfeed-search-remain-on-entry t)
   :config
@@ -2715,8 +2744,18 @@ sbt-mode
 
     (evil-collection-define-key 'normal 'elfeed-search-mode-map
       (kbd "RET") 'p/elfeed-show-entry
+      "D" 'p/fetch-arxiv-paper
       "b" 'p/elfeed-browse-url
       "R" 'elfeed-update))
+      #+end_src
+
+#+begin_src emacs-lisp :results none 
+(use-package elfeed-score
+  :straight t
+  :after elfeed
+  :config
+    (elfeed-score-enable)
+    (define-key elfeed-search-mode-map "=" elfeed-score-map))
 #+end_src
   
 * Configure =winner=
@@ -2840,23 +2879,23 @@ sbt-mode
         ("BLOCKED" . "WAIT")
         ("Scheduled for deployment" . "WAIT")))
   
-    (setq org-jira-default-jql "project = CD and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
+    (setq org-jira-default-jql "project = DEVS and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
   
     (setq org-jira-custom-jqls
       '(
-        (:jql " project = CD and assignee = currentUser() and status in (TODO, 'In Progress') ORDER BY\n  status DESC, created ASC "
-         :filename "CD-working-on"))))
+        (:jql " project = DEVS and assignee = currentUser() and status in (TODO, 'In Progress') ORDER BY\n  status DESC, created ASC "
+         :filename "DEVS-working-on"))))
 
-    (defun +org-jira/get-issues ()
-      (interactive)
-    
-      (let ((path (concat org-jira-working-dir "/CD.org")))
-        (with-current-buffer
-    	(or (get-file-buffer (concat (projectile-project-root) path))
-              (find-file-noselect (concat (projectile-project-root) path)))
-    
-          (erase-buffer))
-          (call-interactively #'org-jira-get-issues)))
+(defun +org-jira/get-issues ()
+  (interactive)
+
+  (let ((path (concat org-jira-working-dir "/DEVS.org")))
+    (with-current-buffer
+	(or (get-file-buffer (concat (projectile-project-root) path))
+          (find-file-noselect (concat (projectile-project-root) path)))
+
+      (erase-buffer))
+      (call-interactively #'org-jira-get-issues)))
 #+end_src
 
 * Configure =svg-lib=
@@ -2967,6 +3006,7 @@ sbt-mode
     "f f" #'find-file
     "f r" #'consult-recent-file
     "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
+    "f j" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work-journal.org"))
     "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
     "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
     "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
@@ -2978,6 +3018,7 @@ sbt-mode
     "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
     "f d" (lambda () (interactive)(dired "~/dotfiles"))
     "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
+    "f n" (lambda () (interactive)(find-file "~/dotfiles/config/nix/home.nix"))
     "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
     "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
     
@@ -2987,6 +3028,7 @@ sbt-mode
     "g p" #'magit-push
     "g r" #'hydra-forge/body
     "g t" #'git-timemachine
+    "g m" #'man
     
     "h b" #'counsel-descbinds
     "h k" #'helpful-key
@@ -3026,7 +3068,7 @@ sbt-mode
     "o V" #'+vterm/new-session
     "o m" #'mu4e
     "o w" #'+eww/browse-url
-    "o i" #'+org-jira/get-issues
+    "o j" #'+org-jira/get-issues
     
     "p a" #'projectile-add-known-project
     "p c" #'projectile-compile-project
@@ -3073,7 +3115,9 @@ sbt-mode
     "TAB TAB" #'persp-switch
     
     "SPC" (lambda () (interactive) (consult-fd (projectile-project-root)))
-    "," #'consult-projectile)
+    "," #'consult-projectile
+
+    "'" #'hydra-dired-bookmarks/body)
 
   (general-create-definer local-leader-def
     :prefix "SPC m")
@@ -3353,6 +3397,32 @@ sbt-mode
 #+end_src
 
 * Utils
+#+begin_src emacs-lisp :results none
+(defun p/send-to-goodnotes ()
+  (interactive)
+
+  (let ((goodnotes-address "me.bc8rmga@goodnotes.email")
+        (path (buffer-file-name)))
+
+    (mu4e-compose-new)
+
+    (save-excursion
+      (beginning-of-buffer)
+      (search-forward "To: " nil t)
+      (end-of-line)
+      (insert goodnotes-address)
+
+      (search-forward "Subject: " nil t)
+      (end-of-line)
+      (insert "file upload")
+
+      (end-of-buffer)
+
+      (insert (concat "\n<#part filename=\"" path "\" disposition=attachment><#/part>")))
+
+    (evil-force-normal-state)))
+#+end_src
+
 #+begin_src emacs-lisp :results none
 (defun convert-timestamp-at-point ()
   (interactive)

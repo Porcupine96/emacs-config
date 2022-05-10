@@ -32,7 +32,7 @@
   org-agenda-show-future-repeats nil
   org-agenda-start-on-weekday nil
   org-agenda-start-day "today"
-  org-deadline-warning-days 30
+  org-deadline-warning-days 100
   org-log-done 'time
   org-agenda-block-separator 9472  ;; straight line
   org-agenda-tags-column -100
@@ -45,16 +45,17 @@
   org-agenda-scheduled-leaders '("" "")
   org-agenda-current-time-string "→"
   org-agenda-todo-keyword-format "%-1s"
+  org-agenda-sorting-strategy '((agenda timestamp-up priority-down category-keep))
   org-agenda-prefix-format '((agenda . " %?-20b %?-10t%s")
                              (timeline . "  % s")
                              (todo . "%i %-12:c%b")
                              (tags . "%i %-12:c%b")
-                             (search . " %i %-12:c")))
+                             (search . " %i %-12:c"))
+  org-super-agenda-keep-order t)
 
 
 (defun pagenda-change-status ()
   (interactive)
-  (message "Hello from pagenda-change-status")
   (org-agenda-todo))
 
 (defun pagenda--format-days-left (days)
@@ -78,16 +79,16 @@
   (-let* ((org-agenda-span span)
 	  (org-super-agenda-groups
 	   `((:discard (:todo ("DONE" "SOMEDAY" "KILL")))
-	     (:name "👔 Work"
+	     (:name "💻 Work"
 		    :transformer #'pagenda--transform
 		    :and (:category "work"
 				    :todo ("STRT" "TODO" "WAIT" "REVIEW")))
-	     (:name "‍📖 Studies"
+	     (:name "‍🏫 Studies"
 		    :transformer #'pagenda--transform
 		    :and (:category "studies" 
 				    :todo ("PROJECT" "STRT" "TODO" "REVIEW"))
 		    )
-	     (:name "‍👦🏻 Private"
+	     (:name "🌳 Private"
 		    :transformer #'pagenda--transform
 		    :and (:category "private" 
 				    :todo ("PROJECT" "STRT" "TODO" "REVIEW"))

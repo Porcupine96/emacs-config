@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: deploy
+# key: deploy
+# --
+deployment: $1
+author: Łukasz
+reviewer: $2
+JIRA: $3
+PR: $4
+

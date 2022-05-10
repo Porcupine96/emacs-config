@@ -446,7 +446,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-table                 ((t (:inherit default ,@fmt-none  ,@fg-blue ,@bg-base03))))
 
              (org-link ((t (,@fmt-undr ,@fg-darkblue ,@bg-base03))))
-             (org-tag ((t (:inherit default :height 1.2 ,@fg-orange ,@bg-base03))))
+             (org-tag ((t (:inherit default :height 0.9 ,@fmt-ital ,@fg-green ,@bg-base03))))
 
 	     (org-level-1 ((t (,@fmt-big ,@fg-purple ,@bg-base03))))
 	     (org-level-2 ((t (,@fmt-sbig ,@fg-pink ,@bg-base03))))
