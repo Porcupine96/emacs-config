@@ -587,6 +587,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (use-package perspective 
   :defer 5
   :straight t
+  :custom
+    (persp-mode-prefix-key (kbd "C-c M-p"))
   :init
     (persp-mode)
   :config 
@@ -1020,113 +1022,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
  :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
 #+end_src
 
-** Org Roam
-#+begin_src emacs-lisp :results none
-(use-package org-roam
-  :straight t
-  :defer t
-  :commands org-roam-node-find
-  ;; :hook (org-mode . org-roam-setup)
-  :bind (:map global-map
-              (("C-c n f" . org-roam-node-find)
-               ("C-c n F" . +org-roam/find-file-by-title)
-               ("C-c n d n" . org-roam-dailies-capture-today)
-               ("C-c n d d" . org-roam-dailies-goto-today))
-              :map org-roam-node-map
-              (("C-c n l" . +org-roam/goto-linked-file)
-               ("C-c n L" . org-roam)
-               ("C-c n f" . org-roam-find-file)
-               ("C-c n F" . +org-roam/find-file-by-title)
-               ("C-c n C" . org-roam-db-sync)
-               ("C-c n g" . org-roam-buffer-toggle)
-               ("C-c n w" . writer)
-               ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
-              :map org-mode-map
-              (("C-c C-b" . org-cycle-list-bullet)
-               ("C-c n l" . +org-roam/goto-linked-file)
-               ("C-c n i" . org-roam-node-insert)))
-  :init
-  (setq org-roam-v2-ack t)
-  :config 
-  (org-roam-db-autosync-mode)
-  (setq org-roam-directory "~/Dropbox/org-roam")
-  (setq org-roam-dailies-directory "journal/")
-
-  (setq org-roam-dailies-capture-templates
-	'(("d" "default" entry "* %<%I:%M %p>: %?"
-           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: Journal: %<%Y-%m-%d>\n"))))
-
-  (setq org-roam-capture-templates '(
-          			     ("d" "default" plain 
-          			      "%?"
-                                      :if-new
-                                      (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
-						 "#+title: ${title}\n#+filetags: \n#+startup: content latexpreview\n")
-          			      :unnarrowed t))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +org-roam/find-file-by-title ()
-  (interactive)
-  (org-roam-node-find nil (+org/property-value "TITLE")))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +org-roam/find-file-next ()
-  (interactive)
-
-  (let ((title (+org/property-value "TITLE")))
-    (when (string-match ".*\\([0-9]+\\)" title)
-      (print (match-string 1)))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +org-roam/goto-linked-file ()
-  (interactive)
-
-  (let* ((titles (-map (lambda (link) (org-roam-node-title (org-roam-backlink-source-node link)))
-                       (org-roam-backlinks-get (org-roam-node-at-point 'assert))))
-         (title (completing-read " " titles))
-         (file (org-roam-node-file (org-roam-node-from-title-or-alias title))))
-    (find-file file)))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defvar orb-title-format "${author-or-editor-abbrev} (${date}).  ${title}.")
-
-(use-package org-roam-bibtex
-  :disabled
-  :straight t
-  :defer t
-  :custom
-    (orb-autokey-format "%a%y")
-    (orb-templates
-     `(("r" "ref" plain
-        (function org-roam-capture--get-point)
-        ""
-        :file-name "refs/${citekey}"
-        :head ,(s-join "\n"
-                       (list
-                        (concat "#+title: "
-                                orb-title-format)
-                        "#+roam_key: ${ref}"
-                        "#+created: %U"))
-        :unnarrowed t))))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun +org/insert-roam-link ()
-    "Inserts an Org-roam link."
-    (interactive)
-    (insert "[[roam:]]")
-    (backward-char 2))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +bibtex/format-citations-apa7 (keys)
-  (bibtex-completion-apa-format-reference (car keys)))
-#+end_src
-
 ** Org Fancy Priorities
 #+begin_src emacs-lisp :results none
 (use-package org-fancy-priorities
@@ -1309,6 +1204,114 @@ Save image and insert it's link at point.
 (use-package ox-slack
   :defer t
   :straight t)
+#+end_src
+
+* Configure =org-roam= 
+#+begin_src emacs-lisp :results none
+(use-package org-roam
+  :straight t
+  :defer t
+  :commands org-roam-node-find
+  ;; :hook (org-mode . org-roam-setup)
+  :bind (:map global-map
+              (("C-c n f" . org-roam-node-find)
+               ("C-c n F" . +org-roam/find-file-by-title)
+               ("C-c n d n" . org-roam-dailies-capture-today)
+               ("C-c n d d" . org-roam-dailies-goto-today))
+              :map org-roam-node-map
+              (("C-c n l" . +org-roam/goto-linked-file)
+               ("C-c n L" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n F" . +org-roam/find-file-by-title)
+               ("C-c n C" . org-roam-db-sync)
+               ("C-c n g" . org-roam-buffer-toggle)
+               ("C-c n w" . writer)
+               ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
+              :map org-mode-map
+              (("C-c C-b" . org-cycle-list-bullet)
+               ("C-c n l" . +org-roam/goto-linked-file)
+               ("C-c n i" . org-roam-node-insert)))
+  :init
+    (setq org-roam-v2-ack t)
+  :config 
+    (setq org-roam-directory "~/Dropbox/org-roam")
+    (setq org-roam-dailies-directory "journal/")
+  
+    (setq org-roam-dailies-capture-templates
+  	'(("d" "default" entry "* %<%I:%M %p>: %?"
+             :if-new (file+head "%<%Y-%m-%d>.org" "#+title: Journal: %<%Y-%m-%d>\n"))))
+  
+    (setq org-roam-capture-templates '(
+            			     ("d" "default" plain 
+            			      "%?"
+                                        :if-new
+                                        (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
+  						 "#+title: ${title}\n#+filetags: \n#+startup: content latexpreview\n")
+            			      :unnarrowed t)))
+
+   (org-roam-db-autosync-mode))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org-roam/find-file-by-title ()
+  (interactive)
+  (org-roam-node-find nil (+org/property-value "TITLE")))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org-roam/find-file-next ()
+  (interactive)
+
+  (let ((title (+org/property-value "TITLE")))
+    (when (string-match ".*\\([0-9]+\\)" title)
+      (print (match-string 1)))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +org-roam/goto-linked-file ()
+  (interactive)
+
+  (let* ((titles (-map (lambda (link) (org-roam-node-title (org-roam-backlink-source-node link)))
+                       (org-roam-backlinks-get (org-roam-node-at-point 'assert))))
+         (title (completing-read " " titles))
+         (file (org-roam-node-file (org-roam-node-from-title-or-alias title))))
+    (find-file file)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defvar orb-title-format "${author-or-editor-abbrev} (${date}).  ${title}.")
+
+(use-package org-roam-bibtex
+  :disabled
+  :straight t
+  :defer t
+  :custom
+    (orb-autokey-format "%a%y")
+    (orb-templates
+     `(("r" "ref" plain
+        (function org-roam-capture--get-point)
+        ""
+        :file-name "refs/${citekey}"
+        :head ,(s-join "\n"
+                       (list
+                        (concat "#+title: "
+                                orb-title-format)
+                        "#+roam_key: ${ref}"
+                        "#+created: %U"))
+        :unnarrowed t))))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun +org/insert-roam-link ()
+    "Inserts an Org-roam link."
+    (interactive)
+    (insert "[[roam:]]")
+    (backward-char 2))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +bibtex/format-citations-apa7 (keys)
+  (bibtex-completion-apa-format-reference (car keys)))
 #+end_src
 
 * Configure =org-noter=
@@ -2744,7 +2747,9 @@ sbt-mode
 
     (evil-collection-define-key 'normal 'elfeed-search-mode-map
       (kbd "RET") 'p/elfeed-show-entry
-      "D" 'p/fetch-arxiv-paper
+      ;; TODO: use general for that?
+      "d" 'p/fetch-arxiv-paper
+      "N" 'p/elfeed-roam-note
       "b" 'p/elfeed-browse-url
       "R" 'elfeed-update))
       #+end_src
