@@ -4,6 +4,7 @@
 # --
 
 import cats.effect.IO
+import cats.effect.ContextShift
 import hero.common.mongo.MongoRepository
 import reactivemongo.api.DB
 
@@ -13,7 +14,7 @@ import reactivemongo.api.bson.Macros.Annotations.Key
 
 import hero.common.util.LazyFunctionK.implicits._
 
-class Mongo$1Repository(db: DB)(implicit ec: ExecutionContext)
+class Mongo$1Repository(db: DB)(implicit ec: ExecutionContext, cs: ContextShift[IO])
     extends MongoRepository[IO](db, Mongo$1Repository.collectionName)
     with $1Repository[IO] {
 

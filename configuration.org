@@ -745,7 +745,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
       (sql . t)
       ;; (ammonite . t)
       ;; (http . t)
-      ;; (jupyter . t)
       ;; (mongo . t)
       (haskell . t)))
 
@@ -761,7 +760,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
      (interactive)
      (org-latex-preview '(64))
      (plist-put (plist-put org-format-latex-options :background "#1c2128")
-                  :scale (if (= (x-display-pixel-width) 1920) 1.5 2.0))
+                  :scale (if (= (x-display-pixel-width) 1920) 1.7 2.0))
      (org-latex-preview '(16)))
 
   (setq org-format-latex-options 
@@ -1015,11 +1014,13 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :defer t)
 #+end_src
 
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none 
 (use-package jupyter
  :straight t
- :defer t
- :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results))
+ ;; :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results)
+ :config
+  (add-to-list 'org-babel-load-languages '(jupyter . t))
+  (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
 #+end_src
 
 ** Org Fancy Priorities
@@ -2412,6 +2413,27 @@ sbt-mode
     (insert import)))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun +scala/used-proto ()
+  (interactive)
+
+  (with-current-buffer (find-file-noselect (concat (projectile-project-root) "build.sbt"))
+    (let ((pos 0)
+          (paths nil)
+          (content (buffer-substring-no-properties (point-min) (point-max))))
+
+      (while (string-match "baseDirectory\\.value \\(.*\\)" content pos)
+        (setq pos (match-end 0))
+
+        (let* ((match (match-string 1 content))
+               (path (substring (s-replace-all '(("," . "") (" " . "") ("\"" . "")) match) 1)))
+          (push path paths)))
+
+      (let ((choice (completing-read " " paths)))
+        (if choice
+            (find-file (concat (projectile-project-root) choice)))))))
+#+end_src
+
 ** Yaml
 #+begin_src emacs-lisp :results none
 (use-package yaml-mode 
@@ -2875,13 +2897,15 @@ sbt-mode
   :init
     (setq org-jira-working-dir "~/.org-jira")
   :config
+    (setq org-element-use-cache nil) ;; hanging emacs issue: https://github.com/ahungry/org-jira/issues/275
+
     (setq jiralib-url "https://chatbotize.atlassian.net")
     (setq org-jira-verbosity 'info)
     (setq org-jira-jira-status-to-org-keyword-alist
       '(("In Progress" . "STRT")
-        ("IN REVIEW" . "REVIEW")
-        ("IN TEST" . "WAIT")
-        ("BLOCKED" . "WAIT")
+        ("In Review" . "REVIEW")
+        ("In Test" . "WAIT")
+        ("Blocked" . "WAIT")
         ("Scheduled for deployment" . "WAIT")))
   
     (setq org-jira-default-jql "project = DEVS and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
@@ -2889,7 +2913,7 @@ sbt-mode
     (setq org-jira-custom-jqls
       '(
         (:jql " project = DEVS and assignee = currentUser() and status in (TODO, 'In Progress') ORDER BY\n  status DESC, created ASC "
-         :filename "DEVS-working-on"))))
+         :filename "DEVS-working-on")))
 
 (defun +org-jira/get-issues ()
   (interactive)
@@ -2900,7 +2924,7 @@ sbt-mode
           (find-file-noselect (concat (projectile-project-root) path)))
 
       (erase-buffer))
-      (call-interactively #'org-jira-get-issues)))
+      (call-interactively #'org-jira-get-issues))))
 #+end_src
 
 * Configure =svg-lib=
@@ -3169,7 +3193,8 @@ sbt-mode
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
     "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
     "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
-    "g p" (lambda () (interactive) (+work/goto-proto)))
+    "g p" (lambda () (interactive) (+work/goto-proto))
+    "g u" (lambda () (interactive) (+scala/used-proto)))
 
   (general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
 
