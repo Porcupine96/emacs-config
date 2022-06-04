@@ -1645,6 +1645,7 @@ vc-annotate options.
      "_" #'+projectile/goto-project-root
      "ge" #'+dired/open-externally
      "gn" #'+dired/open-nautilus
+     "yp" #'+dired/copy-path
      "'" #'hydra-dired-bookmarks/body))
 #+end_src
 
@@ -1668,6 +1669,10 @@ vc-annotate options.
 (defun +dired/open-nautilus ()
   (interactive)
   (call-process "nautilus" nil 0 nil (expand-file-name default-directory)))
+
+(defun +dired/copy-path ()
+  (interactive)
+  (kill-new (dired-get-filename)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1842,6 +1847,7 @@ vc-annotate options.
   (embark-define-keymap embark-link-map
     "Keymap to work with links"
     ("o" +org-open-at-point-other-window)
+    ("e" +org-link-at-point-open-externally)
     ("y" +org-copy-link-at-point))
   
   (defun +org-copy-link-at-point (_)
@@ -1849,6 +1855,12 @@ vc-annotate options.
            (ctx (cadr context))
            (link (plist-get ctx :raw-link)))
       (kill-new link)))
+
+(defun +org-link-at-point-open-externally (_)
+    (let* ((context (org-element-context))
+           (ctx (cadr context))
+           (link (plist-get ctx :raw-link)))
+      (call-process "xdg-open" nil 0 nil link)))
   
   (defun +org-open-at-point-other-window (_)
     (let ((org-link-frame-setup '((file . find-file-other-window))))
