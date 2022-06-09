@@ -261,22 +261,14 @@ Use =evil-surround=
 ** Dired
 #+begin_src emacs-lisp :results none
 (defhydra hydra-dired-bookmarks (:color blue)
-  "
-  ──────────────────────────────
-  _s_ ~/studies
-  _S_ ~/scripts
-  _d_ ~/Downloads
-  _D_ ~/Dropbox
-  _w_ ~/codeheroes/chatbotize
-  ^^        
-  "
-  ("s" (lambda () (interactive) (dired "~/Dropbox/org/resources/studies")))
   ("c" (lambda () (interactive) (dired "~/studies/sem4")))
-  ("h" (lambda () (interactive) (dired "~/")))
-  ("S" (lambda () (interactive) (dired "~/scripts")))
   ("d" (lambda () (interactive) (dired "~/Downloads")))
   ("D" (lambda () (interactive) (dired "~/Dropbox")))
   ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes")))
+  ("h" (lambda () (interactive) (dired "~/")))
+  ("m" (lambda () (interactive) (dired "~/work/monorepo")))
+  ("s" (lambda () (interactive) (dired "~/Dropbox/org/resources/studies")))
+  ("S" (lambda () (interactive) (dired "~/scripts")))
   ("w" (lambda () (interactive) (dired "~/work"))))
 #+end_src
 
@@ -762,6 +754,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
      (plist-put (plist-put org-format-latex-options :background "#1c2128")
                   :scale (if (= (x-display-pixel-width) 1920) 1.7 2.0))
      (org-latex-preview '(16)))
+
+  (setq org-latex-inputenc-alist nil)
+  ;; (setq org-latex-inputenc-alist '(("utf8" . "utf8x")))
 
   (setq org-format-latex-options 
     (plist-put (plist-put org-format-latex-options :background "#1c2128") :scale 1.5))
@@ -1809,6 +1804,7 @@ vc-annotate options.
   (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
   (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
   (define-key embark-file-map (kbd "l") #'+embark/create-link)
+  (define-key embark-file-map (kbd "e") #'+embark/open-externally)
   
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
@@ -1828,6 +1824,8 @@ vc-annotate options.
 	(kill-region beg end)
       (org-insert-link link link (read-string "Description: " ""))))
 
+  (defun +embark/open-externally (link)
+    (call-process "xdg-open" nil 0 nil link))
 
   (require 'org-element)
   
@@ -3038,9 +3036,9 @@ sbt-mode
     "c x" #'flycheck-list-errors
     "c c" #'compile
     "c C" #'recompile
-    
-    "d d" #'dockel
-    
+
+    "d" #'hydra-dired-bookmarks/body
+
     "e e" #'elfeed
     "e d" #'ediff
     
@@ -3156,9 +3154,7 @@ sbt-mode
     "TAB TAB" #'persp-switch
     
     "SPC" (lambda () (interactive) (consult-fd (projectile-project-root)))
-    "," #'consult-projectile
-
-    "'" #'hydra-dired-bookmarks/body)
+    "," #'consult-projectile)
 
   (general-create-definer local-leader-def
     :prefix "SPC m")

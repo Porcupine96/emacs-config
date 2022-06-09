@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: latex_headers
+# key: ltxh
+# --
+#+startup: content latexpreview
+#+options: toc:nil author:nil date:nil
+#+latex_class_options: [6pt]
+#+latex_header: \usepackage{setspace}
+#+latex_header: \onehalfspacing
+#+latex_header: \usepackage[parfill]{parskip}
