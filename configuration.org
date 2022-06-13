@@ -698,14 +698,14 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :defer t
   :delight
   :custom
-    (org-ellipsis " ▾")
-    (org-todo-keyword-faces '(
-      ("PROJECT" . (:inherit default :height 1.2 :foreground "#ffffff" :weight normal :underline t))
-      ("STRT"    . (:inherit default :height 1.2 :foreground "#0198e1" :weight normal :underline t))
-      ("SOMEDAY" . (:inherit default :height 1.2 :foreground "#ff8888" :weight normal :underline t))
-      ("REVIEW"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-      ("DEPLOY"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-      ("WAIT"    . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
+  (org-ellipsis " ▾")
+  (org-todo-keyword-faces '(
+			    ("PROJECT" . (:inherit default :height 1.2 :foreground "#ffffff" :weight normal :underline t))
+			    ("STRT"    . (:inherit default :height 1.2 :foreground "#0198e1" :weight normal :underline t))
+			    ("SOMEDAY" . (:inherit default :height 1.2 :foreground "#ff8888" :weight normal :underline t))
+			    ("REVIEW"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+			    ("DEPLOY"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
+			    ("WAIT"    . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
   :config 
   (require 'org-tempo)
 
@@ -720,6 +720,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq org-tags-column -1)
   (setq org-capture-bookmark nil)
   (setq org-export-with-sub-superscripts nil)
+  (setq org-indirect-buffer-display 'current-window)
 
   (setq org-src-fontify-natively t)
   (setq org-src-tab-acts-natively t)
@@ -728,17 +729,17 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq org-fontify-quote-and-verse-blocks t)
 
   (org-babel-do-load-languages 'org-babel-load-languages
-    '((shell . t)
-      (emacs-lisp . t)
-      (python . t)
-      (plantuml . t)
-      (scheme . t) 
-      (js . t)
-      (sql . t)
-      ;; (ammonite . t)
-      ;; (http . t)
-      ;; (mongo . t)
-      (haskell . t)))
+			       '((shell . t)
+				 (emacs-lisp . t)
+				 (python . t)
+				 (plantuml . t)
+				 (scheme . t) 
+				 (js . t)
+				 (sql . t)
+				 ;; (ammonite . t)
+				 ;; (http . t)
+				 ;; (mongo . t)
+				 (haskell . t)))
 
   (setq org-plantuml-jar-path
         (expand-file-name "~/tools/plantuml.jar"))
@@ -749,17 +750,19 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   ;; LaTeX options
   (defun +latex-rescale ()
-     (interactive)
-     (org-latex-preview '(64))
-     (plist-put (plist-put org-format-latex-options :background "#1c2128")
-                  :scale (if (= (x-display-pixel-width) 1920) 1.7 2.0))
-     (org-latex-preview '(16)))
+    (interactive)
+    (org-latex-preview '(64))
+    (plist-put (plist-put org-format-latex-options :background "#1c2128")
+               :scale (if (= (x-display-pixel-width) 1920) 1.7 2.0))
+    (org-latex-preview '(16)))
 
   (setq org-latex-inputenc-alist nil)
-  ;; (setq org-latex-inputenc-alist '(("utf8" . "utf8x")))
+  (setq org-latex-compiler "xelatex")
+  (setq org-latex-pdf-process '("latexmk -xelatex -quiet -shell-escape -f %f"))
+  (add-to-list 'org-latex-packages-alist '("" "fontspec"))
 
   (setq org-format-latex-options 
-    (plist-put (plist-put org-format-latex-options :background "#1c2128") :scale 1.5))
+	(plist-put (plist-put org-format-latex-options :background "#1c2128") :scale 1.5))
 
   ;; open files in the same window
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
@@ -779,39 +782,44 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   (setq org-capture-templates
         '(("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
-        "* TODO %?
+           "* TODO %?
 :PROPERTIES:
 :CreatedAt: %T
 :END:\n" )
-         ("j" "Work Journal" entry (file+olp+datetree "~/Dropbox/org/todo/work-journal.org") "*** %?
+("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
+           "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n" )
+          ("j" "Work Journal" entry (file+olp+datetree "~/Dropbox/org/todo/work-journal.org") "*** %?
 :PROPERTIES:
 :Effort:   %?
 :END:\n")))
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
-                     (push '("[ ]" . "☐") prettify-symbols-alist)
-                     (push '("[-]" . "⚀") prettify-symbols-alist)
-                     (push '("[X]" . "☒") prettify-symbols-alist)
-                     (push '("->" . "→") prettify-symbols-alist)
-                     (push '("<-" . "←") prettify-symbols-alist)
-                     (push '("<->" . "←→") prettify-symbols-alist)
-                     (push '("---" . "⎯") prettify-symbols-alist)
-                     (push '("#+begin_quote" . ">") prettify-symbols-alist)
-                     (push '("#+end_quote" . "<") prettify-symbols-alist)
-                     (push '("#+BEGIN_QUOTE" . ">") prettify-symbols-alist)
-                     (push '("#+END_QUOTE" . "<") prettify-symbols-alist)
-                     (push '("#+begin_src" . ">") prettify-symbols-alist)
-                     (push '("#+end_src" . "<") prettify-symbols-alist)
-                     (push '("#+BEGIN_SRC" . ">") prettify-symbols-alist)
-                     (push '("#+END_SRC" . "<") prettify-symbols-alist)
+			      (push '("[ ]" . "☐") prettify-symbols-alist)
+			      (push '("[-]" . "⚀") prettify-symbols-alist)
+			      (push '("[X]" . "☒") prettify-symbols-alist)
+			      (push '("->" . "→") prettify-symbols-alist)
+			      (push '("<-" . "←") prettify-symbols-alist)
+			      (push '("<->" . "←→") prettify-symbols-alist)
+			      (push '("---" . "⎯") prettify-symbols-alist)
+			      (push '("#+begin_quote" . ">") prettify-symbols-alist)
+			      (push '("#+end_quote" . "<") prettify-symbols-alist)
+			      (push '("#+BEGIN_QUOTE" . ">") prettify-symbols-alist)
+			      (push '("#+END_QUOTE" . "<") prettify-symbols-alist)
+			      (push '("#+begin_src" . ">") prettify-symbols-alist)
+			      (push '("#+end_src" . "<") prettify-symbols-alist)
+			      (push '("#+BEGIN_SRC" . ">") prettify-symbols-alist)
+			      (push '("#+END_SRC" . "<") prettify-symbols-alist)
 
-                     (prettify-symbols-mode 1))))
+			      (prettify-symbols-mode 1))))
 
   (defun org-archive-save-buffer ()
     (let ((afile (car (org-all-archive-files))))
       (if (file-exists-p afile)
-        (let ((buffer (find-file-noselect afile)))
+          (let ((buffer (find-file-noselect afile)))
             (with-current-buffer buffer
               (save-buffer)))
         (message "Ooops ... (%s) does not exist." afile))))
@@ -819,27 +827,34 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (add-hook 'org-archive-hook 'org-archive-save-buffer)
 
   (add-hook 'after-init-hook
-      (lambda ()
-       (require 'org-indent)  
-       (set-face-attribute 'org-indent nil
-           :inherit '(org-hide fixed-pitch))))
+	    (lambda ()
+	      (require 'org-indent)  
+	      (set-face-attribute 'org-indent nil
+				  :inherit '(org-hide fixed-pitch))))
   :bind
-   (:map evil-normal-state-map
-         ("C-c h" . org-toggle-heading)
-         ("C-k" . evil-window-up)
-         ("C-j" . evil-window-down)
-    :map org-mode-map 
-         ("C-c h" . org-toggle-heading)
-         ("C-x n S" . org-tree-to-indirect-buffer))
+  (:map evil-normal-state-map
+        ("C-c h" . org-toggle-heading)
+        ("C-k" . evil-window-up)
+        ("C-j" . evil-window-down)
+	:map org-mode-map 
+        ("C-c h" . org-toggle-heading)
+        ("C-x n S" . org-tree-to-indirect-buffer))
   :hook (org-mode . org-indent-mode)
-        (org-mode . variable-pitch-mode)
-        (org-mode . auto-fill-mode))
+  (org-mode . variable-pitch-mode)
+  (org-mode . auto-fill-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (use-package org-contrib
   :after org
   :straight t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package org-utf-to-xetex
+  :straight (org-utf-to-xetex :type git :host github :repo "grettke/org-utf-to-xetex" :branch "master")
+  :commands (org-utf-to-xetex-prettify)
+  :hook (org-mode . org-utf-to-xetex-prettify))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2083,6 +2098,7 @@ Setup =python-mode=.
            ("M-w" . +lsp-ui/toggle-doc-focus)          
            ("C-<return>" . lsp-execute-code-action))
          (:map evil-insert-state-map
+           ("C-l l f" . +lsp/fill-signature)
            ("C-t" . lsp-signature-activate)
            ("C-<return>" . lsp-execute-code-action))))
 #+end_src
@@ -2251,6 +2267,33 @@ sbt-mode
 
     (message "Copied: %s" import)
     (kill-new import))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/match-imports ()
+  (interactive)
+
+  (ace-window nil)
+
+  (let ((pos 0)
+        (imports nil)
+        (content (buffer-substring-no-properties (point-min) (point-max))))
+
+    (while (string-match "^import.*" content pos)
+      (setq pos (match-end 0))
+
+      (let ((import (match-string 0 content)))
+        (push import imports)))
+
+    (ace-window nil)
+
+    (beginning-of-buffer)
+    (forward-line)
+
+    (insert "\n")
+    (dolist (import imports)
+      (insert import)
+      (insert "\n"))))
 #+end_src
 
 #+begin_src emacs-lisp :results none

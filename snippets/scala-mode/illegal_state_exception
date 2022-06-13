@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: throw new IllegalStateException
+# name: new IllegalStateException
 # key: ise
 # --
-throw new IllegalStateException($1)
+new IllegalStateException($1)
