@@ -1010,12 +1010,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package ob-http
- :straight t
- :defer t
- :config
-   (add-to-list 'org-babel-load-languages '(http . t))
-   (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
+;; (use-package ob-http
+;;  :straight t
+;;  :defer t
+;;  :config
+;;    (add-to-list 'org-babel-load-languages '(http . t))
+;;    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3395,6 +3395,15 @@ sbt-mode
           (find-file-noselect (concat (projectile-project-root) file)))
 
       (+work/setup-nlp-file-save-hook))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +work/goto-jenkins ()
+  (interactive)
+
+  (let* ((branch (string-remove-prefix " Git:" vc-mode))
+         (url (concat "https://jenkins.codeheroes.tech/job/monorepo/job/" (url-hexify-string branch))))
+    (call-process "xdg-open" nil 0 nil url)))
 #+end_src
 
 ** Version update

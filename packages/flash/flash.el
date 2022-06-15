@@ -176,6 +176,22 @@
   (unless (car (org-property-values flash-anki-prop-deck))
     (org-set-property flash-anki-prop-deck "Default"))))
 
+(defun flash-select-note ()
+  (interactive)
+
+  (let ((deck-to-path nil))
+    (dolist (file (directory-files flash-directory t ".*\\.org"))
+      (let ((buffer (find-file-noselect file)))
+	(with-current-buffer buffer
+	  (let ((deck (org-property-values flash-anki-prop-deck)))
+	    (if deck
+		(push `(,(car deck) . ,file) deck-to-path))))))
+
+    (let ((deck (completing-read " " (-map 'car deck-to-path ))))
+      (if deck
+	  (find-file (cdr (assoc deck deck-to-path)))))))
+
+
 (defun flash-open-notes ()
   (interactive)
   (find-file-other-window (flash--notes-path))
