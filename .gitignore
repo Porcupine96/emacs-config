@@ -33,3 +33,6 @@ org-notify-log.el
 history
 multisession/
 /network-security.data
+tutorial/
+*.sql
+dirvish/

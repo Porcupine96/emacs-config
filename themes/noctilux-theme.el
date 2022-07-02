@@ -85,6 +85,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     ("PROJECT" . (:inherit default :height 1.2 :foreground "#ffffff" :weight normal :underline t))
     ("STRT"    . (:inherit default :height 1.2 :foreground "#0198e1" :weight normal :underline t))
     ("SOMEDAY" . (:inherit default :height 1.2 :foreground "#ff8888" :weight normal :underline t))
+    ("IDEA"    . (:inherit default :height 1.2 :foreground "#007500" :weight normal :underline t))
     ("REVIEW"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
     ("DEPLOY"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
     ("WAIT"    . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))

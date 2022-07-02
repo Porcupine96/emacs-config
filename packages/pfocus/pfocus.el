@@ -1,6 +1,4 @@
 (defun +focus/focus-mode-function ()
-    (when (derived-mode-p 'scala-mode) 
-      (setq olivetti-body-width 150))
     (olivetti-mode)
     (hide-mode-line-mode))
 

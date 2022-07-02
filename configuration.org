@@ -262,14 +262,14 @@ Use =evil-surround=
 #+begin_src emacs-lisp :results none
 (defhydra hydra-dired-bookmarks (:color blue)
   ("c" (lambda () (interactive) (dired "~/studies/sem4")))
-  ("d" (lambda () (interactive) (dired "~/Downloads")))
-  ("D" (lambda () (interactive) (dired "~/Dropbox")))
-  ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes")))
+  ("d" (lambda () (interactive) (dired "~/Downloads/")))
+  ("D" (lambda () (interactive) (dired "~/Dropbox/")))
+  ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes/")))
   ("h" (lambda () (interactive) (dired "~/")))
-  ("m" (lambda () (interactive) (dired "~/work/monorepo")))
-  ("s" (lambda () (interactive) (dired "~/Dropbox/org/resources/studies")))
-  ("S" (lambda () (interactive) (dired "~/scripts")))
-  ("w" (lambda () (interactive) (dired "~/work"))))
+  ("m" (lambda () (interactive) (dired "~/work/monorepo/")))
+  ("s" (lambda () (interactive) (dired "~/Dropbox/org/resources/studies/")))
+  ("S" (lambda () (interactive) (dired "~/scripts/")))
+  ("w" (lambda () (interactive) (dired "~/work/"))))
 #+end_src
 
 ** Forge 
@@ -703,6 +703,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 			    ("PROJECT" . (:inherit default :height 1.2 :foreground "#ffffff" :weight normal :underline t))
 			    ("STRT"    . (:inherit default :height 1.2 :foreground "#0198e1" :weight normal :underline t))
 			    ("SOMEDAY" . (:inherit default :height 1.2 :foreground "#ff8888" :weight normal :underline t))
+			    ("IDEA"    . (:inherit default :height 1.2 :foreground "#007500" :weight normal :underline t))
 			    ("REVIEW"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
 			    ("DEPLOY"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
 			    ("WAIT"    . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
@@ -756,11 +757,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
                :scale (if (= (x-display-pixel-width) 1920) 1.7 2.0))
     (org-latex-preview '(16)))
 
-  (setq org-latex-inputenc-alist nil)
-  (setq org-latex-compiler "xelatex")
-  (setq org-latex-pdf-process '("latexmk -xelatex -quiet -shell-escape -f %f"))
-  (add-to-list 'org-latex-packages-alist '("" "fontspec"))
-
   (setq org-format-latex-options 
 	(plist-put (plist-put org-format-latex-options :background "#1c2128") :scale 1.5))
 
@@ -768,7 +764,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
 
   (setq org-todo-keywords
-	'((sequence "REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "DEPLOY(E)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+	'((sequence "IDEA(i) REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "DEPLOY(E)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
 	  (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
   (evil-collection-define-key 'normal 'org-mode-map
@@ -850,8 +846,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :straight t)
 #+end_src
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none 
 (use-package org-utf-to-xetex
+  :disabled
   :straight (org-utf-to-xetex :type git :host github :repo "grettke/org-utf-to-xetex" :branch "master")
   :commands (org-utf-to-xetex-prettify)
   :hook (org-mode . org-utf-to-xetex-prettify))
@@ -880,6 +877,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     (org-open-at-point)))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun +org/highlight-list ()
+  (interactive)
+  (evil-ex (concat "'<,'>" "s/" "^\\([-+*]\\) \\(.*\\)" "/" "\\1 =\\2=" "/g")))
+#+end_src
+
 ** Org Agenda
 #+begin_src emacs-lisp :results none
 (use-package evil-org
@@ -901,7 +904,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
       "C-<return>" '+org/c-ret-dwim
       "C-S-<return>" '+org/c-s-ret-dwim
       "C-M-<return>" '+org/c-m-ret-dwim
-      "C-c f o" 'flash-open-notes)
+      "C-c f o" 'flash-open-notes
+      "C-c f l" 'flash-select-note)
 
   (general-define-key 
       :states '(normal)
@@ -1010,12 +1014,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 #+begin_src emacs-lisp :results none
-;; (use-package ob-http
-;;  :straight t
-;;  :defer t
-;;  :config
-;;    (add-to-list 'org-babel-load-languages '(http . t))
-;;    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
+(use-package ob-http
+ :straight t
+ :defer t
+ :config
+   (add-to-list 'org-babel-load-languages '(http . t))
+   (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1257,7 +1261,7 @@ Save image and insert it's link at point.
             			      "%?"
                                         :if-new
                                         (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
-  						 "#+title: ${title}\n#+filetags: \n#+startup: content latexpreview\n")
+  						 "#+title: ${title}\n#+filetags: \n#+startup: content\n")
             			      :unnarrowed t)))
 
    (org-roam-db-autosync-mode))
@@ -1373,6 +1377,7 @@ Save image and insert it's link at point.
   :defer t
   :hook ((scala-mode . yas-global-mode)
          (python-mode . yas-global-mode)
+         (flash-mode . yas-global-mode)
          (protobuf-mode . yas-global-mode)))
 #+end_src
 
@@ -1604,17 +1609,12 @@ vc-annotate options.
      :config (keychain-refresh-environment))
   #+end_src
 
-* Configure =ox-reveal=
-#+begin_src emacs-lisp :results none :tangle no
-(use-package ox-reveal
-  :straight t
-  :disabled
-  :defer t)
-  
-(use-package org-re-reveal
-  :straight t
-  :disabled
-  :defer t)
+* Configure =ox-html=
+#+begin_src emacs-lisp :results no
+(use-package ox-html
+  :straight nil
+  :config
+    (setf (alist-get 'verbatim org-html-text-markup-alist) "<span class=\"verbatim\">%s</span>"))
 #+end_src
 
 * Configure =ox-slack=
@@ -1649,7 +1649,7 @@ vc-annotate options.
      (interactive)
      (kill-new dired-directory))
 
-   (setq dired-dwim-target t)
+   (setq dired-dwim-target nil)
 
    (evil-collection-define-key 'normal 'dired-mode-map
      "_" #'+projectile/goto-project-root
@@ -1657,13 +1657,6 @@ vc-annotate options.
      "gn" #'+dired/open-nautilus
      "yp" #'+dired/copy-path
      "'" #'hydra-dired-bookmarks/body))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package treemacs-icons-dired
-  :straight t
-  :after dired
-  :hook (dired-mode . treemacs-icons-dired-enable-once))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1686,19 +1679,22 @@ vc-annotate options.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package dired-subtree
+(use-package dirvish
   :straight t
-  :after dired
-  :bind (:map dired-mode-map
-              ("<tab>" . dired-subtree-toggle)
-              ("<C-tab>" . dired-subtree-cycle)
-              ("<backtab>" . dired-subtree-remove))
+  :ensure t
+  :custom 
+   (dirvish-attributes '(subtree-state all-the-icons))
   :config
-    (setq dired-listing-switches "-alh")
-    (advice-add 'dired-create-directory :after (lambda (&rest r) (revert-buffer)))
-    (advice-add 'dired-subtree-toggle :after (lambda (&rest r) (revert-buffer)))
-    (advice-add 'dired-subtree-cycle :after (lambda (&rest r) (revert-buffer)))
-    (advice-add 'dired-subtree-remove :after (lambda (&rest r) (revert-buffer))))
+   (setq dired-recursive-deletes 'always)
+   (setq delete-by-moving-to-thrash 'always)
+
+   (dirvish-override-dired-mode))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package all-the-icons
+  :straight t
+  :ensure t)
 #+end_src
 
 * Configure =ediff=
@@ -1710,27 +1706,6 @@ vc-annotate options.
     (setq ediff-window-setup-function 'ediff-setup-windows-plain)
     (setq ediff-split-window-function 'split-window-horizontally)
     (setq ediff-forward-word-function 'forward-char))
-#+end_src
-
-* Configure =calfw=
-#+begin_src emacs-lisp :results none
-(use-package calfw
-  :straight t
-  :defer t
-  :config
-    (setq cfw:display-calendar-holidays nil))
-
-(use-package calfw-org
-  :defer t
-  :straight t)
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun open-calendar ()
-  (interactive)
-  (cfw:open-calendar-buffer
-   :contents-sources
-    (list (cfw:org-create-source "Blue"))))
 #+end_src
 
 * Configure =smerge=
@@ -2471,15 +2446,21 @@ sbt-mode
   (interactive)
 
   (with-current-buffer (find-file-noselect (concat (projectile-project-root) "build.sbt"))
-    (let ((pos 0)
-          (paths nil)
-          (content (buffer-substring-no-properties (point-min) (point-max))))
+    (let* ((pos 0)
+           (paths nil)
+           (content (buffer-substring-no-properties (point-min) (point-max)))
+           (pattern
+             (if (s-contains? "baseDirectory\.value \/ \"..\"" content)
+                 "baseDirectory\\.value \\(.*\\)"
+                 "^\s*\"\\(.*\\)")))
 
-      (while (string-match "baseDirectory\\.value \\(.*\\)" content pos)
+      (while (string-match pattern content pos)
         (setq pos (match-end 0))
 
         (let* ((match (match-string 1 content))
-               (path (substring (s-replace-all '(("," . "") (" " . "") ("\"" . "")) match) 1)))
+               (raw-path (s-replace-all '(("," . "") (" " . "") ("\"" . "")) match))
+               (path (if (s-starts-with? "/" raw-path) (substring raw-path 1) raw-path)))
+
           (push path paths)))
 
       (let ((choice (completing-read " " paths)))
@@ -2673,18 +2654,11 @@ sbt-mode
     (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 #+end_src
 
-* Configure =direnev=
+* Configure =envrc=
 #+begin_src emacs-lisp :results none
-;; (use-package direnv
-;;  :straight t
-;;  :config
-;;    (setq direnv-always-show-summary nil)
-   
-;;    (direnv-mode))
-
 (use-package envrc
   :straight t
-  :init
+  :config
     (envrc-global-mode))
 #+end_src
 
@@ -2948,7 +2922,7 @@ sbt-mode
   :straight (org-jira :type git :host github :repo "Porcupine96/org-jira" :branch "master")
   :commands (org-jira-get-issues)
   :init
-    (setq org-jira-working-dir "~/.org-jira")
+    (setq org-jira-working-dir "/home/porcupine/.org-jira")
   :config
     (setq org-element-use-cache nil) ;; hanging emacs issue: https://github.com/ahungry/org-jira/issues/275
 
@@ -3401,8 +3375,8 @@ sbt-mode
 (defun +work/goto-jenkins ()
   (interactive)
 
-  (let* ((branch (string-remove-prefix " Git:" vc-mode))
-         (url (concat "https://jenkins.codeheroes.tech/job/monorepo/job/" (url-hexify-string branch))))
+  (let* ((branch (string-remove-prefix " Git-" (string-remove-prefix " Git:" vc-mode)))
+         (url (concat "https://jenkins.codeheroes.tech/job/monorepo/job/" (url-hexify-string branch) "/lastBuild/console")))
     (call-process "xdg-open" nil 0 nil url)))
 #+end_src
 
@@ -3475,7 +3449,7 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package flash
   :load-path "~/.emacs.default/packages/flash/"
-  :commands (flash-open-notes flash-mode))
+  :commands (flash-open-notes flash-select-note flash-mode))
 #+end_src
 
 ** Focus

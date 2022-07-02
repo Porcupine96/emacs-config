@@ -168,13 +168,13 @@
 (defun flash-insert-skeleton ()
   (interactive)
   (goto-char (point-max))
-  (org-insert-heading nil nil t)
-  (save-excursion
-    (insert "Flashcard\n")
-    (insert "** Front\n\n")
-    (insert "** Back\n")
+
+  (insert "\n")
+  (evil-insert 0)
+  (yas-expand-snippet (yas-lookup-snippet "flashcard"))
+  
   (unless (car (org-property-values flash-anki-prop-deck))
-    (org-set-property flash-anki-prop-deck "Default"))))
+    (org-set-property flash-anki-prop-deck "Default")))
 
 (defun flash-select-note ()
   (interactive)
@@ -187,7 +187,8 @@
 	    (if deck
 		(push `(,(car deck) . ,file) deck-to-path))))))
 
-    (let ((deck (completing-read " " (-map 'car deck-to-path ))))
+    (let* ((sort-by-name (lambda (a b) (string< (car a) (car b))))
+	   (deck (completing-read " " (sort deck-to-path sort-by-name))))
       (if deck
 	  (find-file (cdr (assoc deck deck-to-path)))))))
 
@@ -201,6 +202,7 @@
 (defvar flash-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c a s") #'flash-anki-sync)
+    (define-key map (kbd "C-c f s") #'flash-anki-sync-note-at-point)
     (define-key map (kbd "C-c C-c") #'flash-insert-skeleton)
     map))
 

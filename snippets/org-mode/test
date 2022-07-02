@@ -1,0 +1,7 @@
+# type: command
+# key: test
+# name: test
+# --
+(progn
+  (end-of-buffer)
+  (insert "hello world"))
