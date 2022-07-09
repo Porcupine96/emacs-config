@@ -1695,6 +1695,10 @@ vc-annotate options.
 (defun +dired/copy-path ()
   (interactive)
   (kill-new (dired-get-filename)))
+
+(defun +dired/copy-dir-path ()
+  (interactive)
+  (kill-new (dired-current-directory)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3419,11 +3423,11 @@ sbt-mode
 #+end_src
 
 ** Version update
-#+begin_src emacs-lisp results :none
+#+begin_src emacs-lisp :results none
 (use-package version-update
   :load-path "~/.emacs.default/packages/work/version-update"
   :defer t
-  :commands (+work/update-versions +work/apply-changes))
+  :commands (+work/sync-env +work/update-versions +work/apply-changes))
 #+end_src
 
 * School
