@@ -261,7 +261,8 @@ Use =evil-surround=
 ** Dired
 #+begin_src emacs-lisp :results none
 (defhydra hydra-dired-bookmarks (:color blue)
-  ("c" (lambda () (interactive) (dired "~/studies/sem4")))
+  ("b" (lambda () (interactive) (dired "~/books/")))
+  ("c" (lambda () (interactive) (dired "~/studies/sem4/")))
   ("d" (lambda () (interactive) (dired "~/Downloads/")))
   ("D" (lambda () (interactive) (dired "~/Dropbox/")))
   ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes/")))
@@ -1649,13 +1650,14 @@ vc-annotate options.
      (interactive)
      (kill-new dired-directory))
 
-   (setq dired-dwim-target nil)
+   (setq dired-dwim-target t)
 
    (evil-collection-define-key 'normal 'dired-mode-map
      "_" #'+projectile/goto-project-root
      "ge" #'+dired/open-externally
      "gn" #'+dired/open-nautilus
      "yp" #'+dired/copy-path
+     "yd" #'+dired/copy-dir-path
      "'" #'hydra-dired-bookmarks/body))
 #+end_src
 
@@ -1680,7 +1682,7 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package dirvish
-  :straight t
+  :straight (dirvish :type git :host github :repo "alexluigit/dirvish" :branch "master")
   :ensure t
   :custom 
    (dirvish-attributes '(subtree-state all-the-icons))
@@ -1688,7 +1690,10 @@ vc-annotate options.
    (setq dired-recursive-deletes 'always)
    (setq delete-by-moving-to-thrash 'always)
 
-   (dirvish-override-dired-mode))
+   (dirvish-override-dired-mode)
+
+   (evil-collection-define-key 'normal 'dired-mode-map
+        "o" #'dirvish-quicksort))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3193,7 +3198,8 @@ sbt-mode
   (local-leader-def
     :states 'normal
     :keymaps 'yaml-mode-map
-    "u" #'+work/update-versions)
+    "u" #'+work/update-versions
+    "s" #'+work/sync-env)
   
   (local-leader-def
     :states 'normal
@@ -3276,6 +3282,21 @@ sbt-mode
    :keymaps '(evil-org-mode-map org-mode-map)
    "C-<return>" '+org/c-ret-dwim
    "<return>" '+org/ret-dwim))
+#+end_src
+
+* Configure =nov=
+#+begin_src emacs-lisp :results none
+(use-package nov
+  :straight t
+  :hook
+    ((nov-mode . visual-line-mode)
+     (nov-mode . visual-fill-column-mode))
+  :init
+    (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+  :config
+    (setq nov-text-width 80)
+    (setq nov-text-width t)
+    (setq visual-fill-column-center-text t))
 #+end_src
 
 * Work

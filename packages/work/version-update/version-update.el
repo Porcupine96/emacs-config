@@ -55,3 +55,14 @@
 
   (switch-to-buffer "*update-versions*")
   (+work/update-versions-mode))
+
+(defun +work/sync-env ()
+  (interactive)
+
+  (let ((env (cadr (reverse (s-split "/" (buffer-file-name)))))) 
+    (vterm)
+    (vterm-send-string "~/work/dev-cluster-conf")
+    (vterm-send-return)
+    (vterm-clear)
+    (vterm-send-string (s-concat "./scripts/cli/zowiecli environment sync-diff " env))
+    (vterm-send-return)))
