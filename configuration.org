@@ -847,7 +847,15 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :straight t)
 #+end_src
 
-#+begin_src emacs-lisp :results none 
+#+begin_src emacs-lisp :results none
+(use-package org-download
+  :straight t
+  :hook (org-mode . org-download-enable)
+  :config
+    (setq org-download-image-dir "./images"))
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (use-package org-utf-to-xetex
   :disabled
   :straight (org-utf-to-xetex :type git :host github :repo "grettke/org-utf-to-xetex" :branch "master")
@@ -1220,6 +1228,15 @@ Save image and insert it's link at point.
 (use-package ox-slack
   :defer t
   :straight t)
+#+end_src
+
+** valign
+#+begin_src emacs-lisp :results none
+(use-package valign
+  :straight t
+  :hook (org-mode . valign-mode)
+  :config
+    (setq valign-fancy-bar t))
 #+end_src
 
 * Configure =org-roam= 
