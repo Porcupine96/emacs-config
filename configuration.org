@@ -701,13 +701,13 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :custom
   (org-ellipsis " ▾")
   (org-todo-keyword-faces '(
-			    ("PROJECT" . (:inherit default :height 1.2 :foreground "#ffffff" :weight normal :underline t))
-			    ("STRT"    . (:inherit default :height 1.2 :foreground "#0198e1" :weight normal :underline t))
-			    ("SOMEDAY" . (:inherit default :height 1.2 :foreground "#ff8888" :weight normal :underline t))
-			    ("IDEA"    . (:inherit default :height 1.2 :foreground "#007500" :weight normal :underline t))
-			    ("REVIEW"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-			    ("DEPLOY"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-			    ("WAIT"    . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
+			    ("PROJECT" . (:inherit default :height 1.0 :foreground "#ffffff" :weight bold :underline nil))
+			    ("STRT"    . (:inherit default :height 1.0 :foreground "#0198e1" :weight bold :underline nil))
+			    ("SOMEDAY" . (:inherit default :height 1.0 :foreground "#ff8888" :weight bold :underline nil))
+                        ("IDEA"    . (:inherit default :height 1.0 :foreground "#8aff8a" :weight bold :underline nil))
+			    ("REVIEW"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
+			    ("DEPLOY"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
+			    ("WAIT"    . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))))
   :config 
   (require 'org-tempo)
 
@@ -778,20 +778,34 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
 
   (setq org-capture-templates
-        '(("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
+        '(
+	  ("d" "Daily" entry (file+olp+datetree "~/Dropbox/org/todo/work-daily.org") "*** %T
+/Status/
+- %?
+
+/Mood/
+- :+1:
+")
+
+	  ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
            "* TODO %?
 :PROPERTIES:
 :CreatedAt: %T
-:END:\n" )
-("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
-           "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n" )
+:END:\n
+" )
+
           ("j" "Work Journal" entry (file+olp+datetree "~/Dropbox/org/todo/work-journal.org") "*** %?
 :PROPERTIES:
 :Effort:   %?
-:END:\n")))
+:END:\n
+")
+
+	  ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
+           "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n
+" )))
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
@@ -1502,6 +1516,7 @@ vc-annotate options.
  #+begin_src emacs-lisp :results none
 (use-package git-timemachine 
   :straight t
+  :commands (git-timemachine)
   :defer t)
  #+end_src
 
@@ -1667,7 +1682,7 @@ vc-annotate options.
      (interactive)
      (kill-new dired-directory))
 
-   (setq dired-dwim-target t)
+   (setq dired-dwim-target nil)
 
    (evil-collection-define-key 'normal 'dired-mode-map
      "_" #'+projectile/goto-project-root
@@ -1703,7 +1718,7 @@ vc-annotate options.
 
 #+begin_src emacs-lisp :results none
 (use-package dirvish
-  :straight (dirvish :type git :host github :repo "alexluigit/dirvish" :branch "master")
+  :straight t
   :ensure t
   :custom 
    (dirvish-attributes '(subtree-state all-the-icons))
@@ -2680,12 +2695,12 @@ sbt-mode
     (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 #+end_src
 
-* Configure =envrc=
+* Configure =direnv=
 #+begin_src emacs-lisp :results none
-(use-package envrc
-  :straight t
-  :config
-    (envrc-global-mode))
+(use-package direnv
+ :straight t
+ :config
+   (direnv-mode))
 #+end_src
 
 * Configure =Info=
@@ -2904,9 +2919,9 @@ sbt-mode
 (use-package olivetti
   :straight t
   :defer t
-  :config 
-    (custom-set-variables '(olivetti-body-width 120))
-    (custom-set-variables '(olivetti-recall-visual-line-mode-entry-state t)))
+  :custom
+    (olivetti-body-width 82)
+    (olivetti-recall-visual-line-mode-entry-state t))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2945,8 +2960,8 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package org-jira
   :defer t
-  :straight (org-jira :type git :host github :repo "Porcupine96/org-jira" :branch "master")
-  :commands (org-jira-get-issues)
+  :straight t 
+  :commands (+org-jira/get-issues org-jira-get-issues)
   :init
     (setq org-jira-working-dir "/home/porcupine/.org-jira")
   :config
@@ -3095,7 +3110,7 @@ sbt-mode
     "f P" (lambda () (interactive)(find-file "~/.config/polybar"))
     "f e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org"))
     "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
-    "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/dictionary.org"))
+    "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work-daily.org"))
     "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
     "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
     "f d" (lambda () (interactive)(dired "~/dotfiles"))
@@ -3309,15 +3324,42 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package nov
   :straight t
+  :mode ("\\.epub\\'" . nov-mode)
   :hook
-    ((nov-mode . visual-line-mode)
-     (nov-mode . visual-fill-column-mode))
-  :init
-    (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+    ((nov-mode . nov-font-setup)
+     (nov-mode . olivetti-mode))
+  :bind
+    (:map nov-mode-map
+     ("SPC" . 'ignore)
+     ("g" . 'ignore)
+     ("v" . 'ignore)
+     ("[" . 'ignore)
+     ("]" . 'ignore)
+     ("p" . 'ignore)
+     ("k" . 'ignore)
+     ("j" . 'ignore)
+     ("h" . 'ignore)
+     ("l" . 'ignore)
+     ("n" . 'ignore)
+     :map nov-button-map
+     ("SPC" . 'ignore)
+     ("g" . 'ignore)
+     ("v" . 'ignore)
+     ("[" . 'ignore)
+     ("]" . 'ignore)
+     ("p" . 'ignore)
+     ("k" . 'evil-previous-line)
+     ("j" . 'evil-next-line)
+     ("h" . 'evil-backward-char)
+     ("l" . 'evil-forward-char)
+     ("n" . 'ignore))
   :config
     (setq nov-text-width 80)
-    (setq nov-text-width t)
-    (setq visual-fill-column-center-text t))
+
+    (defun nov-font-setup ()
+       (interactive)
+       (face-remap-add-relative 'variable-pitch :family "Iosevka"
+                                                :height 1.2)))
 #+end_src
 
 * Work

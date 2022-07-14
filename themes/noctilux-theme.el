@@ -82,13 +82,13 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 
 (setq org-todo-keyword-faces '(
-    ("PROJECT" . (:inherit default :height 1.2 :foreground "#ffffff" :weight normal :underline t))
-    ("STRT"    . (:inherit default :height 1.2 :foreground "#0198e1" :weight normal :underline t))
-    ("SOMEDAY" . (:inherit default :height 1.2 :foreground "#ff8888" :weight normal :underline t))
-    ("IDEA"    . (:inherit default :height 1.2 :foreground "#007500" :weight normal :underline t))
-    ("REVIEW"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-    ("DEPLOY"  . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))
-    ("WAIT"    . (:inherit default :height 1.2 :foreground "#f1fa8c" :weight normal :underline t))))
+    ("PROJECT" . (:inherit default :height 1.0 :foreground "#ffffff" :weight bold :underline nil))
+    ("STRT"    . (:inherit default :height 1.0 :foreground "#0198e1" :weight bold :underline nil))
+    ("SOMEDAY" . (:inherit default :height 1.0 :foreground "#ff8888" :weight bold :underline nil))
+    ("IDEA"    . (:inherit default :height 1.0 :foreground "#8aff8a" :weight bold :underline nil))
+    ("REVIEW"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
+    ("DEPLOY"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
+    ("WAIT"    . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))))
 
 (defmacro noct-flet (specs &rest body)
   (let ((flet (if (fboundp 'cl-flet) 'cl-flet 'flet)))
@@ -422,8 +422,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              ;; org
              (org-hide          ((t (,@fg-base03))))
-             (org-todo          ((t (:inherit default :height 1.2 ,@fmt-undr ,@fg-red  ,@bg-base03))))
-             (org-done          ((t (:inherit default :height 1.2 ,@fmt-none ,@fg-gray ,@bg-base03))))
+             (org-todo          ((t (:inherit default :height 1.0 ,@fmt-bold ,@fg-red  ,@bg-base03))))
+             (org-done          ((t (:inherit default :height 1.0 ,@fmt-bold ,@fg-gray ,@bg-base03))))
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray ,@bg-base03))))
              (org-date          ((t (:inherit default ,@fmt-none ,@fg-yellow ,@bg-base03))))
 
@@ -486,6 +486,23 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (dired-subtree-depth-8-face ((t (,@fmt-none))))
 	     (dired-subtree-depth-9-face ((t (,@fmt-none))))
 	     
+
+             ;; shr
+             (shr-h1 ((t (:height 1.4 ,@fg-blue))))
+             (shr-h2 ((t (:height 1.3 ,@fg-darkgreen))))
+             (shr-h3 ((t (:height 1.2 ,@fg-darkblue))))
+	     (shr-code ((t (,@fmt-ital))))
+
+	     ;; `(shr-abbreviation ((,class :inherit modus-themes-lang-note)))
+	     ;; `(shr-code ((,class :inherit modus-themes-markup-verbatim)))
+	     ;; `(shr-h1 ((,class :inherit modus-themes-heading-1)))
+	     ;; `(shr-h2 ((,class :inherit modus-themes-heading-2)))
+	     ;; `(shr-h3 ((,class :inherit modus-themes-heading-3)))
+	     ;; `(shr-h4 ((,class :inherit modus-themes-heading-4)))
+	     ;; `(shr-h5 ((,class :inherit modus-themes-heading-5)))
+	     ;; `(shr-h6 ((,class :inherit modus-themes-heading-6)))
+	     ;; `(shr-selected-link ((,class :inherit modus-themes-subtle-red)))
+
              ;; table
              (table-cell ((t (,@fmt-none ,@fg-base0 ,@bg-back))))
 
