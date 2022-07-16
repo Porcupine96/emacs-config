@@ -90,6 +90,15 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     ("DEPLOY"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
     ("WAIT"    . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))))
 
+(setq org-modern-todo-faces '(
+    ("PROJECT" . (:inherit default :height 1.0 :foreground "#ffffff" :weight bold :underline nil))
+    ("STRT"    . (:inherit default :height 1.0 :foreground "#0198e1" :weight bold :underline nil))
+    ("SOMEDAY" . (:inherit default :height 1.0 :foreground "#ff8888" :weight bold :underline nil))
+    ("IDEA"    . (:inherit default :height 1.0 :foreground "#8aff8a" :weight bold :underline nil))
+    ("REVIEW"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
+    ("DEPLOY"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
+    ("WAIT"    . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))))
+
 (defmacro noct-flet (specs &rest body)
   (let ((flet (if (fboundp 'cl-flet) 'cl-flet 'flet)))
     `(,flet ,specs ,@body)))
@@ -423,6 +432,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              ;; org
              (org-hide          ((t (,@fg-base03))))
              (org-todo          ((t (:inherit default :height 1.0 ,@fmt-bold ,@fg-red  ,@bg-base03))))
+             (org-modern-todo   ((t (:inherit default :height 1.0 ,@fmt-bold ,@fg-red  ,@bg-base03))))
+             (org-modern-tag    ((t (:inherit default :height 1.0 ,@fmt-ital ,@fg-gray,@bg-base02))))
              (org-done          ((t (:inherit default :height 1.0 ,@fmt-bold ,@fg-gray ,@bg-base03))))
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray ,@bg-base03))))
              (org-date          ((t (:inherit default ,@fmt-none ,@fg-yellow ,@bg-base03))))

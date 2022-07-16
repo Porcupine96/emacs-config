@@ -699,19 +699,13 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :defer t
   :delight
   :custom
-  (org-ellipsis " ▾")
-  (org-todo-keyword-faces '(
-			    ("PROJECT" . (:inherit default :height 1.0 :foreground "#ffffff" :weight bold :underline nil))
-			    ("STRT"    . (:inherit default :height 1.0 :foreground "#0198e1" :weight bold :underline nil))
-			    ("SOMEDAY" . (:inherit default :height 1.0 :foreground "#ff8888" :weight bold :underline nil))
-                        ("IDEA"    . (:inherit default :height 1.0 :foreground "#8aff8a" :weight bold :underline nil))
-			    ("REVIEW"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
-			    ("DEPLOY"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
-			    ("WAIT"    . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))))
+    (org-ellipsis " ▾")
+  
   :config 
   (require 'org-tempo)
 
   (setq org-hide-emphasis-markers t)
+  (setq org-pretty-entities t)
   (setq korg-list-allow-alphabetical t)
   (setq org-fontify-done-headline t)
   (setq org-use-fast-todo-selection 'expert)
@@ -719,7 +713,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq org-src-window-setup 'split-window-below)
   (setq org-odt-preferred-output-format "docx")
   (setq org-confirm-babel-evaluate nil)
-  (setq org-tags-column -1)
+  (setq org-tags-column 0)
+  (setq org-insert-heading-respect-content t)
+  (setq org-auto-align-tags nil)
   (setq org-capture-bookmark nil)
   (setq org-export-with-sub-superscripts nil)
   (setq org-indirect-buffer-display 'current-window)
@@ -878,16 +874,14 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package org-superstar
+(use-package org-modern
   :straight t
   :after org
   :hook (org-mode . org-superstar-mode)
-  :custom
-  (org-superstar-remove-leading-stars t)
-  (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●"))
-  (org-superstar-item-bullet-alist '((?* . ?•) (?+ . ?⚬) (?- . ?–))))
+  :config
+    (global-org-modern-mode))
 #+end_src
-   
+
 #+begin_src emacs-lisp :results none
 (defun +org/open-at-point-other-window ()
   (interactive)
@@ -1061,7 +1055,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 ** Org Fancy Priorities
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package org-fancy-priorities
   :straight t
   :defer t
@@ -1325,7 +1319,7 @@ Save image and insert it's link at point.
     (find-file file)))
 #+end_src
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (defvar orb-title-format "${author-or-editor-abbrev} (${date}).  ${title}.")
 
 (use-package org-roam-bibtex
@@ -1391,8 +1385,8 @@ Save image and insert it's link at point.
 (use-package wucuo
   :straight t
   :defer t)
-  ;; :hook (org-roam-mode . wucuo-mode))
 #+end_src
+
 * Configure =langtool=
 #+begin_src emacs-lisp :results none
 (use-package langtool
