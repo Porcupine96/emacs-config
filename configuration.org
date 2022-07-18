@@ -188,6 +188,11 @@ Compilation settings.
 (setq auth-sources '("~/.authinfo"))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(setq home "/home/porcupine")
+(setq p/bibliography `(,(concat home "/Dropbox/org/bibliography.bib")))
+#+end_src
+
 * Use =evil-mode=
 Use =evil-mode=
 #+begin_src emacs-lisp :results none
@@ -600,27 +605,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     (recentf-mode +1))
 #+end_src
 
-* Configure =ivy-bibtex=
-#+begin_src emacs-lisp :results none :tangle no
-(use-package ivy-bibtex
-  :disabled
-  :straight t
-  :defer t
-  :config
-    (setq bibtex-completion-bibliography '("~/Dropbox/zotero/zotero.bib"))
-    (setq bibtex-completion-pdf-field "File")
-
-    (org-roam-bibtex-mode))
-#+end_src
-
-#+begin_src emacs-lisp :results none :tangle no
-(defun +bibtex/open-on-scihub ()
-  (interactive)
-  (let ((url (bibtex-url (point) t))
-        (scihub-url "https://sci-hub.se/"))
-    (browse-url (concat scihub-url (string-trim url)))))
-#+end_src
-
 * Configure =flycheck=
 #+begin_src emacs-lisp :results none
 (use-package flycheck
@@ -726,6 +710,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   (setq org-fontify-quote-and-verse-blocks t)
 
+  ;; org-cite configuration
+
+  (setq org-cite-global-bibliography p/bibliography)
+
+  ;; babel configuration
+
   (org-babel-do-load-languages 'org-babel-load-languages
 			       '((shell . t)
 				 (emacs-lisp . t)
@@ -803,6 +793,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 :END:\n
 " )))
 
+  (add-hook 'org-mode (lambda () (setq left-margin-width 1)))
+
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
 			      (push '("[ ]" . "☐") prettify-symbols-alist)
@@ -877,7 +869,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (use-package org-modern
   :straight t
   :after org
-  :hook (org-mode . org-superstar-mode)
   :config
     (global-org-modern-mode))
 #+end_src
@@ -1238,14 +1229,36 @@ Save image and insert it's link at point.
   :straight t)
 #+end_src
 
-** valign
+* Configure =citar=
 #+begin_src emacs-lisp :results none
-(use-package valign
+(use-package citar
   :straight t
-  :hook (org-mode . valign-mode)
+  :custom
+    (citar-bibliography p/bibliography)
+
   :config
-    (setq valign-fancy-bar t))
-#+end_src
+    (defun p/org-roam-node-from-cite (keys-entries)
+      (interactive (list (citar-select-ref)))
+
+      (print keys-entries)
+
+      (let ((title (citar-format--entry (cdr keys-entries)
+                                                  "${author editor}${date urldate} :: ${title}")))
+        (org-roam-capture- :templates
+                           '(("r" "reference" plain
+                              "%?"
+                              :if-new (file+head "references/${citekey}.org"
+                                                 ":properties:
+:roam_refs: [cite:@${citekey}]
+:end:
+,#+title: ${title}
+,#+filetags: %(kb/insert-lit-category)\n")
+                          :immediate-finish t
+                          :unnarrowed t))
+                       :info (list :citekey (car keys-entries))
+                       :node (org-roam-node-create :title title)
+                       :props '(:finalize find-file)))))
+  #+end_src
 
 * Configure =org-roam= 
 #+begin_src emacs-lisp :results none
@@ -2484,15 +2497,12 @@ sbt-mode
     (let* ((pos 0)
            (paths nil)
            (content (buffer-substring-no-properties (point-min) (point-max)))
-           (pattern
-             (if (s-contains? "baseDirectory\.value \/ \"..\"" content)
-                 "baseDirectory\\.value \\(.*\\)"
-                 "^\s*\"\\(.*\\)")))
+           (pattern "baseDirectory\\.value \\(.*\\)\\|^\s*\"\\(.*\\)\""))
 
       (while (string-match pattern content pos)
         (setq pos (match-end 0))
 
-        (let* ((match (match-string 1 content))
+        (let* ((match (or (match-string 1 content) (match-string 2 content)))
                (raw-path (s-replace-all '(("," . "") (" " . "") ("\"" . "")) match))
                (path (if (s-starts-with? "/" raw-path) (substring raw-path 1) raw-path)))
 
