@@ -689,7 +689,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (require 'org-tempo)
 
   (setq org-hide-emphasis-markers t)
-  (setq org-pretty-entities t)
+  (setq org-pretty-entities nil)
   (setq korg-list-allow-alphabetical t)
   (setq org-fontify-done-headline t)
   (setq org-use-fast-todo-selection 'expert)
@@ -797,21 +797,21 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
-			      (push '("[ ]" . "☐") prettify-symbols-alist)
-			      (push '("[-]" . "⚀") prettify-symbols-alist)
-			      (push '("[X]" . "☒") prettify-symbols-alist)
+			      ;; (push '("[ ]" . "☐") prettify-symbols-alist)
+			      ;; (push '("[-]" . "⚀") prettify-symbols-alist)
+			      ;; (push '("[X]" . "☒") prettify-symbols-alist)
 			      (push '("->" . "→") prettify-symbols-alist)
 			      (push '("<-" . "←") prettify-symbols-alist)
 			      (push '("<->" . "←→") prettify-symbols-alist)
 			      (push '("---" . "⎯") prettify-symbols-alist)
-			      (push '("#+begin_quote" . ">") prettify-symbols-alist)
-			      (push '("#+end_quote" . "<") prettify-symbols-alist)
-			      (push '("#+BEGIN_QUOTE" . ">") prettify-symbols-alist)
-			      (push '("#+END_QUOTE" . "<") prettify-symbols-alist)
-			      (push '("#+begin_src" . ">") prettify-symbols-alist)
-			      (push '("#+end_src" . "<") prettify-symbols-alist)
-			      (push '("#+BEGIN_SRC" . ">") prettify-symbols-alist)
-			      (push '("#+END_SRC" . "<") prettify-symbols-alist)
+			      ;; (push '("#+begin_quote" . ">") prettify-symbols-alist)
+			      ;; (push '("#+end_quote" . "<") prettify-symbols-alist)
+			      ;; (push '("#+BEGIN_QUOTE" . ">") prettify-symbols-alist)
+			      ;; (push '("#+END_QUOTE" . "<") prettify-symbols-alist)
+			      ;; (push '("#+begin_src" . ">") prettify-symbols-alist)
+			      ;; (push '("#+end_src" . "<") prettify-symbols-alist)
+			      ;; (push '("#+BEGIN_SRC" . ">") prettify-symbols-alist)
+			      ;; (push '("#+END_SRC" . "<") prettify-symbols-alist)
 
 			      (prettify-symbols-mode 1))))
 
@@ -870,6 +870,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :straight t
   :after org
   :config
+    (setq org-modern-footnote nil)
     (global-org-modern-mode))
 #+end_src
 
@@ -1234,7 +1235,10 @@ Save image and insert it's link at point.
 (use-package citar
   :straight t
   :custom
-    (citar-bibliography p/bibliography)
+    (org-cite-insert-processor 'citar)
+    (org-cite-follow-processor 'citar)
+    (org-cite-activate-processor 'citar)
+    (citar-bibliography org-cite-global-bibliography)
 
   :config
     (defun p/org-roam-node-from-cite (keys-entries)
@@ -1258,6 +1262,12 @@ Save image and insert it's link at point.
                        :info (list :citekey (car keys-entries))
                        :node (org-roam-node-create :title title)
                        :props '(:finalize find-file)))))
+
+(use-package citar-embark
+  :after citar embark
+  :straight t
+  :config
+    (citar-embark-mode))
   #+end_src
 
 * Configure =org-roam= 
@@ -1978,7 +1988,7 @@ vc-annotate options.
   :after (embark consult)
   :demand t 
   :hook
-    (embark-collect-mode . embark-consult-preview-minor-mode))
+    (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2704,7 +2714,10 @@ sbt-mode
 (use-package direnv
  :straight t
  :config
-   (direnv-mode))
+   (setq direnv-always-show-summary nil)
+   (direnv-mode)
+
+   (add-to-list 'direnv-non-file-modes 'vterm-mode))
 #+end_src
 
 * Configure =Info=
@@ -2980,7 +2993,7 @@ sbt-mode
         ("Blocked" . "WAIT")
         ("Scheduled for deployment" . "WAIT")))
   
-    (setq org-jira-default-jql "project = DEVS and assignee = currentUser() and status != Done ORDER BY\n  priority DESC, created ASC")
+    (setq org-jira-default-jql "project = DEVS and assignee = currentUser() and status != Done and status != \"Won't do\" ORDER BY\n  priority DESC, created ASC")
   
     (setq org-jira-custom-jqls
       '(
@@ -3310,6 +3323,12 @@ sbt-mode
    "E" #'jupyter-org-execute-to-point)
 
   (general-define-key 
+   :prefix "C-c r"
+   :states 'normal
+   :keymaps '(evil-org-mode-map org-mode-map)
+     "t" #'org-roam-tag-add)
+
+  (general-define-key 
    :states '('normal 'insert)
    :keymaps '(evil-org-mode-map org-mode-map)
    "C-<return>" '+org/c-ret-dwim
@@ -3550,11 +3569,8 @@ sbt-mode
 
 * Utils
 #+begin_src emacs-lisp :results none
-(defun p/send-to-goodnotes ()
-  (interactive)
-
-  (let ((goodnotes-address "me.bc8rmga@goodnotes.email")
-        (path (buffer-file-name)))
+(defun p/send-attachment (address)
+  (let ((path (or (buffer-file-name) nov-file-name)))
 
     (mu4e-compose-new)
 
@@ -3562,7 +3578,7 @@ sbt-mode
       (beginning-of-buffer)
       (search-forward "To: " nil t)
       (end-of-line)
-      (insert goodnotes-address)
+      (insert address)
 
       (search-forward "Subject: " nil t)
       (end-of-line)
@@ -3573,6 +3589,14 @@ sbt-mode
       (insert (concat "\n<#part filename=\"" path "\" disposition=attachment><#/part>")))
 
     (evil-force-normal-state)))
+
+(defun p/send-to-goodnotes ()
+  (interactive)
+  (p/send-attachment "me.bc8rmga@goodnotes.email"))
+
+(defun p/send-to-kindle ()
+  (interactive)
+  (p/send-attachment "luki.pol_63@kindle.com"))
 #+end_src
 
 #+begin_src emacs-lisp :results none
