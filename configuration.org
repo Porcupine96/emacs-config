@@ -714,6 +714,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   (setq org-cite-global-bibliography p/bibliography)
 
+  ;; ignore some unwanted warnings
+  (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+
   ;; babel configuration
 
   (org-babel-do-load-languages 'org-babel-load-languages
@@ -1680,9 +1683,6 @@ vc-annotate options.
   :straight t
   :defer 10
   :config
-    (setq emojify-user-emojis '(
-      (":brain:" . (("name" . "Brain") ("unicode" . "🧠") ("style" . "ascii")))))
-
     (when (featurep 'emojify)
       (emojify-set-emoji-data))
     
@@ -3600,12 +3600,19 @@ sbt-mode
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(defun convert-timestamp-at-point ()
+(defun +core/convert-timestamp-at-point ()
   (interactive)
   (let ((word (current-word)))
     (left-word)
     (kill-word 1)
     (insert (format-time-string "\"%d-%m-%Y %H:%M:%S\"" (seconds-to-time (/ (string-to-number word) 1000))))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +core/current-timestamp ()
+  (interactive)
+  
+  (insert (number-to-string (floor (* 1000 (float-time))))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
