@@ -386,6 +386,10 @@ Dired jump.
 (global-set-key (kbd "C-x C-j") 'dired-jump)
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c i") (lambda () (interactive) (org-capture nil "i")))
+#+end_src
+
 Disable downcase-region
 #+begin_src emacs-lisp :results none
 (global-unset-key (kbd "C-x C-l"))
@@ -716,6 +720,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   ;; ignore some unwanted warnings
   (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+  
+  (setq warning-suppress-types (append warning-suppress-types '((defvaralias))))
 
   ;; babel configuration
 
@@ -770,7 +776,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
         '(
 	  ("d" "Daily" entry (file+olp+datetree "~/Dropbox/org/todo/work-daily.org") "*** %T
 /Status/
+
+,*Current*
 - %?
+
+,*Recently completed*
+-  
 
 /Mood/
 - :+1:
@@ -780,8 +791,14 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
            "* TODO %?
 :PROPERTIES:
 :CreatedAt: %T
-:END:\n
+:END:\n\n
 " )
+
+          ("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org") "* TODO %?
+:PROPERTIES:
+:CreatedAt: %T
+:END:\n\n
+")
 
           ("j" "Work Journal" entry (file+olp+datetree "~/Dropbox/org/todo/work-journal.org") "*** %?
 :PROPERTIES:
@@ -793,7 +810,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
            "* TODO %?
 :PROPERTIES:
 :CreatedAt: %T
-:END:\n
+:END:\n\n
 " )))
 
   (add-hook 'org-mode (lambda () (setq left-margin-width 1)))
@@ -1536,8 +1553,7 @@ vc-annotate options.
  #+begin_src emacs-lisp :results none
 (use-package git-timemachine 
   :straight t
-  :commands (git-timemachine)
-  :defer t)
+  :commands (git-timemachine))
  #+end_src
 
 * Configure =treemacs=
@@ -2717,7 +2733,8 @@ sbt-mode
    (setq direnv-always-show-summary nil)
    (direnv-mode)
 
-   (add-to-list 'direnv-non-file-modes 'vterm-mode))
+   (add-to-list 'direnv-non-file-modes 'vterm-mode)
+   (add-to-list 'direnv-non-file-modes 'dirvish))
 #+end_src
 
 * Configure =Info=
@@ -2989,16 +3006,19 @@ sbt-mode
     (setq org-jira-jira-status-to-org-keyword-alist
       '(("In Progress" . "STRT")
         ("In Review" . "REVIEW")
-        ("In Test" . "WAIT")
+        ("In test" . "WAIT")
         ("Blocked" . "WAIT")
         ("Scheduled for deployment" . "WAIT")))
   
     (setq org-jira-default-jql "project = DEVS and assignee = currentUser() and status != Done and status != \"Won't do\" ORDER BY\n  priority DESC, created ASC")
   
     (setq org-jira-custom-jqls
-      '(
-        (:jql " project = DEVS and assignee = currentUser() and status in (TODO, 'In Progress') ORDER BY\n  status DESC, created ASC "
-         :filename "DEVS-working-on")))
+      `(
+        (:jql  ,(concat  " project = DEVS AND"
+                         " assignee IN ('Krzysztof Jurkiewicz', 'Łukasz Kaźmierczak', 'Marcin Kordus', 'Igor Nadworski', 'Kamil Bukowczyk') AND"
+                         " status IN (TODO, 'TO DO', 'In Progress', 'In Review', 'In test')"
+                         " ORDER BY status DESC, created ASC ")
+         :filename "deflect")))
 
 (defun +org-jira/get-issues ()
   (interactive)
@@ -3010,6 +3030,29 @@ sbt-mode
 
       (erase-buffer))
       (call-interactively #'org-jira-get-issues))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +work/jira-to-work ()
+  (interactive)
+  (let* ((headline (org-element-at-point))
+         (ticket-id (org-element-property :ID headline))
+         (title (org-element-property :raw-value headline))
+         (heading (concat "* TODO " "[[" "https://chatbotize.atlassian.net/browse/" ticket-id  "][" ticket-id "]]" " " title))
+         (org-capture-templates `(("j" "Jira" entry (file "~/Dropbox/org/todo/work.org") ,heading))))
+
+    (org-capture nil "j")))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +work/jira-to-pr ()
+  (interactive)
+  (let* ((headline (org-element-at-point))
+         (ticket-id (org-element-property :ID headline))
+         (title (org-element-property :raw-value headline))
+         (url (concat "https://chatbotize.atlassian.net/browse/" ticket-id)))
+
+    (kill-new (concat "[feat] " ticket-id ": " title))))
 #+end_src
 
 * Configure =svg-lib=
@@ -3124,7 +3167,7 @@ sbt-mode
     "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
     "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
     "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
-    "f P" (lambda () (interactive)(find-file "~/.config/polybar"))
+    "f P" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/private.org"))
     "f e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org"))
     "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
     "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work-daily.org"))

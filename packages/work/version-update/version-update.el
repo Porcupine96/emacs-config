@@ -64,5 +64,7 @@
     (vterm-send-string "~/work/dev-cluster-conf")
     (vterm-send-return)
     (vterm-clear)
+    (vterm-send-string "direnv allow")
+    (vterm-send-return)
     (vterm-send-string (s-concat "./scripts/cli/zowiecli environment sync-diff " env))
     (vterm-send-return)))
