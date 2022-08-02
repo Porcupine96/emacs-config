@@ -183,7 +183,8 @@ Compilation settings.
 (setq compilation-always-kill t)
 #+end_src
 
-* Miscellaneous
+* Miscellaneous 
+SCHEDULED: 2022-08-01 Mon>
 #+begin_src emacs-lisp :results none
 (setq auth-sources '("~/.authinfo"))
 #+end_src
@@ -816,24 +817,13 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (add-hook 'org-mode (lambda () (setq left-margin-width 1)))
 
   (add-hook 'org-mode-hook
-	    (lambda () (progn (push '(":@call:" . "☎") prettify-symbols-alist)
-			      ;; (push '("[ ]" . "☐") prettify-symbols-alist)
-			      ;; (push '("[-]" . "⚀") prettify-symbols-alist)
-			      ;; (push '("[X]" . "☒") prettify-symbols-alist)
-			      (push '("->" . "→") prettify-symbols-alist)
-			      (push '("<-" . "←") prettify-symbols-alist)
-			      (push '("<->" . "←→") prettify-symbols-alist)
-			      (push '("---" . "⎯") prettify-symbols-alist)
-			      ;; (push '("#+begin_quote" . ">") prettify-symbols-alist)
-			      ;; (push '("#+end_quote" . "<") prettify-symbols-alist)
-			      ;; (push '("#+BEGIN_QUOTE" . ">") prettify-symbols-alist)
-			      ;; (push '("#+END_QUOTE" . "<") prettify-symbols-alist)
-			      ;; (push '("#+begin_src" . ">") prettify-symbols-alist)
-			      ;; (push '("#+end_src" . "<") prettify-symbols-alist)
-			      ;; (push '("#+BEGIN_SRC" . ">") prettify-symbols-alist)
-			      ;; (push '("#+END_SRC" . "<") prettify-symbols-alist)
+	    (lambda () (progn (push '("->" . "→") prettify-symbols-alist)
+			 (push '("<-" . "←") prettify-symbols-alist)
+			 (push '("<->" . "←→") prettify-symbols-alist)
+			 (push '("---" . "⎯") prettify-symbols-alist)
+			 (push '("\\\\" . "▾") prettify-symbols-alist)
 
-			      (prettify-symbols-mode 1))))
+                     (prettify-symbols-mode 1))))
 
   (defun org-archive-save-buffer ()
     (let ((afile (car (org-all-archive-files))))
@@ -1064,17 +1054,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
  :config
   (add-to-list 'org-babel-load-languages '(jupyter . t))
   (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
-#+end_src
-
-** Org Fancy Priorities
-#+begin_src emacs-lisp :results none :tangle no
-(use-package org-fancy-priorities
-  :straight t
-  :defer t
-  :hook
-    (org-mode . org-fancy-priorities-mode)
-  :config
-    (setq org-fancy-priorities-list '("❗" "❕" "⇓")))
 #+end_src
 
 ** Export CSS
@@ -2679,6 +2658,7 @@ sbt-mode
   :defer t 
   :config
     (setq plantuml-jar-path "/home/porcupine/tools/plantuml.jar")
+    (setq plantuml-output-type "png")
     (setq plantuml-default-exec-mode 'jar))
 #+end_src
 
@@ -3018,7 +2998,12 @@ sbt-mode
                          " assignee IN ('Krzysztof Jurkiewicz', 'Łukasz Kaźmierczak', 'Marcin Kordus', 'Igor Nadworski', 'Kamil Bukowczyk') AND"
                          " status IN (TODO, 'TO DO', 'In Progress', 'In Review', 'In test')"
                          " ORDER BY status DESC, created ASC ")
-         :filename "deflect")))
+         :filename "deflect")
+
+        (:jql  ,(concat  " project = SUP AND"
+                                " status IN ('Under review')"
+                                " ORDER BY status DESC, created ASC ")
+                :filename "sup")))
 
 (defun +org-jira/get-issues ()
   (interactive)
