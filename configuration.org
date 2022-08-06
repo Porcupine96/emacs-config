@@ -724,8 +724,11 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   
   (setq warning-suppress-types (append warning-suppress-types '((defvaralias))))
 
-  ;; babel configuration
+  (setq org-refile-targets
+     '(("/home/porcupine/Dropbox/org/todo/work.org" :maxlevel . 1)
+       ("/home/porcupine/Dropbox/org/todo/private.org" :maxlevel . 1)))
 
+  ;; babel configuration
   (org-babel-do-load-languages 'org-babel-load-languages
 			       '((shell . t)
 				 (emacs-lisp . t)
@@ -2950,6 +2953,13 @@ sbt-mode
   :straight t
   :defer t
   :hook (emacs-lisp-mode . eros-mode))
+#+end_src
+
+* Configure =vundo=
+#+begin_src emacs-lisp :results none
+(use-package vundo
+  :straight t
+  :defer t)
 #+end_src
 
 * Configure =tramp=

@@ -431,10 +431,10 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
              ;; org
              (org-hide          ((t (,@fg-base03))))
-             (org-todo          ((t (:inherit default :height 1.0 ,@fmt-bold ,@fg-red  ,@bg-base03))))
-             (org-modern-todo   ((t (:inherit default :height 1.0 ,@fmt-bold ,@fg-red  ,@bg-base03))))
-             (org-modern-tag    ((t (:inherit default :height 1.0 ,@fmt-ital ,@fg-gray,@bg-base02))))
-             (org-done          ((t (:inherit default :height 1.0 ,@fmt-bold ,@fg-gray ,@bg-base03))))
+             (org-todo          ((t (:inherit default ,@fmt-bold ,@fg-red  ,@bg-base03))))
+             (org-modern-todo   ((t (:inherit default ,@fmt-bold ,@fg-red  ,@bg-base03))))
+             (org-modern-tag    ((t (:inherit default ,@fmt-ital ,@fg-gray,@bg-base02))))
+             (org-done          ((t (:inherit default ,@fmt-bold ,@fg-gray ,@bg-base03))))
 	     (org-headline-done ((t (,@fmt-strk ,@fg-gray ,@bg-base03))))
              (org-date          ((t (:inherit default ,@fmt-none ,@fg-yellow ,@bg-base03))))
 
@@ -455,10 +455,11 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 	     (org-meta-line             ((t (:inherit default ,@fmt-small ,@fg-gray  ,@bg-base03))))
 	     (org-special-keyword       ((t (:inherit default ,@fg-green))))
 
-	     (org-table                 ((t (:inherit default ,@fmt-none  ,@fg-blue ,@bg-base03))))
+	     ;; (org-table                 ((t (:inherit default ,@fmt-none  ,@fg-blue ,@bg-base03))))
+	     ;; (org-table-header          ((t (:inherit default ,@fmt-none  ,@fg-blue ,@bg-base03))))
 
              (org-link ((t (,@fmt-undr ,@fg-darkblue ,@bg-base03))))
-             (org-tag ((t (:inherit default :height 0.9 ,@fmt-ital ,@fg-green ,@bg-base03))))
+             (org-tag ((t (:inherit default ,@fmt-ital ,@fg-green ,@bg-base03))))
 
 	     (org-level-1 ((t (,@fmt-big ,@fg-purple ,@bg-base03))))
 	     (org-level-2 ((t (,@fmt-sbig ,@fg-pink ,@bg-base03))))
