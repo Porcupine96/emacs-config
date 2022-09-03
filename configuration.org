@@ -1822,7 +1822,6 @@ vc-annotate options.
   :commands (consult-projectile))
 #+end_src
 
-
 * Configure =helpful=
  #+begin_src emacs-lisp :results none
  (use-package helpful
@@ -2866,13 +2865,6 @@ sbt-mode
 (use-package eval-expr
    :straight t
    :defer t)
-#+end_src
-
-* Configure =synosaurus=
-#+begin_src emacs-lisp :results none
-(use-package synosaurus
-  :straight t
-  :defer t)
 #+end_src
 
 * Configure =pdf-tools=
