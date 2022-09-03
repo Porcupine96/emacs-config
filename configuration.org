@@ -1621,7 +1621,8 @@ vc-annotate options.
 ** =darbbrev=
 #+begin_src emacs-lisp :results none
 (use-package dabbrev
-  :bind (("M-/" . dabbrev-completion)
+  :bind (("C-/" . dabbrev-completion)
+         ("M-/" . dabbrev-completion)
          ("C-M-/" . dabbrev-expand))
   :custom
     (dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
@@ -3029,7 +3030,8 @@ sbt-mode
 (use-package origami
   :straight t
   :defer t
-  :hook (js-mode . origami-mode))
+  :hook ((js-mode . origami-mode)
+          (scala-mode . origami-mode)))
 #+end_src
 
 * Configure =mu4e=
@@ -3562,7 +3564,6 @@ sbt-mode
   :commands (pscreenshot/org-screenshot-take +ocr/screenshot))
 #+end_src
 
-** Upgrade versions
 ** Flash
 #+begin_src emacs-lisp :results none
 (use-package flash
