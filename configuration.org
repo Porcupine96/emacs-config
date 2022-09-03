@@ -222,6 +222,8 @@ Use =evil-mode=
     (define-and-bind-text-object "_" "_" "_")
     (define-and-bind-text-object "/" "/" "/")
 
+    (evil-define-key '(normal insert) global-map (kbd "C-n") 'evil-avy-goto-char)
+
     (evil-mode +1)
   :bind (:map evil-motion-state-map
         ("C-w C-U" . winner-undo)
@@ -340,6 +342,11 @@ Buffer commands.
 (global-set-key (kbd "C-x C-b") #'ibuffer)
 (global-set-key (kbd "C-c b n") #'next-buffer)
 (global-set-key (kbd "C-c b p") #'previous-buffer)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "M-k") #'drag-stuff-up)
+(global-set-key (kbd "M-j") #'drag-stuff-down)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -684,7 +691,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :defer t
   :delight
   :custom
-    (org-ellipsis " ▾")
+  (org-ellipsis " ▾")
   
   :config 
   (require 'org-tempo)
@@ -721,8 +728,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq warning-suppress-types (append warning-suppress-types '((defvaralias))))
 
   (setq org-refile-targets
-     '(("/home/porcupine/Dropbox/org/todo/work.org" :maxlevel . 1)
-       ("/home/porcupine/Dropbox/org/todo/private.org" :maxlevel . 1)))
+	'(("/home/porcupine/Dropbox/org/todo/work.org" :maxlevel . 1)
+	  ("/home/porcupine/Dropbox/org/todo/private.org" :maxlevel . 1)))
 
   ;; babel configuration
   (org-babel-do-load-languages 'org-babel-load-languages
@@ -755,6 +762,10 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   (setq org-format-latex-options 
 	(plist-put (plist-put org-format-latex-options :background "#1c2128") :scale 1.5))
+
+  ;; (setq org-latex-packages-alist '("" "booktabs" nil))
+  ;; (setq org-latex-packages-alist '("" "ragged2e" t))
+  (setq org-latex-packages-alist nil)
 
   ;; open files in the same window
   (setf (alist-get 'file org-link-frame-setup) 'find-file)
@@ -817,12 +828,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '("->" . "→") prettify-symbols-alist)
-			 (push '("<-" . "←") prettify-symbols-alist)
-			 (push '("<->" . "←→") prettify-symbols-alist)
-			 (push '("---" . "⎯") prettify-symbols-alist)
-			 (push '("\\\\" . "▾") prettify-symbols-alist)
+			      (push '("<-" . "←") prettify-symbols-alist)
+			      (push '("<->" . "←→") prettify-symbols-alist)
+			      (push '("---" . "⎯") prettify-symbols-alist)
+			      (push '("\\\\" . "▾") prettify-symbols-alist)
 
-                     (prettify-symbols-mode 1))))
+			      (prettify-symbols-mode 1))))
 
   (defun org-archive-save-buffer ()
     (let ((afile (car (org-all-archive-files))))
@@ -879,6 +890,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :straight t
   :after org
   :config
+    (setq org-modern-table nil)
     (setq org-modern-footnote nil)
     (global-org-modern-mode))
 #+end_src
@@ -1046,8 +1058,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :defer t)
 #+end_src
 
-#+begin_src emacs-lisp :results none 
+#+begin_src emacs-lisp :results none :tangle no
 (use-package jupyter
+ :defer t
  :straight t
  ;; :commands (jupyter-org-insert-src-block jupyter-org-kill-block-and-results)
  :config
@@ -1588,56 +1601,227 @@ vc-annotate options.
      (custom-set-variables
        '(zoom-window-mode-line-color "#4682B4")))
  #+end_src
-* Configure =company=
+
+* Completions
+** =corfu=
 #+begin_src emacs-lisp :results none
-(use-package company
+(use-package corfu
+  :straight t
+  :custom
+    (corfu-auto t) 
+    (corfu-auto-delay 0.1)
+    (corfu-auto-prefix 1)
+    (corfu-separator ?\s)
+  :bind
+  ;; (:map corfu-map ("M-SPC" . corfu-insert-separator))
+  :init
+    (global-corfu-mode))
+#+end_src
+
+** =darbbrev=
+#+begin_src emacs-lisp :results none
+(use-package dabbrev
+  :bind (("M-/" . dabbrev-completion)
+         ("C-M-/" . dabbrev-expand))
+  :custom
+    (dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
+#+end_src
+
+** =vertico=
+#+begin_src emacs-lisp :result none
+(use-package vertico
+  :straight t
+  :init (vertico-mode))
+#+end_src
+
+#+begin_src emacs-lisp :result none
+(use-package savehist
+  :straight t
+  :after vertico
+  :init
+    (savehist-mode)
+  :config
+    (setq history-length 20))
+#+end_src
+
+#+begin_src emacs-lisp :result none
+(use-package orderless
+  :straight t
+  :init
+    (setq completion-styles '(orderless basic)
+          completion-category-defaults nil
+          completion-category-overrides '((file (styles partial-completion)))))
+#+end_src
+
+#+RESULTS:
+
+** =embark=
+#+begin_src emacs-lisp :results none
+(use-package embark
+  :straight t
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  :config
+  (defun embark-zeal ()
+    (interactive)
+    (call-process "zeal" nil 0 nil (current-word)))      
+
+  
+  (global-set-key (kbd "C-a") #'embark-act)
+  (global-set-key (kbd "C->") #'embark-become)
+  
+  (define-key embark-general-map (kbd "z") #'embark-zeal)
+  (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
+  (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
+  (define-key embark-file-map (kbd "l") #'+embark/create-link)
+  (define-key embark-file-map (kbd "e") #'+embark/open-externally)
+  
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none))))
+
+
+  (defun +embark/create-link (link)
+    (let* ((beg-raw (re-search-backward " \\|^"))
+           (_ (forward-char))
+           (beg (if (looking-at-p " ")) (+ beg-raw 1) beg-raw)
+           (end-raw (re-search-forward " \\|$"))
+           (_ (backward-char))
+           (end (if (looking-at-p " ") (- end-raw 1) end-raw)))
+
+	(kill-region beg end)
+      (org-insert-link link link (read-string "Description: " ""))))
+
+  (defun +embark/open-externally (link)
+    (call-process "xdg-open" nil 0 nil link))
+
+  (require 'org-element)
+  
+  (defun org-link-finder ()
+    (if (eq major-mode 'org-mode) 
+        (let ((context (org-element-context)))
+          (if (equal (org-element-type context) 'link)
+              (let* ((ctx (cadr context))
+                     (beg (plist-get ctx :begin))
+                     (end (plist-get ctx :end))
+                     (content-beg (plist-get ctx :contents-begin))
+                     (content-end (plist-get ctx :contents-end))
+                     (link-text (buffer-substring-no-properties
+				 (or content-beg beg) (or content-end end))))
+		`(link ,link-text ,beg . ,end))))))
+  
+  (embark-define-keymap embark-link-map
+    "Keymap to work with links"
+    ("o" +org-open-at-point-other-window)
+    ("e" +org-link-at-point-open-externally)
+    ("y" +org-copy-link-at-point))
+  
+  (defun +org-copy-link-at-point (_)
+    (let* ((context (org-element-context))
+           (ctx (cadr context))
+           (link (plist-get ctx :raw-link)))
+      (kill-new link)))
+
+(defun +org-link-at-point-open-externally (_)
+    (let* ((context (org-element-context))
+           (ctx (cadr context))
+           (link (plist-get ctx :raw-link)))
+      (call-process "xdg-open" nil 0 nil link)))
+  
+  (defun +org-open-at-point-other-window (_)
+    (let ((org-link-frame-setup '((file . find-file-other-window))))
+      (org-open-at-point)))
+  
+  (add-to-list 'embark-target-finders 'org-link-finder)
+  (add-to-list 'embark-keymap-alist '(link . embark-link-map)))
+
+(defun +embark/insert-grep-line (line)
+  (interactive "sInsert: ")
+  (let* ((trimmed (s-trim (->> (s-split ":" line) (-drop 2) (s-join ":"))))
+         (result (if (equal "" trimmed) line trimmed)))
+
+    (if buffer-read-only
+        (with-selected-window (other-window-for-scrolling)
+          (insert result))
+      (insert result))))
+#+end_src
+
+** =marginalia=
+#+begin_src emacs-lisp :results none
+(use-package marginalia
+  :straight t
+  :commands (execute-extended-command)
+  :init
+    (marginalia-mode))
+#+end_src
+
+** =consult=
+#+begin_src emacs-lisp :results none
+(use-package consult
   :straight t
   :defer t
-  :hook (prog-mode . global-company-mode)
-  :custom
-    (company-minimum-prefix-length 1)
-    (company-idle-delay 0.1)
-    (company-backends '((company-capf company-yasnippet) company-dabbrev company-files company-elisp))
-    (company-dabbrev-downcase nil)
-    (lsp-completion-provider :capf)
-  :bind (:map company-active-map
-          ("<tab>" . +company/custom-complete)
-          ("<return>" . +company/custom-complete))
-        
-  :config
-    (with-eval-after-load 'company
-        (define-key company-mode-map (kbd "C-SPC") #'company-complete)
-        (define-key company-active-map (kbd "<tab>") #'company-complete-common)
-        (define-key company-active-map (kbd "TAB") #'company-complete-common)
-        (define-key company-active-map (kbd "RET") #'+company/custom-complete)
-        (define-key company-active-map (kbd "<return>") #'company-complete-selection)))
+  :commands (execute-extended-command consult-find consult-line)
+  :init
+    (setq consult-fontify-preserve t)
+    (setq consult-async-min-input 1)
+    (setq consult-async-refresh-delay 0.1)
 
-(use-package company-box
+    (setq register-preview-delay 0
+          register-preview-function #'consult-register-format)
+
+    (advice-add #'register-preview :override #'consult-register-window)
+    (advice-add #'consult-line :after (lambda (&rest r)
+       (push (car consult--line-history) regexp-search-ring)))
+
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
+
+    (global-set-key (kbd "C-c k") (lambda () (interactive) (consult-ripgrep default-directory)))
+    (global-set-key (kbd "C-x b") #'consult-buffer)
+    (global-set-key (kbd "C-s") #'consult-line) 
+
+    (setq consult-preview-key (list (kbd "M-n") (kbd "M-p")))
+
+  :config
+    (setq consult-narrow-key "<")
+
+    (autoload 'projectile-project-root "projectile")
+    (setq consult-project-root-function #'projectile-project-root))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package consult-fd
+  :load-path "~/.emacs.default/packages/consult-fd/"
+  :defer t
+  :commands (consult-fd))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package embark-consult
   :straight t
-  :hook (company-mode . company-box-mode)
-  :config
-    (setq company-box-doc-enable nil))
+  :after (embark consult)
+  :demand t 
+  :hook
+    (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(defun +company/custom-complete ()
-  "Run company-complete-selection either on the selected item or on the first
-   item if no candidate was selected."
-  (interactive)
-  (let ((company-selection (or company-selection 0)))
-    (company-complete-selection)))
+(use-package consult-flycheck
+  :straight t
+  :after (consult flycheck))
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(defun advice-unadvice (sym)
-  "Remove all advices from symbol SYM."
-  (interactive "aFunction symbol: ")
-  (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+(use-package consult-projectile
+  :load-path "~/.emacs.default/packages/consult-projectile/"
+  :defer t
+  :commands (consult-projectile))
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(advice-add 'company-complete :after (lambda (&rest r) (company-select-next)))
-#+end_src
 
 * Configure =helpful=
  #+begin_src emacs-lisp :results none
@@ -1757,6 +1941,13 @@ vc-annotate options.
     (setq ediff-forward-word-function 'forward-char))
 #+end_src
 
+* Configure =drag-stuff=
+#+begin_src emacs-lisp :results none
+(use-package drag-stuff
+  :straight t
+  :defer t)
+#+end_src
+
 * Configure =smerge=
 #+begin_src emacs-lisp :results none
 (use-package smerge-mode
@@ -1768,234 +1959,6 @@ vc-annotate options.
     ("C-c m a" . smerge-keep-all)
     ("C-c m p" . smerge-prev)
     ("C-c m n" . smerge-next)))
-#+end_src
-
-* Configure =selectrum=
-#+begin_src emacs-lisp :results none :tangle no
-(use-package selectrum
-  :disabled
-  :straight t
-  :defer t
-  :config
-    (setq selectrum-max-window-height 15)
-    (setq selectrum-fix-vertical-window-height t)
-    (setq selectrum-highlight-candidates-function #'selectrum-candidates-identity)
-    (selectrum-mode +1))
-#+end_src
-
-#+begin_src emacs-lisp :results none :tangle no
-(use-package selectrum-prescient
-  :straight t
-  :disabled
-  :after selectrum
-  :config
-   (selectrum-prescient-mode +1)
-   (prescient-persist-mode +1))
-#+end_src
-
-* Configure =vertico=
-#+begin_src emacs-lisp :result none
-(use-package vertico
-  :straight t
-  :init (vertico-mode))
-#+end_src
-
-#+begin_src emacs-lisp :result none
-(use-package savehist
-  :straight t
-  :after vertico
-  :init
-    (savehist-mode)
-  :config
-    (setq history-length 20))
-#+end_src
-
-#+begin_src emacs-lisp :result none
-(use-package orderless
-  :straight t
-  :after vertico
-  :init
-   (setq completion-styles '(orderless)
-         completion-category-defaults nil
-         completion-category-overrides '((file (styles partial-completion)))))
-#+end_src
-
-* Configure =embark=
-#+begin_src emacs-lisp :results none
-(use-package embark
-  :straight t
-  :init
-  ;; Optionally replace the key help with a completing-read interface
-  (setq prefix-help-command #'embark-prefix-help-command)
-
-  :config
-  (defun embark-zeal ()
-    (interactive)
-    (call-process "zeal" nil 0 nil (current-word)))      
-
-  
-  (global-set-key (kbd "C-a") #'embark-act)
-  (global-set-key (kbd "C->") #'embark-become)
-  
-  (define-key embark-general-map (kbd "z") #'embark-zeal)
-  (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
-  (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
-  (define-key embark-file-map (kbd "l") #'+embark/create-link)
-  (define-key embark-file-map (kbd "e") #'+embark/open-externally)
-  
-  ;; Hide the mode line of the Embark live/completions buffers
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none))))
-
-
-  (defun +embark/create-link (link)
-    (let* ((beg-raw (re-search-backward " \\|^"))
-           (_ (forward-char))
-           (beg (if (looking-at-p " ")) (+ beg-raw 1) beg-raw)
-           (end-raw (re-search-forward " \\|$"))
-           (_ (backward-char))
-           (end (if (looking-at-p " ") (- end-raw 1) end-raw)))
-
-	(kill-region beg end)
-      (org-insert-link link link (read-string "Description: " ""))))
-
-  (defun +embark/open-externally (link)
-    (call-process "xdg-open" nil 0 nil link))
-
-  (require 'org-element)
-  
-  (defun org-link-finder ()
-    (if (eq major-mode 'org-mode) 
-        (let ((context (org-element-context)))
-          (if (equal (org-element-type context) 'link)
-              (let* ((ctx (cadr context))
-                     (beg (plist-get ctx :begin))
-                     (end (plist-get ctx :end))
-                     (content-beg (plist-get ctx :contents-begin))
-                     (content-end (plist-get ctx :contents-end))
-                     (link-text (buffer-substring-no-properties
-				 (or content-beg beg) (or content-end end))))
-		`(link ,link-text ,beg . ,end))))))
-  
-  (embark-define-keymap embark-link-map
-    "Keymap to work with links"
-    ("o" +org-open-at-point-other-window)
-    ("e" +org-link-at-point-open-externally)
-    ("y" +org-copy-link-at-point))
-  
-  (defun +org-copy-link-at-point (_)
-    (let* ((context (org-element-context))
-           (ctx (cadr context))
-           (link (plist-get ctx :raw-link)))
-      (kill-new link)))
-
-(defun +org-link-at-point-open-externally (_)
-    (let* ((context (org-element-context))
-           (ctx (cadr context))
-           (link (plist-get ctx :raw-link)))
-      (call-process "xdg-open" nil 0 nil link)))
-  
-  (defun +org-open-at-point-other-window (_)
-    (let ((org-link-frame-setup '((file . find-file-other-window))))
-      (org-open-at-point)))
-  
-  (add-to-list 'embark-target-finders 'org-link-finder)
-  (add-to-list 'embark-keymap-alist '(link . embark-link-map)))
-
-(defun +embark/insert-grep-line (line)
-  (interactive "sInsert: ")
-  (let* ((trimmed (s-trim (->> (s-split ":" line) (-drop 2) (s-join ":"))))
-         (result (if (equal "" trimmed) line trimmed)))
-
-    (if buffer-read-only
-        (with-selected-window (other-window-for-scrolling)
-          (insert result))
-      (insert result))))
-#+end_src
-
-* Configure =marginalia=
-#+begin_src emacs-lisp :results none
-(use-package marginalia
-  :straight t
-  :commands (execute-extended-command)
-  :init
-    (marginalia-mode))
-#+end_src
-
-* Configure =consult=
-#+begin_src emacs-lisp :results none
-(use-package consult
-  :straight t
-  :defer t
-  :commands (execute-extended-command consult-find consult-line)
-  :init
-    (setq consult-fontify-preserve t)
-    (setq consult-async-min-input 1)
-    (setq consult-async-refresh-delay 0.1)
-
-    (setq register-preview-delay 0
-          register-preview-function #'consult-register-format)
-
-    (advice-add #'register-preview :override #'consult-register-window)
-    (advice-add #'consult-line :after (lambda (&rest r)
-       (push (car consult--line-history) regexp-search-ring)))
-
-    (setq xref-show-xrefs-function #'consult-xref
-          xref-show-definitions-function #'consult-xref)
-
-    (global-set-key (kbd "C-c k") (lambda () (interactive) (consult-ripgrep default-directory)))
-    (global-set-key (kbd "C-x b") #'consult-buffer)
-    (global-set-key (kbd "C-s") #'consult-line) 
-
-    (setq consult-preview-key (list (kbd "M-n") (kbd "M-p")))
-
-  :config
-    (setq consult-narrow-key "<")
-
-    (autoload 'projectile-project-root "projectile")
-    (setq consult-project-root-function #'projectile-project-root))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package consult-fd
-  :load-path "~/.emacs.default/packages/consult-fd/"
-  :defer t
-  :commands (consult-fd))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package embark-consult
-  :straight t
-  :after (embark consult)
-  :demand t 
-  :hook
-    (embark-collect-mode . consult-preview-at-point-mode))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package consult-flycheck
-  :straight t
-  :after (consult flycheck))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(use-package consult-projectile
-  :load-path "~/.emacs.default/packages/consult-projectile/"
-  :defer t
-  :commands (consult-projectile))
-#+end_src
-
-* Configure =popper=
-#+begin_src emacs-lisp :results none :tangle no
-(use-package popper
-  :straight t 
-  :commands (popper-toggle-latest popper-toggle-type)
-  :defer t
-  :config
-    (setq popper-display-function (lambda (b x) (display-buffer-in-direction b '(right))))
-    (popper-mode +1))
 #+end_src
 
 * Languages
@@ -2093,14 +2056,19 @@ Setup =python-mode=.
    :straight t
    :hook ((typescript-mode . lsp-deferred)  
           (c-mode . lsp-deferred)
-          (sh-mode . lsp-deferred))
+          (sh-mode . lsp-deferred)
+          (lsp-completion-mode . my/lsp-mode-setup-completion))
    :custom
          (lsp-headerline-breadcrumb-enable nil)
          (lsp-diagnostic-clean-after-change t)
+         (lsp-completion-provider :none)
    :init
          (setq lsp-keymap-prefix "C-c l")
-   :config
-         (setq lsp-completion-provider :none)
+
+         (defun my/lsp-mode-setup-completion ()
+           (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+                 '(orderless)))
+    :config
          (setq lsp-prefer-flymake nil)
          (lsp-enable-which-key-integration t)
          (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
@@ -2127,6 +2095,12 @@ Setup =python-mode=.
     (setq lsp-ui-doc-use-childframe nil)
     (setq lsp-ui-doc-enable nil)
     (add-to-list 'lsp-ui-doc-frame-parameters '(no-accept-focus . t)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package consult-lsp
+  :straight t
+  :after lsp-mode)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2223,7 +2197,7 @@ Setup =python-mode=.
 #+end_src
 
 Remove other LSP sessions.
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none
 (defun +lsp/remove-other-sessions ()
     (interactive)
     (-each 
@@ -2508,7 +2482,7 @@ sbt-mode
     (let* ((pos 0)
            (paths nil)
            (content (buffer-substring-no-properties (point-min) (point-max)))
-           (pattern "baseDirectory\\.value \\(.*\\)\\|^\s*\"\\(.*\\)\""))
+           (pattern "\sbaseDirectory\\.value \\(.*\\)\\|^\s*\"\\(.*\\)\""))
 
       (while (string-match pattern content pos)
         (setq pos (match-end 0))
@@ -3200,7 +3174,6 @@ sbt-mode
     "l d" #'lsp-find-definition
     "l s" #'lsp-describe-session
     "l e" #'lsp-ui-flycheck-list
-    "l f" #'lsp-format-buffer
     "l l" #'consult-lsp-symbols
     "l t" #'hydra-lsp-toggle/body
     "l T" #'lsp-treemacs-errors-list
@@ -3209,7 +3182,7 @@ sbt-mode
     "l R" #'lsp-rename
     "l x" #'+lsp/remove-other-sessions
     "l i" #'lsp-goto-implementation
-    "l f" #'format-all-buffer
+    "l f" (lambda () (interactive) (if (derived-mode-p 'scala-mode) (lsp-format-buffer) (format-all-buffer)))
     "l I" #'+scala/copy-import
     
     "o c" #'cfw:open-org-calendar
@@ -3314,6 +3287,7 @@ sbt-mode
     "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
     "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
     "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
+    "c T" #'+scala/test
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
     "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
     "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
@@ -3357,16 +3331,14 @@ sbt-mode
    "b" (lambda () (interactive) (jupyter-org-insert-src-block t current-prefix-arg))
    "x" #'jupyter-org-kill-block-and-results
    "c" #'org-babel-remove-result
-   "j" #'org-babel-next-src-block
-   "k" #'org-babel-previous-src-block
-   "r" #'jupyter-run-repl
-   "E" #'jupyter-org-execute-to-point)
+   "j" #'org-babel-next-src-blok
+   "k" #'org-babel-previous-src-block)
 
   (general-define-key 
    :prefix "C-c r"
    :states 'normal
    :keymaps '(evil-org-mode-map org-mode-map)
-     "t" #'org-roam-tag-add)
+   "t" #'org-roam-tag-add)
 
   (general-define-key 
    :states '('normal 'insert)
@@ -3519,6 +3491,19 @@ sbt-mode
   (let* ((branch (string-remove-prefix " Git-" (string-remove-prefix " Git:" vc-mode)))
          (url (concat "https://jenkins.codeheroes.tech/job/monorepo/job/" (url-hexify-string branch) "/lastBuild/console")))
     (call-process "xdg-open" nil 0 nil url)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/test ()
+  (interactive)
+
+  (let* ((default-directory (projectile-project-root))
+	 ;; (test-file (buffer-name (consult-find (projectile-project-root) "Test\\.scala #")))
+       (test-file (-last-item (s-split  "/" ( buffer-file-name))))
+	 (file-pattern (concat "\"*" (string-remove-suffix ".scala" test-file) "\""))
+  	 (project (s-trim (shell-command-to-string "bloop projects | head -n1"))))
+
+    (+projectile/compile (concat "bloop " "test " project " -o " file-pattern))))
 #+end_src
 
 ** Version update

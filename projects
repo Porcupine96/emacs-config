@@ -1,3 +1,2 @@
 ;;; -*- lisp-data -*-
-(("~/.emacs.default/")
- ("~/work/monorepo/"))
+(("~/projects/homer/"))
