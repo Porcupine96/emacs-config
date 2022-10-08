@@ -3615,7 +3615,7 @@ sbt-mode
                                 (if (equal header (org-element-property :raw-value
                                                                              (org-element-property :parent h)))
                                     1 0)))))
-         (ctype-str (if (equal class-type "Ćwiczenia") " - ćwiczenia " " - wykład ") )
+         (ctype-str (if (equal class-type "Ćwiczenia") " - ćwiczenia " " - wykład "))
          (title (concat subject ctype-str (number-to-string (+ 1 count)) " (" date ")")))
 
     (pcase 
@@ -3625,8 +3625,8 @@ sbt-mode
                                     (let ((elem (org-element-at-point)))
                                       (if (equal header (s-trim (org-element-property :raw-value elem)))
                                           (progn
-                                            (org-insert-heading-after-current)
-                                            (org-demote)
+                                            (org-insert-heading-respect-content)
+                                            (org-do-demote)
                                             (let ((beg (point)))
                                               (insert title)
                                               `(,beg ,(point))))))))))
