@@ -494,8 +494,8 @@ Scale text.
 (defvar +core/light-theme 'modus-operandi)
 
 (defun +core/load-theme (theme)
-   (mapcar #'disable-theme custom-enabled-themes)
-   (load-theme theme t))
+  (mapcar #'disable-theme custom-enabled-themes)
+  (load-theme theme t))
 
 (defun +core/redraw-dired-buffers ()
   (dolist (buffer (buffer-list))
@@ -507,13 +507,19 @@ Scale text.
   (interactive)
 
   (if (equal (car custom-enabled-themes) +core/dark-theme)
-     ;; TODO: could be improved by extracting background directly from theme
-     (progn
-       (+core/load-theme +core/light-theme)
-       (setq org-format-latex-options (plist-put org-format-latex-options :background "white")))
-     (progn
-       (+core/load-theme +core/dark-theme)
-       (setq org-format-latex-options (plist-put org-format-latex-options :background "#202020"))))
+      ;; TODO: could be improved by extracting background directly from theme
+      (progn
+	(setq org-todo-keyword-faces '(
+				      ("REVIEW"  . (:foreground "#ffffff" :background "#ffcc00"))
+				      ("WAIT"    . (:foreground "#ffffff" :background "#ffcc00"))
+				      ("SOMEDAY" . (:foreground "#ffffff" :background "#ffcc00"))
+				      ("STRT"    . (:foreground "#ffffff" :background "#0198e1"))))
+	(setq org-modern-todo-faces org-todo-keyword-faces)
+	(+core/load-theme +core/light-theme)
+	(setq org-format-latex-options (plist-put org-format-latex-options :background "white")))
+    (progn
+      (+core/load-theme +core/dark-theme)
+      (setq org-format-latex-options (plist-put org-format-latex-options :background "#202020"))))
 
   (treemacs-icons-dired-mode -1)
   (treemacs-icons-dired-mode 1)
@@ -742,6 +748,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 				 (scheme . t) 
 				 (js . t)
 				 (sql . t)
+				 ;; (jupyter . t)
 				 ;; (ammonite . t)
 				 ;; (http . t)
 				 ;; (mongo . t)
@@ -813,10 +820,10 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 :END:\n\n
 ")
 
-          ("j" "Work Journal" entry (file+olp+datetree "~/Dropbox/org/todo/work-journal.org") "*** %?
+          ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org") "* TODO %?
 :PROPERTIES:
-:Effort:   %?
-:END:\n
+:CreatedAt: %T
+:END:\n\n
 ")
 
 	  ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
@@ -965,13 +972,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 	:map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
   :config
     (setq org-agenda-files '(
-       "~/Dropbox/org-roam/2022-02-23--18-45-30Z--psychologia_społeczna_ii_zajęcia.org"
-       "~/Dropbox/org-roam/2022-02-25--10-17-45Z--psychologia_edukacji.org"
-       "~/Dropbox/org-roam/2022-02-27--13-15-43Z--psychologia_zaburzen_zajęcia.org"
-       "~/Dropbox/org-roam/2022-03-02--14-00-31Z--psychologia_rozwoju_w_biegu_zycia_ii_zajęcia.org"
-       "~/Dropbox/org-roam/2021-10-03--10-46-11Z--język_angielski_zajęcia.org"
-       "~/Dropbox/org-roam/2022-03-01--12-00-27Z--psychometria_zajęcia.org"
        "~/Dropbox/org/todo/work.org"
+       "~/Dropbox/org/todo/studies.org"
        "~/Dropbox/org/todo/private.org")))
 #+end_src
 
@@ -1325,6 +1327,12 @@ Save image and insert it's link at point.
                                         :if-new
                                         (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
   						 "#+title: ${title}\n#+filetags: \n#+startup: content\n")
+            			      :unnarrowed t)
+                                   ("c" "class" plain 
+            			      "%?"
+                                        :if-new
+                                        (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
+  						 "#+title: ${title}\n#+filetags: classes\n#+startup: content\n")
             			      :unnarrowed t)))
 
    (org-roam-db-autosync-mode))
@@ -1921,6 +1929,15 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package emojify
   :straight t
+  :bind (:map global-map
+   (
+    ("C-c SPC g" . (lambda () (interactive) (insert "🟢")))
+    ("C-c SPC y" . (lambda () (interactive) (insert "🟡")))
+    ("C-c SPC r" . (lambda () (interactive) (insert "🔴")))
+    ("C-c SPC w" . (lambda () (interactive) (insert "⚪")))
+    ("C-c SPC k" . (lambda () (interactive) (insert "👆")))
+    ("C-c SPC j" . (lambda () (interactive) (insert "👇")))
+    ("C-c SPC l" . (lambda () (interactive) (insert "👉")))))
   :config 
    (setq emojify-display-style 'image)
    (setq emojify-emoji-styles '(unicode github))
@@ -2099,6 +2116,12 @@ Setup =python-mode=.
   (interactive)
   (+core/surround-word-with "Optional[" "]"))
 #+end_src
+** R
+#+begin_src emacs-lisp :results none
+(use-package ess
+  :straight t
+  :defer t)
+#+end_src
 
 ** Protobuf
 #+begin_src emacs-lisp :results none
@@ -2176,9 +2199,50 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+;; (defun lsp-treemacs-render (tree title expand-depth
+;;                                  &optional buffer-name right-click-actions _clear-cache?)
+;;   (let ((buffer (get-buffer-create (or buffer-name "*LSP Lookup*"))))
+;;     (with-current-buffer buffer
+;; (treemacs-initialize lsp-treemacs-generic-root
+;;         :with-expand-depth (or expand-depth 0)
+;;         :and-do (progn
+;;                   (lsp-treemacs--set-mode-line-format buffer title)
+;;                   (setq-local face-remapping-alist '((button . default)))
+;;                   (setq-local lsp-treemacs-tree tree)
+;;                   (setq-local treemacs-default-visit-action 'treemacs-RET-action)
+;;                   (setq-local lsp-treemacs--right-click-actions right-click-actions)
+;;                   (setq-local window-size-fixed nil)
+;;                   (setq-local treemacs--width-is-locked nil)
+;;                   (setq-local treemacs-space-between-root-nodes nil)
+;;                   (when treemacs-text-scale
+;;                     (text-scale-increase treemacs-text-scale))
+;;                   (lsp-treemacs-generic-mode t)))
+;; (current-buffer))))
+
+
+;; (defun lsp-treemacs-errors-list--refresh ()
+;;   (lsp-treemacs-render
+;;    (if (and lsp-treemacs-error-list-current-project-only
+;;             lsp-treemacs--current-workspaces)
+;;  (->> lsp-treemacs--current-workspaces
+;;             (-map #'lsp-workspace-folders)
+;;             (-flatten)
+;;             (-keep #'lsp-treemacs--build-error-list))
+;;      (->> (lsp-session)
+;;           (lsp-session-folders)
+;;           (-keep #'lsp-treemacs--build-error-list)))
+;;    "Errors List"
+;;    2 
+;;    lsp-treemacs-errors-buffer-name
+;;    `(["Cycle Severity" lsp-treemacs-cycle-severity])))
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (use-package lsp-metals
   :straight t
   :after (lsp-mode scala-mode))
+  ;; :config
+  ;;   (require 'treemacs-extensions))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2299,7 +2363,8 @@ Remove other LSP sessions.
       (list 'vc 'Git "/home/porcupine/work/monorepo/creator/creator-plugin-handover"))
 
     (defun project-try-python (dir)
-      (list 'vc 'Git "/home/porcupine/work/monorepo/ai/ai-intent-backend"))
+      (list 'vc 'Git "/home/porcupine/work/monorepo/ai/ai-intent-backend"
+                     "/home/porcupine/work/monorepo/ai/ai-intent-bert-backend"))
 
     (setq completion-category-overrides '((eglot (styles orderless))))
 
@@ -2765,15 +2830,15 @@ sbt-mode
 
 * Configure =direnv=
 #+begin_src emacs-lisp :results none
-;; (use-package direnv
-;;  :straight t
-;;  :config
-;;    (setq direnv-always-show-summary nil)
+(use-package direnv
+ :straight t
+ :config
+   (setq direnv-always-show-summary nil)
 
-;;    (add-to-list 'direnv-non-file-modes 'vterm-mode)
-;;    (add-to-list 'direnv-non-file-modes 'dirvish)
+   (add-to-list 'direnv-non-file-modes 'vterm-mode)
+   (add-to-list 'direnv-non-file-modes 'dirvish)
 
-;;    (direnv-mode))
+   (direnv-mode))
 
 (use-package envrc
   :straight t
@@ -2962,9 +3027,9 @@ sbt-mode
   :mode "\\.pdf$"
   :init
     (pdf-loader-install)
+    ;; (pdf-tools-install)
   :config 
     (setq pdf-view-midnight-colors '("#839496" . "#1c2128")) 
-    ;; (pdf-tools-install)
     (add-hook 'pdf-view-mode-hook #'+pdf/setup)
 
     (add-hook 'pdf-view-mode-hook
@@ -2990,6 +3055,7 @@ sbt-mode
 (use-package olivetti
   :straight t
   :defer t
+  :commands olivetti-mode
   :custom
     (olivetti-body-width 82)
     (olivetti-recall-visual-line-mode-entry-state t))
@@ -3604,18 +3670,21 @@ sbt-mode
 (defun school/next-class ()
   (interactive)
 
-  (let* ((class-type (completing-read "Type: " '("Ćwiczenia" "Wykład")))
+  (let* ((class-type (completing-read "Type: " '("Ćwiczenia" "Wykłady" "Laboratoria")))
          (subject (car (s-split " - " (+org/property-value "TITLE"))))
          (date (pcase (s-split "-" (org-read-date))
                  (`(,year ,month ,day . nil) (s-join "." `(,day ,month ,year)))
                  (_ (error "Could not parse date."))))
-         (header (if (equal class-type "Ćwiczenia") "Ćwiczenia" "Wykłady"))
+         (header class-type)
          (count (-reduce '+ (org-element-map (org-element-parse-buffer) 'headline
                               (lambda (h)
                                 (if (equal header (org-element-property :raw-value
-                                                                             (org-element-property :parent h)))
+                                                                        (org-element-property :parent h)))
                                     1 0)))))
-         (ctype-str (if (equal class-type "Ćwiczenia") " - ćwiczenia " " - wykład "))
+         (ctype-str (pcase class-type
+		      ("Ćwiczenia" " - ćwiczenia ")
+		      ("Wykłady" " - wykład ")
+		      ("Laboratoria" " - labolatoria ")))
          (title (concat subject ctype-str (number-to-string (+ 1 count)) " (" date ")")))
 
     (pcase 

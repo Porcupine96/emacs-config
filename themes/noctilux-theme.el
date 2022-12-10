@@ -85,18 +85,14 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
     ("PROJECT" . (:inherit default :height 1.0 :foreground "#ffffff" :weight bold :underline nil))
     ("STRT"    . (:inherit default :height 1.0 :foreground "#0198e1" :weight bold :underline nil))
     ("SOMEDAY" . (:inherit default :height 1.0 :foreground "#ff8888" :weight bold :underline nil))
-    ("IDEA"    . (:inherit default :height 1.0 :foreground "#8aff8a" :weight bold :underline nil))
     ("REVIEW"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
-    ("DEPLOY"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
     ("WAIT"    . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))))
 
 (setq org-modern-todo-faces '(
     ("PROJECT" . (:inherit default :height 1.0 :foreground "#ffffff" :weight bold :underline nil))
     ("STRT"    . (:inherit default :height 1.0 :foreground "#0198e1" :weight bold :underline nil))
     ("SOMEDAY" . (:inherit default :height 1.0 :foreground "#ff8888" :weight bold :underline nil))
-    ("IDEA"    . (:inherit default :height 1.0 :foreground "#8aff8a" :weight bold :underline nil))
     ("REVIEW"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
-    ("DEPLOY"  . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))
     ("WAIT"    . (:inherit default :height 1.0 :foreground "#f1fa8c" :weight bold :underline nil))))
 
 (defmacro noct-flet (specs &rest body)
