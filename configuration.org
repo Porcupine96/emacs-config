@@ -861,10 +861,12 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 				  :inherit '(org-hide fixed-pitch))))
   :bind
   (:map evil-normal-state-map
+        ("C-z t l" . +zowie/to-jira-org-link) ;; TODO: use general instead?
         ("C-c h" . org-toggle-heading)
         ("C-k" . evil-window-up)
         ("C-j" . evil-window-down)
 	:map org-mode-map 
+        ("C-z t l" . +zowie/to-jira-org-link)
         ("C-c h" . org-toggle-heading)
         ("C-x n S" . org-tree-to-indirect-buffer))
   :hook (org-mode . org-indent-mode)
@@ -1333,6 +1335,12 @@ Save image and insert it's link at point.
                                         :if-new
                                         (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
   						 "#+title: ${title}\n#+filetags: classes\n#+startup: content\n")
+            			      :unnarrowed t)
+                                   ("z" "zowie" plain 
+            			      "%?"
+                                        :if-new
+                                        (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
+  						 "#+title: ${title}\n#+filetags: zowie\n#+startup: content\n")
             			      :unnarrowed t)))
 
    (org-roam-db-autosync-mode))
@@ -1362,6 +1370,12 @@ Save image and insert it's link at point.
          (title (completing-read " " titles))
          (file (org-roam-node-file (org-roam-node-from-title-or-alias title))))
     (find-file file)))
+#+end_src
+
+#+begin_src emacs-lisp :results none :tangle no
+(use-package org-roam-ui
+  :straight t
+  :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none :tangle no
@@ -1935,6 +1949,7 @@ vc-annotate options.
     ("C-c SPC y" . (lambda () (interactive) (insert "🟡")))
     ("C-c SPC r" . (lambda () (interactive) (insert "🔴")))
     ("C-c SPC w" . (lambda () (interactive) (insert "⚪")))
+    ("C-c SPC h" . (lambda () (interactive) (insert "👈")))
     ("C-c SPC k" . (lambda () (interactive) (insert "👆")))
     ("C-c SPC j" . (lambda () (interactive) (insert "👇")))
     ("C-c SPC l" . (lambda () (interactive) (insert "👉")))))
@@ -3655,6 +3670,18 @@ sbt-mode
   	 (project (s-trim (shell-command-to-string "bloop projects | head -n1"))))
 
     (+projectile/compile (concat "bloop " "test " project " -o " file-pattern))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +zowie/to-jira-org-link ()
+  (interactive)
+  (let ((w (current-word)))
+    (if (not (null (string-match-p "-" w)))
+      (progn 
+        (search-backward " ")
+        (forward-char 1)
+        (delete-char (length w))
+        (insert (concat "[[" "https://chatbotize.atlassian.net/browse/" w "][" w "]]"))))))
 #+end_src
 
 ** Version update
