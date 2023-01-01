@@ -1,8 +1,10 @@
 (require 'consult)
 
 (defun consult--fd-builder (input)
-  (pcase-let* ((cmd (split-string-and-unquote consult-find-args))
-               (type (consult--find-regexp-type (car cmd)))
+  (pcase-let* ((cmd (consult--build-args consult-find-args))
+               (type (if (eq 0 (call-process-shell-command
+                          (concat (car cmd) " -regextype emacs -version")))
+                   'emacs 'basic))
                (`(,arg . ,opts) (consult--command-split input))
                (`(,re . ,hl) (funcall consult--regexp-compiler arg type
 				      (member "--ignore-case" cmd)))
