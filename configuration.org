@@ -568,6 +568,19 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :straight t
   :init
     (exec-path-from-shell-initialize))
+
+;; (defun set-exec-path-from-shell-PATH ()
+;;   (let ((path-from-shell (replace-regexp-in-string
+;;                           "[ \t\n]*$"
+;;                           ""
+;;                           (shell-command-to-string "echo $PATH"))))
+;;     (setenv "PATH" path-from-shell)
+;;     (setq exec-path (split-string path-from-shell path-separator))))
+;; 
+;; (when window-system (set-exec-path-from-shell-PATH))
+;; 
+;; (let ((explicit-shell-file-name "/usr/bin/bash"))
+;;   (shell-command-to-string "echo $PATH"))
 #+end_src
 
 * Configure =which-key=
@@ -1945,6 +1958,8 @@ vc-annotate options.
   :straight t
   :bind (:map global-map
    (
+    ("C-c SPC !" . (lambda () (interactive) (insert "❗")))
+    ("C-c SPC ?" . (lambda () (interactive) (insert "❓")))
     ("C-c SPC g" . (lambda () (interactive) (insert "🟢")))
     ("C-c SPC y" . (lambda () (interactive) (insert "🟡")))
     ("C-c SPC r" . (lambda () (interactive) (insert "🔴")))
@@ -2115,11 +2130,11 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-;; (use-package lsp-pyright
-;;   :straight t
-;;   :hook (python-mode . (lambda ()
-;;                           (require 'lsp-pyright)
-;;                           (lsp))))  ; or lsp-deferred
+(use-package lsp-pyright
+  :straight t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2366,7 +2381,7 @@ Remove other LSP sessions.
 #+end_src
 
 ** Eglot 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package eglot
   :straight t
   :hook (;;(scala-mode . eglot-ensure)
@@ -2379,6 +2394,7 @@ Remove other LSP sessions.
 
     (defun project-try-python (dir)
       (list 'vc 'Git "/home/porcupine/work/monorepo/ai/ai-intent-backend"
+                     "/home/porcupine/work/monorepo/ai/ai-email-classifier"
                      "/home/porcupine/work/monorepo/ai/ai-intent-bert-backend"))
 
     (setq completion-category-overrides '((eglot (styles orderless))))

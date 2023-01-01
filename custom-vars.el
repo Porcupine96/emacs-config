@@ -10,7 +10,13 @@
      (eval message "Hello")
      (eval setq projectile-project-compilation-cmd "make" lsp-pyright-extra-paths
 	   ["/home/porcupine/work/monorepo/ai/ai-supervised-clustering-backend/" "/home/porcupine/work/monorepo/ai/ai-supervised-clustering-backend/generated/"])))
- '(warning-suppress-types '((comp) (comp) (comp)))
+ '(warning-suppress-types
+   '((org-roam)
+     (comp)
+     (comp)
+     (comp)
+     (org-element-cache)
+     (defvaralias)))
  '(zoom-window-mode-line-color "#4682B4"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
