@@ -1,5 +1,7 @@
 #+STARTUP: overview
 
+# TODO: play with https://github.com/cpitclaudel/monospacifier
+
 * Startup
 #+begin_src emacs-lisp :results none
 (defvar file-name-handler-alist-old file-name-handler-alist)
@@ -1385,6 +1387,15 @@ Save image and insert it's link at point.
     (find-file file)))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun +org-roam/scoped-search ()
+  (interactive)
+
+  (let* ((current (org-roam-node-at-point 'assert)))
+     (print current)
+     (print (org-roam-reflinks-get current))))
+#+end_src
+
 #+begin_src emacs-lisp :results none :tangle no
 (use-package org-roam-ui
   :straight t
@@ -1498,6 +1509,7 @@ Save image and insert it's link at point.
 (use-package projectile 
   :straight t
   :defer t
+  :hook (prog-mode . projectile-global-mode)
   :config
     (projectile-global-mode)
     (setq projectile-project-search-path '("~/work/monorepo"))
@@ -1960,6 +1972,7 @@ vc-annotate options.
    (
     ("C-c SPC !" . (lambda () (interactive) (insert "❗")))
     ("C-c SPC ?" . (lambda () (interactive) (insert "❓")))
+    ("C-c SPC W" . (lambda () (interactive) (insert "⚠")))
     ("C-c SPC g" . (lambda () (interactive) (insert "🟢")))
     ("C-c SPC y" . (lambda () (interactive) (insert "🟡")))
     ("C-c SPC r" . (lambda () (interactive) (insert "🔴")))
@@ -1967,10 +1980,15 @@ vc-annotate options.
     ("C-c SPC h" . (lambda () (interactive) (insert "👈")))
     ("C-c SPC k" . (lambda () (interactive) (insert "👆")))
     ("C-c SPC j" . (lambda () (interactive) (insert "👇")))
-    ("C-c SPC l" . (lambda () (interactive) (insert "👉")))))
+    ("C-c SPC l" . (lambda () (interactive) (insert "👉")))
+    ("C-c SPC t" . (lambda () (interactive) (insert "🤔")))))
   :config 
-   (setq emojify-display-style 'image)
-   (setq emojify-emoji-styles '(unicode github))
+   (when (member "Noto Color Emoji" (font-family-list))
+     (set-fontset-font
+       t 'symbol (font-spec :family "Noto Color Emoji") nil 'prepend))
+
+   (setq emojify-display-style 'unicode)
+   (setq emojify-emoji-styles '(unicode))
   :hook (after-init . global-emojify-mode))
   #+end_src
 
@@ -3057,28 +3075,29 @@ sbt-mode
   :defer t
   :mode "\\.pdf$"
   :init
-    (pdf-loader-install)
-    ;; (pdf-tools-install)
+  (setenv "PATH" (concat  (getenv "PATH") ":" "/usr/bin"))
+  (pdf-loader-install)
+  ;; (pdf-tools-install)
   :config 
-    (setq pdf-view-midnight-colors '("#839496" . "#1c2128")) 
-    (add-hook 'pdf-view-mode-hook #'+pdf/setup)
+  (setq pdf-view-midnight-colors '("#839496" . "#1c2128")) 
+  (add-hook 'pdf-view-mode-hook #'+pdf/setup)
 
-    (add-hook 'pdf-view-mode-hook
-      (lambda ()
-        (setq cursor-in-non-selected-windows nil)))
-        ;; TODO: need to find a way to disable it
-        ;; (internal-show-cursor nil nil))
+  (add-hook 'pdf-view-mode-hook
+	    (lambda ()
+              (setq cursor-in-non-selected-windows nil)))
+  ;; TODO: need to find a way to disable it
+  ;; (internal-show-cursor nil nil))
 
-    (defun +pdf/open-externally ()
-      (interactive)
-      (call-process "xdg-open" nil 0 nil (buffer-file-name)))
+  (defun +pdf/open-externally ()
+    (interactive)
+    (call-process "xdg-open" nil 0 nil (buffer-file-name)))
 
-    (defun +pdf/setup ()
-      (evil-collection-define-key 'normal 'pdf-view-mode-map
-        "ge" #'+pdf/open-externally)
+  (defun +pdf/setup ()
+    (evil-collection-define-key 'normal 'pdf-view-mode-map
+      "ge" #'+pdf/open-externally)
 
-      (pdf-tools-install)
-      (hide-mode-line-mode)))
+    (pdf-tools-install)
+    (hide-mode-line-mode)))
 #+end_src
 
 * Configure =olivetti=

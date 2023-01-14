@@ -28,11 +28,6 @@
 (defun flash--set-note-id (id)
   (org-set-property flash-anki-prop-note-id (number-to-string id)))
 
-(defun flash--notes-path ()
-  (pcase (org-property-values "ID")
-    (`(,id . nil) (expand-file-name (s-concat id ".org") flash-directory))
-    (_ (error "Couldn't find org ID property."))))
-
 (defun flash-anki--headline-content (headline)
   (let ((start (org-element-property :contents-begin headline))
 	(end (org-element-property :contents-end headline)))
@@ -192,11 +187,17 @@
       (if deck
 	  (find-file (cdr (assoc deck deck-to-path)))))))
 
+(defun flash-create-note (name)
+  (interactive "sName: ")
 
-(defun flash-open-notes ()
-  (interactive)
-  (find-file-other-window (flash--notes-path))
-  (flash-mode 1))
+  (let ((path (s-concat flash-directory "/" (s-snake-case name) ".org")))
+    (save-excursion
+      (find-file-other-window path)
+      (insert ":PROPERTIES:\n")
+      (insert (s-concat ":ANKI_DECK: " name "\n"))
+      (insert ":END:\n"))
+      (insert (s-concat "#+TITLE: " name "\n\n"))
+    (insert (s-concat "[[" path "][" name "]]"))))
 
 ;;;###autoload
 (defvar flash-mode-map
