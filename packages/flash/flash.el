@@ -195,9 +195,11 @@
       (find-file-other-window path)
       (insert ":PROPERTIES:\n")
       (insert (s-concat ":ANKI_DECK: " name "\n"))
-      (insert ":END:\n"))
+      (insert ":END:\n")
       (insert (s-concat "#+TITLE: " name "\n\n"))
-    (insert (s-concat "[[" path "][" name "]]"))))
+      (flash-mode))
+
+    (insert (s-concat "[[" path "][Flash: " name "]]"))))
 
 ;;;###autoload
 (defvar flash-mode-map
