@@ -94,10 +94,17 @@
 	            (car (org-property-values flash-anki-prop-deck))))
        (model-name . ,(or (org-element-property :ANKI_MODEL_NAME top)
 			  "Basic"))
+       (flag . ,(flash-anki--headline-flag top))
        (front . ,(flash-anki--headline-content front))
        (back . ,(flash-anki--headline-content back))))
     (_ (error "couldn't parse map headline to note"))))
 
+(defun flash-anki--headline-flag (headline)
+  (pcase (org-element-property :priority headline)
+    (65 1)
+    (66 2)
+    (67 3)
+    (_ nil)))
 
 (defun flash-anki--add-note-success (data)
   (let ((note-id (cdr (assoc 'result data))))

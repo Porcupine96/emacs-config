@@ -1792,6 +1792,7 @@ vc-annotate options.
   (global-set-key (kbd "C-a") #'embark-act)
   (global-set-key (kbd "C->") #'embark-become)
   
+  (define-key embark-org-link-map (kbd "o") #'+org-open-at-point-other-window)
   (define-key embark-general-map (kbd "z") #'embark-zeal)
   (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
   (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
@@ -1833,12 +1834,12 @@ vc-annotate options.
                      (link-text (buffer-substring-no-properties
 				 (or content-beg beg) (or content-end end))))
 		`(link ,link-text ,beg . ,end))))))
-  
-  (embark-define-keymap embark-link-map
-    "Keymap to work with links"
-    ("o" +org-open-at-point-other-window)
-    ("e" +org-link-at-point-open-externally)
-    ("y" +org-copy-link-at-point))
+
+  ;; (embark-define-keymap embark-link-map
+  ;;   "Keymap to work with links"
+  ;;   ("o" +org-open-at-point-other-window)
+  ;;   ("e" +org-link-at-point-open-externally)
+  ;;   ("y" +org-copy-link-at-point))
   
   (defun +org-copy-link-at-point (_)
     (let* ((context (org-element-context))
@@ -1904,7 +1905,7 @@ vc-annotate options.
     (global-set-key (kbd "C-x b") #'consult-buffer)
     (global-set-key (kbd "C-s") #'consult-line) 
 
-    (setq consult-preview-key (list (kbd "M-n") (kbd "M-p")))
+    ;; (setq consult-preview-key (list (kbd "M-n") (kbd "M-p")))
 
   :config
     (setq consult-narrow-key "<")
@@ -3410,7 +3411,7 @@ sbt-mode
     "o e" #'eshell
     "o E" #'+eshell/open-in-default
     "o P" #'+eshell/open-in-project-root
-    "o o" #'p/focus-mode
+    "o o" #'olivetti-mode
     "o v" #'+vterm/focus-or-create
     "o V" #'+vterm/new-session
     "o m" #'mu4e
