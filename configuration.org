@@ -83,6 +83,7 @@ MacOS settings
 #+begin_src emacs-lisp :results none
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-revert-verbose nil)
+(setq auto-revert-interval 0.3)
 (global-auto-revert-mode 1)
 #+end_src
 
@@ -271,7 +272,7 @@ Use =evil-surround=
 #+begin_src emacs-lisp :results none
 (defhydra hydra-dired-bookmarks (:color blue)
   ("b" (lambda () (interactive) (dired "~/books/")))
-  ("c" (lambda () (interactive) (dired "~/studies/sem4/")))
+  ("c" (lambda () (interactive) (dired "~/studies/sem6/")))
   ("d" (lambda () (interactive) (dired "~/Downloads/")))
   ("D" (lambda () (interactive) (dired "~/Dropbox/")))
   ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes/")))
@@ -356,6 +357,10 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c g") #'gpt-init)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-<backspace>") #'my-backward-delete)
 
 (require 'cc-engine) ;; for c-hungry-backspace - maybe can be replaced with something else
@@ -377,6 +382,10 @@ Buffer commands.
 
 #+begin_src emacs-lisp :results none
 (global-unset-key (kbd "C-SPC"))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(global-unset-key (kbd "C-x C-q"))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -629,7 +638,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+begin_src emacs-lisp :results none
 (use-package recentf
   :straight nil
-  :defer 10
   :config
     (setq recentf-max-saved-items 300)
     (add-to-list 'recentf-keep 'file-remote-p)
@@ -782,8 +790,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (defun +latex-rescale ()
     (interactive)
     (org-latex-preview '(64))
-    (plist-put (plist-put org-format-latex-options :background "#1c2128")
-               :scale (if (= (x-display-pixel-width) 1920) 1.7 2.0))
+    (plist-put (plist-put org-format-latex-options :background "white")
+               :scale (if (= (x-display-pixel-width) 1920) 1.2 2.0))
     (org-latex-preview '(16)))
 
   (setq org-format-latex-options 
@@ -1083,7 +1091,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :defer t)
 #+end_src
 
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none 
 (use-package jupyter
  :defer t
  :straight t
@@ -1488,7 +1496,7 @@ Save image and insert it's link at point.
   :straight t
   :defer t
   :hook ((scala-mode . yas-global-mode)
-         (python-mode . yas-global-mode)
+         ;; (python-mode . yas-global-mode)
          (flash-mode . yas-global-mode)))
 #+end_src
 
@@ -1571,7 +1579,13 @@ Save image and insert it's link at point.
 
 (use-package forge 
    :straight t  
-   :after magit)
+   :after magit
+   :config
+    (add-to-list 'forge-alist
+                   '("gitlab.vpn.zowie.ai"
+                     "gitlab.vpn.zowie.ai/api/v4"
+                     "zowiegitlab"
+                     forge-gitlab-repository)))
 #+end_src
  
 vc-annotate options.
@@ -1858,7 +1872,7 @@ vc-annotate options.
       (org-open-at-point)))
   
   (add-to-list 'embark-target-finders 'org-link-finder)
-  (add-to-list 'embark-keymap-alist '(link . embark-link-map)))
+  (add-to-list 'embark-keymap-alist '(link . embark-org-link-map)))
 
 (defun +embark/insert-grep-line (line)
   (interactive "sInsert: ")
@@ -2136,8 +2150,7 @@ Setup =python-mode=.
    :init
      (font-lock-add-keywords 'python-mode
        '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
-   :hook ((python-mode . origami-mode)
-          (python-mode . yas-global-mode))
+   :hook ((python-mode . origami-mode))
    :config
 
    (setq python-indent-guess-indent-offset nil)  
@@ -2156,7 +2169,8 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (use-package pyvenv
   :straight t
-  :defer t)
+  :defer t
+  :config (pyvenv-mode t))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2186,7 +2200,16 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (use-package ess
   :straight t
-  :defer t)
+  :defer t
+
+  :config
+
+   (defun clear-shell ()
+     (interactive)
+     (let ((old-max comint-buffer-maximum-size))
+       (setq comint-buffer-maximum-size 0)
+       (comint-truncate-buffer)
+       (setq comint-buffer-maximum-size old-max))))
 #+end_src
 
 ** Protobuf
@@ -2780,20 +2803,20 @@ sbt-mode
 #+end_src
 
 ** ReasonML
-#+begin_src emacs-lisp :results none :tangle no
-;; (use-package reason-mode
-;;   :straight t
-;;   :defer t
-;;   :mode "\\.rei?$"
-;;   :config 
-;;   (require 'lsp-mode)
-;;   (setq lsp-response-timeout 180)
-;;   (lsp-register-client
-;;    (make-lsp-client :new-connection (lsp-stdio-connection "/usr/bin/reason-language-server")
-;;                     :major-modes '(reason-mode)
-;;                     :notification-handlers (ht ("client/registerCapability" 'ignore))
-;;                     :priority 1
-;;                     :server-id 'reason-ls)))
+#+begin_src emacs-lisp :results none 
+(use-package reason-mode
+  :straight t
+  :defer t
+  :mode "\\.rei?$"
+  :config 
+  (require 'lsp-mode)
+  (setq lsp-response-timeout 180)
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection "/usr/bin/reason-language-server")
+                    :major-modes '(reason-mode)
+                    :notification-handlers (ht ("client/registerCapability" 'ignore))
+                    :priority 1
+                    :server-id 'reason-ls)))
 #+end_src
 
 ** JavaScript
@@ -3367,7 +3390,8 @@ sbt-mode
     "f d" (lambda () (interactive)(dired "~/dotfiles"))
     "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
     "f n" (lambda () (interactive)(find-file "~/dotfiles/config/nix/home.nix"))
-    "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
+    "f t" (lambda () (interactive)(find-file "~/Dropbox/org/todo/telegram.org"))
+    "f T" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
     "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
     
     "g b" #'magit-branch
@@ -3396,7 +3420,6 @@ sbt-mode
     "l s" #'lsp-describe-session
     "l e" #'lsp-ui-flycheck-list
     "l l" #'consult-lsp-symbols
-    "l t" #'hydra-lsp-toggle/body
     "l T" #'lsp-treemacs-errors-list
     ;; "l r" #'lsp-ui-peek-find-references
     "l r" #'lsp-find-references
@@ -3819,6 +3842,14 @@ sbt-mode
   :load-path "~/.emacs.default/packages/pfocus/"
   :defer t
   :commands p/focus-mode)
+#+end_src
+
+** GPT
+#+begin_src emacs-lisp :results none
+(use-package gpt
+  :load-path "~/.emacs.default/packages/gpt/"
+  :defer t
+  :commands gpt-init)
 #+end_src
 
 * Utils
