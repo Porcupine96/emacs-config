@@ -83,7 +83,7 @@ MacOS settings
 #+begin_src emacs-lisp :results none
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-revert-verbose nil)
-(setq auto-revert-interval 0.3)
+(setq auto-revert-interval 0.2)
 (global-auto-revert-mode 1)
 #+end_src
 
@@ -336,6 +336,21 @@ Use =evil-surround=
    "
    ("l" #'+python/surround-word-with-list)
    ("o" #'+python/surround-word-with-optional))
+#+end_src
+
+** GPT
+#+begin_src emacs-lisp :results none
+(defhydra hydra-gpt (:color blue)
+   "
+   ^
+   ^Surround^     
+   ^────^───────────
+   _e_ Explain
+   _d_ Define (and Translate)
+   ^^        
+   "
+   ("e" #'gpt-explain)
+   ("d" #'gpt-define))
 #+end_src
 
 * Global keybindings 
@@ -3596,6 +3611,7 @@ sbt-mode
    :states '('normal)
    :keymaps '(evil-org-mode-map org-mode-map)
    "C-<return>" '+org/c-ret-dwim
+   "C-c q" #'hydra-gpt/body
    "<return>" '+org/ret-dwim))
 #+end_src
 

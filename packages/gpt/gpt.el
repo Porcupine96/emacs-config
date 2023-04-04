@@ -5,16 +5,17 @@
 
 (defun gpt-explain ()
   (interactive)
+  (gpt-query "What' \"%s\"?"))
 
+(defun gpt-define ()
+  (interactive)
+  (gpt-query "What does \"%s\" mean?\n\nGive a definition, some examples and a Polish translation."))
+
+(defun gpt-query (template)
   (let ((text (buffer-substring-no-properties (region-beginning) (region-end))))
-    (gpt-init)
-    (insert
-     (concat
-      "What's \""
-      text
-      "\"" ))))
+    (gpt-init (format template text))))
 
-(defun gpt-init ()
+(defun gpt-init (&optional input)
   (interactive)
 
   (let* ((file_id (generate-uuid))
@@ -28,6 +29,8 @@
 	(insert "---\n\n")
 	(insert "# Question")
 	(insert "\n\n")
+	(when input
+	  (insert input))
 
 	(write-file path)
 	(gpt-mode))))
