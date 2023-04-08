@@ -57,7 +57,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 (defvar noctilux-colors           ; ANSI(Noctilux terminal)
   ;; name       sRGB      Gen RGB   256       16              8
-  '((base03    "#1c2128" "#1c2128" "#1c2128" "brightblack"   "black")
+  '((base03    "#282a36" "#282a36" "#282a36" "brightblack"   "black")
     (base02    "#292929" "#292929" "#292929" "black"         "black")
     (base01    "#5f5f5f" "#5f5f5f" "#5f5f5f" "brightgreen"   "green")
     (base00    "#999999" "#999999" "#999999" "brightyellow"  "yellow")
