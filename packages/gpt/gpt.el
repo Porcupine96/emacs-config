@@ -72,6 +72,26 @@
       (setq parent_id (s-trim (substring-no-properties (match-string 1))))
       (if (string-empty-p parent_id) nil parent_id))))
 
+(defun gpt-reset ()
+  (interactive)
+
+  (beginning-of-buffer)
+  (re-search-forward "# Question" nil t)
+
+  (let ((beg (point)))
+    (markdown-next-heading)
+    (previous-line 1)
+    (let* ((end (point))
+	   (text (s-trim (buffer-substring-no-properties beg end))))
+      (gpt-init text))))
+
+(defun gpt-format ()
+  (interactive)
+
+  (mark-whole-buffer)
+  (call-interactively 'fill-paragraph)
+  (write-file (buffer-file-name)))
+
 (defun gpt-execute ()
   (interactive)
 
@@ -99,6 +119,8 @@
 (defvar gpt-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-c") #'gpt-execute)
+    (define-key map (kbd "C-c r") #'gpt-reset)
+    (define-key map (kbd "C-c r") #'gpt-format)
     map))
 
 (define-derived-mode gpt-mode
