@@ -1,4 +1,5 @@
 ;;; -*- lisp-data -*-
-(("/home/porcupine/")
+(("~/projects/service-port/")
+ ("/home/porcupine/")
  ("~/work/monorepo/")
  ("~/projects/homer/"))

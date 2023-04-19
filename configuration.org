@@ -26,14 +26,14 @@
 * Visuals
 Set window transparency.
 #+begin_src emacs-lisp :results none
-(set-frame-parameter nil 'alpha-background 90) 
-(add-to-list 'default-frame-alist '(alpha-background . 90))
+(set-frame-parameter nil 'alpha-background 50) 
+(add-to-list 'default-frame-alist '(alpha-background . 50))
 #+end_src
 
 Font.
 #+begin_src emacs-lisp :results none
-(set-face-attribute 'default nil :font "Noto Sans Mono-12")
-(set-face-attribute 'fixed-pitch nil :font "Noto Sans Mono-12")
+(set-face-attribute 'default nil :font "Roboto Mono for Powerline-12")
+(set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-12")
 (set-face-attribute 'variable-pitch nil :font "Iosevka-13")
 #+end_src
  
@@ -794,6 +794,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 				 (scheme . t) 
 				 (js . t)
 				 (sql . t)
+				 (R . t)
 				 ;; (jupyter . t)
 				 ;; (ammonite . t)
 				 ;; (http . t)
@@ -811,8 +812,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (defun +latex-rescale ()
     (interactive)
     (org-latex-preview '(64))
-    (plist-put (plist-put org-format-latex-options :background "white")
-               :scale (if (= (x-display-pixel-width) 1920) 1.2 2.0))
+    (plist-put (plist-put org-format-latex-options :background "#282a36")
+               :scale (if (= (x-display-pixel-width) 1920) 1.2 2.5))
     (org-latex-preview '(16)))
 
   (setq org-format-latex-options 
@@ -1554,7 +1555,7 @@ Save image and insert it's link at point.
     ;;                                                  projectile-root-top-down-recurring
     ;;                                                  projectile-root-bottom-up
     ;;                                                  projectile-root-local))
-    (setq projectile-project-root-files-bottom-up '("build.sbt" ".git" "requirements.txt" "mypy.ini"))
+    (setq projectile-project-root-files-bottom-up '("build.sbt" ".git" "requirements.txt" "mypy.ini" "pyproject.toml"))
 
     (projectile-register-project-type 'scala '("build.sbt")))
 #+end_src
@@ -1828,6 +1829,7 @@ vc-annotate options.
   (global-set-key (kbd "C->") #'embark-become)
   
   (define-key embark-org-link-map (kbd "o") #'+org-open-at-point-other-window)
+  (define-key embark-org-link-map (kbd "e") #'+org-link-at-point-open-externally)
   (define-key embark-general-map (kbd "z") #'embark-zeal)
   (define-key embark-general-map (kbd "i") #'+embark/insert-grep-line)
   (define-key embark-symbol-map (kbd "h") #'helpful-symbol)
@@ -3413,7 +3415,7 @@ sbt-mode
     "f n" (lambda () (interactive)(find-file "~/dotfiles/config/nix/home.nix"))
     "f t" (lambda () (interactive)(find-file "~/Dropbox/org/todo/telegram.org"))
     "f T" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
-    "f x" (lambda () (interactive)(find-file "~/.config/i3/config"))
+    "f x" (lambda () (interactive)(find-file "~/.config/sway/config"))
     
     "g b" #'magit-branch
     "g g" #'magit-status

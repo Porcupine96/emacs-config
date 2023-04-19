@@ -229,7 +229,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (fringe ((t (,@fg-base01 ,@bg-base03))))
              (linum ((t (,@fg-base01 ,@bg-base03))))
              (header-line ((t (,@fg-base0 ,@bg-base03)))) ; Pmenu
-             (highlight ((t (,@bg-base02))))
+             (highlight ((t (,@fg-base02 ,@bg-base00 ,@fmt-revbb))))
              (hl-line ((t (:underline ,opt-under ,@bg-base02)))) ; CursorLine
              (isearch ((t (,@fmt-stnd ,@fg-orange ,@bg-back)))) ; IncSearch
              (isearch-fail ((t (,@fmt-stnd ,@fg-orange ,@bg-back)))) ; IncSearch
@@ -242,7 +242,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
               ((t (,@fg-base0,@bg-base02 ,@fmt-bb :box nil))))
              (mode-line-inactive ; StatusLineNC
               ((t (,@fg-base01 ,@bg-base03 ,@fmt-bb :box nil))))
-             (region ((t (,@fg-base01 ,@bg-base03 ,@fmt-revbb)))) ; Visual
+             (region ((t (,@fg-base02 ,@bg-base00 ,@fmt-revbb)))) ; Visual
              (secondary-selection ((t (,@bg-base02))))
              (shadow ((t (,@fg-base01))))
              (trailing-whitespace ((t (,@fmt-revr ,@fg-red))))
