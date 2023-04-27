@@ -64,7 +64,7 @@
 (defun gpt-get-conversation_id ()
   (save-excursion
     (goto-char (point-min))
-    (when (re-search-forward "^conversation_id:\\(.*\\)$" nil t)
+    (when (re-search-forward "^conversation_id: \\(.*\\)$" nil t)
       (let ((conversation_id (s-trim (substring-no-properties (match-string 1)))))
 	(if (string-empty-p conversation_id) nil conversation_id)))))
 
@@ -127,11 +127,24 @@
 	       (gpt-make-request prompt (buffer-file-name) conversation_id parent_id model)))
 	(error "Unexpected header.")))))
 
+(defun gpt-choose-model ()
+  (interactive)
+  (let* ((options '("text-davinci-002-render-sha" "gpt-4"))
+	 (choice (completing-read "Choose the model: " options)))
+
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "^model: .*$" nil t)
+	(beginning-of-line)
+	(kill-line)
+	(insert (concat "model: " choice))))))
+
 (defvar gpt-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-c") #'gpt-execute)
     (define-key map (kbd "C-c r") #'gpt-reset)
     (define-key map (kbd "C-c f") #'gpt-format)
+    (define-key map (kbd "C-c f") #'gpt-choose-model)
     map))
 
 (define-derived-mode gpt-mode
