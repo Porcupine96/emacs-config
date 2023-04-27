@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: definition
+# key: definition
+# --
+What does "$0" mean?
+
+Give a definition, some examples and a Polish translation.

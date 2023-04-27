@@ -374,7 +374,7 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(global-set-key (kbd "C-x r k") #'consult-bookmark)
+(global-set-key (kbd "C-x f") (lambda () (interactive) (consult-find default-directory)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -813,7 +813,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     (interactive)
     (org-latex-preview '(64))
     (plist-put (plist-put org-format-latex-options :background "#282a36")
-               :scale (if (= (x-display-pixel-width) 1920) 1.2 2.5))
+               :scale (if (= (x-display-pixel-width) 1920) 1.0 2.5))
     (org-latex-preview '(16)))
 
   (setq org-format-latex-options 
@@ -1549,12 +1549,13 @@ Save image and insert it's link at point.
     (setq projectile-auto-discover nil)
     (setq projectile-enable-caching t)
 
-    (setq projectile-project-root-functions #'(projectile-root-bottom-up))
+    (setq projectile-project-root-functions #'(projectile-root-top-down))
 
     ;; (setq projectile-project-root-files-functions #'(projectile-root-top-down
     ;;                                                  projectile-root-top-down-recurring
     ;;                                                  projectile-root-bottom-up
     ;;                                                  projectile-root-local))
+
     (setq projectile-project-root-files-bottom-up '("build.sbt" ".git" "requirements.txt" "mypy.ini" "pyproject.toml"))
 
     (projectile-register-project-type 'scala '("build.sbt")))
@@ -1952,13 +1953,6 @@ vc-annotate options.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package consult-fd
-  :load-path "~/.emacs.default/packages/consult-fd/"
-  :defer t
-  :commands (consult-fd))
-#+end_src
-
-#+begin_src emacs-lisp :results none
 (use-package embark-consult
   :straight t
   :after (embark consult)
@@ -2224,7 +2218,6 @@ Setup =python-mode=.
 (use-package ess
   :straight t
   :defer t
-
   :config
 
    (defun clear-shell ()
@@ -3508,7 +3501,7 @@ sbt-mode
     "TAB r" #'persp-rename
     "TAB TAB" #'persp-switch
     
-    "SPC" (lambda () (interactive) (consult-fd (projectile-project-root)))
+    "SPC" (lambda () (interactive) (consult-find (projectile-project-root)))
     "," #'consult-projectile)
 
   (general-create-definer local-leader-def
@@ -3719,7 +3712,7 @@ sbt-mode
 
 (defun +work/consult-find-file-monorepo ()
   (interactive)
-  (consult-fd +work/monorepo-path))
+  (consult-find +work/monorepo-path))
 #+end_src
 
 #+begin_src emacs-lisp :results none

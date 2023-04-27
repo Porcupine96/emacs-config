@@ -25,7 +25,9 @@
       (switch-to-buffer buffer)
 	(insert "-*- mode: gpt-mode; -*-")
 	(insert "\n---\n")
-	(insert (concat "conversation_id: " "\n"))
+	(insert (concat "conversation_id:" "\n"))
+	(insert "--\n")
+	(insert (concat "model: text-davinci-002-render-sha" "\n"))
 	(insert "---\n\n")
 	(insert "# Question")
 	(insert "\n\n")
@@ -42,13 +44,14 @@
 (defun gpt-on-error ()
   (error "Error when processing request..."))
 
-(defun gpt-make-request (prompt file conversation_id parent_id)
+(defun gpt-make-request (prompt file conversation_id parent_id model)
   (request "http://localhost:5000/ask"
     :type "POST"
     :data (json-encode `(("prompt" . ,prompt)
 			 ("output" . ,file)
 			 ("conversation_id" . ,conversation_id)
-  			 ("parent_id" . ,parent_id)))
+  			 ("parent_id" . ,parent_id)
+			 ("model" . ,model)))
     :parser 'json-read
     :headers '(("Content-Type" . "application/json"))
     :success (cl-function
@@ -61,16 +64,23 @@
 (defun gpt-get-conversation_id ()
   (save-excursion
     (goto-char (point-min))
-    (when (re-search-forward "^conversation_id: \\(.*\\)$" nil t)
-      (setq conversation_id (s-trim (substring-no-properties (match-string 1))))
-      (if (string-empty-p conversation_id) nil conversation_id))))
+    (when (re-search-forward "^conversation_id:\\(.*\\)$" nil t)
+      (let ((conversation_id (s-trim (substring-no-properties (match-string 1)))))
+	(if (string-empty-p conversation_id) nil conversation_id)))))
+
+(defun gpt-get-model ()
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "^model: \\(.*\\)$" nil t)
+      (let ((model (s-trim (substring-no-properties (match-string 1)))))
+        (if (string-empty-p model) nil model)))))
 
 (defun gpt-get-parent_id ()
   (save-excursion
     (goto-char (point-max))
     (when (re-search-backward "^parent_id: \\(.*\\)$" nil t)
-      (setq parent_id (s-trim (substring-no-properties (match-string 1))))
-      (if (string-empty-p parent_id) nil parent_id))))
+      (let ((parent_id (s-trim (substring-no-properties (match-string 1)))))
+        (if (string-empty-p parent_id) nil parent_id)))))
 
 (defun gpt-reset ()
   (interactive)
@@ -103,6 +113,7 @@
 		(end-of-buffer)
 		(point)))
 	 (conversation_id (gpt-get-conversation_id))
+	 (model (gpt-get-model))
 	 (parent_id (gpt-get-parent_id))
          (content (buffer-substring-no-properties start end)))
 
@@ -110,10 +121,10 @@
       (if (string-prefix-p prefix content)
 	  (progn
       	    (insert "\n\n")
-  	    (insert "# Answer\n\n")
+	    (insert "# Answer\n\n")
 	    (write-file (buffer-file-name))
 	    (let ((prompt (string-trim (substring content (length prefix)))))
-	       (gpt-make-request prompt (buffer-file-name) conversation_id parent_id)))
+	       (gpt-make-request prompt (buffer-file-name) conversation_id parent_id model)))
 	(error "Unexpected header.")))))
 
 (defvar gpt-mode-map
