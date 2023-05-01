@@ -13,10 +13,13 @@
      (eval setq projectile-project-compilation-cmd "make" lsp-pyright-extra-paths
 	   ["/home/porcupine/work/monorepo/ai/ai-supervised-clustering-backend/" "/home/porcupine/work/monorepo/ai/ai-supervised-clustering-backend/generated/"])))
  '(warning-suppress-types
-   '((org-roam)
+   '((lsp-mode)
+     (org-roam)
      (comp)
      (comp)
      (comp)
+     (org-element-cache)
+     (defvaralias)
      (org-element-cache)
      (defvaralias)))
  '(zoom-window-mode-line-color "#4682B4"))

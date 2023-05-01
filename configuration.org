@@ -812,15 +812,13 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (defun +latex-rescale ()
     (interactive)
     (org-latex-preview '(64))
-    (plist-put (plist-put org-format-latex-options :background "#282a36")
+    (plist-put (plist-put org-format-latex-options :background "white")
                :scale (if (= (x-display-pixel-width) 1920) 1.0 2.5))
     (org-latex-preview '(16)))
 
   (setq org-format-latex-options 
-	(plist-put (plist-put org-format-latex-options :background "#1c2128") :scale 1.5))
+	(plist-put (plist-put org-format-latex-options :background "white") :scale 1.0))
 
-  ;; (setq org-latex-packages-alist '("" "booktabs" nil))
-  ;; (setq org-latex-packages-alist '("" "ragged2e" t))
   (setq org-latex-packages-alist nil)
 
   ;; open files in the same window
@@ -909,12 +907,10 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 				  :inherit '(org-hide fixed-pitch))))
   :bind
   (:map evil-normal-state-map
-        ("C-z t l" . +zowie/to-jira-org-link) ;; TODO: use general instead?
         ("C-c h" . org-toggle-heading)
         ("C-k" . evil-window-up)
         ("C-j" . evil-window-down)
 	:map org-mode-map 
-        ("C-z t l" . +zowie/to-jira-org-link)
         ("C-c h" . org-toggle-heading)
         ("C-x n S" . org-tree-to-indirect-buffer))
   :hook (org-mode . org-indent-mode)
@@ -3207,76 +3203,6 @@ sbt-mode
   :defer t
   :config
     (delight '((conf-windows-mode "" ""))))
-#+end_src
-
-* Configure =org-jira=
-#+begin_src emacs-lisp :results none
-(use-package org-jira
-  :defer t
-  :straight t 
-  :commands (+org-jira/get-issues org-jira-get-issues)
-  :init
-    (setq org-jira-working-dir "/home/porcupine/.org-jira")
-  :config
-    (setq org-element-use-cache nil) ;; hanging emacs issue: https://github.com/ahungry/org-jira/issues/275
-
-    (setq jiralib-url "https://chatbotize.atlassian.net")
-    (setq org-jira-verbosity 'info)
-    (setq org-jira-jira-status-to-org-keyword-alist
-      '(("In Progress" . "STRT")
-        ("In Review" . "REVIEW")
-        ("In test" . "WAIT")
-        ("Blocked" . "WAIT")
-        ("Scheduled for deployment" . "WAIT")))
-  
-    (setq org-jira-default-jql "project = DEVS and assignee = currentUser() and status != Done and status != \"Won't do\" ORDER BY\n  priority DESC, created ASC")
-  
-    (setq org-jira-custom-jqls
-      `(
-        (:jql  ,(concat  " project = DEVS AND"
-                         " assignee IN ('Krzysztof Jurkiewicz', 'Łukasz Kaźmierczak', 'Marcin Kordus', 'Igor Nadworski', 'Kamil Bukowczyk') AND"
-                         " status IN (TODO, 'TO DO', 'In Progress', 'In Review', 'In test')"
-                         " ORDER BY status DESC, created ASC ")
-         :filename "deflect")
-
-        (:jql  ,(concat  " project = SUP AND"
-                                " status IN ('Under review')"
-                                " ORDER BY status DESC, created ASC ")
-                :filename "sup")))
-
-(defun +org-jira/get-issues ()
-  (interactive)
-
-  (let ((path (concat org-jira-working-dir "/DEVS.org")))
-    (with-current-buffer
-	(or (get-file-buffer (concat (projectile-project-root) path))
-          (find-file-noselect (concat (projectile-project-root) path)))
-
-      (erase-buffer))
-      (call-interactively #'org-jira-get-issues))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +work/jira-to-work ()
-  (interactive)
-  (let* ((headline (org-element-at-point))
-         (ticket-id (org-element-property :ID headline))
-         (title (org-element-property :raw-value headline))
-         (heading (concat "* TODO " "[[" "https://chatbotize.atlassian.net/browse/" ticket-id  "][" ticket-id "]]" " " title))
-         (org-capture-templates `(("j" "Jira" entry (file "~/Dropbox/org/todo/work.org") ,heading))))
-
-    (org-capture nil "j")))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +work/jira-to-pr ()
-  (interactive)
-  (let* ((headline (org-element-at-point))
-         (ticket-id (org-element-property :ID headline))
-         (title (org-element-property :raw-value headline))
-         (url (concat "https://chatbotize.atlassian.net/browse/" ticket-id)))
-
-    (kill-new (concat "[feat] " ticket-id ": " title))))
 #+end_src
 
 * Configure =svg-lib=

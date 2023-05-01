@@ -144,7 +144,7 @@
     (define-key map (kbd "C-c C-c") #'gpt-execute)
     (define-key map (kbd "C-c r") #'gpt-reset)
     (define-key map (kbd "C-c f") #'gpt-format)
-    (define-key map (kbd "C-c f") #'gpt-choose-model)
+    (define-key map (kbd "C-c m") #'gpt-choose-model)
     map))
 
 (define-derived-mode gpt-mode
