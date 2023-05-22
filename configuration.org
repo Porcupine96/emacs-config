@@ -382,6 +382,10 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c s") #'pjira-current-sprint)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-<backspace>") #'my-backward-delete)
 
 (require 'cc-engine) ;; for c-hungry-backspace - maybe can be replaced with something else
@@ -813,7 +817,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     (interactive)
     (org-latex-preview '(64))
     (plist-put (plist-put org-format-latex-options :background "white")
-               :scale (if (= (x-display-pixel-width) 1920) 1.0 2.5))
+               :scale (if (= (x-display-pixel-width) 1920) 1.0 2.0))
     (org-latex-preview '(16)))
 
   (setq org-format-latex-options 
@@ -1665,21 +1669,21 @@ vc-annotate options.
 (use-package doom-modeline
   :straight t 
   :config 
-    (setq doom-modeline-height 25)
-    (setq doom-modeline-vcs-max-length 40)
-    (setq doom-modeline-enable-word-count t)
-    (setq doom-modeline-persp-name nil)
+    ;; (setq doom-modeline-height 25)
+    ;; (setq doom-modeline-vcs-max-length 40)
+    ;; (setq doom-modeline-enable-word-count t)
+    ;; (setq doom-modeline-persp-name nil)
 
-    (doom-modeline-def-modeline 'pc/modeline
-      '(bar matches buffer-info remote-host buffer-position selection-info)
-      '(minor-modes major-mode vcs process battery checker bar bar))
+    ;; (doom-modeline-def-modeline 'pc/modeline
+    ;;   '(bar matches buffer-info remote-host buffer-position selection-info)
+    ;;   '(minor-modes major-mode vcs process battery checker bar bar))
 
-    (defun pc/setup-modeline ()
-      (doom-modeline-set-modeline 'pc/modeline 'default))
+    ;; (defun pc/setup-modeline ()
+    ;;   (doom-modeline-set-modeline 'pc/modeline 'default))
 
-    (set-face-attribute 'mode-line nil :height 100)
+    ;; (set-face-attribute 'mode-line nil :height 100)
 
-    (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
+    ;; (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
 
     (doom-modeline-mode))
 #+end_src
@@ -2709,6 +2713,7 @@ sbt-mode
     "import cats.syntax.monadError._"
     "import cats.syntax.applicative._"
     "import cats.syntax.apply._"
+    "import cats.syntax.option._"
     "import hero.common.util.time.TimeUtils.TimeProvider"
     "import hero.common.util.IdProvider"))
 
@@ -3162,7 +3167,7 @@ sbt-mode
   :defer t
   :commands olivetti-mode
   :custom
-    (olivetti-body-width 82)
+    (olivetti-body-width 120)
     (olivetti-recall-visual-line-mode-entry-state t))
 #+end_src
 
@@ -3793,6 +3798,14 @@ sbt-mode
   :load-path "~/.emacs.default/packages/gpt/"
   :defer t
   :commands gpt-init)
+#+end_src
+
+** Pjira
+#+begin_src emacs-lisp :results none
+(use-package pjira
+  :load-path "~/.emacs.default/packages/pjira/"
+  :defer t
+  :commands pjira-current-sprint)
 #+end_src
 
 * Utils
