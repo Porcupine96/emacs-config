@@ -1664,28 +1664,35 @@ vc-annotate options.
   :after (projectile treemacs))
 #+end_src
 
-* Configure =doom-modeline=
+* Configure =doom-modeline= / =nano-modeline=
 #+begin_src emacs-lisp :results none
-(use-package doom-modeline
-  :straight t 
-  :config 
-    ;; (setq doom-modeline-height 25)
-    ;; (setq doom-modeline-vcs-max-length 40)
-    ;; (setq doom-modeline-enable-word-count t)
-    ;; (setq doom-modeline-persp-name nil)
+;; (use-package doom-modeline
+;;   :straight t 
+;;   :config 
+;;     (setq doom-modeline-height 25)
+;;     (setq doom-modeline-vcs-max-length 40)
+;;     (setq doom-modeline-enable-word-count t)
+;;     (setq doom-modeline-persp-name nil)
 
-    ;; (doom-modeline-def-modeline 'pc/modeline
-    ;;   '(bar matches buffer-info remote-host buffer-position selection-info)
-    ;;   '(minor-modes major-mode vcs process battery checker bar bar))
+;;     (doom-modeline-def-modeline 'pc/modeline
+;;       '(bar matches buffer-info remote-host buffer-position selection-info)
+;;       '(minor-modes major-mode vcs process battery checker bar bar))
 
-    ;; (defun pc/setup-modeline ()
-    ;;   (doom-modeline-set-modeline 'pc/modeline 'default))
+;;     (defun pc/setup-modeline ()
+;;       (doom-modeline-set-modeline 'pc/modeline 'default))
 
-    ;; (set-face-attribute 'mode-line nil :height 100)
+;;     (set-face-attribute 'mode-line nil :height 100)
 
-    ;; (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
+;;     (add-hook 'doom-modeline-mode-hook 'pc/setup-modeline)
 
-    (doom-modeline-mode))
+;;     (doom-modeline-mode))
+
+
+(use-package nano-modeline
+  :straight t
+  :config
+    (setq nano-modeline-position 'bottom)
+    (nano-modeline))
 #+end_src
 * Configure =zoom-window=
  #+begin_src emacs-lisp :results none
