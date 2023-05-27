@@ -2003,6 +2003,8 @@ vc-annotate options.
     ("C-c SPC k" . (lambda () (interactive) (insert "👆")))
     ("C-c SPC j" . (lambda () (interactive) (insert "👇")))
     ("C-c SPC l" . (lambda () (interactive) (insert "👉")))
+    ("C-c SPC c" . (lambda () (interactive) (insert "✅")))
+    ("C-c SPC x" . (lambda () (interactive) (insert "❌")))
     ("C-c SPC t" . (lambda () (interactive) (insert "🤔")))))
   :config 
    (when (member "Noto Color Emoji" (font-family-list))
@@ -2695,6 +2697,7 @@ sbt-mode
     "import cats.syntax.monadError._"
     "import cats.syntax.applicative._"
     "import cats.syntax.apply._"
+    "import cats.syntax.option._"
     "import hero.common.util.time.TimeUtils.TimeProvider"
     "import hero.common.util.IdProvider"))
 
@@ -3148,7 +3151,7 @@ sbt-mode
   :defer t
   :commands olivetti-mode
   :custom
-    (olivetti-body-width 82)
+    (olivetti-body-width 120)
     (olivetti-recall-visual-line-mode-entry-state t))
 #+end_src
 
@@ -3367,7 +3370,6 @@ sbt-mode
     "o V" #'+vterm/new-session
     "o m" #'mu4e
     "o w" #'+eww/browse-url
-    "o j" #'+org-jira/get-issues
     
     "p a" #'projectile-add-known-project
     "p c" #'projectile-compile-project
@@ -3568,6 +3570,13 @@ sbt-mode
        (interactive)
        (face-remap-add-relative 'variable-pitch :family "Iosevka"
                                                 :height 1.2)))
+#+end_src
+
+* Configure =sqlite3=
+#+begin_src emacs-lisp :results none
+(use-package sqlite3
+  :straight t
+  :defer t)
 #+end_src
 
 * Work
@@ -3779,6 +3788,15 @@ sbt-mode
   :load-path "~/.emacs.default/packages/gpt/"
   :defer t
   :commands gpt-init)
+#+end_src
+
+** Pjira
+
+#+begin_src emacs-lisp :results none
+(use-package pjira
+  :load-path "~/.emacs.default/packages/pjira/"
+  :defer t
+  :commands pjira-current-sprint)
 #+end_src
 
 * Utils
