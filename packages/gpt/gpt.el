@@ -27,7 +27,7 @@
 	(insert "\n---\n")
 	(insert (concat "conversation_id:" "\n"))
 	(insert "--\n")
-	(insert (concat "model: text-davinci-002-render-sha" "\n"))
+	(insert (concat "model: gpt-3.5-turbo" "\n"))
 	(insert "---\n\n")
 	(insert "# Question")
 	(insert "\n\n")
@@ -129,7 +129,7 @@
 
 (defun gpt-choose-model ()
   (interactive)
-  (let* ((options '("text-davinci-002-render-sha" "gpt-4"))
+  (let* ((options '("gpt-3.5-turbo" "gpt-4"))
 	 (choice (completing-read "Choose the model: " options)))
 
     (save-excursion

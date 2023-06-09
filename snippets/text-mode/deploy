@@ -5,6 +5,11 @@
 deployment: $1
 author: Łukasz
 reviewer: $2
-JIRA: $3
-PR: $4
+QA: $3
 customer facing: NO
+JIRA: $4
+PR: $5
+services: $6
+deployments:
+- Atman
+- AWS

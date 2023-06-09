@@ -382,6 +382,10 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c s") #'pjira-current-sprint)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-<backspace>") #'my-backward-delete)
 
 (require 'cc-engine) ;; for c-hungry-backspace - maybe can be replaced with something else
