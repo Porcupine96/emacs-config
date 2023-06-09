@@ -15,7 +15,7 @@
       (pjira-refresh)
       (find-file pjira-path))))
 
-(defvar pijra-mode-map
+(defvar pjira-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c s") #'pjira-current-sprint)
     map))
