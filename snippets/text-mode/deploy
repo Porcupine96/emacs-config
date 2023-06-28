@@ -11,5 +11,5 @@ JIRA: $4
 PR: $5
 services: $6
 deployments:
-- Atman
-- AWS
+- Atman :loading:
+- AWS :loading:

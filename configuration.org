@@ -32,9 +32,9 @@ Set window transparency.
 
 Font.
 #+begin_src emacs-lisp :results none
-(set-face-attribute 'default nil :font "Roboto Mono for Powerline-12")
-(set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-12")
-(set-face-attribute 'variable-pitch nil :font "Iosevka-13")
+;; (set-face-attribute 'default nil :font "Roboto Mono for Powerline-12")
+;; (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-12")
+;; (set-face-attribute 'variable-pitch nil :font "Iosevka-13")
 #+end_src
  
 Hide all the bezels.
@@ -48,8 +48,8 @@ Hide all the bezels.
 
 Color theme.
 #+begin_src emacs-lisp :results none
-(add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
-(load-theme 'noctilux t)
+;; (add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
+;; (load-theme 'noctilux t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -555,7 +555,7 @@ Scale text.
 	(setq org-format-latex-options (plist-put org-format-latex-options :background "white")))
     (progn
       (+core/load-theme +core/dark-theme)
-      (setq org-format-latex-options (plist-put org-format-latex-options :background "#202020"))))
+      (setq org-format-latex-options (plist-put org-format-latex-options :background "#282a36"))))
 
   (treemacs-icons-dired-mode -1)
   (treemacs-icons-dired-mode 1)
@@ -1101,7 +1101,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+begin_src emacs-lisp :results none
 (use-package ob-http
  :straight t
- :defer t
+ ;; :defer t
  :config
    (add-to-list 'org-babel-load-languages '(http . t))
    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
@@ -1664,13 +1664,31 @@ vc-annotate options.
   :after (projectile treemacs))
 #+end_src
 
-* Configure =nano-modeline=
+* Configure =nano=
 #+begin_src emacs-lisp :results none
-(use-package nano-modeline
-  :straight t
-  :config
+(use-package nano
+  :straight (nano-emacs :type git :host github :repo "rougier/nano-emacs")
+  :demand t
+  :init
     (setq nano-modeline-position 'bottom)
-    (nano-modeline))
+    (setq nano-theme-var "dark")
+  :config
+    (require 'nano-faces)
+    (require 'nano-theme-dark)
+    (require 'nano-modeline)
+
+    (setq nano-font-size 12)
+
+    (nano-faces)
+    (nano-modeline)
+    (nano-theme)
+
+    (nano-toggle-theme)
+
+    ;; TODO: change to nano-color-background
+    (set-face-attribute 'error nil :foreground "#2E3440")
+
+    (menu-bar-mode -1))
 #+end_src
 
 * Configure =zoom-window=
@@ -3292,6 +3310,7 @@ sbt-mode
     "b a" #'bookmark-set
     "b b" #'consult-bookmark
     "b c" (lambda () (interactive) (switch-to-buffer "*compilation*"))
+    "b C" (lambda () (interactive) (switch-to-buffer-other-window "*compilation*"))
     "b n" #'next-buffer
     "b s" #'+core/summon-scratch
     "b N" #'+core/scratch-buffer
