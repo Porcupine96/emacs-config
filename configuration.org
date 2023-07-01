@@ -32,9 +32,9 @@ Set window transparency.
 
 Font.
 #+begin_src emacs-lisp :results none
-;; (set-face-attribute 'default nil :font "Roboto Mono for Powerline-12")
-;; (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-12")
-;; (set-face-attribute 'variable-pitch nil :font "Iosevka-13")
+(set-face-attribute 'default nil :font "Roboto Mono for Powerline-12")
+(set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-12")
+(set-face-attribute 'variable-pitch nil :font "Iosevka-13")
 #+end_src
  
 Hide all the bezels.
@@ -48,8 +48,9 @@ Hide all the bezels.
 
 Color theme.
 #+begin_src emacs-lisp :results none
-;; (add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
+(add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
 ;; (load-theme 'noctilux t)
+(load-theme 'modus-operandi t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1666,29 +1667,14 @@ vc-annotate options.
 
 * Configure =nano=
 #+begin_src emacs-lisp :results none
-(use-package nano
-  :straight (nano-emacs :type git :host github :repo "rougier/nano-emacs")
-  :demand t
-  :init
-    (setq nano-modeline-position 'bottom)
-    (setq nano-theme-var "dark")
-  :config
-    (require 'nano-faces)
-    (require 'nano-theme-dark)
-    (require 'nano-modeline)
+(straight-use-package
+  '(nano-emacs :type git :host github :repo "rougier/nano-emacs"))
 
-    (setq nano-font-size 12)
+(require 'nano-faces)
+(require 'nano-modeline)
 
-    (nano-faces)
-    (nano-modeline)
-    (nano-theme)
-
-    (nano-toggle-theme)
-
-    ;; TODO: change to nano-color-background
-    (set-face-attribute 'error nil :foreground "#2E3440")
-
-    (menu-bar-mode -1))
+(nano-faces)
+(nano-modeline)
 #+end_src
 
 * Configure =zoom-window=
@@ -3180,7 +3166,9 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package hide-mode-line
   :straight t 
-  :defer t)
+  :defer t
+  :config
+    (hide-mode-line-mode))
 #+end_src
 
 * Configure =eros=

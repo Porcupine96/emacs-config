@@ -6,6 +6,9 @@
   (call-process "pjira" nil 0 nil))
 
 
+(defun pjira-copy-link ()
+  (interactive))
+
 (defun pjira-current-sprint ()
   (interactive)
 
