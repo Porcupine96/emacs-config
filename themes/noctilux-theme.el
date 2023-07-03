@@ -229,7 +229,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (fringe ((t (,@fg-base01 ,@bg-base03))))
              (linum ((t (,@fg-base01 ,@bg-base03))))
              (header-line ((t (,@fg-base0 ,@bg-base03)))) ; Pmenu
-             (highlight ((t (,@fg-base02 ,@bg-base00 ,@fmt-revbb))))
+             (highlight ((t (,@fmt-revbb))))
              (hl-line ((t (:underline ,opt-under ,@bg-base02)))) ; CursorLine
              (isearch ((t (,@fmt-stnd ,@fg-orange ,@bg-back)))) ; IncSearch
              (isearch-fail ((t (,@fmt-stnd ,@fg-orange ,@bg-back)))) ; IncSearch

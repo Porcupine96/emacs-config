@@ -1667,15 +1667,24 @@ vc-annotate options.
 
 * Configure =nano=
 #+begin_src emacs-lisp :results none
-(straight-use-package
-  '(nano-emacs :type git :host github :repo "rougier/nano-emacs"))
+;; (straight-use-package
+;;   '(nano-emacs :type git :host github :repo "rougier/nano-emacs"))
 
-(require 'nano-faces)
-(require 'nano-modeline)
+;; (require 'nano-faces)
+;; (require 'nano-base-colors)
+;; (require 'nano-modeline)
 
-(nano-faces)
-(nano-modeline)
+;; (nano-faces)
+;; (nano-modeline)
+;; ;; (nano-command)
 #+end_src
+
+* Congiure =doom-modeline=
+#+begin_src emacs-lisp :results none
+(use-package doom-modeline
+  :straight t
+  :init (doom-modeline-mode 1))
+  #+end_src
 
 * Configure =zoom-window=
  #+begin_src emacs-lisp :results none
