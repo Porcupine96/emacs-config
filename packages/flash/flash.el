@@ -93,6 +93,7 @@
        (deck . ,(or (org-element-property :ANKI_DECK top)
 	            (car (org-property-values flash-anki-prop-deck))))
        (model-name . ,(or (org-element-property :ANKI_MODEL_NAME top)
+                          (car (org-property-values "ANKI_MODEL_NAME"))
 			  "Basic"))
        (flag . ,(flash-anki--headline-flag top))
        (front . ,(flash-anki--headline-content front))
@@ -153,6 +154,7 @@
     (flash-anki-sync-note-at-point (lambda ()
 				     (flash-anki--sync-next current-point t)))))
 
+
 (defun flash-anki-sync ()
   (interactive)
   (goto-char (point-min))
@@ -160,6 +162,12 @@
   (unless (looking-at-p "\*.*")
     (org-next-visible-heading 1))
   
+  (flash-anki-sync-below))
+
+
+(defun flash-anki-sync-below ()
+  (interactive)
+
   (save-excursion
     (let ((element (org-element-at-point)))
       (if (eq (org-element-type element) 'headline)

@@ -2427,7 +2427,7 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (defun +lsp/lsp-select-log-level()
   (interactive)
-  (let* ((level-string (ivy-read "Lsp log level" '("ERROR" "WARN" "INFO" "DEBUG")))
+  (let* ((level-string (completing-read "Lsp log level" '("ERROR" "WARN" "INFO" "DEBUG")))
          (severity  (pcase level-string
                       (`"ERROR" 1)
                       (`"WARN" 2)

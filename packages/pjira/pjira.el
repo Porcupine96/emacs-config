@@ -1,4 +1,5 @@
 (require 'org)
+(require 's)
 
 (defvar pjira-path "/tmp/sprint.org")
 (defvar pjira-me "Łukasz Kaźmierczak")
@@ -15,8 +16,20 @@
   (org-narrow-to-subtree))
 
 
+(defun pjira--get-link ()
+  (concat
+   "https://chatbotize.atlassian.net/browse/"
+   (s-replace "_" "-" (car (org-get-tags)))))
+
 (defun pjira-copy-link ()
-  (interactive))
+  (interactive)
+
+  (kill-new (pjira--get-link))
+
+(defun pjira-open-url ()
+  (interactive)
+
+  (call-process "xdg-open" nil 0 nil (pjira--get-link)))
 
 (defun pjira-current-sprint ()
   (interactive)
