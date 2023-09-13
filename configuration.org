@@ -558,8 +558,6 @@ Scale text.
       (+core/load-theme +core/dark-theme)
       (setq org-format-latex-options (plist-put org-format-latex-options :background "#282a36"))))
 
-  (treemacs-icons-dired-mode -1)
-  (treemacs-icons-dired-mode 1)
   (+core/redraw-dired-buffers))
 #+end_src
 
@@ -665,7 +663,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (use-package recentf
   :straight nil
   :config
-    (setq recentf-max-saved-items 300)
+    (setq recentf-max-saved-items 500)
     (add-to-list 'recentf-keep 'file-remote-p)
     (recentf-mode +1))
 #+end_src
@@ -1355,7 +1353,7 @@ Save image and insert it's link at point.
                ("C-c n f" . org-roam-find-file)
                ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n C" . org-roam-db-sync)
-               ("C-c n g" . org-roam-buffer-toggle)
+               ("C-c n g" . org-roam-buffer-display-dedicated)
                ("C-c n w" . writer)
                ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
               :map org-mode-map
@@ -1859,25 +1857,6 @@ vc-annotate options.
 
   (require 'org-element)
   
-  (defun org-link-finder ()
-    (if (eq major-mode 'org-mode) 
-        (let ((context (org-element-context)))
-          (if (equal (org-element-type context) 'link)
-              (let* ((ctx (cadr context))
-                     (beg (plist-get ctx :begin))
-                     (end (plist-get ctx :end))
-                     (content-beg (plist-get ctx :contents-begin))
-                     (content-end (plist-get ctx :contents-end))
-                     (link-text (buffer-substring-no-properties
-				 (or content-beg beg) (or content-end end))))
-		`(link ,link-text ,beg . ,end))))))
-
-  ;; (embark-define-keymap embark-link-map
-  ;;   "Keymap to work with links"
-  ;;   ("o" +org-open-at-point-other-window)
-  ;;   ("e" +org-link-at-point-open-externally)
-  ;;   ("y" +org-copy-link-at-point))
-  
   (defun +org-copy-link-at-point (_)
     (let* ((context (org-element-context))
            (ctx (cadr context))
@@ -1894,7 +1873,7 @@ vc-annotate options.
     (let ((org-link-frame-setup '((file . find-file-other-window))))
       (org-open-at-point)))
   
-  (add-to-list 'embark-target-finders 'org-link-finder)
+  ;; (add-to-list 'embark-target-finders 'org-link-finder)
   (add-to-list 'embark-keymap-alist '(link . embark-org-link-map)))
 
 (defun +embark/insert-grep-line (line)
@@ -2499,6 +2478,26 @@ scala-mode
     (font-lock-add-keywords 'scala-mode
       '(("\\(TODO\\):" 1 'todo-comment-face prepend)
         ("\\(NOTE\\):" 1 'bookmark-face prepend))))
+
+(defun is-scala3-project ()
+  (projectile-with-default-dir (projectile-project-root)
+    (when (file-exists-p "build.sbt")
+      (with-temp-buffer
+        (insert-file-contents "build.sbt")
+        (search-forward "scalaVersion := \"3" nil t)))))
+
+(defun with-disable-for-scala3 (orig-scala-mode-map:add-self-insert-hooks &rest arguments)
+    "When using scala3 skip adding indention hooks."
+    (unless (is-scala3-project)
+      (apply orig-scala-mode-map:add-self-insert-hooks arguments)))
+
+(advice-add #'scala-mode-map:add-self-insert-hooks :around #'with-disable-for-scala3)
+
+(defun disable-scala-indent ()
+  (when (is-scala3-project)
+    (setq indent-line-function 'indent-relative-maybe)))
+
+(add-hook 'scala-mode-hook #'disable-scala-indent)
 #+end_src
 
 sbt-mode
@@ -3343,7 +3342,7 @@ sbt-mode
     "f n" (lambda () (interactive)(find-file "~/dotfiles/config/nix/home.nix"))
     "f t" (lambda () (interactive)(find-file "~/Dropbox/org/todo/telegram.org"))
     "f T" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
-    "f x" (lambda () (interactive)(find-file "~/.config/sway/config"))
+    "f x" (lambda () (interactive)(find-file "~/.config/hypr/hyprland.conf"))
     
     "g b" #'magit-branch
     "g g" #'magit-status

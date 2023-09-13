@@ -24,7 +24,7 @@
 (defun pjira-copy-link ()
   (interactive)
 
-  (kill-new (pjira--get-link))
+  (kill-new (pjira--get-link)))
 
 (defun pjira-open-url ()
   (interactive)
