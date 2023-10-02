@@ -203,6 +203,13 @@ Compilation settings.
 (setq p/bibliography `(,(concat home "/Dropbox/org/bibliography.bib")))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+;; temporary fix to: https://github.com/magit/magit/issues/5011
+(defun seq-keep (function sequence)
+  "Apply FUNCTION to SEQUENCE and return the list of all the non-nil results."
+  (delq nil (seq-map function sequence)))
+#+end_src
+
 * Use =evil-mode=
 Use =evil-mode=
 #+begin_src emacs-lisp :results none
@@ -3246,17 +3253,38 @@ sbt-mode
     (setq mu4e-get-mail-command "mbsync -a")
     (setq mu4e-maildir "~/.mail")
 
-    (setq mu4e-drafts-folder "/[Gmail]/Drafts")
-    (setq mu4e-sent-folder   "/[Gmail]/Sent Mail")
-    (setq mu4e-refile-folder "/[Gmail]/All Mail")
-    (setq mu4e-trash-folder  "/[Gmail]/Trash")
+    (setq mu4e-contexts
+           (list
+             ;; Work account
+             (make-mu4e-context
+              :name "Work"
+              :match-func
+                (lambda (msg)
+                  (when msg
+                    (string-prefix-p "/Zowie" (mu4e-message-field msg :maildir))))
+              :vars '((user-mail-address . "lukasz.kazmierczak@zowie.ai")
+                      (user-full-name    . "Łukasz Kaźmierczak")
+                      (mu4e-drafts-folder  . "/Zowie/[Gmail]/Drafts")
+                      (mu4e-sent-folder  . "/Zowie/[Gmail]/Sent Mail")
+                      (mu4e-refile-folder  . "/Zowie/[Gmail]/All Mail")
+                      (mu4e-trash-folder  . "/Zowie/[Gmail]/Trash")))
+
+             (make-mu4e-context
+              :name "Private"
+              :match-func
+                (lambda (msg)
+                  (when msg
+                    (string-prefix-p "/Private" (mu4e-message-field msg :maildir))))
+              :vars '((user-mail-address . "luki.pol@gmail.com")
+                      (user-full-name    . "Łukasz Kaźmierczak")
+                      (mu4e-drafts-folder  . "/Private/[Gmail]/Drafts")
+                      (mu4e-sent-folder  . "/Private/[Gmail]/Sent Mail")
+                      (mu4e-refile-folder  . "/Private/[Gmail]/All Mail")
+                      (mu4e-trash-folder  . "/Private/[Gmail]/Trash")))))
 
     (setq mu4e-maildir-shortcuts
-        '(("/gmail/Inbox"       . ?i)
-          ("/[Gmail]/Sent Mail" . ?s)
-          ("/[Gmail]/Trash"     . ?t)
-          ("/[Gmail]/Drafts"    . ?d)
-          ("/[Gmail]/All Mail"  . ?a)))
+        '(("/Private/[Gmail]/All Mail" . ?p)
+          ("/Zowie/[Gmail]/All Mail"   . ?z)))
 
     (setq user-mail-address "lukasz.kazmierczak@zowie.ai")
     (setq user-full-name "Łukasz Kaźmierczak")

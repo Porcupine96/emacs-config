@@ -33,7 +33,3 @@
 
 
 (load-file "~/.emacs.default/configuration.el")
-
-
-;; TODO: do I still need it?
-;; (add-to-list 'native-comp-eln-load-path (expand-file-name "eln-cache/" user-emacs-directory))
