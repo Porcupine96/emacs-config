@@ -34,7 +34,7 @@ Font.
 #+begin_src emacs-lisp :results none
 (set-face-attribute 'default nil :font "Roboto Mono for Powerline-12")
 (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-12")
-(set-face-attribute 'variable-pitch nil :font "Iosevka-13")
+(set-face-attribute 'variable-pitch nil :font "Hack-12")
 #+end_src
  
 Hide all the bezels.
@@ -1613,8 +1613,9 @@ Save image and insert it's link at point.
     (add-to-list 'forge-alist
                    '("gitlab.vpn.zowie.ai"
                      "gitlab.vpn.zowie.ai/api/v4"
-                     "zowiegitlab"
-                     forge-gitlab-repository)))
+                     "gitlab.vpn.zowie.ai"
+                     forge-gitlab-repository))
+)
 #+end_src
  
 vc-annotate options.
@@ -1688,7 +1689,9 @@ vc-annotate options.
 #+begin_src emacs-lisp :results none
 (use-package doom-modeline
   :straight t
-  :init (doom-modeline-mode 1))
+  :init
+    (setq doom-modeline-mu4e t)
+    (doom-modeline-mode 1))
   #+end_src
 
 * Configure =zoom-window=
@@ -3244,7 +3247,8 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package mu4e
   :straight nil
-  :load-path "~/.nix-profile/share/emacs/site-lisp/mu4e"
+  ;; :load-path "~/.nix-profile/share/emacs/site-lisp/mu4e"
+  :load-path "/usr/share/emacs/site-lisp/mu4e"
 
   :config 
     (setq mu4e-change-filenames-when-moving t)
@@ -3284,7 +3288,7 @@ sbt-mode
 
     (setq mu4e-maildir-shortcuts
         '(("/Private/[Gmail]/All Mail" . ?p)
-          ("/Zowie/[Gmail]/All Mail"   . ?z)))
+          ("/Zowie/[Gmail]/All Mail"   . ?w)))
 
     (setq user-mail-address "lukasz.kazmierczak@zowie.ai")
     (setq user-full-name "Łukasz Kaźmierczak")
@@ -3294,14 +3298,6 @@ sbt-mode
     (setq smtpmail-stream-type 'starttls)
 
     (setq message-send-mail-function 'smtpmail-send-it))
-#+end_src
-
-#+begin_src emacs-lisp :results none :tangle no
-(use-package mu4e-alert
-  :straight t
-  :disabled
-  :config 
-    (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
 #+end_src
 
 * Configure =general=
@@ -3583,8 +3579,7 @@ sbt-mode
   :straight t
   :mode ("\\.epub\\'" . nov-mode)
   :hook
-    ((nov-mode . nov-font-setup)
-     (nov-mode . olivetti-mode))
+    ((nov-mode . olivetti-mode))
   :bind
     (:map nov-mode-map
      ("SPC" . 'ignore)
@@ -3613,10 +3608,7 @@ sbt-mode
   :config
     (setq nov-text-width 80)
 
-    (defun nov-font-setup ()
-       (interactive)
-       (face-remap-add-relative 'variable-pitch :family "Iosevka"
-                                                :height 1.2)))
+    )
 #+end_src
 
 * Configure =sqlite3=
