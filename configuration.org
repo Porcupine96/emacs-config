@@ -286,7 +286,7 @@ Use =evil-surround=
 #+begin_src emacs-lisp :results none
 (defhydra hydra-dired-bookmarks (:color blue)
   ("b" (lambda () (interactive) (dired "~/books/")))
-  ("c" (lambda () (interactive) (dired "~/studies/sem6/")))
+  ("c" (lambda () (interactive) (dired "~/studies/sem7/")))
   ("d" (lambda () (interactive) (dired "~/Downloads/")))
   ("D" (lambda () (interactive) (dired "~/Dropbox/")))
   ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes/")))
@@ -1389,6 +1389,12 @@ Save image and insert it's link at point.
                                         :if-new
                                         (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
   						 "#+title: ${title}\n#+filetags: classes\n#+startup: content\n")
+            			      :unnarrowed t)
+                                   ("m" "masters" plain 
+            			      "%?"
+                                        :if-new
+                                        (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
+  						 "#+title: ${title}\n#+filetags: masters\n#+startup: content\n")
             			      :unnarrowed t)
                                    ("z" "zowie" plain 
             			      "%?"
@@ -3256,6 +3262,8 @@ sbt-mode
     (setq mu4e-hide-index-messages t)
     (setq mu4e-get-mail-command "mbsync -a")
     (setq mu4e-maildir "~/.mail")
+
+    (setq mu4e-context-policy 'pick-first)
 
     (setq mu4e-contexts
            (list
