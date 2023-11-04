@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Translate to English
+# key: en
+# --
+
+Translate the text below to English:
+
+$0

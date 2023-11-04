@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Poprawność językowa
+# key: pj
+# --
+
+Czy poniższy tekst jest poprawny językowo?
+
+$0
