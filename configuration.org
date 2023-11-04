@@ -49,8 +49,8 @@ Hide all the bezels.
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
-;; (load-theme 'noctilux t)
-(load-theme 'modus-operandi t)
+(load-theme 'noctilux t)
+;; (load-theme 'modus-operandi t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1040,7 +1040,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :defer t
   :after org
   :config 
-  (setq org-ref-default-bibliography '("~/Dropbox/zotero/zotero.bib"))
+  (setq org-ref-default-bibliography '("~/Dropbox/org/bibliography.bib"))
   (setq org-ref-bibliography-notes "~/Dropbox/papers/notes.org")
   (setq org-ref-pdf-directory "~/Dropbox/papers/pdfs")
 
@@ -1310,30 +1310,7 @@ Save image and insert it's link at point.
     (org-cite-insert-processor 'citar)
     (org-cite-follow-processor 'citar)
     (org-cite-activate-processor 'citar)
-    (citar-bibliography org-cite-global-bibliography)
-
-  :config
-    (defun p/org-roam-node-from-cite (keys-entries)
-      (interactive (list (citar-select-ref)))
-
-      (print keys-entries)
-
-      (let ((title (citar-format--entry (cdr keys-entries)
-                                                  "${author editor}${date urldate} :: ${title}")))
-        (org-roam-capture- :templates
-                           '(("r" "reference" plain
-                              "%?"
-                              :if-new (file+head "references/${citekey}.org"
-                                                 ":properties:
-:roam_refs: [cite:@${citekey}]
-:end:
-,#+title: ${title}
-,#+filetags: %(kb/insert-lit-category)\n")
-                          :immediate-finish t
-                          :unnarrowed t))
-                       :info (list :citekey (car keys-entries))
-                       :node (org-roam-node-create :title title)
-                       :props '(:finalize find-file)))))
+    (citar-bibliography org-cite-global-bibliography))
 
 (use-package citar-embark
   :after citar embark
@@ -1352,6 +1329,7 @@ Save image and insert it's link at point.
   :bind (:map global-map
               (("C-c n f" . org-roam-node-find)
                ("C-c n F" . +org-roam/find-file-by-title)
+               ("C-c n p" . citar-open)
                ("C-c n d n" . org-roam-dailies-capture-today)
                ("C-c n d d" . org-roam-dailies-goto-today))
               :map org-roam-node-map
@@ -1372,6 +1350,9 @@ Save image and insert it's link at point.
   :config 
     (setq org-roam-directory "~/Dropbox/org-roam")
     (setq org-roam-dailies-directory "journal/")
+
+    (setq org-roam-node-display-template
+      (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   
     (setq org-roam-dailies-capture-templates
   	'(("d" "default" entry "* %<%I:%M %p>: %?"
@@ -1481,14 +1462,6 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (defun +bibtex/format-citations-apa7 (keys)
   (bibtex-completion-apa-format-reference (car keys)))
-#+end_src
-
-* Configure =org-noter=
-
-#+begin_src emacs-lisp :results none
-(use-package org-noter
-  :straight t
-  :defer t)
 #+end_src
 
 * Configure =flyspell=
@@ -1796,7 +1769,6 @@ vc-annotate options.
     (setq company-box-doc-enable nil))
 #+end_src
 
-
 ** =vertico=
 #+begin_src emacs-lisp :result none
 (use-package vertico
@@ -1834,10 +1806,6 @@ vc-annotate options.
   (setq prefix-help-command #'embark-prefix-help-command)
 
   :config
-  (defun embark-zeal ()
-    (interactive)
-    (call-process "zeal" nil 0 nil (current-word)))      
-
   
   (global-set-key (kbd "C-a") #'embark-act)
   (global-set-key (kbd "C->") #'embark-become)
@@ -1879,7 +1847,7 @@ vc-annotate options.
            (link (plist-get ctx :raw-link)))
       (kill-new link)))
 
-(defun +org-link-at-point-open-externally (_)
+  (defun +org-link-at-point-open-externally (_)
     (let* ((context (org-element-context))
            (ctx (cadr context))
            (link (plist-get ctx :raw-link)))
@@ -1887,10 +1855,10 @@ vc-annotate options.
   
   (defun +org-open-at-point-other-window (_)
     (let ((org-link-frame-setup '((file . find-file-other-window))))
-      (org-open-at-point)))
+      (org-open-at-point))))
   
   ;; (add-to-list 'embark-target-finders 'org-link-finder)
-  (add-to-list 'embark-keymap-alist '(link . embark-org-link-map)))
+  ;; (add-to-list 'embark-keymap-alist '(link . embark-org-link-map)))
 
 (defun +embark/insert-grep-line (line)
   (interactive "sInsert: ")
@@ -2184,6 +2152,10 @@ Setup =python-mode=.
   :straight t
   :defer t
   :config (pyvenv-mode t))
+
+(defun +pyvenv-activate ()
+  (interactive)
+  (print (shell-command-to-string "pyenv local")))
 #+end_src
 
 #+begin_src emacs-lisp :results none
