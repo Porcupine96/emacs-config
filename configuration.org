@@ -32,9 +32,9 @@ Set window transparency.
 
 Font.
 #+begin_src emacs-lisp :results none
-(set-face-attribute 'default nil :font "Roboto Mono for Powerline-12")
+(set-face-attribute 'default nil :font "Roboto Mono for Powerline-11")
 (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-12")
-(set-face-attribute 'variable-pitch nil :font "Hack-12")
+(set-face-attribute 'variable-pitch nil :font "Hack-11")
 #+end_src
  
 Hide all the bezels.
@@ -2155,7 +2155,10 @@ Setup =python-mode=.
 
 (defun +pyvenv-activate ()
   (interactive)
-  (print (shell-command-to-string "pyenv local")))
+  (let* ((root (s-trim (shell-command-to-string "pyenv root")))
+	 (env (s-trim (shell-command-to-string "pyenv local")))
+	 (path (concat root "/" "versions" "/" env)))
+    (pyvenv-activate path)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3439,7 +3442,8 @@ sbt-mode
     "TAB TAB" #'persp-switch
     
     "SPC" (lambda () (interactive) (consult-find (projectile-project-root)))
-    "," #'consult-projectile)
+    "," #'consult-projectile
+    "'" #'hydra-dired-bookmarks/body)
 
   (general-create-definer local-leader-def
     :prefix "SPC m")
