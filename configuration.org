@@ -33,7 +33,7 @@ Set window transparency.
 Font.
 #+begin_src emacs-lisp :results none
 (set-face-attribute 'default nil :font "Roboto Mono for Powerline-11")
-(set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-12")
+(set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-11")
 (set-face-attribute 'variable-pitch nil :font "Hack-11")
 #+end_src
  
@@ -85,6 +85,10 @@ MacOS settings
 
 #+begin_src emacs-lisp :results none
 (setq use-dialog-box nil)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(setq max-specpdl-size 10000)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -672,6 +676,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :config
     (setq recentf-max-saved-items 500)
     (add-to-list 'recentf-keep 'file-remote-p)
+    (add-hook 'find-file-hook 'recentf-save-list)
     (recentf-mode +1))
 #+end_src
 
@@ -3482,6 +3487,7 @@ sbt-mode
     "l" #'+scala/insert-common-import
     "d" #'+scala/def-in-file
     "p" #'+scala/insert-package
+    "t" #'lsp-metals-toggle-show-inferred-type
     "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
     "c c" (lambda () (interactive) (+projectile/compile "bl"))
     "c p" (lambda () (interactive) (+projectile/compile "protob"))
@@ -3600,6 +3606,19 @@ sbt-mode
 (use-package sqlite3
   :straight t
   :defer t)
+#+end_src
+
+* Configure =copilot=
+
+#+begin_src emacs-lisp :results none
+(use-package copilot
+  :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
+  :ensure t
+  :config
+    (add-hook 'prog-mode-hook 'copilot-mode)
+
+    (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+    (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion))
 #+end_src
 
 * Work
