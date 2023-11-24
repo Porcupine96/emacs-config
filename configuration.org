@@ -3482,7 +3482,7 @@ sbt-mode
   (local-leader-def
     :states 'normal
     :keymaps 'scala-mode-map
-    "a" #'+lsp-avy-lens
+    "a" #'lsp-avy-lens
     "i" #'+scala/copy-import
     "y" #'+scala/fill-imports-from-side-buffers
     "s" #'hydra-scala-surround/body
