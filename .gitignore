@@ -26,6 +26,7 @@ configuration.el
 eln-cache/
 eaf/
 straight/
+!straight/versions/default.el
 quelpa/
 site-lisp/
 org-notify-log.el
@@ -37,3 +38,4 @@ tutorial/
 *.sql
 dirvish/
 nov-places
+forge-database*
