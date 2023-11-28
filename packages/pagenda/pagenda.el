@@ -45,7 +45,7 @@
   org-agenda-scheduled-leaders '("" "")
   org-agenda-current-time-string "→"
   org-agenda-todo-keyword-format "%-1s"
-  org-agenda-sorting-strategy '((agenda timestamp-up priority-down category-keep))
+  org-agenda-sorting-strategy '((agenda priority-down timestamp-up category-keep))
   org-agenda-prefix-format '((agenda . " %?-20b %?-10t%s")
                              (timeline . "  % s")
                              (todo . "%i %-12:c%b")

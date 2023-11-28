@@ -2230,8 +2230,8 @@ Setup =python-mode=.
          (lsp-headerline-breadcrumb-enable nil)
          (lsp-diagnostic-clean-after-change t)
          (lsp-completion-provider :none)
-         (lsp-semantic-tokens-enable t)
-         (lsp-semantic-tokens-apply-modifiers nil)
+         ;; (lsp-semantic-tokens-enable t)
+         ;; (lsp-semantic-tokens-apply-modifiers nil)
    :init
          (setq lsp-keymap-prefix "C-c l")
 
@@ -2323,7 +2323,7 @@ Setup =python-mode=.
   :custom
     (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"
                               "-J-Dmetals.icons=unicode"))
-    (lsp-metals-enable-semantic-highlighting t)
+    (lsp-metals-enable-semantic-highlighting nil)
   :after (lsp-mode scala-mode))
 #+end_src
 

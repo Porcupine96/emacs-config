@@ -231,6 +231,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (header-line ((t (,@fg-base0 ,@bg-base03)))) ; Pmenu
              (highlight ((t (:background "#222222" :underline ,opt-under))))
              (hl-line ((t (:underline ,opt-under ,@bg-base02)))) ; CursorLine
+             (treemacs-hl-line-face ((t (:underline ,opt-under ,@bg-base02)))) ; CursorLine
              (isearch ((t (,@fmt-stnd ,@fg-orange ,@bg-back)))) ; IncSearch
              (isearch-fail ((t (,@fmt-stnd ,@fg-orange ,@bg-back)))) ; IncSearch
              (lazy-highlight ((t (,@fmt-revr ,@fg-yellow ,@bg-back)))) ; Search
