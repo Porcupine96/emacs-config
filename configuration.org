@@ -1312,16 +1312,26 @@ Save image and insert it's link at point.
 (use-package citar
   :straight t
   :custom
+    (citar-notes-paths `(org-roam-directory))
     (org-cite-insert-processor 'citar)
     (org-cite-follow-processor 'citar)
     (org-cite-activate-processor 'citar)
-    (citar-bibliography org-cite-global-bibliography))
+    (citar-bibliography org-cite-global-bibliography)
+    (citar-indicators (list citar-indicator-files citar-indicator-notes-icons)))
 
 (use-package citar-embark
   :after citar embark
   :straight t
   :config
     (citar-embark-mode))
+
+;; https://github.com/emacs-citar/citar-org-roam
+(use-package citar-org-roam
+  :straight t
+  :custom
+    (citar-org-roam-note-title-template "${title} (${year}) | ${author}")
+  :after (citar org-roam)
+  :config (citar-org-roam-mode))
   #+end_src
 
 * Configure =org-roam= 
@@ -3620,7 +3630,9 @@ sbt-mode
     (add-hook 'prog-mode-hook 'copilot-mode)
 
     (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-    (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion))
+    (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+    (define-key copilot-completion-map (kbd "M-[") 'copilot-next-completion)
+    (define-key copilot-completion-map (kbd "M-]") 'copilot-previous-completion))
 #+end_src
 
 * Work
@@ -3831,7 +3843,7 @@ sbt-mode
 (use-package gpt
   :load-path "~/.emacs.default/packages/gpt/"
   :defer t
-  :commands gpt-init)
+  :commands (gpt-init gpt-mode))
 #+end_src
 
 ** Pjira

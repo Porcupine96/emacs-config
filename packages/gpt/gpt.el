@@ -23,11 +23,11 @@
 	 (buffer (find-file-noselect path)))
     (with-current-buffer buffer
       (switch-to-buffer buffer)
-	(insert "-*- mode: gpt-mode; -*-")
+	(insert "; -*- mode: gpt; -*-")
 	(insert "\n---\n")
 	(insert (concat "conversation_id:" "\n"))
 	(insert "--\n")
-	(insert (concat "model: gpt-4" "\n"))
+	(insert (concat "model: gpt-4-1106-preview" "\n"))
 	(insert "---\n\n")
 	(insert "# Question")
 	(insert "\n\n")
