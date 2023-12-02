@@ -1312,7 +1312,7 @@ Save image and insert it's link at point.
 (use-package citar
   :straight t
   :custom
-    (citar-notes-paths `(org-roam-directory))
+    (citar-notes-paths '("~/Dropbox/org-roam"))
     (org-cite-insert-processor 'citar)
     (org-cite-follow-processor 'citar)
     (org-cite-activate-processor 'citar)
@@ -2023,6 +2023,8 @@ vc-annotate options.
 
    (setq dired-dwim-target t)
 
+   (define-key dired-mode (kbd "C-x n n") #'dired-narrow)
+
    (evil-collection-define-key 'normal 'dired-mode-map
      "_" #'+projectile/goto-project-root
      "ge" #'+dired/open-externally
@@ -2031,6 +2033,12 @@ vc-annotate options.
      "yp" #'+dired/copy-path
      "yd" #'+dired/copy-dir-path
      "'" #'hydra-dired-bookmarks/body))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package dired-narrow
+  :straight t
+  :after dired-mode)
 #+end_src
 
 #+begin_src emacs-lisp :results none
