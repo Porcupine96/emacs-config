@@ -26,8 +26,8 @@
 * Visuals
 Set window transparency.
 #+begin_src emacs-lisp :results none
-(set-frame-parameter nil 'alpha-background 50) 
-(add-to-list 'default-frame-alist '(alpha-background . 50))
+(set-frame-parameter nil 'alpha-background 75) 
+(add-to-list 'default-frame-alist '(alpha-background . 75))
 #+end_src
 
 Font.
@@ -541,6 +541,8 @@ Scale text.
 (defvar +core/dark-theme 'noctilux)
 (defvar +core/light-theme 'modus-operandi)
 
+(setq org-format-latex-options (plist-put org-format-latex-options :background "#282a36"))
+
 (defun +core/load-theme (theme)
   (mapcar #'disable-theme custom-enabled-themes)
   (load-theme theme t))
@@ -898,6 +900,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '("->" . "→") prettify-symbols-alist)
+			      (push '("!=" . "≠") prettify-symbols-alist)
 			      (push '("<-" . "←") prettify-symbols-alist)
 			      (push '("<->" . "←→") prettify-symbols-alist)
 			      (push '("---" . "⎯") prettify-symbols-alist)
@@ -1667,26 +1670,26 @@ vc-annotate options.
 
 * Configure =nano=
 #+begin_src emacs-lisp :results none
-;; (straight-use-package
-;;   '(nano-emacs :type git :host github :repo "rougier/nano-emacs"))
-
-;; (require 'nano-faces)
-;; (require 'nano-base-colors)
-;; (require 'nano-modeline)
-
-;; (nano-faces)
-;; (nano-modeline)
-;; ;; (nano-command)
+(use-package nano-modeline
+  :straight t
+  :custom
+    (nano-modeline-text-mode t)
+    (nano-modeline-position #'nano-modeline-footer)
+  :init
+     (add-hook 'text-mode-hook  #'nano-modeline-text-mode)
+     (add-hook 'prog-mode-hook  #'nano-modeline-prog-mode)
+  :config
+     (nano-modeline-text-mode))
 #+end_src
 
-* Congiure =doom-modeline=
+* Configure =doom-modeline=
 #+begin_src emacs-lisp :results none
-(use-package doom-modeline
-  :straight t
-  :init
-    (setq doom-modeline-mu4e t)
-    (doom-modeline-mode 1))
-  #+end_src
+;; (use-package doom-modeline
+;;   :straight t
+;;   :init
+;;     (setq doom-modeline-mu4e t)
+;;     (doom-modeline-mode 1))
+#+end_src
 
 * Configure =zoom-window=
  #+begin_src emacs-lisp :results none
@@ -2023,7 +2026,7 @@ vc-annotate options.
 
    (setq dired-dwim-target t)
 
-   (define-key dired-mode (kbd "C-x n n") #'dired-narrow)
+   (define-key dired-mode-map (kbd "C-x n n") #'dired-narrow)
 
    (evil-collection-define-key 'normal 'dired-mode-map
      "_" #'+projectile/goto-project-root
@@ -2955,20 +2958,20 @@ sbt-mode
 
 * Configure =direnv=
 #+begin_src emacs-lisp :results none
-(use-package direnv
- :straight t
- :config
-   (setq direnv-always-show-summary nil)
+;; (use-package direnv
+;;  :straight t
+;;  :config
+;;    (setq direnv-always-show-summary nil)
 
-   (add-to-list 'direnv-non-file-modes 'vterm-mode)
-   (add-to-list 'direnv-non-file-modes 'dirvish)
+;;    (add-to-list 'direnv-non-file-modes 'vterm-mode)
+;;    (add-to-list 'direnv-non-file-modes 'dirvish)
 
-   (direnv-mode))
+;;    (direnv-mode))
 
-(use-package envrc
-  :straight t
-  :config
-    (envrc-global-mode))
+;; (use-package envrc
+;;   :straight t
+;;   :config
+;;     (envrc-global-mode))
 #+end_src
 
 * Configure =Info=
