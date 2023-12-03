@@ -1365,10 +1365,9 @@ Save image and insert it's link at point.
                ("C-c n i" . org-roam-node-insert)))
   :init
     (setq org-roam-v2-ack t)
-  :config 
     (setq org-roam-directory "~/Dropbox/org-roam")
     (setq org-roam-dailies-directory "journal/")
-
+  :config  
     (setq org-roam-node-display-template
       (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   
@@ -3636,8 +3635,8 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package copilot
   :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
-  :ensure t
-  :config
+  :defer t
+  :init
     (add-hook 'prog-mode-hook 'copilot-mode)
 
     (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
