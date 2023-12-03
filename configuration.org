@@ -503,7 +503,8 @@ Scale text.
 #+begin_src emacs-lisp :results none
 (defun +core/scratch-buffer () 
    (interactive)
-   (switch-to-buffer (generate-new-buffer "*scratch*")))
+   (switch-to-buffer (generate-new-buffer "*scratch*"))
+   (text-mode))
 #+end_src
  
 #+begin_src emacs-lisp :results none
@@ -521,7 +522,8 @@ Scale text.
 #+begin_src emacs-lisp :results none
 (defun +core/summon-scratch ()
    (interactive)
-   (switch-to-buffer-other-window "*scratch*"))
+   (switch-to-buffer-other-window "*scratch*")
+   (text-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -659,16 +661,40 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
 * Configure =perspective=
 #+begin_src emacs-lisp :results none
-(use-package perspective 
-  :defer 5
-  :straight t
+;; (use-package perspective 
+;;   :defer 5
+;;   :straight t
+;;   :custom
+;;     (persp-mode-prefix-key (kbd "C-c M-p"))
+;;   :init
+;;     (persp-mode)
+;;   :config 
+;;     (define-key evil-normal-state-map (kbd "gt") #'persp-next)
+;;     (define-key evil-normal-state-map (kbd "gT") #'persp-prev))
+#+end_src
+
+* Configure =tabspaces=
+#+begin_src emacs-lisp :results none
+(use-package tabspaces
+  :straight (:type git :host github :repo "mclear-tools/tabspaces")
+  ;; :hook
+  ;;   (after-init . tabspaces-mode) 
+  :commands
+    (tabspaces-switch-or-create-workspace
+     tabspaces-open-or-create-project-and-workspace)
   :custom
-    (persp-mode-prefix-key (kbd "C-c M-p"))
-  :init
-    (persp-mode)
-  :config 
-    (define-key evil-normal-state-map (kbd "gt") #'persp-next)
-    (define-key evil-normal-state-map (kbd "gT") #'persp-prev))
+    (tabspaces-use-filtered-buffers-as-default t)
+    (tabspaces-default-tab "Default")
+    (tabspaces-remove-to-default t)
+    (tabspaces-include-buffers '("*scratch*"))
+    (tabspaces-initialize-project-with-todo t)
+    ;; sessions
+    ;; (tabspaces-session t)
+    ;; (tabspaces-session-auto-restore t)
+
+  :config
+     (define-key evil-normal-state-map (kbd "gt") #'tab-next)
+     (define-key evil-normal-state-map (kbd "gT") #'tab-previous))
 #+end_src
 
 * Configure =recentf=
@@ -1520,7 +1546,7 @@ Save image and insert it's link at point.
   :straight t
   :defer t
   :hook ((scala-mode . yas-global-mode)
-         ;; (python-mode . yas-global-mode)
+         (org-mode . yas-global-mode)
          (flash-mode . yas-global-mode)))
 #+end_src
 
@@ -1669,16 +1695,25 @@ vc-annotate options.
 
 * Configure =nano=
 #+begin_src emacs-lisp :results none
+(straight-use-package '(nano-splash :type git :host github
+                                   :repo "rougier/nano-splash"))
+
+(require 'nano-splash)
+
+
 (use-package nano-modeline
   :straight t
+  :hook (after-init . nano-modeline-text-mode)
   :custom
-    (nano-modeline-text-mode t)
-    (nano-modeline-position #'nano-modeline-footer)
+  (nano-modeline-text-mode t)
+  (nano-modeline-position #'nano-modeline-footer)
   :init
-     (add-hook 'text-mode-hook  #'nano-modeline-text-mode)
-     (add-hook 'prog-mode-hook  #'nano-modeline-prog-mode)
+  (add-hook 'fundamental-mode-hook  #'nano-modeline-text-mode)
+  (add-hook 'text-mode-hook  #'nano-modeline-text-mode)
+  (add-hook 'special-mode-hook  #'nano-modeline-text-mode)
+  (add-hook 'prog-mode-hook  #'nano-modeline-prog-mode)
   :config
-     (nano-modeline-text-mode))
+  (nano-modeline-text-mode))
 #+end_src
 
 * Configure =doom-modeline=
@@ -3460,12 +3495,11 @@ sbt-mode
     "RET" #'consult-bookmark
     "`" #'popper-toggle-type
     
-    "TAB c" #'persp-switch
-    "TAB d" #'persp-kill
-    "TAB n" (lambda () (interactive) (persp-switch (generate-new-buffer-name "workspace")))
-    "TAB k" #'persp-kill
-    "TAB r" #'persp-rename
-    "TAB TAB" #'persp-switch
+    "TAB c" #'tabspaces-switch-or-create-workspace
+    "TAB d" #'tabspaces-kill-buffers-close-workspace
+    "TAB n" #'tabspaces-switch-or-create-workspace
+    "TAB k" #'tabspaces-kill-buffers-close-workspace
+    "TAB TAB" #'tab-bar-mode
     
     "SPC" (lambda () (interactive) (consult-find (projectile-project-root)))
     "," #'consult-projectile
@@ -3638,7 +3672,7 @@ sbt-mode
   :defer t
   :init
     (add-hook 'prog-mode-hook 'copilot-mode)
-
+  :config
     (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
     (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
     (define-key copilot-completion-map (kbd "M-[") 'copilot-next-completion)
