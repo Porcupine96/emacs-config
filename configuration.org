@@ -46,6 +46,11 @@ Hide all the bezels.
 (setq cursor-in-non-selected-windows nil)
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(setq-default left-margin-width 5)
+(setq-default right-margin-width 5)
+#+end_src
+
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
@@ -922,7 +927,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 :END:\n\n
 " )))
 
-  (add-hook 'org-mode (lambda () (setq left-margin-width 1)))
+  (add-hook 'org-mode (lambda ()
+    (setq left-margin-width 5)
+    (setq right-margin-width 5)))
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '("->" . "→") prettify-symbols-alist)
@@ -1336,6 +1343,27 @@ Save image and insert it's link at point.
   :straight t)
 #+end_src
 
+** org-ai 
+#+begin_src emacs-lisp :results none
+(use-package org-ai
+  :straight t
+  :commands (org-ai-mode
+             org-ai-global-mode)
+  :init
+  (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
+  (org-ai-global-mode) ; installs global keybindings on C-c M-a
+  :config
+  (setq org-ai-default-chat-model "gpt-4") ; if you are on the gpt-4 beta:
+  (org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
+#+end_src
+
+* Configure =greader=
+#+begin_src emacs-lisp :results none
+(use-package greader
+  :straight t
+  :defer t)
+#+end_src
+
 * Configure =citar=
 #+begin_src emacs-lisp :results none
 (use-package citar
@@ -1705,24 +1733,24 @@ vc-annotate options.
   :straight t
   :hook (after-init . nano-modeline-text-mode)
   :custom
-  (nano-modeline-text-mode t)
   (nano-modeline-position #'nano-modeline-footer)
   :init
-  (add-hook 'fundamental-mode-hook  #'nano-modeline-text-mode)
-  (add-hook 'text-mode-hook  #'nano-modeline-text-mode)
-  (add-hook 'special-mode-hook  #'nano-modeline-text-mode)
-  (add-hook 'prog-mode-hook  #'nano-modeline-prog-mode)
-  :config
-  (nano-modeline-text-mode))
-#+end_src
+  (setq nano-modeline-text-mode t)
 
-* Configure =doom-modeline=
-#+begin_src emacs-lisp :results none
-;; (use-package doom-modeline
-;;   :straight t
-;;   :init
-;;     (setq doom-modeline-mu4e t)
-;;     (doom-modeline-mode 1))
+  (add-hook 'text-mode-hook             #'nano-modeline-text-mode)
+  (add-hook 'dired-mode-hook            #'nano-modeline-text-mode)
+  (add-hook 'messages-buffer-mode-hook  #'nano-modeline-text-mode)
+  (add-hook 'special-mode-hook          #'nano-modeline-text-mode)
+  (add-hook 'prog-mode-hook             #'nano-modeline-prog-mode)
+  (add-hook 'org-mode-hook              #'nano-modeline-org-mode)
+
+  (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
+  (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
+  (add-hook 'mu4e-compose-mode-hook    #'nano-modeline-mu4e-compose-mode)
+
+  :config
+
+  (nano-modeline-text-mode))
 #+end_src
 
 * Configure =zoom-window=
@@ -1996,12 +2024,12 @@ vc-annotate options.
  #+end_src
 
 * Configure =keychain=
-  #+begin_src emacs-lisp :results none
-  (use-package keychain-environment
-     :straight t
-     :defer 10
-     :config (keychain-refresh-environment))
-  #+end_src
+#+begin_src emacs-lisp :results none
+(use-package keychain-environment
+   :straight t
+   :defer nil
+   :config (keychain-refresh-environment))
+#+end_src
 
 * Configure =ox-html=
 #+begin_src emacs-lisp :results no
@@ -2894,6 +2922,7 @@ sbt-mode
   :straight nil
   :defer t
   :config
+    (setq js-indent-level 2) 
     (font-lock-add-keywords 'js-mode
        '(("\\(TODO\\):" 1 'todo-comment-face prepend))))
 #+end_src
@@ -2903,7 +2932,7 @@ sbt-mode
   :straight t
   :hook (js-mode . prettier-js-mode) 
   :defer t
-  :config
+  :init
     (setq js-indent-level 2))
 #+end_src
 
@@ -2912,6 +2941,8 @@ sbt-mode
 (use-package typescript-mode
   :straight t
   :mode "\\.\\(ts\\|tsx\\)$"
+  :init
+    (setq typescript-indent-level 2)
   :hook (typescript-mode . prettier-js-mode))
 #+end_src
 
