@@ -1738,7 +1738,6 @@ vc-annotate options.
   (setq nano-modeline-text-mode t)
 
   (add-hook 'text-mode-hook             #'nano-modeline-text-mode)
-  (add-hook 'dired-mode-hook            #'nano-modeline-text-mode)
   (add-hook 'messages-buffer-mode-hook  #'nano-modeline-text-mode)
   (add-hook 'special-mode-hook          #'nano-modeline-text-mode)
   (add-hook 'prog-mode-hook             #'nano-modeline-prog-mode)
