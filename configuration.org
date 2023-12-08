@@ -47,8 +47,15 @@ Hide all the bezels.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(setq-default left-margin-width 5)
-(setq-default right-margin-width 5)
+(setq-default left-margin-width 3)
+(setq-default right-margin-width 3)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(setq-default tab-bar-new-button-show nil)
+(setq-default tab-bar-close-button-show nil)
+(setq-default tab-bar-separator "")
+(setq-default tab-bar-auto-width-max '(300 20))
 #+end_src
 
 Color theme.
@@ -928,8 +935,8 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 " )))
 
   (add-hook 'org-mode (lambda ()
-    (setq left-margin-width 5)
-    (setq right-margin-width 5)))
+    (setq left-margin-width 3)
+    (setq right-margin-width 3)))
 
   (add-hook 'org-mode-hook
 	    (lambda () (progn (push '("->" . "→") prettify-symbols-alist)
@@ -949,6 +956,16 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
               (save-buffer)))
         (message "Ooops ... (%s) does not exist." afile))))
 
+
+  (defun paste-formatted ()
+    (interactive)
+
+    (if current-prefix-arg
+       (let ((content (current-kill 0)))
+          (insert (s-replace "- " "" (s-trim content)))
+          (org-fill-paragraph))
+       (evil-paste-after 1)))
+
   (add-hook 'org-archive-hook 'org-archive-save-buffer)
 
   (add-hook 'after-init-hook
@@ -961,6 +978,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
         ("C-c h" . org-toggle-heading)
         ("C-k" . evil-window-up)
         ("C-j" . evil-window-down)
+        ("p" . paste-formatted)
 	:map org-mode-map 
         ("C-c h" . org-toggle-heading)
         ("C-x n S" . org-tree-to-indirect-buffer))
@@ -1738,6 +1756,7 @@ vc-annotate options.
   (setq nano-modeline-text-mode t)
 
   (add-hook 'text-mode-hook             #'nano-modeline-text-mode)
+  (add-hook 'vterm-mode-hook            #'nano-modeline-text-mode)
   (add-hook 'messages-buffer-mode-hook  #'nano-modeline-text-mode)
   (add-hook 'special-mode-hook          #'nano-modeline-text-mode)
   (add-hook 'prog-mode-hook             #'nano-modeline-prog-mode)
@@ -3655,7 +3674,8 @@ sbt-mode
   :straight t
   :mode ("\\.epub\\'" . nov-mode)
   :hook
-    ((nov-mode . olivetti-mode))
+    ((nov-mode . olivetti-mode)
+     (nov-mode . (lambda () (setq header-line-format '("")))))
   :bind
     (:map nov-mode-map
      ("SPC" . 'ignore)
@@ -3682,9 +3702,7 @@ sbt-mode
      ("l" . 'evil-forward-char)
      ("n" . 'ignore))
   :config
-    (setq nov-text-width 80)
-
-    )
+    (setq nov-text-width 80))
 #+end_src
 
 * Configure =sqlite3=

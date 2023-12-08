@@ -427,15 +427,18 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (bookmark-face     ((t (,@bg-base03 ,@fg-green))))
 
              ;; org
-             (org-hide                ((t (,@fg-base03))))
-             (org-todo                ((t (:inherit default ,@fmt-bold ,@fg-red  ,@bg-base03))))
-             (org-modern-date-active  ((t (:inherit default ,@fmt-none ,@fg-gray ,@bg-base03))))
-             (org-modern-done         ((t (:inherit default ,@fmt-bold ,@fg-gray ,@bg-base03))))
-             (org-modern-todo         ((t (:inherit default ,@fmt-bold ,@fg-red  ,@bg-base03))))
-             (org-modern-tag          ((t (:inherit default ,@fmt-ital ,@fg-gray,@bg-base02))))
-             (org-done                ((t (:inherit default ,@fmt-bold ,@fg-gray ,@bg-base03))))
-	     (org-headline-done       ((t (,@fmt-strk ,@fg-gray ,@bg-base03))))
-             (org-date                ((t (:inherit default ,@fmt-none ,@fg-yellow ,@bg-base03))))
+             (org-hide                  ((t (,@fg-base03))))
+             (org-todo                  ((t (:inherit default ,@fmt-bold ,@fg-red  ,@bg-base03))))
+             (org-modern-date-active    ((t (:inherit default ,@fmt-small ,@fg-gray ,@bg-base03))))
+             (org-modern-date-inactive  ((t (:inherit default ,@fmt-small ,@fg-gray ,@bg-base03))))
+             (org-modern-time-active    ((t (:inherit default ,@fmt-small ,@fg-gray ,@bg-base03))))
+             (org-modern-time-inactive  ((t (:inherit default ,@fmt-small ,@fg-gray ,@bg-base03))))
+             (org-modern-done           ((t (:inherit default ,@fmt-bold ,@fg-gray ,@bg-base03))))
+             (org-modern-todo           ((t (:inherit default ,@fmt-bold ,@fg-red  ,@bg-base03))))
+             (org-modern-tag            ((t (:inherit default ,@fmt-ital ,@fg-gray,@bg-base02))))
+             (org-done                  ((t (:inherit default ,@fmt-bold ,@fg-gray ,@bg-base03))))
+	     (org-headline-done         ((t (,@fmt-strk ,@fg-gray ,@bg-base03))))
+             (org-date                  ((t (:inherit default ,@fmt-none ,@fg-yellow ,@bg-base03))))
 
 	     (org-checkbox-statistics-todo  ((t (,@fmt-none ,@fg-red ,@bg-base03))))
 	     (org-checkbox-statistics-done  ((t (,@fmt-none ,@fg-gray ,@bg-base03))))
@@ -770,6 +773,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 	     ;; tab-bar
 	     (tab-bar ((t (,@bg-base03))))
+	     (tab-bar-tab ((t (,@fmt-undr ,@bg-base03))))
+	     (tab-bar-tab-inactive ((t (,@bg-base03))))
 
 	     ;; lsp
 
