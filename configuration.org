@@ -1380,7 +1380,7 @@ Save image and insert it's link at point.
   (org-ai-global-mode) ; installs global keybindings on C-c M-a
   :config
   (setq org-ai-default-chat-model "gpt-4") ; if you are on the gpt-4 beta:
-  (org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
+  ) ; if you are using yasnippet and want `ai` snippets
 #+end_src
 
 * Configure =greader=
