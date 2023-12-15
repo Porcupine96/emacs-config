@@ -288,6 +288,14 @@ Use =evil-surround=
      (global-evil-surround-mode +1))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(use-package evil-escape
+  :straight t
+  :after evil
+  :config
+   (evil-escape-mode 1))
+#+end_src
+
 * Configure =hydra=
 #+begin_src emacs-lisp :results none
 (use-package hydra
