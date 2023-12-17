@@ -3947,6 +3947,15 @@ sbt-mode
   :commands (gpt-init gpt-mode))
 #+end_src
 
+** Read Me
+
+#+begin_src emacs-lisp :results none
+(use-package read-me
+  :load-path "~/.emacs.default/packages/read-me/"
+  :defer t
+  :commands (read-me read-me-generate read-me-read))
+#+end_src
+
 ** Pjira
 
 #+begin_src emacs-lisp :results none

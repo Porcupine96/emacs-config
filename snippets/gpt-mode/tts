@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: tts
+# key: tts
+# --
+Remove references that are hard to read for a TTS system from the text below.
+
+Do not change the sentence structure.
+
+TEXT START
+
+$0
+
+TEXT END
