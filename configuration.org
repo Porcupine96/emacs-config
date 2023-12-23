@@ -87,6 +87,9 @@ MacOS settings
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(setq ring-bell-function #'ignore)
+#+end_src
+#+begin_src emacs-lisp :results none
 (setq vc-follow-symlinks t)
 #+end_src
 
