@@ -89,6 +89,7 @@ MacOS settings
 #+begin_src emacs-lisp :results none
 (setq ring-bell-function #'ignore)
 #+end_src
+
 #+begin_src emacs-lisp :results none
 (setq vc-follow-symlinks t)
 #+end_src
@@ -1373,17 +1374,16 @@ Save image and insert it's link at point.
 #+end_src
 
 ** org-ai 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle none
 (use-package org-ai
   :straight t
   :commands (org-ai-mode
              org-ai-global-mode)
   :init
-  (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
-  (org-ai-global-mode) ; installs global keybindings on C-c M-a
+    (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
+    (org-ai-global-mode) ; installs global keybindings on C-c M-a
   :config
-  (setq org-ai-default-chat-model "gpt-4") ; if you are on the gpt-4 beta:
-  ) ; if you are using yasnippet and want `ai` snippets
+  (setq org-ai-default-chat-model "gpt-4"))
 #+end_src
 
 * Configure =greader=
@@ -1947,7 +1947,7 @@ vc-annotate options.
       (org-insert-link link link (read-string "Description: " ""))))
 
   (defun +embark/open-externally (link)
-    (call-process "xdg-open" nil 0 nil link))
+    (call-process (open-command) nil 0 nil link))
 
   (require 'org-element)
   
@@ -1961,7 +1961,7 @@ vc-annotate options.
     (let* ((context (org-element-context))
            (ctx (cadr context))
            (link (plist-get ctx :raw-link)))
-      (call-process "xdg-open" nil 0 nil link)))
+      (call-process (open-command) nil 0 nil link)))
   
   (defun +org-open-at-point-other-window (_)
     (let ((org-link-frame-setup '((file . find-file-other-window))))
@@ -2149,8 +2149,8 @@ vc-annotate options.
   (if (s-starts-with? "/ssh" filename)
       (let ((dest (concat "/tmp/" (file-name-nondirectory filename))))
 	(tramp-sh-handle-copy-file filename dest t)
-	(call-process "xdg-open" nil 0 nil dest)))
-     (call-process "xdg-open" nil 0 nil filename)))
+	(call-process (open-command) nil 0 nil dest)))
+     (call-process (open-command) nil 0 nil filename)))
 
 (defun +dired/open-nautilus ()
   (interactive)
@@ -3187,7 +3187,7 @@ sbt-mode
 #+end_src
 
 * Configure =elfeed=
-#+begin_src emacs-lisp :results none 
+#+begin_src emacs-lisp :results none :tangle no
 (use-package elfeed
   :straight t
   :defer t
@@ -3263,7 +3263,7 @@ sbt-mode
 
   (defun +pdf/open-externally ()
     (interactive)
-    (call-process "xdg-open" nil 0 nil (buffer-file-name)))
+    (call-process (open-command) nil 0 nil (buffer-file-name)))
 
   (defun +pdf/setup ()
     (evil-collection-define-key 'normal 'pdf-view-mode-map
@@ -3827,15 +3827,6 @@ sbt-mode
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(defun +work/goto-jenkins ()
-  (interactive)
-
-  (let* ((branch (string-remove-prefix " Git-" (string-remove-prefix " Git:" vc-mode)))
-         (url (concat "https://jenkins.codeheroes.tech/job/monorepo/job/" (url-hexify-string branch) "/lastBuild/console")))
-    (call-process "xdg-open" nil 0 nil url)))
-#+end_src
-
-#+begin_src emacs-lisp :results none
 (defun +scala/test ()
   (interactive)
 
@@ -4029,5 +4020,14 @@ sbt-mode
      (evil-join (region-beginning) (region-end))
      (mark-paragraph)
      (kill-ring-save (region-beginning) (region-end))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun open-command ()
+  (interactive)
+
+  (if (eq system-type 'darwin)
+     "open"
+      "xdg-open"))
 #+end_src
 
