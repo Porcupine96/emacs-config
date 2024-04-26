@@ -23,27 +23,36 @@
              (display-battery-mode)) t)
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(when (eq system-type 'darwin)
+  (setq insert-directory-program "/opt/homebrew/bin/gls"))
+#+end_src
+
 * Visuals
 Set window transparency.
 #+begin_src emacs-lisp :results none
-(set-frame-parameter nil 'alpha-background 75) 
-(add-to-list 'default-frame-alist '(alpha-background . 75))
+(set-frame-parameter nil 'alpha-background 100)
+(add-to-list 'default-frame-alist '(alpha-background . 100))
 #+end_src
 
 Font.
 #+begin_src emacs-lisp :results none
-(set-face-attribute 'default nil :font "Roboto Mono for Powerline-11")
-(set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-11")
-(set-face-attribute 'variable-pitch nil :font "Hack-11")
+(set-face-attribute 'default nil :font "Roboto Mono for Powerline-13")
+(set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-13")
+(set-face-attribute 'variable-pitch nil :font "Hack-13")
 #+end_src
  
 Hide all the bezels.
 #+begin_src emacs-lisp :results none
 (tool-bar-mode -1)
-(menu-bar-mode -1)
 (toggle-scroll-bar -1)
 (blink-cursor-mode -1)
 (setq cursor-in-non-selected-windows nil)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+;; for yabai to work properly on OSX
+(menu-bar-mode t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -61,8 +70,8 @@ Hide all the bezels.
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
-(load-theme 'noctilux t)
-;; (load-theme 'modus-operandi t)
+;; (load-theme 'noctilux t)
+(load-theme 'modus-operandi t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -74,6 +83,10 @@ Color theme.
 #+end_src
 
 * Sensible settings
+#+begin_src emacs-lisp :results none
+(setenv "JAVA_HOME" "/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home")
+#+end_src
+
 Disable backup and lockfiles.
 #+begin_src emacs-lisp :results none
 (setq make-backup-files nil)
@@ -211,6 +224,10 @@ Compilation settings.
 #+begin_src emacs-lisp :results none
 (setq compilation-scroll-output t)
 (setq compilation-always-kill t)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(setq revert-without-query '(".*"))
 #+end_src
 
 * Miscellaneous 
@@ -419,6 +436,10 @@ Buffer commands.
 
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-c s") #'pjira-current-sprint)
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c P") #'copilot-mode)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -637,6 +658,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+end_src
 
 * Configure =exec-path-from-shell=
+
 #+begin_src emacs-lisp :results none
 (use-package exec-path-from-shell
   :straight t
@@ -844,9 +866,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (setq org-cite-global-bibliography p/bibliography)
 
   ;; ignore some unwanted warnings
-  (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+  ;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
   
-  (setq warning-suppress-types (append warning-suppress-types '((defvaralias))))
+  ;; (setq warning-suppress-types (append warning-suppress-types '((defvaralias))))
 
   (setq org-refile-targets
 	'(("/home/porcupine/Dropbox/org/todo/work.org" :maxlevel . 1)
@@ -870,6 +892,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
   (setq org-plantuml-jar-path
         (expand-file-name "~/tools/plantuml.jar"))
+
+  (push '("\\.excalidraw.svg\\'" . "echo '%s' | sed 's/.svg//' | xargs open") org-file-apps)
+
 
   (setq org-startup-with-inline-images t)
 
@@ -1385,6 +1410,28 @@ Save image and insert it's link at point.
   :config
   (setq org-ai-default-chat-model "gpt-4"))
 #+end_src
+* Configure =org-excalidraw=
+SCHEDULED: <2024-02-25 Sun>
+
+#+begin_src emacs-lisp :results none
+(use-package org-excalidraw
+  :straight (:type git :host github :repo "wdavew/org-excalidraw")
+  :config
+    (setq org-excalidraw-directory "~/Dropbox/org/excalidraw")
+    ;; (setq org-link-abbrev-alist '("excalidraw" . "file"))
+    (org-excalidraw-initialize))
+
+    ;; (defun my/org-excalidraw-create-drawing-advice (orig-fun &rest args)
+    ;;   (cl-letf (((symbol-function 'format)
+    ;;              (lambda (fmt &rest args)
+    ;;                (if (string-equal fmt "[[excalidraw:%s.svg]]")
+    ;;                    (apply 'format "[[file:%s.svg]]" args)
+    ;;                  (apply 'format fmt args)))))
+    ;;     (apply orig-fun args)))
+    
+    ;;(advice-remove 'org-excalidraw-create-drawing :around
+    ;;#'my/org-excalidraw-create-drawing-advice))
+#+end_src
 
 * Configure =greader=
 #+begin_src emacs-lisp :results none
@@ -1566,19 +1613,19 @@ Save image and insert it's link at point.
 
 * Configure =flyspell=
 #+begin_src emacs-lisp :results none 
-(use-package flyspell
-  :straight t
-  :defer t
-  :config
-    (setq ispell-program-name "hunspell")
-    (setq ispell-dictionary "english,polish")
-    (ispell-set-spellchecker-params)
-    (ispell-hunspell-add-multi-dic "english,polish")
+;; (use-package flyspell
+;;   :straight t
+;;   :defer t
+;;   :config
+;;     (setq ispell-program-name "hunspell")
+;;     (setq ispell-dictionary "english,polish")
+;;     (ispell-set-spellchecker-params)
+;;     (ispell-hunspell-add-multi-dic "english,polish")
 
-  :bind
-     (:map flyspell-mode-map
-        ("C-," . nil)
-        ("C-c $" . nil)))
+;;   :bind
+;;      (:map flyspell-mode-map
+;;         ("C-," . nil)
+        ;; ("C-c $" . nil)))
 #+end_src
 
 * Configure =Wucuo=
@@ -1640,7 +1687,6 @@ Save image and insert it's link at point.
     ;;                                                  projectile-root-top-down-recurring
     ;;                                                  projectile-root-bottom-up
     ;;                                                  projectile-root-local))
-
     (setq projectile-project-root-files-bottom-up '("build.sbt" ".git" "requirements.txt" "mypy.ini" "pyproject.toml"))
 
     (projectile-register-project-type 'scala '("build.sbt")))
@@ -1753,7 +1799,7 @@ vc-annotate options.
 * Configure =nano=
 #+begin_src emacs-lisp :results none
 (straight-use-package '(nano-splash :type git :host github
-                                   :repo "rougier/nano-splash"))
+                                    :repo "rougier/nano-splash"))
 
 (require 'nano-splash)
 
@@ -1771,7 +1817,7 @@ vc-annotate options.
   (add-hook 'compilation-mode-hook      #'nano-modeline-text-mode)
   (add-hook 'messages-buffer-mode-hook  #'nano-modeline-text-mode)
   (add-hook 'special-mode-hook          #'nano-modeline-text-mode)
-  (add-hook 'prog-mode-hook             #'nano-modeline-prog-mode)
+  (add-hook 'prog-mode-hook             #'nano-modeline-text-mode)
   (add-hook 'org-mode-hook              #'nano-modeline-org-mode)
 
   (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
@@ -1794,37 +1840,47 @@ vc-annotate options.
  #+end_src
 
 * Completions
+
 ** =corfu=
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none
 (use-package corfu
   :straight t
-  :after orderless
+  ;; Optional customizations
   :custom
-    (corfu-auto t)
-    (corfu-auto-delay 0)
-    (corfu-auto-prefix 0)
-    (corfu-separator ?\s)
-  :bind
-    (:map corfu-map ("M-SPC" . corfu-insert-separator))
+  (corfu-cycle t)                 ; Allows cycling through candidates
+  (corfu-auto t)                  ; Enable auto completion
+  (corfu-auto-prefix 2)
+  (corfu-auto-delay 0.1)
+  (corfu-popupinfo-delay '(0.5 . 0.2))
+  (corfu-preview-current 'insert) ; insert previewed candidate
+  (corfu-preselect 'prompt)
+  (corfu-on-exact-match nil)      ; Don't auto expand tempel snippets
+  ;; Optionally use TAB for cycling, default is `corfu-complete'.
+  :bind (:map corfu-map
+              ("M-SPC"      . corfu-insert-separator)
+              ("TAB"        . corfu-next)
+              ([tab]        . corfu-next)
+              ("S-TAB"      . corfu-previous)
+              ([backtab]    . corfu-previous)
+              ("S-<return>" . corfu-insert)
+              ("RET"        . corfu-insert))
+
   :init
-  (defun orderless-fast-dispatch (word index total)
-    (and (= index 0) (= total 1) (length< word 4)
-         `(orderless-regexp . ,(concat "^" (regexp-quote word)))))
-
-  (orderless-define-completion-style orderless-fast
-    (orderless-style-dispatchers '(orderless-fast-dispatch))
-    (orderless-matching-styles '(orderless-literal orderless-regexp)))
-
-  (setq-local corfu-auto t
-              ;; corfu-auto-delay 0
-              corfu-auto-prefix 0
-              completion-styles '(orderless-fast))
-
-  (global-corfu-mode))
+  (global-corfu-mode)
+  (corfu-history-mode)
+  (corfu-popupinfo-mode) ; Popup completion info
+  :config
+  (add-hook 'eshell-mode-hook
+            (lambda () (setq-local corfu-quit-at-boundary t
+                                   corfu-quit-no-match t
+                                   corfu-auto nil)
+              (corfu-mode))
+            nil
+            t))
 #+end_src
 
 ** =cape=
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none 
 (use-package cape
   :straight t
   :after corfu
@@ -1851,32 +1907,32 @@ vc-annotate options.
 
 ** =darbbrev=
 #+begin_src emacs-lisp :results none
-(use-package dabbrev
-  :bind (("C-/" . dabbrev-completion)
-         ("M-/" . dabbrev-completion)
-         ("C-M-/" . dabbrev-expand))
-  :custom
-    (dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
+;; (use-package dabbrev
+;;   :bind (("C-/" . dabbrev-completion)
+;;          ("M-/" . dabbrev-completion)
+;;          ("C-M-/" . dabbrev-expand))
+;;   :custom
+;;     (dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
 #+end_src
 
 ** =company= 
-#+begin_src emacs-lisp :results none
-(use-package company-mode
-  :straight t
-  :defer t
-  :hook (prog-mode . global-company-mode)
-  :custom
-    (company-minimum-prefix-length 1)
-    (company-idle-delay 0.0)
-    (company-backends '((company-capf company-yasnippet) company-dabbrev company-files company-elisp))
-    (company-dabbrev-downcase nil)
-    (lsp-completion-provider :capf))
+#+begin_src emacs-lisp :results none :tangle no
+;; (use-package company-mode 
+;;   :straight t
+;;   :defer t
+;;   :hook (prog-mode . global-company-mode)
+;;   :custom
+;;     (company-minimum-prefix-length 1)
+;;     (company-idle-delay 0.0)
+;;     (company-backends '((company-capf company-yasnippet) company-dabbrev company-files company-elisp))
+;;     (company-dabbrev-downcase nil)
+;;     (lsp-completion-provider :capf))
 
-(use-package company-box
-  :straight t
-  :hook (company-mode . company-box-mode)
-  :config
-    (setq company-box-doc-enable nil))
+;; (use-package company-box
+;;   :straight t
+;;   :hook (company-mode . company-box-mode)
+;;   :config
+;;     (setq company-box-doc-enable nil))
 #+end_src
 
 ** =vertico=
@@ -2271,6 +2327,13 @@ Setup =python-mode=.
   :defer t
   :config (pyvenv-mode t))
 
+(defun +pyvenv-anaconda ()
+  (interactive)
+  (let* ((root-dir "~/anaconda3/envs/")
+           (dirs (directory-files root-dir t directory-files-no-dot-files-regexp))
+           (chosen-dir (completing-read "Choose directory: " dirs nil t)))
+     (pyvenv-activate chosen-dir)))
+
 (defun +pyvenv-activate ()
   (interactive)
   (let* ((root (s-trim (shell-command-to-string "pyenv root")))
@@ -2382,7 +2445,10 @@ Setup =python-mode=.
   :config 
     (setq lsp-ui-doc-use-childframe nil)
     (setq lsp-ui-doc-enable nil)
-    (add-to-list 'lsp-ui-doc-frame-parameters '(no-accept-focus . t)))
+    (add-to-list 'lsp-ui-doc-frame-parameters '(no-accept-focus . t))
+
+    (setq dap-output-window-min-height 40)
+    (setq dap-output-window-max-height 40))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2581,7 +2647,7 @@ scala-mode
   :mode "\\.s\\(cala\\|bt\\)$"
   :hook
      (scala-mode . lsp)
-     (scala-mode . company-mode)
+     ;; (scala-mode . company-mode)
   :bind (:map scala-mode-map
         ("C-c C-c" . +scala/dwim-at-point))
   :config
@@ -2637,6 +2703,23 @@ sbt-mode
 
     (message "Copied: %s" import)
     (kill-new import))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/create-test ()
+  (interactive)
+
+  (let* ((file-path (buffer-file-name))
+	 (test-path (replace-regexp-in-string "src/main/scala" "src/test/scala" file-path)))
+
+    (shell-command (format "mkdir -p %s" (file-name-directory test-path)))
+    (shell-command (format "touch %s" test-path))
+
+    (with-current-buffer (find-file test-path)
+      (insert (format "import org.scalatest.wordspec.AnyWordSpec\n"))
+      (insert (format "import org.scalatest.matchers.should.Matchers\n\n"))
+      (insert (format "class %sTest extends AnyWordSpec with Matchers {\n\n}" (file-name-nondirectory (file-name-sans-extension file-path))))
+      (save-buffer))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3120,7 +3203,7 @@ sbt-mode
   :defer t
   :hook (eshell-first-time-mode . +eshell/configure-eshell)
   :config
-    (company-mode -1)
+    ;; (company-mode -1)
 
     (defalias 'e "find-file-other-window $1")
     (defalias 'gs "git status")
@@ -3151,7 +3234,7 @@ sbt-mode
 
       (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
 
-      (company-mode -1)
+      ;; (company-mode -1)
 
       (setq eshell-history-size              10000
             eshell-buffer-maximum-lines      10000
@@ -3210,7 +3293,7 @@ sbt-mode
       "R" 'elfeed-update))
       #+end_src
 
-#+begin_src emacs-lisp :results none 
+#+begin_src emacs-lisp :results none :tangle no
 (use-package elfeed-score
   :straight t
   :after elfeed
@@ -3349,6 +3432,7 @@ sbt-mode
 * Configure =mu4e=
 #+begin_src emacs-lisp :results none
 (use-package mu4e
+  :disabled t
   :straight nil
   ;; :load-path "~/.nix-profile/share/emacs/site-lisp/mu4e"
   :load-path "/usr/share/emacs/site-lisp/mu4e"
@@ -3456,7 +3540,6 @@ sbt-mode
     "f f" #'find-file
     "f r" #'consult-recent-file
     "f i" (lambda () (interactive)(find-file "~/Dropbox/org/todo/inbox.org"))
-    "f j" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work-journal.org"))
     "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
     "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
     "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
@@ -3530,8 +3613,11 @@ sbt-mode
     "p s" #'projectile-save-project-buffers
     "p w" #'+projectile/search-word-under-cursor
     
-    "r h" #'evil-window-decrease-width
-    "r l" #'evil-window-increase-width
+    "r j" (lambda () (interactive) (evil-window-decrease-height 30))
+    "r k" (lambda () (interactive) (evil-window-increase-height 30))
+    "r h" (lambda () (interactive) (evil-window-decrease-width 50))
+    "r l" (lambda () (interactive) (evil-window-increase-width 50))
+    "r =" #'balance-windows
     
     "s m" #'+work/consult-monorepo
     "s M" #'+work/consult-monorepo-glob
@@ -3550,7 +3636,7 @@ sbt-mode
     
     "y a" #'yas-new-snippet
     "y v" #'yas-visit-snippet-file
-    "y c" #'company-yasnippet
+    ;; "y c" #'company-yasnippet
     "y p" #'+core/copy-file-path
     
     "RET" #'consult-bookmark
@@ -3562,7 +3648,7 @@ sbt-mode
     "TAB k" #'tabspaces-kill-buffers-close-workspace
     "TAB TAB" #'tab-bar-mode
     
-    "SPC" (lambda () (interactive) (consult-find (projectile-project-root)))
+    "SPC" (lambda () (interactive) (consult-find default-directory))
     "," #'consult-projectile
     "'" #'hydra-dired-bookmarks/body)
 
@@ -3598,6 +3684,7 @@ sbt-mode
     :states 'normal
     :keymaps 'scala-mode-map
     "a" #'lsp-avy-lens
+    "m" #'lsp
     "i" #'+scala/copy-import
     "y" #'+scala/fill-imports-from-side-buffers
     "s" #'hydra-scala-surround/body
@@ -3605,6 +3692,7 @@ sbt-mode
     "d" #'+scala/def-in-file
     "p" #'+scala/insert-package
     "t" #'lsp-metals-toggle-show-inferred-type
+    "T" #'+scala/create-test
     "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
     "c c" (lambda () (interactive) (+projectile/compile "bl"))
     "c p" (lambda () (interactive) (+projectile/compile "protob"))
@@ -3612,6 +3700,7 @@ sbt-mode
     "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
     "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
     "c T" #'+scala/test
+    "g c" (lambda () (interactive) (+scala/goto "src/main/resources/app.conf"))
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
     "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
     "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
@@ -3644,6 +3733,7 @@ sbt-mode
   (local-leader-def
     :states 'normal
     :keymaps 'python-mode-map
+    "m" #'lsp
     "s" #'run-python
     "s" #'hydra-python-surround/body)
 
@@ -3670,7 +3760,8 @@ sbt-mode
    "C-<return>" '+org/c-ret-dwim
    "S-<return>" '+org/s-ret-dwim
    "C-S-<return>" '+org/c-s-ret-dwim
-   "C-M-<return>" '+org/c-m-ret-dwim)
+   "C-M-<return>" '+org/c-m-ret-dwim
+   "C-c e e" #'org-excalidraw-create-drawing)
 
   (general-define-key 
    :states '('normal)
@@ -3730,8 +3821,12 @@ sbt-mode
 (use-package copilot
   :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
   :defer t
+  :custom
+    (copilot-indent-offset-warning-disable t)
+    (copilot-max-char -1)
   :init
     (add-hook 'prog-mode-hook 'copilot-mode)
+    (add-hook 'conf-mode-hook 'copilot-mode)
   :config
     (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
     (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
