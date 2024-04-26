@@ -1225,29 +1225,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
 #+end_src
 
-** Export CSS
-#+begin_src emacs-lisp :results none
-(defun my-org-inline-css-hook (exporter)
-  "Insert custom inline css"
-  (when (eq exporter 'html)
-    (let* ((dir (ignore-errors (file-name-directory (buffer-file-name))))
-           (path (concat dir "style.css"))
-           (homestyle (or (null dir) (null (file-exists-p path))))
-           (final (if homestyle "~/.emacs.default/org.css" path)))
-
-      (setq org-html-head-include-default-style nil)
-      (setq org-html-head (concat
-                           "<style type=\"text/css\">\n"
-                           "<!--/*--><![CDATA[/*><!--*/\n"
-                           (with-temp-buffer
-                             (insert-file-contents final)
-                             (buffer-string))
-                           "/*]]>*/-->\n"
-                           "</style>\n")))))
-
-(add-hook 'org-export-before-processing-hook 'my-org-inline-css-hook)
-#+end_src
-
 ** Functions
 #+begin_src emacs-lisp :results none
 (defun +org/ret-dwim ()
@@ -1382,15 +1359,6 @@ Save image and insert it's link at point.
           (lambda (el) (when (string-match property (org-element-property :key el)) el))))))
 #+end_src
 
-** org-publish
-#+begin_src emacs-lisp :results none :tangle no
-;; (use-package publish
-;;   :load-path "~/.emacs.default/packages/publish"
-;;   :commands (p/publish-configure p/force-publish-current-file)
-;;   :init
-;;     (p/publish-configure))
-#+end_src
-
 ** ox-slack
 #+begin_src emacs-lisp :results none
 (use-package ox-slack
@@ -1398,20 +1366,7 @@ Save image and insert it's link at point.
   :straight t)
 #+end_src
 
-** org-ai 
-#+begin_src emacs-lisp :results none :tangle none
-(use-package org-ai
-  :straight t
-  :commands (org-ai-mode
-             org-ai-global-mode)
-  :init
-    (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
-    (org-ai-global-mode) ; installs global keybindings on C-c M-a
-  :config
-  (setq org-ai-default-chat-model "gpt-4"))
-#+end_src
 * Configure =org-excalidraw=
-SCHEDULED: <2024-02-25 Sun>
 
 #+begin_src emacs-lisp :results none
 (use-package org-excalidraw
@@ -1431,13 +1386,6 @@ SCHEDULED: <2024-02-25 Sun>
     
     ;;(advice-remove 'org-excalidraw-create-drawing :around
     ;;#'my/org-excalidraw-create-drawing-advice))
-#+end_src
-
-* Configure =greader=
-#+begin_src emacs-lisp :results none
-(use-package greader
-  :straight t
-  :defer t)
 #+end_src
 
 * Configure =citar=
@@ -1635,15 +1583,6 @@ SCHEDULED: <2024-02-25 Sun>
   :defer t)
 #+end_src
 
-* Configure =langtool=
-#+begin_src emacs-lisp :results none
-(use-package langtool
-  :straight t
-  :defer t
-  :config
-    (setq langtool-http-server-host "localhost"
-          langtool-http-server-port 8081))
-#+end_src
 * Configure =yasnippet=
 #+begin_src emacs-lisp :results none
 (use-package yasnippet
@@ -1903,36 +1842,6 @@ vc-annotate options.
   :init
    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
    (add-to-list 'completion-at-point-functions #'cape-file))
-#+end_src
-
-** =darbbrev=
-#+begin_src emacs-lisp :results none
-;; (use-package dabbrev
-;;   :bind (("C-/" . dabbrev-completion)
-;;          ("M-/" . dabbrev-completion)
-;;          ("C-M-/" . dabbrev-expand))
-;;   :custom
-;;     (dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
-#+end_src
-
-** =company= 
-#+begin_src emacs-lisp :results none :tangle no
-;; (use-package company-mode 
-;;   :straight t
-;;   :defer t
-;;   :hook (prog-mode . global-company-mode)
-;;   :custom
-;;     (company-minimum-prefix-length 1)
-;;     (company-idle-delay 0.0)
-;;     (company-backends '((company-capf company-yasnippet) company-dabbrev company-files company-elisp))
-;;     (company-dabbrev-downcase nil)
-;;     (lsp-completion-provider :capf))
-
-;; (use-package company-box
-;;   :straight t
-;;   :hook (company-mode . company-box-mode)
-;;   :config
-;;     (setq company-box-doc-enable nil))
 #+end_src
 
 ** =vertico=
@@ -2255,13 +2164,6 @@ vc-annotate options.
     (setq ediff-forward-word-function 'forward-char))
 #+end_src
 
-* Configure =drag-stuff=
-#+begin_src emacs-lisp :results none
-(use-package drag-stuff
-  :straight t
-  :defer t)
-#+end_src
-
 * Configure =smerge=
 #+begin_src emacs-lisp :results none
 (use-package smerge-mode
@@ -2455,45 +2357,6 @@ Setup =python-mode=.
 (use-package consult-lsp
   :straight t
   :after lsp-mode)
-#+end_src
-
-#+begin_src emacs-lisp :results none
-;; (defun lsp-treemacs-render (tree title expand-depth
-;;                                  &optional buffer-name right-click-actions _clear-cache?)
-;;   (let ((buffer (get-buffer-create (or buffer-name "*LSP Lookup*"))))
-;;     (with-current-buffer buffer
-;; (treemacs-initialize lsp-treemacs-generic-root
-;;         :with-expand-depth (or expand-depth 0)
-;;         :and-do (progn
-;;                   (lsp-treemacs--set-mode-line-format buffer title)
-;;                   (setq-local face-remapping-alist '((button . default)))
-;;                   (setq-local lsp-treemacs-tree tree)
-;;                   (setq-local treemacs-default-visit-action 'treemacs-RET-action)
-;;                   (setq-local lsp-treemacs--right-click-actions right-click-actions)
-;;                   (setq-local window-size-fixed nil)
-;;                   (setq-local treemacs--width-is-locked nil)
-;;                   (setq-local treemacs-space-between-root-nodes nil)
-;;                   (when treemacs-text-scale
-;;                     (text-scale-increase treemacs-text-scale))
-;;                   (lsp-treemacs-generic-mode t)))
-;; (current-buffer))))
-
-
-;; (defun lsp-treemacs-errors-list--refresh ()
-;;   (lsp-treemacs-render
-;;    (if (and lsp-treemacs-error-list-current-project-only
-;;             lsp-treemacs--current-workspaces)
-;;  (->> lsp-treemacs--current-workspaces
-;;             (-map #'lsp-workspace-folders)
-;;             (-flatten)
-;;             (-keep #'lsp-treemacs--build-error-list))
-;;      (->> (lsp-session)
-;;           (lsp-session-folders)
-;;           (-keep #'lsp-treemacs--build-error-list)))
-;;    "Errors List"
-;;    2 
-;;    lsp-treemacs-errors-buffer-name
-;;    `(["Cycle Severity" lsp-treemacs-cycle-severity])))
 #+end_src
 
 #+begin_src emacs-lisp :results none
