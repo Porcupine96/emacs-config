@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: what is 
+# key: wi
+# --
+What is "$0"?

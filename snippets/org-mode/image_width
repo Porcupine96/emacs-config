@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: image width
+# key: iwd
+# --
+#+ATTR_ORG: :width 600

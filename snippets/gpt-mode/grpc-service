@@ -1,0 +1,50 @@
+# -*- mode: snippet -*-
+# name: grpc-service
+# key: grpcs
+# --
+Below there's an example of an existing gRPC
+
+```
+import ai.zowie.chatbot_cloner.ConfigValueLoader
+import ai.zowie.chatbot_cloner.domain.service.IntentService
+import cats.Functor
+import cats.effect.Resource
+import cats.effect.kernel.Async
+import cats.effect.std.Dispatcher
+import cats.syntax.functor._
+import com.chatbotize.ai.intent_service.proto.api._
+import com.chatbotize.ai.intent_service.proto.common._
+import hero.common.grpc.GrpcChannelCreator
+import hero.common.grpc.GrpcUtils
+import hero.common.logging.LoggingSupport
+
+class GrpcIntentService[F[_]: Functor](stub: IntentServiceGrpcF[F, Unit]) extends IntentService[F] with LoggingSupport {
+
+  override def upsertConfig(config: IntentConfig): F[Unit] =
+    stub.upsertConfig(UpsertConfigRequest(config), ()).void
+
+  override def getConfig(chatbotId: String): F[Option[IntentConfig]] =
+    stub
+      .getConfig(GetConfigRequest(projectId = s"chatbots/$chatbotId"), ())
+      .map(_.config)
+
+}
+
+object GrpcIntentService {
+  def resource[F[_]: Async](config: ConfigValueLoader.Service): Resource[F, GrpcIntentService[F]] =
+    for {
+      dispatcher <- Dispatcher[F]
+      channel    <- GrpcChannelCreator.defaultChannelResource(config.host, config.port)
+      client      = IntentServiceGrpcF.client(dispatcher, channel, GrpcUtils.createEmptyMetadata)
+    } yield new GrpcIntentService[F](client)
+}
+
+
+```
+
+Based on that implement another gRPC service for the following protobuf schema:
+```
+$0
+```
+
+Write only the code without any unnecessary comments.

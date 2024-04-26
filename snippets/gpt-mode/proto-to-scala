@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# key: p2s
+# name: proto-to-scala
+# --
+Rewrite the following proto definition to Scala.
+For sequences use a List.
+Don't use any default values.
+Output only the code without any comments.
+
+$0

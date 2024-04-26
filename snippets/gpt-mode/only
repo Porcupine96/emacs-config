@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: LLM only
+# key: only
+# --
+Write only what you were told to write. Don't provide any unnecessary information.

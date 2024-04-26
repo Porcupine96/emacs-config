@@ -27,7 +27,7 @@
 	(insert "\n---\n")
 	(insert (concat "conversation_id:" "\n"))
 	(insert "--\n")
-	(insert (concat "model: gpt-4-1106-preview" "\n"))
+	(insert (concat "model: gpt-4-turbo" "\n"))
 	(insert "---\n\n")
 	(insert "# Question")
 	(insert "\n\n")
@@ -45,7 +45,7 @@
   (error "Error when processing request..."))
 
 (defun gpt-make-request (prompt file conversation_id parent_id model)
-  (request "http://localhost:5000/ask"
+  (request "http://127.0.0.1:5000/ask"
     :type "POST"
     :data (json-encode `(("prompt" . ,prompt)
 			 ("output" . ,file)

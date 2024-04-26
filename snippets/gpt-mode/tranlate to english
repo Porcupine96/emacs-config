@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: tranlate to english
+# key: tr
+# --
+Translate to English "$0". You may give a few different translations.
