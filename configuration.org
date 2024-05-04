@@ -70,8 +70,9 @@ Hide all the bezels.
 Color theme.
 #+begin_src emacs-lisp :results none
 (add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
-;; (load-theme 'noctilux t)
-(load-theme 'modus-operandi t)
+(load-theme 'noctilux t)
+
+;; (load-theme 'modus-operandi t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -588,6 +589,8 @@ Scale text.
 (defvar +core/dark-theme 'noctilux)
 (defvar +core/light-theme 'modus-operandi)
 
+(setq modus-themes-fringes nil)
+
 (setq org-format-latex-options (plist-put org-format-latex-options :background "#282a36"))
 
 (defun +core/load-theme (theme)
@@ -1074,6 +1077,18 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   (evil-ex (concat "'<,'>" "s/" "^\\([-+*]\\) \\(.*\\)" "/" "\\1 =\\2=" "/g")))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun is-grammatically-correct (start end)
+  (interactive "r") 
+  (let ((text (buffer-substring start end)))
+    (kill-new text)
+    (gpt-init
+     (s-concat
+      "Is this text grammatically correct?"
+      "\n\n"
+      text))))
+#+end_src
+
 ** Org Agenda
 #+begin_src emacs-lisp :results none
 (use-package evil-org
@@ -1390,29 +1405,29 @@ Save image and insert it's link at point.
 
 * Configure =citar=
 #+begin_src emacs-lisp :results none
-(use-package citar
-  :straight t
-  :custom
-    (citar-notes-paths '("~/Dropbox/org-roam"))
-    (org-cite-insert-processor 'citar)
-    (org-cite-follow-processor 'citar)
-    (org-cite-activate-processor 'citar)
-    (citar-bibliography org-cite-global-bibliography)
-    (citar-indicators (list citar-indicator-files citar-indicator-notes-icons)))
+;; (use-package citar
+;;   :straight t
+;;   :custom
+;;     (citar-notes-paths '("~/Dropbox/org-roam"))
+;;     (org-cite-insert-processor 'citar)
+;;     (org-cite-follow-processor 'citar)
+;;     (org-cite-activate-processor 'citar)
+;;     (citar-bibliography org-cite-global-bibliography)
+;;     (citar-indicators (list citar-indicator-files citar-indicator-notes-icons)))
 
-(use-package citar-embark
-  :after citar embark
-  :straight t
-  :config
-    (citar-embark-mode))
+;; (use-package citar-embark
+;;   :after citar embark
+;;   :straight t
+;;   :config
+;;     (citar-embark-mode))
 
-;; https://github.com/emacs-citar/citar-org-roam
-(use-package citar-org-roam
-  :straight t
-  :custom
-    (citar-org-roam-note-title-template "${title} (${year}) | ${author}")
-  :after (citar org-roam)
-  :config (citar-org-roam-mode))
+;; ;; https://github.com/emacs-citar/citar-org-roam
+;; (use-package citar-org-roam
+;;   :straight t
+;;   :custom
+;;     (citar-org-roam-note-title-template "${title} (${year}) | ${author}")
+;;   :after (citar org-roam)
+;;   :config (citar-org-roam-mode))
   #+end_src
 
 * Configure =org-roam= 
@@ -1458,25 +1473,25 @@ Save image and insert it's link at point.
             			      "%?"
                                         :if-new
                                         (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
-  						 "#+title: ${title}\n#+filetags: \n#+startup: content\n")
+  						 "#+title: ${title}\n#+filetags: \n#+startup: overview\n")
             			      :unnarrowed t)
                                    ("c" "class" plain 
             			      "%?"
                                         :if-new
                                         (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
-  						 "#+title: ${title}\n#+filetags: classes\n#+startup: content\n")
+  						 "#+title: ${title}\n#+filetags: classes\n#+startup: overview\n")
             			      :unnarrowed t)
                                    ("m" "masters" plain 
             			      "%?"
                                         :if-new
                                         (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
-  						 "#+title: ${title}\n#+filetags: masters\n#+startup: content\n")
+  						 "#+title: ${title}\n#+filetags: masters\n#+startup: overview\n")
             			      :unnarrowed t)
                                    ("z" "zowie" plain 
             			      "%?"
                                         :if-new
                                         (file+head "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}.org\" (current-time) t)"
-  						 "#+title: ${title}\n#+filetags: zowie\n#+startup: content\n")
+  						 "#+title: ${title}\n#+filetags: zowie\n#+startup: overview\n")
             			      :unnarrowed t)))
 
    (org-roam-db-autosync-mode))
@@ -1743,29 +1758,53 @@ vc-annotate options.
 (require 'nano-splash)
 
 
-(use-package nano-modeline
+;; (use-package nano-modeline
+;;   :straight t
+;;   :hook (after-init . nano-modeline-text-mode)
+;;   :custom
+;;   (nano-modeline-position #'nano-modeline-footer)
+;;   :init
+;;   (setq nano-modeline-text-mode t)
+
+;;   (add-hook 'text-mode-hook             #'nano-modeline-text-mode)
+;;   (add-hook 'vterm-mode-hook            #'nano-modeline-text-mode)
+;;   (add-hook 'compilation-mode-hook      #'nano-modeline-text-mode)
+;;   (add-hook 'messages-buffer-mode-hook  #'nano-modeline-text-mode)
+;;   (add-hook 'special-mode-hook          #'nano-modeline-text-mode)
+;;   (add-hook 'prog-mode-hook             #'nano-modeline-text-mode)
+;;   (add-hook 'org-mode-hook              #'nano-modeline-org-mode)
+
+;;   (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
+;;   (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
+;;   (add-hook 'mu4e-compose-mode-hook    #'nano-modeline-mu4e-compose-mode)
+
+;;   :config
+
+;;   (nano-modeline-text-mode))
+#+end_src
+
+* Configure =moody=
+SCHEDULED: <2024-04-29 Mon>
+
+#+begin_src emacs-lisp :results none
+(use-package moody
   :straight t
-  :hook (after-init . nano-modeline-text-mode)
-  :custom
-  (nano-modeline-position #'nano-modeline-footer)
-  :init
-  (setq nano-modeline-text-mode t)
-
-  (add-hook 'text-mode-hook             #'nano-modeline-text-mode)
-  (add-hook 'vterm-mode-hook            #'nano-modeline-text-mode)
-  (add-hook 'compilation-mode-hook      #'nano-modeline-text-mode)
-  (add-hook 'messages-buffer-mode-hook  #'nano-modeline-text-mode)
-  (add-hook 'special-mode-hook          #'nano-modeline-text-mode)
-  (add-hook 'prog-mode-hook             #'nano-modeline-text-mode)
-  (add-hook 'org-mode-hook              #'nano-modeline-org-mode)
-
-  (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
-  (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
-  (add-hook 'mu4e-compose-mode-hook    #'nano-modeline-mu4e-compose-mode)
-
   :config
+  (setq x-underline-at-descent-line t)
+  (moody-replace-mode-line-buffer-identification)
+  (moody-replace-vc-mode)
+  (moody-replace-eldoc-minibuffer-message-function)
 
-  (nano-modeline-text-mode))
+
+  (setq mode-line-format '("%e" mode-line-front-space
+	(:propertize
+         ("" mode-line-mule-info mode-line-client mode-line-modified mode-line-remote)
+	 display
+	 (min-width
+	  (5.0)))
+	mode-line-frame-identification moody-mode-line-buffer-identification "   " mode-line-position evil-mode-line-tag
+	(vc-mode moody-vc-mode)
+	"  " mode-line-misc-info mode-line-end-spaces)))
 #+end_src
 
 * Configure =zoom-window=
@@ -1946,6 +1985,12 @@ vc-annotate options.
       (insert result))))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defun lsp-find-in-side-window ()
+  (interactive)
+  (lsp-find-definition :display-action 'window))
+#+end_src
+
 ** =marginalia=
 #+begin_src emacs-lisp :results none
 (use-package marginalia
@@ -2049,7 +2094,7 @@ vc-annotate options.
    (
     ("C-c SPC !" . (lambda () (interactive) (insert "❗")))
     ("C-c SPC ?" . (lambda () (interactive) (insert "❓")))
-    ("C-c SPC W" . (lambda () (interactive) (insert "⚠")))
+    ("C-c SPC W" . (lambda () (interactive) (insert "⚠️")))
     ("C-c SPC g" . (lambda () (interactive) (insert "🟢")))
     ("C-c SPC y" . (lambda () (interactive) (insert "🟡")))
     ("C-c SPC r" . (lambda () (interactive) (insert "🔴")))
@@ -2060,6 +2105,7 @@ vc-annotate options.
     ("C-c SPC l" . (lambda () (interactive) (insert "👉")))
     ("C-c SPC c" . (lambda () (interactive) (insert "✅")))
     ("C-c SPC x" . (lambda () (interactive) (insert "❌")))
+    ("C-c SPC s" . (lambda () (interactive) (insert "🤷‍♂️")))
     ("C-c SPC t" . (lambda () (interactive) (insert "🤔")))))
   :config 
    (when (member "Noto Color Emoji" (font-family-list))
@@ -2070,6 +2116,13 @@ vc-annotate options.
    (setq emojify-emoji-styles '(unicode))
   :hook (after-init . global-emojify-mode))
   #+end_src
+
+* Configure =drag-stuff=
+#+begin_src emacs-lisp :results none
+(use-package drag-stuff
+  :straight t
+  :defer t)
+#+end_src
 
 * Configure =dired=
 #+begin_src emacs-lisp :results none
@@ -2950,7 +3003,11 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package tree-sitter
   :straight t
-  :defer t)
+  :defer t
+  :delight " tree"
+  :hook (python-mode . (lambda ()
+     (tree-sitter-mode)
+     (tree-sitter-hl-mode))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3026,6 +3083,16 @@ sbt-mode
         (kbd "gT") #'persp-prev))
   ;; :bind (:map evil-normal-state-map
   ;;   ("RET" . 'Info-follow-nearest-node)))
+#+end_src
+
+* Configure =workgroups=
+#+begin_src emacs-lisp :resuls none
+(use-package workgroups
+  :straight t
+  :config 
+    (setq wg-prefix-key (kbd "C-c w"))
+
+    (workgroups-mode 1))
 #+end_src
 
 * Configure =smartparens=
@@ -3372,6 +3439,8 @@ sbt-mode
   (leader-def
     :states '(normal visual motion)
     :keymaps 'override
+    "0" #'toggle-frame-fullscreen
+
     "a a" #'org-agenda
     "a c" #'open-calendar
     "a w" #'+agenda/weekly-agenda
@@ -3916,6 +3985,9 @@ sbt-mode
   :defer t
   :commands pjira-current-sprint)
 #+end_src
+
+** Memo
+
 
 * Utils
 #+begin_src emacs-lisp :results none
