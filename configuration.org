@@ -332,7 +332,7 @@ Use =evil-surround=
 #+begin_src emacs-lisp :results none
 (defhydra hydra-dired-bookmarks (:color blue)
   ("b" (lambda () (interactive) (dired "~/books/")))
-  ("c" (lambda () (interactive) (dired "~/studies/sem7/")))
+  ("c" (lambda () (interactive) (dired "~/studies")))
   ("d" (lambda () (interactive) (dired "~/Downloads/")))
   ("D" (lambda () (interactive) (dired "~/Dropbox/")))
   ("g" (lambda () (interactive) (dired "~/Dropbox/Apps/GoodNotes 5/'/GoodNotes/")))
@@ -3092,7 +3092,10 @@ sbt-mode
   :config 
     (setq wg-prefix-key (kbd "C-c w"))
 
-    (workgroups-mode 1))
+    (set-face-attribute 'wg-mode-line-face nil :foreground "black")
+
+    (workgroups-mode 1)
+)
 #+end_src
 
 * Configure =smartparens=
@@ -3556,6 +3559,7 @@ sbt-mode
     "s f" #'+work/consult-find-file-monorepo
     
     "t r" #'+core/reload-theme
+    "t t" #'+core/toggle-darkmode
     "t e" #'treemacs-display-current-project-exclusively
     
     "u" #'universal-argument
