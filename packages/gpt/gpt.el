@@ -27,7 +27,7 @@
 	(insert "\n---\n")
 	(insert (concat "conversation_id:" "\n"))
 	(insert "--\n")
-	(insert (concat "model: gpt-4-turbo" "\n"))
+	(insert (concat "model: gpt-4o" "\n"))
 	(insert "---\n\n")
 	(insert "# Question")
 	(insert "\n\n")
