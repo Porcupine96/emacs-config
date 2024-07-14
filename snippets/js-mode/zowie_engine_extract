@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: extract
+# key: ext
+# --
+const $1 = context.extract("$1")

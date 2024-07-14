@@ -1,15 +1,16 @@
 (require 'json)
 (require 'request)
 
-
 (defun memo/create-flashcard ()
   (interactive)
-  (let ((word (thing-at-point 'word))
+  (let ((phrase (if (region-active-p)
+		    (thing-at-point 'region)
+		  (thing-at-point 'word)))
         (paragraph (thing-at-point 'paragraph)))
 
-    (message "Creating flashcard for word: %s" word)
+    (message "Creating flashcard for word: %s" phrase)
 
-    (create-flashcard word paragraph)))
+    (create-flashcard phrase paragraph)))
 
 
 (defun on-success ()

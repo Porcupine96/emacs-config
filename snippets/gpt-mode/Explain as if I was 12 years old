@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Explain as if I was 12 years old
+# key: e12
+# --
+Explain as if I was 12 years old the concept of $1 based on the article excerpt below:

@@ -1440,6 +1440,7 @@ Save image and insert it's link at point.
   :bind (:map global-map
               (("C-c n f" . org-roam-node-find)
                ("C-c n F" . +org-roam/find-file-by-title)
+	       ("C-c n k" . (lambda () (interactive) (consult-ripgrep  org-roam-directory)))
                ("C-c n p" . citar-open)
                ("C-c n d n" . org-roam-dailies-capture-today)
                ("C-c n d d" . org-roam-dailies-goto-today))
@@ -1572,6 +1573,16 @@ Save image and insert it's link at point.
 #+begin_src emacs-lisp :results none
 (defun +bibtex/format-citations-apa7 (keys)
   (bibtex-completion-apa-format-reference (car keys)))
+#+end_src
+
+* Configure =code-cells=
+
+#+begin_src emacs-lisp :results none
+(use-package code-cells
+  :straight t
+  :defer t
+  :init
+    (add-hook 'python-mode-hook 'code-cells-mode-maybe))
 #+end_src
 
 * Configure =flyspell=
@@ -1721,6 +1732,17 @@ vc-annotate options.
   (eww url (if arg 4 nil)))
 #+end_src
 
+* Configure =leetcode=
+
+#+begin_src emacs-lisp :results none
+(use-package leetcode
+   :straight t 
+   :defer t
+   :config
+     (setq leetcode-prefer-language "python3")
+     (setq leetcode-directory "~/leetcode"))
+#+end_src
+
 * Configure =git-timemachine=
  #+begin_src emacs-lisp :results none
 (use-package git-timemachine 
@@ -1794,7 +1816,6 @@ SCHEDULED: <2024-04-29 Mon>
   (moody-replace-mode-line-buffer-identification)
   (moody-replace-vc-mode)
   (moody-replace-eldoc-minibuffer-message-function)
-
 
   (setq mode-line-format '("%e" mode-line-front-space
 	(:propertize
@@ -1879,8 +1900,21 @@ SCHEDULED: <2024-04-29 Mon>
          ("C-c p &" . cape-sgml)
          ("C-c p r" . cape-rfc1345))
   :init
+   ;; (setf (elt (cl-member 'lsp-completion-at-point completion-at-point-functions) 0)
+   ;;       (cape-capf-buster #'lsp-completion-at-point))
+   
+   (add-to-list 'completion-at-point-functions (cape-company-to-capf #'company-yasnippet))
    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
    (add-to-list 'completion-at-point-functions #'cape-file))
+#+end_src
+
+** =company=
+
+#+begin_src emacs-lisp :results none
+(use-package company
+  :straight t
+  :defer t
+  :commands company-yasnippet)
 #+end_src
 
 ** =vertico=
@@ -2257,20 +2291,18 @@ Setup =python-mode=.
    :init
      (font-lock-add-keywords 'python-mode
        '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
+      (setq python-indent-offset 4)
+      (setq python-indent 4)
+      (setq python-guess-indent nil)  
+      (setq python-indent-guess-indent-offset t)  
+      (setq python-indent-guess-indent-offset-verbose nil)
+      
+      (setq python-shell-interpreter "ipython"
+            python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
    :hook ((python-mode . origami-mode))
    :config
-
-   (setq python-indent-guess-indent-offset nil)  
-   (setq python-guess-indent nil)  
-   (setq python-indent-offset 4)
-   (setq python-indent 4)
-   (setq python-indent-guess-indent-offset-verbose nil)
-
-   (setq python-shell-interpreter "ipython"
-         python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
-
-   (add-hook 'python-mode-hook 
-     (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
+     (add-hook 'python-mode-hook 
+       (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
 #+end_src
    
 #+begin_src emacs-lisp :results none
@@ -2557,7 +2589,7 @@ scala-mode
 #+begin_src emacs-lisp :results none
 (use-package scala-mode
   :straight t
-  :mode "\\.s\\(cala\\|bt\\)$"
+  :mode "\\.s\\(cala\\|bt\\|c\\)$"
   :hook
      (scala-mode . lsp)
      ;; (scala-mode . company-mode)
@@ -2686,6 +2718,24 @@ sbt-mode
   (save-excursion
     (evil-find-char-backward 1 ?\")
     (insert "s")))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/importer ()
+  (interactive)
+  (let* ((path (projectile-project-root))
+	 (executable "/Users/lukaszkazmierczak/projects/scala-importer/scala-importer")
+	 (output (shell-command-to-string (format (s-concat executable " %s") path)))
+         (imports (-filter (lambda (s) (not (equal (s-trim s) ""))) (s-split "\n" output)))
+         (chosen-import (completing-read "Choose: " imports)))
+    (if chosen-import
+	(save-excursion
+	  (beginning-of-buffer)
+	  (forward-line)
+
+	  (insert "\nimport ")
+	  (insert chosen-import))
+      (print "No import chosen!"))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2820,6 +2870,14 @@ sbt-mode
     "import cats.syntax.applicative._"
     "import cats.syntax.apply._"
     "import cats.syntax.option._"
+    "import cats.effect.IO"
+    "import scala.jdk.CollectionConverters._"
+    "import cats.effect.kernel.Ref"
+    "import cats.effect.Resource"
+    "import cats.effect.std.Dispatcher"
+    "import cats.effect.unsafe.IORuntime"
+    "import hero.common.logging.Logger"
+    "import hero.common.logging.LoggingSupport"
     "import hero.common.util.time.TimeUtils.TimeProvider"
     "import hero.common.util.IdProvider"))
 
@@ -2950,7 +3008,7 @@ sbt-mode
   :config
     (setq js-indent-level 2) 
     (font-lock-add-keywords 'js-mode
-       '(("\\(TODO\\):" 1 'todo-comment-face prepend))))
+       '(("(TODO\\):" 1 'todo-comment-face prepend))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3007,9 +3065,20 @@ sbt-mode
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package tree-sitter-langs
-  :straight t
-  :defer t)
+
+#+end_src
+
+*** ts-fold
+
+#+begin_src emacs-lisp :results none
+(use-package ts-fold
+  :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold")
+  :init
+    (setq global-ts-fold-mode t)	
+    (define-key evil-normal-state-map (kbd "zc") #'ts-fold-close)
+    (define-key evil-normal-state-map (kbd "zC") #'ts-fold-close-all)
+    (define-key evil-normal-state-map (kbd "zo") #'ts-fold-open)
+    (define-key evil-normal-state-map (kbd "zO") #'ts-fold-open-all))
 #+end_src
 
 ** Fish
@@ -3333,16 +3402,16 @@ sbt-mode
 
 * Configure =origami-mode=
 #+begin_src emacs-lisp :results none
-(use-package origami
-  :straight (origami :type git :host github :repo "elp-revive/origami.el" :branch "master")
-  :defer t
-  :hook ((js-mode . origami-mode)
-         (scala-mode . origami-mode))
-  :config
-    (define-key evil-normal-state-map (kbd "zc") #'origami-close-node)
-    (define-key evil-normal-state-map (kbd "zC") #'origami-close-all-nodes)
-    (define-key evil-normal-state-map (kbd "zo") #'origami-open-node)
-    (define-key evil-normal-state-map (kbd "zO") #'origami-open-all-nodes))
+;; (use-package origami
+;;   :straight (origami :type git :host github :repo "elp-revive/origami.el" :branch "master")
+;;   :defer t
+;;   :hook ((js-mode . origami-mode)
+;;          (scala-mode . origami-mode))
+;;   :config
+;;     (define-key evil-normal-state-map (kbd "zc") #'origami-close-node)
+;;     (define-key evil-normal-state-map (kbd "zC") #'origami-close-all-nodes)
+;;     (define-key evil-normal-state-map (kbd "zo") #'origami-open-node)
+;;     (define-key evil-normal-state-map (kbd "zO") #'origami-open-all-nodes))
 #+end_src
 
 * Configure =mu4e=
@@ -3454,6 +3523,7 @@ sbt-mode
 
     "e e" #'elfeed
     "e d" #'ediff
+    "e b" #'ediff-buffers
     
     "f f" #'find-file
     "f r" #'consult-recent-file
@@ -3472,7 +3542,7 @@ sbt-mode
     "f n" (lambda () (interactive)(find-file "~/dotfiles/config/nix/home.nix"))
     "f t" (lambda () (interactive)(find-file "~/Dropbox/org/todo/telegram.org"))
     "f T" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
-    "f x" (lambda () (interactive)(find-file "~/.config/hypr/hyprland.conf"))
+    "f x" (lambda () (interactive)(find-file "~/.config/yabai/yabairc"))
     
     "g b" #'magit-branch
     "g g" #'magit-status
@@ -3495,7 +3565,7 @@ sbt-mode
     
     "k" #'consult-yank-from-kill-ring
 
-    "m m" #'memo/create-flashcard
+    "m f" #'memo/create-flashcard
     
     "l b" #'lsp-metals-build-import
     "l d" #'lsp-find-definition
@@ -3609,7 +3679,8 @@ sbt-mode
     "i" #'+scala/copy-import
     "y" #'+scala/fill-imports-from-side-buffers
     "s" #'hydra-scala-surround/body
-    "l" #'+scala/insert-common-import
+    "l" #'+scala/importer
+    "L" #'+scala/insert-common-import
     "d" #'+scala/def-in-file
     "p" #'+scala/insert-package
     "t" #'lsp-metals-toggle-show-inferred-type
@@ -3668,6 +3739,16 @@ sbt-mode
    "c" #'org-babel-remove-result
    "j" #'org-babel-next-src-blok
    "k" #'org-babel-previous-src-block)
+  
+  (general-define-key 
+   :prefix "SPC h"
+   :states 'normal
+   :keymaps 'org-mode-map
+   "w" #'widen
+   "s" (lambda () (interactive)
+	  (progn
+	    (evil-window-vsplit)
+	    (org-tree-to-indirect-buffer))))
 
   (general-define-key 
    :prefix "C-c r"
@@ -3753,6 +3834,14 @@ sbt-mode
     (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
     (define-key copilot-completion-map (kbd "M-[") 'copilot-next-completion)
     (define-key copilot-completion-map (kbd "M-]") 'copilot-previous-completion))
+#+end_src
+
+* Configure =gptel=
+
+#+begin_src emacs-lisp :results none
+(use-package gptel
+  :straight t
+  :defer t)
 #+end_src
 
 * Work
