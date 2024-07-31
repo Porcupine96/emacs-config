@@ -2538,7 +2538,7 @@ Remove other LSP sessions.
 ;; (global-lsp-bridge-mode))
 #+end_src
 
-** COMMENT Scala
+** Scala
 scala-mode
 #+begin_src emacs-lisp :results none
 (use-package scala-mode
@@ -2665,49 +2665,6 @@ sbt-mode
   (save-excursion
     (evil-find-char-backward 1 ?\")
     (insert "s")))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +scala/importer ()
-  (interactive)
-  (let* ((path (projectile-project-root))
-	 (executable "/Users/lukaszkazmierczak/projects/scala-importer/scala-importer")
-	 (output (shell-command-to-string (format (s-concat executable " %s") path)))
-         (imports (-filter (lambda (s) (not (equal (s-trim s) ""))) (s-split "\n" output)))
-         (chosen-import (completing-read "Choose: " imports)))
-    (if chosen-import
-	(save-excursion
-	  (beginning-of-buffer)
-	  (forward-line)
-
-	  (insert "\nimport ")
-	  (insert chosen-import))
-      (print "No import chosen!"))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +scala/resolve-imports ()
-  (interactive)
-
-  (let* ((path (projectile-project-root))
-	 (executable "/Users/lukaszkazmierczak/projects/scala-importer/scala-importer")
-	 (output (shell-command-to-string (format (s-concat executable " %s") path)))
-         (available (-filter (lambda (s) (not (equal (s-trim s) ""))) (s-split "\n" output)))
-	 (missing
-	  (-distinct 
-	   (-map (lambda (s) (s-replace "not found: type " "" s))
-		 (-filter (lambda (s) (s-starts-with? "not found: type" s))
-			  (+lsp/get-errors-for-buffer)))))
-	 (imports
-	  (-filter (lambda (s) (-any? (lambda (m) (s-ends-with? m s)) missing))
-		   available)))
-
-    (if imports
-	(save-excursion
-	  (beginning-of-buffer)
-	  (forward-line)
-	  (-each imports (lambda (i) (insert "\nimport ") (insert i))))
-      (message "No imports to resolve"))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2863,6 +2820,51 @@ sbt-mode
     (move-to-column 1)
     (newline)
     (insert import)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/importer ()
+  (interactive)
+  (let* ((path (projectile-project-root))
+	 (executable "/Users/lukaszkazmierczak/projects/scala-importer/scala-importer")
+	 (output (shell-command-to-string (format (s-concat executable " %s") path)))
+         (imports (-filter (lambda (s) (not (equal (s-trim s) ""))) (s-split "\n" output)))
+         (chosen-import (completing-read "Choose: " imports)))
+    (if chosen-import
+	(save-excursion
+	  (beginning-of-buffer)
+	  (forward-line)
+
+	  (insert "\nimport ")
+	  (insert chosen-import))
+      (print "No import chosen!"))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/resolve-imports ()
+  (interactive)
+
+  (let* ((path (projectile-project-root))
+	 (executable "/Users/lukaszkazmierczak/projects/scala-importer/scala-importer")
+	 (output (shell-command-to-string (format (s-concat executable " %s") path)))
+         (available (-concat
+		     (-filter (lambda (s) (not (equal (s-trim s) ""))) (s-split "\n" output))
+		     (-map (lambda (s) (s-replace "import " "" s)) +scala/common-imports)))
+	 (missing
+	  (-distinct 
+	   (-map (lambda (s) (s-replace "not found: type " "" s))
+		 (-filter (lambda (s) (s-starts-with? "not found: type" s))
+			  (+lsp/get-errors-for-buffer)))))
+	 (imports
+	  (-filter (lambda (s) (-any? (lambda (m) (s-ends-with? m s)) missing))
+		   available)))
+    
+    (if imports
+	(save-excursion
+	  (beginning-of-buffer)
+	  (forward-line)
+	  (-each imports (lambda (i) (insert "\nimport ") (insert i))))
+      (message "No imports to resolve"))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
