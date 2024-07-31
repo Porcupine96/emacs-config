@@ -428,7 +428,17 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c w w") #'psession-restore-winconf)
+(global-set-key (kbd "C-c w s") #'psession-save-winconf)
+(global-set-key (kbd "C-c w d") #'psession-delete-winconf)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-x f") (lambda () (interactive) (consult-find default-directory)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c j j") #'org-roam-dailies-goto-today)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -827,6 +837,13 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
     (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc proselint)))
 #+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package flycheck-projectile
+  :straight t 
+  :defer t)
+#+end_src
+
 * Configure =org=
 ** Core
 #+begin_src emacs-lisp :results none
@@ -1778,54 +1795,18 @@ vc-annotate options.
                                     :repo "rougier/nano-splash"))
 
 (require 'nano-splash)
-
-
-;; (use-package nano-modeline
-;;   :straight t
-;;   :hook (after-init . nano-modeline-text-mode)
-;;   :custom
-;;   (nano-modeline-position #'nano-modeline-footer)
-;;   :init
-;;   (setq nano-modeline-text-mode t)
-
-;;   (add-hook 'text-mode-hook             #'nano-modeline-text-mode)
-;;   (add-hook 'vterm-mode-hook            #'nano-modeline-text-mode)
-;;   (add-hook 'compilation-mode-hook      #'nano-modeline-text-mode)
-;;   (add-hook 'messages-buffer-mode-hook  #'nano-modeline-text-mode)
-;;   (add-hook 'special-mode-hook          #'nano-modeline-text-mode)
-;;   (add-hook 'prog-mode-hook             #'nano-modeline-text-mode)
-;;   (add-hook 'org-mode-hook              #'nano-modeline-org-mode)
-
-;;   (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
-;;   (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
-;;   (add-hook 'mu4e-compose-mode-hook    #'nano-modeline-mu4e-compose-mode)
-
-;;   :config
-
-;;   (nano-modeline-text-mode))
 #+end_src
 
-* Configure =moody=
+* Configure =mood-line=
 SCHEDULED: <2024-04-29 Mon>
 
 #+begin_src emacs-lisp :results none
-(use-package moody
+(use-package mood-line
   :straight t
   :config
-  (setq x-underline-at-descent-line t)
-  (moody-replace-mode-line-buffer-identification)
-  (moody-replace-vc-mode)
-  (moody-replace-eldoc-minibuffer-message-function)
-
-  (setq mode-line-format '("%e" mode-line-front-space
-	(:propertize
-         ("" mode-line-mule-info mode-line-client mode-line-modified mode-line-remote)
-	 display
-	 (min-width
-	  (5.0)))
-	mode-line-frame-identification moody-mode-line-buffer-identification "   " mode-line-position evil-mode-line-tag
-	(vc-mode moody-vc-mode)
-	"  " mode-line-misc-info mode-line-end-spaces)))
+    (mood-line-mode)
+  :custom
+    (mood-line-glyph-alist mood-line-glyphs-fira-code))
 #+end_src
 
 * Configure =zoom-window=
@@ -2192,6 +2173,9 @@ SCHEDULED: <2024-04-29 Mon>
      (print filename)
      (call-process "unzip" nil 0 filename)))
 
+(defun open-command ()
+  "open")
+
 (defun +dired/open-externally ()
   (interactive)
   (let ((filename (dired-get-filename)))
@@ -2447,7 +2431,8 @@ Setup =python-mode=.
   :custom
     (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"
                               "-J-Dmetals.icons=unicode"))
-    (lsp-metals-enable-semantic-highlighting nil)
+    (lsp-metals-super-method-lenses-enabled t)
+    (lsp-metals-enable-semantic-highlighting t)
   :after (lsp-mode scala-mode))
 #+end_src
 
@@ -2510,21 +2495,6 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(defun +lsp/references ()
-  (interactive)
-  (let ((loc (lsp-request "textDocument/references"
-                          ((lsp--text-document-position-params) (list :context `(:includeDeclaration nil))))))
-     ((lsp--locations-to-xref-items loc))))
-#+end_src
-
-#+begin_src emacs-lisp :results none :tangle no
-(defun +lsp/consult-errors ()
-  (interactive)
-
-  (eval-expr 'lsp-diagnostics))
-#+end_src
-
-#+begin_src emacs-lisp :results none
 (defun +lsp/lsp-select-log-level()
   (interactive)
   (let* ((level-string (completing-read "Lsp log level" '("ERROR" "WARN" "INFO" "DEBUG")))
@@ -2549,39 +2519,16 @@ Remove other LSP sessions.
         #'lsp-workspace-folders-remove))
 #+end_src
    
-#+begin_src emacs-lisp :results none :tangle no
-(defun +lsp-treemacs/remove-session-at-point ()
-  (interactive)
-  (let ((file (button-get (treemacs-node-at-point) :key)))
-    (lsp-workspace-folders-remove file)))
-#+end_src
+** LSP Bridge
 
-** Eglot 
-#+begin_src emacs-lisp :results none :tangle no
-(use-package eglot
-  :straight t
-  :hook (;;(scala-mode . eglot-ensure)
-         (python-mode . eglot-ensure))
-  :bind (:map eglot-mode-map
-    ("C-<return>" . eglot-code-actions))
-  :config
-    (defun project-try-scala (dir)
-      (list 'vc 'Git "/home/porcupine/work/monorepo/creator/creator-plugin-handover"))
-
-    (defun project-try-python (dir)
-      (list 'vc 'Git "/home/porcupine/work/monorepo/ai/ai-intent-backend"
-                     "/home/porcupine/work/monorepo/ai/ai-email-classifier"
-                     "/home/porcupine/work/monorepo/ai/ai-intent-bert-backend"))
-
-    (setq completion-category-overrides '((eglot (styles orderless))))
-
-    (add-to-list 'project-find-functions #'project-try-python)
-    (add-to-list 'project-find-functions #'project-try-scala)
-
-    (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
-    (add-to-list 'eglot-server-programs '(scala-mode . ("metals")))
-
-    (setq eglot-confirm-server-initiated-edits nil))
+#+begin_src emacs-lisp :results none 
+(use-package lsp-bridge
+  :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
+            :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+            :build (:not compile))
+  :init
+    (setq lsp-bridge-python-lsp-server "pyright"))
+;; (global-lsp-bridge-mode))
 #+end_src
 
 ** Scala
@@ -2606,13 +2553,6 @@ scala-mode
       (with-temp-buffer
         (insert-file-contents "build.sbt")
         (search-forward "scalaVersion := \"3" nil t)))))
-
-(defun with-disable-for-scala3 (orig-scala-mode-map:add-self-insert-hooks &rest arguments)
-    "When using scala3 skip adding indention hooks."
-    (unless (is-scala3-project)
-      (apply orig-scala-mode-map:add-self-insert-hooks arguments)))
-
-(advice-add #'scala-mode-map:add-self-insert-hooks :around #'with-disable-for-scala3)
 
 (defun disable-scala-indent ()
   (when (is-scala3-project)
@@ -2924,20 +2864,6 @@ sbt-mode
   :defer t)
 #+end_src
 
-** SQL
-#+begin_src emacs-lisp :results none
-(defun +sql/align ()
-  (interactive)
-  (let ((rule
-	 (list (list nil
-		     (cons 'regexp  "\\(\\s-*\\)\\(VARCHAR\\|NOT NULL\\|TIMESTAMP\\)")
-		     (cons 'group 1)
-		     (cons 'bogus nil)
-		     (cons 'spacing 3)
-		     (cons 'repeat t)))))
-    (align-region (region-beginning) (region-end) 'entire rule nil nil)))
-#+end_src
-
 ** Elisp
 #+begin_src emacs-lisp :results none
 (use-package emacs
@@ -2953,51 +2879,6 @@ sbt-mode
               (lambda () (progn
           		 (push '("lambda" . "λ") prettify-symbols-alist)
           		 (prettify-symbols-mode 1)))))
-#+end_src
-
-** Scheme
-#+begin_src emacs-lisp :results none
-(use-package geiser
-  :straight t 
-  :defer t
-  :config 
-    (setq geiser-active-implementations '(guile)))
-#+end_src
-
-** askell
-#+begin_src emacs-lisp :results none :tangle no
-(use-package haskell-mode
-  :straight t
-  :diabled
-  :defer t
-  :config
-    (flycheck-haskell-setup))
-#+end_src
-
-
-#+begin_src emacs-lisp :results none :tangle no
-(use-package flycheck-haskell
-  :straight t
-  :defer t
-  :disabled
-  :commands flycheck-haskell-setup)
-#+end_src
-
-** ReasonML
-#+begin_src emacs-lisp :results none 
-(use-package reason-mode
-  :straight t
-  :defer t
-  :mode "\\.rei?$"
-  :config 
-  (require 'lsp-mode)
-  (setq lsp-response-timeout 180)
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection "/usr/bin/reason-language-server")
-                    :major-modes '(reason-mode)
-                    :notification-handlers (ht ("client/registerCapability" 'ignore))
-                    :priority 1
-                    :server-id 'reason-ls)))
 #+end_src
 
 ** JavaScript
@@ -3060,12 +2941,18 @@ sbt-mode
   :straight t
   :defer t
   :delight " tree"
+  :init
+    (global-tree-sitter-mode)
+    (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+
   :hook ((python-mode . (lambda () (tree-sitter-mode) (tree-sitter-hl-mode)))
          (scala-mode . (lambda () (tree-sitter-mode) (tree-sitter-hl-mode)))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
-
+(use-package tree-sitter-langs
+  :straight t
+  :after tree-sitter)
 #+end_src
 
 *** ts-fold
@@ -3087,20 +2974,6 @@ sbt-mode
   :straight t
   :defer t
   :mode "\\.fish$")
-#+end_src
-
-** Nix
-#+begin_src emacs-lisp :results none
-(use-package nix-mode
-  :straight t
-  :mode "\\.nix$")
-#+end_src
-
-** Elastic
-#+begin_src emacs-lisp :results none
-(use-package es-mode 
-  :straight t
-  :defer t)
 #+end_src
 
 * Configure =format-all=
@@ -3573,7 +3446,6 @@ sbt-mode
     "l e" #'lsp-ui-flycheck-list
     "l l" #'consult-lsp-symbols
     "l T" #'lsp-treemacs-errors-list
-    ;; "l r" #'lsp-ui-peek-find-references
     "l r" #'lsp-find-references
     "l R" #'lsp-rename
     "l x" #'+lsp/remove-other-sessions
@@ -3757,6 +3629,13 @@ sbt-mode
    "t" #'org-roam-tag-add)
 
   (general-define-key 
+   :prefix "C-c j"
+   :states 'normal
+   :keymaps '(evil-org-mode-map org-mode-map)
+   "p" #'org-roam-dailies-goto-yesterday
+   "n" #'org-roam-dailies-goto-tomorrow)
+
+  (general-define-key 
    :states '('normal 'insert)
    :keymaps '(evil-org-mode-map org-mode-map)
    "C-<return>" '+org/c-ret-dwim
@@ -3842,6 +3721,15 @@ sbt-mode
 (use-package gptel
   :straight t
   :defer t)
+#+end_src
+
+* Configure =psession=
+#+begin_src emacs-lisp :results none
+(use-package psession
+  :straight t
+  :init 
+    (psession-autosave-mode 1)
+    (psession-mode 1))
 #+end_src
 
 * Work
@@ -4047,15 +3935,14 @@ sbt-mode
 #+end_src
 
 ** Memo
-
 #+begin_src emacs-lisp :results none
 (use-package memo
   :load-path "~/.emacs.default/packages/memo/"
   :defer t
   :commands (memo/create-flashcard))
 #+end_src
-** Read Me
 
+** Read Me
 #+begin_src emacs-lisp :results none
 (use-package read-me
   :load-path "~/.emacs.default/packages/read-me/"
@@ -4064,7 +3951,6 @@ sbt-mode
 #+end_src
 
 ** Pjira
-
 #+begin_src emacs-lisp :results none
 (use-package pjira
   :load-path "~/.emacs.default/packages/pjira/"
@@ -4072,77 +3958,12 @@ sbt-mode
   :commands pjira-current-sprint)
 #+end_src
 
-** Memo
-
-* Utils
+** Winman
 #+begin_src emacs-lisp :results none
-(defun p/send-attachment (address)
-  (let ((path (or (buffer-file-name) nov-file-name)))
-
-    (mu4e-compose-new)
-
-    (save-excursion
-      (beginning-of-buffer)
-      (search-forward "To: " nil t)
-      (end-of-line)
-      (insert address)
-
-      (search-forward "Subject: " nil t)
-      (end-of-line)
-      (insert "file upload")
-
-      (end-of-buffer)
-
-      (insert (concat "\n<#part filename=\"" path "\" disposition=attachment><#/part>")))
-
-    (evil-force-normal-state)))
-
-(defun p/send-to-goodnotes ()
-  (interactive)
-  (p/send-attachment "me.bc8rmga@goodnotes.email"))
-
-(defun p/send-to-kindle ()
-  (interactive)
-  (p/send-attachment "luki.pol_63@kindle.com"))
+(use-package winman
+  :load-path "~/.emacs.default/packages/winman/"
+  :defer t
+  :commands (winman-save winman-load winman-delete))
 #+end_src
 
-#+begin_src emacs-lisp :results none
-(defun +core/convert-timestamp-at-point ()
-  (interactive)
-  (let ((word (current-word)))
-    (left-word)
-    (kill-word 1)
-    (insert (format-time-string "\"%d-%m-%Y %H:%M:%S\"" (seconds-to-time (/ (string-to-number word) 1000))))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun +core/current-timestamp ()
-  (interactive)
-  
-  (insert (number-to-string (floor (* 1000 (float-time))))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun copy-without-newlines ()
-   (interactive)
-   (mark-paragraph)
-   (kill-ring-save (region-beginning) (region-end))
-   (deactivate-mark)
-
-   (with-temp-buffer
-     (yank)
-     (mark-paragraph)
-     (evil-join (region-beginning) (region-end))
-     (mark-paragraph)
-     (kill-ring-save (region-beginning) (region-end))))
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(defun open-command ()
-  (interactive)
-
-  (if (eq system-type 'darwin)
-     "open"
-      "xdg-open"))
-#+end_src
 

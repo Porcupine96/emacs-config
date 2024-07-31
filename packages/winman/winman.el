@@ -1,0 +1,50 @@
+(defvar winman--configs (make-hash-table :test #'equal))
+
+(defun winman-save (key)
+  (interactive "sName: ")
+  (puthash key
+           (window-state-get (frame-root-window) t)
+           winman--configs))
+
+(defun winman-load (key)
+  (interactive
+   (let* ((completion-ignore-case t)
+          (completions '())
+          (nothing (maphash (lambda (k v) (push k completions)) winman--configs)))
+     (list (completing-read "Choose: " completions nil t))))
+  (window-state-put (gethash key winman--configs)))
+
+
+(defun winman-delete (key)
+  (interactive
+   (let* ((completion-ignore-case t)
+          (completions '())
+          (nothing (maphash (lambda (k v) (push k completions)) winman--configs)))
+     (list (completing-read "Choose: " completions nil t))))
+  (remhash key winman--configs))
+  
+
+(defun winman-persist ()
+  "Save the current window manager configurations to a file."
+  (interactive)
+  (let ((file (expand-file-name "winman-config.el" user-emacs-directory)))
+    (with-temp-file file
+      (insert ";; This is a generated file. Do not edit manually.\n")
+      (insert "(setq winman--configs\n      (make-hash-table :test 'equal :size " (number-to-string (hash-table-count winman--configs)) ")\n)\n")
+      (maphash (lambda (k v)
+                 (insert (format "(puthash (quote %S) (quote %S) winman--configs)\n" k v)))
+               winman--configs))))
+
+(defun winman-restore ()
+  "Restore the window configurations from a file."
+  (interactive)
+  (let ((winman-file (expand-file-name "winman-config.el" user-emacs-directory)))
+    (if (file-readable-p winman-file)
+        (progn
+          (load winman-file)
+          (let* ((elements (cdr winman--configs))
+                 (new-hash (make-hash-table :test 'equal)))
+            (dolist (element elements)
+              (puthash (car element) (cdr element) new-hash))
+            (setq winman--configs new-hash)))
+      (message "No configuration file found to restore."))))
