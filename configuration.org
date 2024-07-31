@@ -1816,7 +1816,7 @@ SCHEDULED: <2024-04-29 Mon>
    :defer t
    :config
      (custom-set-variables
-       '(zoom-window-mode-line-color "#4682B4")))
+       '(zoom-window-mode-line-color "#6272a4")))
  #+end_src
 
 * Completions
@@ -2437,6 +2437,13 @@ Setup =python-mode=.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defun +lsp/get-errors-for-buffer ()
+  (mapcar (lambda (el) (gethash "message" el))
+    (gethash (buffer-file-name)
+	     (lsp-diagnostics t))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (defun +lsp-ui/toggle-doc-focus ()
   (interactive)
   (if (lsp-ui-doc--visible-p)
@@ -2531,7 +2538,7 @@ Remove other LSP sessions.
 ;; (global-lsp-bridge-mode))
 #+end_src
 
-** Scala
+** COMMENT Scala
 scala-mode
 #+begin_src emacs-lisp :results none
 (use-package scala-mode
@@ -2676,6 +2683,31 @@ sbt-mode
 	  (insert "\nimport ")
 	  (insert chosen-import))
       (print "No import chosen!"))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/resolve-imports ()
+  (interactive)
+
+  (let* ((path (projectile-project-root))
+	 (executable "/Users/lukaszkazmierczak/projects/scala-importer/scala-importer")
+	 (output (shell-command-to-string (format (s-concat executable " %s") path)))
+         (available (-filter (lambda (s) (not (equal (s-trim s) ""))) (s-split "\n" output)))
+	 (missing
+	  (-distinct 
+	   (-map (lambda (s) (s-replace "not found: type " "" s))
+		 (-filter (lambda (s) (s-starts-with? "not found: type" s))
+			  (+lsp/get-errors-for-buffer)))))
+	 (imports
+	  (-filter (lambda (s) (-any? (lambda (m) (s-ends-with? m s)) missing))
+		   available)))
+
+    (if imports
+	(save-excursion
+	  (beginning-of-buffer)
+	  (forward-line)
+	  (-each imports (lambda (i) (insert "\nimport ") (insert i))))
+      (message "No imports to resolve"))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3553,6 +3585,7 @@ sbt-mode
     "s" #'hydra-scala-surround/body
     "l" #'+scala/importer
     "L" #'+scala/insert-common-import
+    "r" #'+scala/resolve-imports
     "d" #'+scala/def-in-file
     "p" #'+scala/insert-package
     "t" #'lsp-metals-toggle-show-inferred-type
