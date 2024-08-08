@@ -4,6 +4,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auth-source-save-behavior nil)
+ '(custom-safe-themes
+   '("52acee1228acc0397eb0e55039b43d18b6634ec0d259b57f8f0853b76137be2c" "3756ace14c5d362b7f9ca22a05cc3ba730d876962cd3b245147e67152b260a97" default))
  '(org-safe-remote-resources
    '("\\`https://gitlab\\.com/OlMon/org-themes/-/raw/master/src/bigblow/bigblow\\.theme\\'" "\\`https://gitlab\\.com/OlMon/org-themes/-/raw/master/src/darksun/darksun\\.theme\\'" "\\`https://gitlab\\.com/OlMon/org-themes/-/raw/master/src/stylish_white/stylish_white\\.theme\\'" "\\`https://gitlab\\.com/OlMon/org-themes/-/raw/master/src/darksun/export/setup/theme-darksun\\.setup\\'"))
  '(safe-local-variable-values

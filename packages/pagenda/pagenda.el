@@ -22,6 +22,7 @@
   org-agenda-scheduled-leaders '("" "")
   org-agenda-current-time-string "→"
   org-agenda-todo-keyword-format "%-1s"
+  org-super-agenda-final-group-separator "\n"
   org-agenda-sorting-strategy '((agenda priority-down user-defined-down))
   org-agenda-prefix-format '((agenda . " %?-2i %t ")
                              (todo . " %-12:c")
@@ -68,16 +69,16 @@
   (-let* ((org-agenda-span span)
 	  (org-super-agenda-groups
 	   `((:discard (:todo ("SOMEDAY" "KILL") :scheduled nil))
-	     (:name "👨‍💻 Work"
+	     (:name "👨‍💻 Work \n"
 		    :transformer #'pagenda--transform
 		    :and (:category "work"
 				    :todo ("STRT" "TODO" "WAIT" "REVIEW" "DONE")))
-	     (:name "🏫 Studies"
+	     (:name "🎓 Studies \n"
 		    :transformer #'pagenda--transform
 		    :and (:category "studies" 
 				    :todo ("PROJECT" "STRT" "TODO" "REVIEW" "DONE"))
 		    )
-	     (:name "🦔 Private"
+	     (:name "🦔 Private \n"
 		    :transformer #'pagenda--transform
 		    :and (:category "private" 
 				    :todo ("PROJECT" "STRT" "TODO" "REVIEW" "DONE"))

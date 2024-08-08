@@ -196,9 +196,9 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
               (fg-white `(:foreground ,white))
 
               (fmt-none `(:weight normal :slant normal  :underline nil        :inverse-video nil))
-              (fmt-big `(:weight normal :slant normal  :underline nil        :inverse-video nil :height 1.2))
+              (fmt-big `(:weight normal :slant normal  :underline nil         :inverse-video nil :height 1.2))
               (fmt-sbig `(:weight normal :slant normal  :underline nil        :inverse-video nil :height 1.1))
-              (fmt-bigger  `(:weight normal :slant normal  :underline nil        :inverse-video nil :height 1.5))
+              (fmt-bigger  `(:weight normal :slant normal  :underline nil     :inverse-video nil :height 1.5))
               (fmt-small `(:weight normal :slant normal :underline nil        :inverse-video nil :height 0.8))
               (fmt-bold `(:weight ,bold  :slant normal  :underline nil        :inverse-video nil))
               (fmt-bldi `(:weight ,bold                 :underline nil        :inverse-video nil))
@@ -475,7 +475,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 	     ;; org-agenda
 	     (org-agenda-date-today ((t (,@fmt-none ,@fg-purple))))
-	     (org-super-agenda-header ((t (,@fmt-bigger ,@fg-white))))
+	     (org-super-agenda-header ((t (,@fmt-big ,@fg-white :box (:line-width 1 :style flat-button :color ,white)))))
 	     (org-scheduled-previously ((t (,@fg-white))))
 	     (org-scheduled-today ((t (,@fg-white))))
 	     (org-upcoming-deadline ((t (,@fg-white))))

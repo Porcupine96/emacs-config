@@ -20,7 +20,8 @@
                    gc-cons-percentage 0.1)
              (message "Emacs started in: %s" (emacs-init-time))
              (garbage-collect)
-             (display-battery-mode)) t)
+             (display-battery-mode)) t
+	     (tab-bar-mode -1))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -98,10 +99,6 @@ MacOS settings
 #+begin_src emacs-lisp :results none
 (setq mac-option-modifier 'meta)
 (setq mac-right-option-modifier nil)
-#+end_src
-
-#+begin_src emacs-lisp :results none
-(setq tab-bar-mode nil)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3486,7 +3483,7 @@ sbt-mode
     "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
     "f y" (lambda () (interactive)(find-file "~/youtube/"))
     "f n" (lambda () (interactive)(find-file "~/dotfiles/config/nix/home.nix"))
-    "f T" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
+    "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
     "f x" (lambda () (interactive)(find-file "~/.config/yabai/yabairc"))
     
     "g b" #'magit-branch
