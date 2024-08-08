@@ -101,6 +101,10 @@ MacOS settings
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(setq tab-bar-mode nil)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (setq ring-bell-function #'ignore)
 #+end_src
 
@@ -340,7 +344,8 @@ Use =evil-surround=
   ("m" (lambda () (interactive) (dired "~/work/monorepo/")))
   ("s" (lambda () (interactive) (dired "~/Dropbox/org/resources/studies/")))
   ("S" (lambda () (interactive) (dired "~/scripts/")))
-  ("w" (lambda () (interactive) (dired "~/work/"))))
+  ("w" (lambda () (interactive) (dired "~/work/")))
+  ("y" (lambda () (interactive) (dired "~/youtube/"))))
 #+end_src
 
 ** Forge 
@@ -423,6 +428,10 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(global-set-key (kbd "C-c a") #'+agenda/daily-agenda)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (global-set-key (kbd "M-k") #'drag-stuff-up)
 (global-set-key (kbd "M-j") #'drag-stuff-down)
 #+end_src
@@ -430,6 +439,7 @@ Buffer commands.
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-c w w") #'psession-restore-winconf)
 (global-set-key (kbd "C-c w s") #'psession-save-winconf)
+(global-set-key (kbd "C-c w r") #'psession-update-winconf)
 (global-set-key (kbd "C-c w d") #'psession-delete-winconf)
 #+end_src
 
@@ -619,12 +629,12 @@ Scale text.
   (if (equal (car custom-enabled-themes) +core/dark-theme)
       ;; TODO: could be improved by extracting background directly from theme
       (progn
-	(setq org-todo-keyword-faces '(
-				      ("REVIEW"  . (:foreground "#ffffff" :background "#ffcc00"))
-				      ("WAIT"    . (:foreground "#ffffff" :background "#ffcc00"))
-				      ("SOMEDAY" . (:foreground "#ffffff" :background "#ffcc00"))
-				      ("STRT"    . (:foreground "#ffffff" :background "#0198e1"))))
-	(setq org-modern-todo-faces org-todo-keyword-faces)
+	;; (setq org-todo-keyword-faces '(
+	;; 			      ("REVIEW"  . (:foreground "#ffffff" :background "#ffcc00"))
+	;; 			      ("WAIT"    . (:foreground "#ffffff" :background "#ffcc00"))
+	;; 			      ("SOMEDAY" . (:foreground "#ffffff" :background "#ffcc00"))
+	;; 			      ("STRT"    . (:foreground "#ffffff" :background "#0198e1"))))
+	;; (setq org-modern-todo-faces org-todo-keyword-faces)
 	(+core/load-theme +core/light-theme)
 	(setq org-format-latex-options (plist-put org-format-latex-options :background "white")))
     (progn
@@ -716,20 +726,6 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (define-key evil-motion-state-map (kbd "g s j") #'evilem-motion-next-line)
 (define-key evil-motion-state-map (kbd "g s f") #'evil-avy-goto-char)
 (define-key evil-motion-state-map (kbd "g s s") #'evil-avy-goto-char-2)
-#+end_src
-
-* Configure =perspective=
-#+begin_src emacs-lisp :results none
-;; (use-package perspective 
-;;   :defer 5
-;;   :straight t
-;;   :custom
-;;     (persp-mode-prefix-key (kbd "C-c M-p"))
-;;   :init
-;;     (persp-mode)
-;;   :config 
-;;     (define-key evil-normal-state-map (kbd "gt") #'persp-next)
-;;     (define-key evil-normal-state-map (kbd "gT") #'persp-prev))
 #+end_src
 
 * Configure =tabspaces=
@@ -847,201 +843,201 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 * Configure =org=
 ** Core
 #+begin_src emacs-lisp :results none
-(use-package org
-  :straight t
-  :defer t
-  :delight
-  :custom
-  (org-ellipsis " ▾")
-  
-  :config 
-  (require 'org-tempo)
+  (use-package org
+    :straight t
+    :defer t
+    :delight
+    :custom
+    (org-ellipsis " ▾")
+    
+    :config 
+    (require 'org-tempo)
+    
+    (setq org-hide-emphasis-markers t)
+    (setq org-pretty-entities nil)
+    (setq korg-list-allow-alphabetical t)
+    (setq org-fontify-done-headline t)
+    (setq org-use-fast-todo-selection 'expert)
+    (setq org-image-actual-width nil)
+    (setq org-src-window-setup 'split-window-below)
+    (setq org-odt-preferred-output-format "docx")
+    (setq org-confirm-babel-evaluate nil)
+    (setq org-tags-column 0)
+    (setq org-insert-heading-respect-content t)
+    (setq org-auto-align-tags nil)
+    (setq org-capture-bookmark nil)
+    (setq org-export-with-sub-superscripts nil)
+    (setq org-indirect-buffer-display 'current-window)
 
-  (setq org-hide-emphasis-markers t)
-  (setq org-pretty-entities nil)
-  (setq korg-list-allow-alphabetical t)
-  (setq org-fontify-done-headline t)
-  (setq org-use-fast-todo-selection 'expert)
-  (setq org-image-actual-width nil)
-  (setq org-src-window-setup 'split-window-below)
-  (setq org-odt-preferred-output-format "docx")
-  (setq org-confirm-babel-evaluate nil)
-  (setq org-tags-column 0)
-  (setq org-insert-heading-respect-content t)
-  (setq org-auto-align-tags nil)
-  (setq org-capture-bookmark nil)
-  (setq org-export-with-sub-superscripts nil)
-  (setq org-indirect-buffer-display 'current-window)
+    (setq org-src-fontify-natively t)
+    (setq org-src-tab-acts-natively t)
+    (setq org-src-preserve-indentation t)
 
-  (setq org-src-fontify-natively t)
-  (setq org-src-tab-acts-natively t)
-  (setq org-src-preserve-indentation t)
+    (setq org-html-validation-link nil)
 
-  (setq org-html-validation-link nil)
+    (setq org-fontify-quote-and-verse-blocks t)
 
-  (setq org-fontify-quote-and-verse-blocks t)
+    ;; org-cite configuration
 
-  ;; org-cite configuration
+    (setq org-cite-global-bibliography p/bibliography)
 
-  (setq org-cite-global-bibliography p/bibliography)
+    ;; ignore some unwanted warnings
+    ;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+    
+    ;; (setq warning-suppress-types (append warning-suppress-types '((defvaralias))))
 
-  ;; ignore some unwanted warnings
-  ;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
-  
-  ;; (setq warning-suppress-types (append warning-suppress-types '((defvaralias))))
+    (setq org-refile-targets
+  	'(("/home/porcupine/Dropbox/org/todo/work.org" :maxlevel . 1)
+  	  ("/home/porcupine/Dropbox/org/todo/private.org" :maxlevel . 1)))
 
-  (setq org-refile-targets
-	'(("/home/porcupine/Dropbox/org/todo/work.org" :maxlevel . 1)
-	  ("/home/porcupine/Dropbox/org/todo/private.org" :maxlevel . 1)))
+    ;; babel configuration
+    (org-babel-do-load-languages 'org-babel-load-languages
+  			       '((shell . t)
+  				 (emacs-lisp . t)
+  				 (python . t)
+  				 (plantuml . t)
+  				 (scheme . t) 
+  				 (js . t)
+  				 (sql . t)
+  				 (R . t)
+  				 ;; (jupyter . t)
+  				 ;; (ammonite . t)
+  				 ;; (http . t)
+  				 ;; (mongo . t)
+  				 (haskell . t)))
 
-  ;; babel configuration
-  (org-babel-do-load-languages 'org-babel-load-languages
-			       '((shell . t)
-				 (emacs-lisp . t)
-				 (python . t)
-				 (plantuml . t)
-				 (scheme . t) 
-				 (js . t)
-				 (sql . t)
-				 (R . t)
-				 ;; (jupyter . t)
-				 ;; (ammonite . t)
-				 ;; (http . t)
-				 ;; (mongo . t)
-				 (haskell . t)))
+    (setq org-plantuml-jar-path
+          (expand-file-name "~/tools/plantuml.jar"))
 
-  (setq org-plantuml-jar-path
-        (expand-file-name "~/tools/plantuml.jar"))
-
-  (push '("\\.excalidraw.svg\\'" . "echo '%s' | sed 's/.svg//' | xargs open") org-file-apps)
-
-
-  (setq org-startup-with-inline-images t)
-
-  (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
-
-  ;; LaTeX options
-  (defun +latex-rescale ()
-    (interactive)
-    (org-latex-preview '(64))
-    (plist-put (plist-put org-format-latex-options :background "white")
-               :scale (if (= (x-display-pixel-width) 1920) 1.0 2.5))
-    (org-latex-preview '(16)))
-
-  (setq org-format-latex-options 
-	(plist-put (plist-put org-format-latex-options :background "white") :scale 1.0))
-
-  (setq org-latex-packages-alist nil)
-
-  ;; open files in the same window
-  (setf (alist-get 'file org-link-frame-setup) 'find-file)
-
-  (setq org-todo-keywords
-	'((sequence "IDEA(i) REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "DEPLOY(E)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
-	  (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
-
-  (evil-collection-define-key 'normal 'org-mode-map
-    "gr" #'org-mode-restart
-    (kbd "C-k") 'evil-window-up
-    (kbd "C-j") 'evil-window-down)
-
-  (add-to-list 'org-emphasis-alist '("`" bold :foreground "Orange"))
+    (push '("\\.excalidraw.svg\\'" . "echo '%s' | sed 's/.svg//' | xargs open") org-file-apps)
 
 
-  (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
+    (setq org-startup-with-inline-images t)
 
-  (setq org-capture-templates
-        '(
-	  ("d" "Daily" entry (file+olp+datetree "~/Dropbox/org/todo/work-daily.org") "*** %T
-/Status/
+    (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
 
-,*Current*
-- %?
+    ;; LaTeX options
+    (defun +latex-rescale ()
+      (interactive)
+      (org-latex-preview '(64))
+      (plist-put (plist-put org-format-latex-options :background "white")
+                 :scale (if (= (x-display-pixel-width) 1920) 1.0 2.5))
+      (org-latex-preview '(16)))
 
-,*Recently completed*
--  
+    (setq org-format-latex-options 
+  	(plist-put (plist-put org-format-latex-options :background "white") :scale 1.0))
 
-/Mood/
-- :+1:
-")
+    (setq org-latex-packages-alist nil)
 
-	  ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
-           "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n\n
-" )
+    ;; open files in the same window
+    (setf (alist-get 'file org-link-frame-setup) 'find-file)
 
-          ("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org") "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n\n
-")
+    (setq org-todo-keywords
+  	'((sequence "IDEA(i) REPEAT(r)" "TODO(t)" "NEXT(n)" "PROJECT(p)" "REVIEW(R)" "DEPLOY(E)" "STRT(s)" "SOMEDAY(S)" "WAIT(w)" "|" "DONE(d!)" "KILL(k)")
+  	  (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
 
-          ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org") "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n\n
-")
+    (evil-collection-define-key 'normal 'org-mode-map
+      "gr" #'org-mode-restart
+      (kbd "C-k") 'evil-window-up
+      (kbd "C-j") 'evil-window-down)
 
-	  ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
-           "* TODO %?
-:PROPERTIES:
-:CreatedAt: %T
-:END:\n\n
-" )))
-
-  (add-hook 'org-mode (lambda ()
-    (setq left-margin-width 3)
-    (setq right-margin-width 3)))
-
-  (add-hook 'org-mode-hook
-	    (lambda () (progn (push '("->" . "→") prettify-symbols-alist)
-			      (push '("!=" . "≠") prettify-symbols-alist)
-			      (push '("<-" . "←") prettify-symbols-alist)
-			      (push '("<->" . "←→") prettify-symbols-alist)
-			      (push '("---" . "⎯") prettify-symbols-alist)
-			      (push '("\\\\" . "▾") prettify-symbols-alist)
-
-			      (prettify-symbols-mode 1))))
-
-  (defun org-archive-save-buffer ()
-    (let ((afile (car (org-all-archive-files))))
-      (if (file-exists-p afile)
-          (let ((buffer (find-file-noselect afile)))
-            (with-current-buffer buffer
-              (save-buffer)))
-        (message "Ooops ... (%s) does not exist." afile))))
+    (add-to-list 'org-emphasis-alist '("`" bold :foreground "Orange"))
 
 
-  (defun paste-formatted ()
-    (interactive)
+    (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
 
-    (if current-prefix-arg
-       (let ((content (current-kill 0)))
-          (insert (s-replace "- " "" (s-trim content)))
-          (org-fill-paragraph))
-       (evil-paste-after 1)))
+    (setq org-capture-templates
+          '(
+  	  ("d" "Daily" entry (file+olp+datetree "~/Dropbox/org/todo/work-daily.org") "*** %T
+  /Status/
 
-  (add-hook 'org-archive-hook 'org-archive-save-buffer)
+  ,*Current*
+  - %?
 
-  (add-hook 'after-init-hook
-	    (lambda ()
-	      (require 'org-indent)  
-	      (set-face-attribute 'org-indent nil
-				  :inherit '(org-hide fixed-pitch))))
-  :bind
-  (:map evil-normal-state-map
-        ("C-c h" . org-toggle-heading)
-        ("C-k" . evil-window-up)
-        ("C-j" . evil-window-down)
-        ("p" . paste-formatted)
-	:map org-mode-map 
-        ("C-c h" . org-toggle-heading)
-        ("C-x n S" . org-tree-to-indirect-buffer))
-  :hook (org-mode . org-indent-mode)
-  (org-mode . variable-pitch-mode)
-  (org-mode . auto-fill-mode))
+  ,*Recently completed*
+  -  
+
+  /Mood/
+  - :+1:
+  ")
+
+  	  ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
+             "* TODO %?
+  :PROPERTIES:
+  :CreatedAt: %T
+  :END:\n\n
+  " )
+
+            ("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org") "* TODO %?
+  :PROPERTIES:
+  :CreatedAt: %T
+  :END:\n\n
+  ")
+
+            ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org") "* TODO %?
+  :PROPERTIES:
+  :CreatedAt: %T
+  :END:\n\n
+  ")
+
+  	  ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
+             "* TODO %?
+  :PROPERTIES:
+  :CreatedAt: %T
+  :END:\n\n
+  " )))
+
+    (add-hook 'org-mode (lambda ()
+      (setq left-margin-width 3)
+      (setq right-margin-width 3)))
+
+    (add-hook 'org-mode-hook
+  	    (lambda () (progn (push '("->" . "→") prettify-symbols-alist)
+  			      (push '("!=" . "≠") prettify-symbols-alist)
+  			      (push '("<-" . "←") prettify-symbols-alist)
+  			      (push '("<->" . "←→") prettify-symbols-alist)
+  			      (push '("---" . "⎯") prettify-symbols-alist)
+  			      (push '("\\\\" . "▾") prettify-symbols-alist)
+
+  			      (prettify-symbols-mode 1))))
+
+    (defun org-archive-save-buffer ()
+      (let ((afile (car (org-all-archive-files))))
+        (if (file-exists-p afile)
+            (let ((buffer (find-file-noselect afile)))
+              (with-current-buffer buffer
+                (save-buffer)))
+          (message "Ooops ... (%s) does not exist." afile))))
+
+
+    (defun paste-formatted ()
+      (interactive)
+
+      (if current-prefix-arg
+         (let ((content (current-kill 0)))
+            (insert (s-replace "- " "" (s-trim content)))
+            (org-fill-paragraph))
+         (evil-paste-after 1)))
+
+    (add-hook 'org-archive-hook 'org-archive-save-buffer)
+
+    (add-hook 'after-init-hook
+  	    (lambda ()
+  	      (require 'org-indent)  
+  	      (set-face-attribute 'org-indent nil
+  				  :inherit '(org-hide fixed-pitch))))
+    :bind
+    (:map evil-normal-state-map
+          ("C-c h" . org-toggle-heading)
+          ("C-k" . evil-window-up)
+          ("C-j" . evil-window-down)
+          ("p" . paste-formatted)
+  	:map org-mode-map 
+          ("C-c h" . org-toggle-heading)
+          ("C-x n S" . org-tree-to-indirect-buffer))
+    :hook (org-mode . org-indent-mode)
+    (org-mode . variable-pitch-mode)
+    (org-mode . auto-fill-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1139,26 +1135,35 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 #+begin_src emacs-lisp :results none
 (use-package pagenda
   :load-path "~/.emacs.default/packages/pagenda/"
-  :hook (org-agenda-mode . pagenda-mode)
   :commands (pagenda-mode +agenda/daily-agenda +agenda/weekly-agenda)
   :defer t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package org-super-agenda
-  :straight t
-  :defer t
-  :hook
-    (org-agenda-mode . org-super-agenda-mode)
-  :bind 
-    (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
-	:map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
-	:map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
-  :config
-    (setq org-agenda-files '(
-       "~/Dropbox/org/todo/work.org"
-       "~/Dropbox/org/todo/studies.org"
-       "~/Dropbox/org/todo/private.org")))
+  (use-package org-super-agenda
+    :straight t
+    :defer t
+    :hook ((org-agenda-mode . org-super-agenda-mode)
+           (org-agenda-mode . pagenda-mode))
+    :bind 
+      (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
+  	:map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
+  	:map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
+    :config
+      (require 'org-expiry)
+  
+      (setq org-expiry-inactive-timestamps t)
+    
+      (setq org-agenda-files '(
+         "~/Dropbox/org/todo/work.org"
+         "~/Dropbox/org/todo/studies.org"
+         "~/Dropbox/org/todo/private.org")))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package org-ql
+  :straight (:type git :host github :repo "alphapapa/org-ql")
+  :defer t)
 #+end_src
 
 ** Academic
@@ -1716,7 +1721,7 @@ Save image and insert it's link at point.
 (use-package forge 
    :straight t  
    :after magit
-   :config
+   :config    
     (add-to-list 'forge-alist
                    '("gitlab.vpn.zowie.ai"
                      "gitlab.vpn.zowie.ai/api/v4"
@@ -1737,8 +1742,8 @@ vc-annotate options.
   :defer t
   :config 
     (evil-collection-define-key 'normal 'eww-mode-map
-      "gt" #'persp-next
-      "gT" #'persp-prev))
+      "gt" #'tab-next
+      "gT" #'tab-prev))
 
 (defun +eww/browse-url (url &optional arg)
   (interactive
@@ -1751,7 +1756,7 @@ vc-annotate options.
 
 * Configure =leetcode=
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package leetcode
    :straight t 
    :defer t
@@ -2270,8 +2275,6 @@ Setup =python-mode=.
 (use-package python-mode
    :straight t
    :defer t
-   :bind (:map python-mode-map
-	       ("C-<backspace>" . backward-kill-word))
    :init
      (font-lock-add-keywords 'python-mode
        '(("\\(TODO\\):" 1 'todo-comment-face prepend)))
@@ -2280,11 +2283,14 @@ Setup =python-mode=.
       (setq python-guess-indent nil)  
       (setq python-indent-guess-indent-offset t)  
       (setq python-indent-guess-indent-offset-verbose nil)
+      (setq lsp-pyls-plugins-flake8-max-line-length 120)
       
       (setq python-shell-interpreter "ipython"
             python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
-   :hook ((python-mode . origami-mode))
    :config
+     (add-hook 'python-base-mode-hook 'flymake-mode)
+     (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
+
      (add-hook 'python-mode-hook 
        (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
 #+end_src
@@ -2316,7 +2322,7 @@ Setup =python-mode=.
   :hook (python-mode . blacken-mode))
 #+end_src
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package lsp-pyright
   :straight t
   :hook (python-mode . (lambda ()
@@ -2526,9 +2532,39 @@ Remove other LSP sessions.
         #'lsp-workspace-folders-remove))
 #+end_src
    
+** Eglot 
+#+begin_src emacs-lisp :results none
+(use-package eglot
+  :straight t
+  :hook
+  (python-mode . eglot-ensure)
+
+  :config
+  (add-hook 'eglot-managed-mode-hook
+    (lambda () (cond ((derived-mode-p 'python-base-mode)
+                      (add-hook 'flymake-diagnostic-functions 'python-flymake nil t))
+                      ;; if not adding diagnostic functions to other modes just use an if
+                      ;; ...
+                     (t nil))))
+  
+  (setq-default eglot-workspace-configuration
+                '((:pyright-langserver . (:configurationSources ["flake8"]
+								:plugins (
+									  :pycodestyle (:enabled :json-false)
+									  :mccabe (:enabled :json-false)
+									  :pyflakes (:enabled :json-false)
+									  :flake8 (:enabled :json-false :maxLineLength 120)
+									  :ruff (:enabled t :lineLength 120)
+									  :pydocstyle (:enabled t :convention "numpy")
+									  :yapf (:enabled :json-false)
+									  :autopep8 (:enabled :json-false)
+									  :black (:enabled t :line_length 120 :cache_config t)))))))
+
+#+end_src
+
 ** LSP Bridge
 
-#+begin_src emacs-lisp :results none 
+#+begin_src emacs-lisp :results none :tangle no
 (use-package lsp-bridge
   :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
             :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
@@ -2787,6 +2823,9 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (defvar +scala/common-imports
   '("import scala.concurrent.duration._"
+    "import scala.concurrent.duration.FiniteDuration"
+    "import java.time.ZonedDateTime"
+    "import scala.jdk.CollectionConverters._"
     "import cats.instances.future.catsStdInstancesForFuture"
     "import cats.instances.list.catsStdInstancesForList"
     "import cats.syntax.flatMap._"
@@ -2800,7 +2839,6 @@ sbt-mode
     "import cats.syntax.apply._"
     "import cats.syntax.option._"
     "import cats.effect.IO"
-    "import scala.jdk.CollectionConverters._"
     "import cats.effect.kernel.Ref"
     "import cats.effect.Resource"
     "import cats.effect.std.Dispatcher"
@@ -2852,11 +2890,11 @@ sbt-mode
 		     (-map (lambda (s) (s-replace "import " "" s)) +scala/common-imports)))
 	 (missing
 	  (-distinct 
-	   (-map (lambda (s) (s-replace "not found: type " "" s))
-		 (-filter (lambda (s) (s-starts-with? "not found: type" s))
+	   (-map (lambda (s) (s-replace "not found: value " "" (s-replace "not found: type " "" s)))
+		 (-filter (lambda (s) (s-starts-with? "not found: " s))
 			  (+lsp/get-errors-for-buffer)))))
 	 (imports
-	  (-filter (lambda (s) (-any? (lambda (m) (s-ends-with? m s)) missing))
+	  (-filter (lambda (s) (-any? (lambda (m) (s-ends-with? (concat "." m) s)) missing))
 		   available)))
     
     (if imports
@@ -3397,7 +3435,7 @@ sbt-mode
   :config
   (general-create-definer leader-def 
     :prefix "SPC")
-  
+    
   (leader-def
     :states '(normal visual motion)
     :keymaps 'override
@@ -3446,8 +3484,8 @@ sbt-mode
     "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
     "f d" (lambda () (interactive)(dired "~/dotfiles"))
     "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
+    "f y" (lambda () (interactive)(find-file "~/youtube/"))
     "f n" (lambda () (interactive)(find-file "~/dotfiles/config/nix/home.nix"))
-    "f t" (lambda () (interactive)(find-file "~/Dropbox/org/todo/telegram.org"))
     "f T" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
     "f x" (lambda () (interactive)(find-file "~/.config/yabai/yabairc"))
     
@@ -3548,6 +3586,11 @@ sbt-mode
     "SPC" (lambda () (interactive) (consult-find default-directory))
     "," #'consult-projectile
     "'" #'hydra-dired-bookmarks/body)
+  
+  (leader-def
+    :states '(normal visual motion)
+    :keymaps 'eglot-mode-map
+    "l d" #'xref-find-definitions)
 
   (general-create-definer local-leader-def
     :prefix "SPC m")
@@ -3564,7 +3607,8 @@ sbt-mode
     "p" #'p/force-publish-current-file
     "P" #'p/show-current-currently-published-file
     "i" #'+org/save-image-insert-link
-    "t" #'org-todo)
+    "t" #'org-todo
+    "a" #'org-expiry-insert-created)
 
   (local-leader-def
     :states 'normal
@@ -3763,8 +3807,15 @@ sbt-mode
 (use-package psession
   :straight t
   :init 
-    (psession-autosave-mode 1)
-    (psession-mode 1))
+  (psession-autosave-mode 1)
+  (psession-mode 1)
+  :config
+
+  (defun psession-update-winconf (conf)
+    (interactive (list (completing-read
+			"WinConfig: "
+			(sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
+    (psession-save-winconf conf)))
 #+end_src
 
 * Work

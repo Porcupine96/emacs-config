@@ -4,28 +4,7 @@
 (require 'org-super-agenda)
 (require 'face-remap)
 (require 'winner)
-;; (require 'svg-lib)
 
-(defvar-local pagenda-transforms nil "A list of faces and their associated specs.")
-(defcustom pagenda-font "Roboto Mono Light for Powerline" "The font to use in an elegant agenda buffer")
-
-(defvar pagenda-face-remappings
-  (let ((face-height (face-attribute 'default :height)))
-    (list
-     (list 'default (list :family pagenda-font
-                          :height (ceiling (* face-height 1.25)) :weight 'thin))
-     (list 'header-line (list :family pagenda-font
-                              :height (* face-height 1.5) :weight 'thin
-                              :underline nil  :overline nil :box nil))
-     (list 'org-agenda-date-today (list :weight 'bold))
-     (list 'org-agenda-structure (list :family pagenda-font :weight 'regular))
-     (list 'bold (list :family pagenda-font :height (ceiling (* face-height 1.1)) :weight 'bold))))
-  "A list of faces and the associated specs that will be remapped
-  when pagenda-mode is enabled")
-
-(defun pagenda--file-tag (test)
-  (print test)
-  "tag")
 
 (setq
   org-agenda-window-setup 'only-window
@@ -34,25 +13,40 @@
   org-agenda-start-day "today"
   org-deadline-warning-days 100
   org-log-done 'time
-  org-agenda-block-separator 9472  ;; straight line
-  org-agenda-tags-column -100
   org-agenda-compact-blocks t
   diary-show-holidays-flag nil
-  org-agenda-skip-deadline-prewarning-if-scheduled nil
+  org-agenda-skip-deadline-prewarning-if-scheduled t
   org-agenda-skip-scheduled-if-deadline-is-shown t
   org-agenda-hide-tags-regexp ".*"
   org-agenda-breadcrumbs-separator " ❯ "
   org-agenda-scheduled-leaders '("" "")
   org-agenda-current-time-string "→"
   org-agenda-todo-keyword-format "%-1s"
-  org-agenda-sorting-strategy '((agenda priority-down timestamp-up category-keep))
-  org-agenda-prefix-format '((agenda . " %?-20b %?-10t%s")
-                             (timeline . "  % s")
-                             (todo . "%i %-12:c%b")
-                             (tags . "%i %-12:c%b")
-                             (search . " %i %-12:c"))
-  org-super-agenda-keep-order t)
+  org-agenda-sorting-strategy '((agenda priority-down user-defined-down))
+  org-agenda-prefix-format '((agenda . " %?-2i %t ")
+                             (todo . " %-12:c")
+                             (tags . " %-12:c")
+                             (search . " %-12:c"))
+  org-super-agenda-keep-order t
+  org-agenda-cmp-user-defined #'org-agenda-cmp-user-defined)
 
+
+(defun org-agenda-cmp-user-defined (a b)
+  (let* ((a-todo (get-text-property 0 'todo-state a))
+	 (b-todo (get-text-property 0 'todo-state b))
+	 (todo-order '(("STRT" . 1)
+		       ("TODO" . 2)
+		       ("WAIT" . 3)
+		       ("REVIEW" . 4)
+		       ("DONE" . 5)))
+
+	 (a-todo-prio (cdr (assoc a-todo todo-order)))
+	 (b-todo-prio (cdr (assoc b-todo todo-order))))
+
+    (cond
+     ((= a-todo-prio b-todo-prio) 0)
+     ((> a-todo-prio b-todo-prio) -1)
+     ((< a-todo-prio b-todo-prio) 1))))
 
 (defun pagenda-change-status ()
   (interactive)
@@ -66,32 +60,27 @@
     (propertize label 'face format)))
 
 (defun pagenda--transform (item)
-  (let* ((days-string (replace-regexp-in-string ".*In\s+\\([0-9]+\\) d\.:.*" "\\1" item))
-	 (days (string-to-number (substring-no-properties days-string)))
-	 (item-stripped (replace-regexp-in-string " In\s+[0-9]+ d\.:" "" item)))
-
-    (if (equal days 0)
-	(replace-regexp-in-string "Deadline:\s+" "" item)
-      (s-concat (s-pad-right 70 " " item-stripped) " " (pagenda--format-days-left days)))))
+  ;; (print item)
+  item)
 
 (defun +agenda/show (span)
   (interactive)
   (-let* ((org-agenda-span span)
 	  (org-super-agenda-groups
-	   `((:discard (:todo ("DONE" "SOMEDAY" "KILL")))
-	     (:name "💻 Work"
+	   `((:discard (:todo ("SOMEDAY" "KILL") :scheduled nil))
+	     (:name "👨‍💻 Work"
 		    :transformer #'pagenda--transform
 		    :and (:category "work"
-				    :todo ("STRT" "TODO" "WAIT" "REVIEW")))
-	     (:name "‍🏫 Studies"
+				    :todo ("STRT" "TODO" "WAIT" "REVIEW" "DONE")))
+	     (:name "🏫 Studies"
 		    :transformer #'pagenda--transform
 		    :and (:category "studies" 
-				    :todo ("PROJECT" "STRT" "TODO" "REVIEW"))
+				    :todo ("PROJECT" "STRT" "TODO" "REVIEW" "DONE"))
 		    )
-	     (:name "🌳 Private"
+	     (:name "🦔 Private"
 		    :transformer #'pagenda--transform
 		    :and (:category "private" 
-				    :todo ("PROJECT" "STRT" "TODO" "REVIEW"))
+				    :todo ("PROJECT" "STRT" "TODO" "REVIEW" "DONE"))
 		    ))))
     (org-agenda nil "a")
     (scroll-down)))
@@ -124,18 +113,12 @@
 (defun pagenda--enable()
   (setq-local mode-line-format nil)
   (setq-local line-spacing 8)
-  (org-super-agenda-mode)
+  (org-super-agenda-mode))
 
-  (setq pagenda-transforms
-	(mapcar (lambda (face-&-spec)
-		  (face-remap-add-relative (car face-&-spec) (cadr face-&-spec)))
-		pagenda-face-remappings)))
 
 (defun pagenda--disable()
   (setq-local mode-line-format (default-value 'mode-line-format))
-  (setq-local line-spacing (default-value 'line-spacing))
-  (mapc #'face-remap-remove-relative
-	pagenda-transforms))
+  (setq-local line-spacing (default-value 'line-spacing)))
 
 
 (defvar pagenda-mode-map
@@ -143,6 +126,8 @@
     (define-key map (kbd "q") #'winner-undo)
     (define-key map (kbd "t") #'pagenda-change-status)
     (define-key map (kbd "RET") #'winner-undo)
+    (define-key map (kbd "C-k") #'org-agenda-earlier)
+    (define-key map (kbd "C-j") #'org-agenda-later)
     map))
 
 (define-minor-mode pagenda-mode

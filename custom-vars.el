@@ -24,7 +24,7 @@
      (defvaralias)
      (org-element-cache)
      (defvaralias)))
- '(zoom-window-mode-line-color "#4682B4"))
+ '(zoom-window-mode-line-color "#6272a4"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

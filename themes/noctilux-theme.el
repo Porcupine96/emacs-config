@@ -208,10 +208,8 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
               (fmt-undi `(:weight normal                :underline ,underline :inverse-video nil))
               (fmt-uopt `(:weight normal :slant normal  :underline ,opt-under :inverse-video nil))
               (fmt-bb  `(:weight ,bright-bold :slant normal :underline nil    :inverse-video nil))
-              ;; FIXME: not quite the same
               (fmt-curl `(:weight normal :slant normal  :underline t          :inverse-video nil))
               (fmt-ital `(:weight normal :slant ,italic :underline nil        :inverse-video nil))
-              ;; FIXME: not quite the same
               (fmt-stnd `(:weight normal :slant normal  :underline nil        :inverse-video t))
               (fmt-revr `(:weight normal :slant normal  :underline nil        :inverse-video t))
               (fmt-revb `(:weight ,bold  :slant normal  :underline nil        :inverse-video t))
@@ -477,7 +475,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
 
 	     ;; org-agenda
 	     (org-agenda-date-today ((t (,@fmt-none ,@fg-purple))))
-	     (org-super-agenda-header ((t (,@fmt-big ,@fg-purple))))
+	     (org-super-agenda-header ((t (,@fmt-bigger ,@fg-white))))
 	     (org-scheduled-previously ((t (,@fg-white))))
 	     (org-scheduled-today ((t (,@fg-white))))
 	     (org-upcoming-deadline ((t (,@fg-white))))
