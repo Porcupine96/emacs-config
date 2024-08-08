@@ -32,8 +32,8 @@
 * Visuals
 Set window transparency.
 #+begin_src emacs-lisp :results none
-(set-frame-parameter nil 'alpha-background 100)
-(add-to-list 'default-frame-alist '(alpha-background . 100))
+(set-frame-parameter nil 'alpha-background 25)
+(add-to-list 'default-frame-alist '(alpha-background . 25))
 #+end_src
 
 Font.
@@ -944,45 +944,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     (setq org-default-notes-file (concat org-directory "~/Dropbox/org/todo/notes.org"))
 
     (setq org-capture-templates
-          '(
-  	  ("d" "Daily" entry (file+olp+datetree "~/Dropbox/org/todo/work-daily.org") "*** %T
-  /Status/
-
-  ,*Current*
-  - %?
-
-  ,*Recently completed*
-  -  
-
-  /Mood/
-  - :+1:
-  ")
-
-  	  ("p" "Private" entry (file "~/Dropbox/org/todo/private.org")
-             "* TODO %?
-  :PROPERTIES:
-  :CreatedAt: %T
-  :END:\n\n
-  " )
-
-            ("i" "Inbox" entry (file "~/Dropbox/org/todo/inbox.org") "* TODO %?
-  :PROPERTIES:
-  :CreatedAt: %T
-  :END:\n\n
-  ")
-
-            ("s" "Studies" entry (file "~/Dropbox/org/todo/studies.org") "* TODO %?
-  :PROPERTIES:
-  :CreatedAt: %T
-  :END:\n\n
-  ")
-
-  	  ("w" "Work" entry (file "~/Dropbox/org/todo/work.org")
-             "* TODO %?
-  :PROPERTIES:
-  :CreatedAt: %T
-  :END:\n\n
-  " )))
+          '(("p" "Private" entry (file+headline "~/Dropbox/org/todo/private.org" "Private") "* TODO %?\n\n" :prepend t)
+            ("s" "Studies" entry (file+headline "~/Dropbox/org/todo/studies.org" "Studies") "* TODO %?\n\n" :prepend t)
+            ("w" "Work" entry (file+headline "~/Dropbox/org/todo/work.org" "Work") "* TODO %?\n\n" :prepend t)))
 
     (add-hook 'org-mode (lambda ()
       (setq left-margin-width 3)
@@ -1107,6 +1071,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :config
     (add-hook 'org-mode-hook 'evil-org-mode)
     (add-hook 'evil-org-mode-hook 'general-define-org-keys)
+    (add-hook 'org-trigger-hook 'save-buffer)
     
     (require 'evil-org-agenda)
     (evil-org-agenda-set-keys))
@@ -1143,9 +1108,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     :hook ((org-agenda-mode . org-super-agenda-mode)
            (org-agenda-mode . pagenda-mode))
     :bind 
-      (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
-  	:map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
-  	:map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
+     (:map org-agenda-keymap (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
+      :map org-agenda-mode-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line))
+      :map org-super-agenda-header-map (("h" . evil-backward-char) ("k" . evil-previous-line) ("l" . evil-forward-char) ("j" . evil-next-line)))
     :config
       (require 'org-expiry)
   
@@ -3807,11 +3772,19 @@ sbt-mode
   (psession-autosave-mode 1)
   (psession-mode 1)
   :config
+  (setq psession-object-to-save-alist '((extended-command-history . "extended-command-history.el")
+					(regexp-search-ring . "regexp-search-ring.el")
+					(search-ring . "search-ring.el")
+					(file-name-history . "file-name-history.el")
+					(kill-ring . "kill-ring.el")
+					(kill-ring-yank-pointer . "kill-ring-yank-pointer.el")
+					(register-alist . "register-alist.el")
+					(psession--winconf-alist . "psession-winconf-alist.el")))
 
   (defun psession-update-winconf (conf)
     (interactive (list (completing-read
-			"WinConfig: "
-			(sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
+ 			"WinConfig: "
+ 			(sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
     (psession-save-winconf conf)))
 #+end_src
 
