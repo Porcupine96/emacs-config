@@ -432,6 +432,7 @@ the \"Gen RGB\" column in noctilux-definitions.el to improve them further."
              (org-modern-time-active    ((t (:inherit default ,@fmt-small ,@fg-gray ,@bg-base03))))
              (org-modern-time-inactive  ((t (:inherit default ,@fmt-small ,@fg-gray ,@bg-base03))))
              (org-modern-done           ((t (:inherit default ,@fmt-bold ,@fg-gray ,@bg-base03))))
+             (org-modern-priority       ((t (:inherit default ,@fg-white ,@bg-green :height 0.8))))
              (org-modern-todo           ((t (:inherit default ,@fmt-bold ,@fg-red  ,@bg-base03))))
              (org-modern-tag            ((t (:inherit default ,@fmt-ital ,@fg-gray,@bg-base02))))
              (org-done                  ((t (:inherit default ,@fmt-bold ,@fg-gray ,@bg-base03))))

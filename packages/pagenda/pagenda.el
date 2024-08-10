@@ -6,6 +6,14 @@
 (require 'winner)
 
 
+(defface pagenda--days-left-face
+  '((t :foreground "red"))
+  "Face for days left in deadline"
+  :group 'org-faces)
+
+
+(defvar pagenda--deadline-padding 80)
+
 (setq
   org-agenda-window-setup 'only-window
   org-agenda-show-future-repeats nil
@@ -49,20 +57,27 @@
      ((> a-todo-prio b-todo-prio) -1)
      ((< a-todo-prio b-todo-prio) 1))))
 
-(defun pagenda-change-status ()
-  (interactive)
-  (org-agenda-todo))
+(defun pagenda--get-days-left (deadline)
+  (car (time-subtract (org-time-string-to-time deadline) (current-time))))
 
-(defun pagenda--format-days-left (days)
-  (let* ((format (cond ((eql days 1) '(:foreground "#ff5555" :weight bold))
- 		      ((<= days 3) '(:foreground  "yellow" :weight bold))
-		      (t '(:foreground  "white"))))
-	(label (s-concat (number-to-string days) " " (if (equal days 1) "day" " days") " left")))
-    (propertize label 'face format)))
+(defun pagenda--days-left-string (days-left)
+   (cond
+    ((< days-left 0) "overdue")
+    ((= days-left 0) "today")
+    ((= days-left 1) (s-concat (number-to-string days-left) " day left"))
+    (t               (s-concat (number-to-string days-left) " days left"))))
 
 (defun pagenda--transform (item)
-  ;; (print item)
-  item)
+  (org-super-agenda--when-with-marker-buffer (org-super-agenda--get-marker item)
+
+    (let* ((deadline (org-entry-get (point) "DEADLINE")))
+      (if deadline
+	  (let* ((days-left (pagenda--get-days-left deadline)))
+	    (s-concat
+	     ;; TODO: fix padding
+	     (format (format "%%-%ds" pagenda--deadline-padding) item)
+	     (propertize (pagenda--days-left-string days-left) 'face 'pagenda--days-left-face)))
+	item))))
 
 (defun +agenda/show (span)
   (interactive)
@@ -76,12 +91,12 @@
 	     (:name "🎓 Studies \n"
 		    :transformer #'pagenda--transform
 		    :and (:category "studies" 
-				    :todo ("PROJECT" "STRT" "TODO" "REVIEW" "DONE"))
+				    :todo ("PROJECT" "STRT" "WAIT" "TODO" "REVIEW" "DONE"))
 		    )
 	     (:name "🦔 Private \n"
 		    :transformer #'pagenda--transform
 		    :and (:category "private" 
-				    :todo ("PROJECT" "STRT" "TODO" "REVIEW" "DONE"))
+				    :todo ("PROJECT" "STRT" "WAIT" "TODO" "REVIEW" "DONE"))
 		    ))))
     (org-agenda nil "a")
     (scroll-down)))
@@ -102,15 +117,6 @@
     (interactive)
     (org-tags-view t "@hot"))
 
-(defun pagenda/save-at-point ()
-  (interactive)
-  (let* ((marker (or (org-get-at-bol 'org-marker)
-	             (error "Invalid marker!")))
-	 (buffer (marker-buffer marker)))
-
-    (with-current-buffer buffer)
-       (save-buffer)))
-
 (defun pagenda--enable()
   (setq-local mode-line-format nil)
   (setq-local line-spacing 8)
@@ -125,7 +131,7 @@
 (defvar pagenda-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "q") #'winner-undo)
-    (define-key map (kbd "t") #'pagenda-change-status)
+    (define-key map (kbd "t") #'org-agenda-todo)
     (define-key map (kbd "RET") #'winner-undo)
     (define-key map (kbd "C-k") #'org-agenda-earlier)
     (define-key map (kbd "C-j") #'org-agenda-later)

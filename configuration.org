@@ -3450,6 +3450,7 @@ sbt-mode
     "f n" (lambda () (interactive)(find-file "~/dotfiles/config/nix/home.nix"))
     "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
     "f x" (lambda () (interactive)(find-file "~/.config/yabai/yabairc"))
+    "f X" (lambda () (interactive)(find-file "~/.config/skhd/skhdrc"))
     
     "g b" #'magit-branch
     "g g" #'magit-status
@@ -3772,14 +3773,16 @@ sbt-mode
   (psession-autosave-mode 1)
   (psession-mode 1)
   :config
+  ;; idea: save magit commit history as well
   (setq psession-object-to-save-alist '((extended-command-history . "extended-command-history.el")
-					(regexp-search-ring . "regexp-search-ring.el")
-					(search-ring . "search-ring.el")
-					(file-name-history . "file-name-history.el")
-					(kill-ring . "kill-ring.el")
-					(kill-ring-yank-pointer . "kill-ring-yank-pointer.el")
-					(register-alist . "register-alist.el")
-					(psession--winconf-alist . "psession-winconf-alist.el")))
+                                        (regexp-search-ring . "regexp-search-ring.el")
+                                        (search-ring . "search-ring.el")
+                                        (file-name-history . "file-name-history.el")
+                                        (kill-ring . "kill-ring.el")
+                                        (kill-ring-yank-pointer . "kill-ring-yank-pointer.el")
+                                        (register-alist . "register-alist.el")
+                                        (psession--save-buffers-alist . "psession-save-buffers-alist.el")
+                                        (psession--winconf-alist . "psession-winconf-alist.el")))
 
   (defun psession-update-winconf (conf)
     (interactive (list (completing-read
