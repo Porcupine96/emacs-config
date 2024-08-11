@@ -58,7 +58,11 @@
      ((< a-todo-prio b-todo-prio) 1))))
 
 (defun pagenda--get-days-left (deadline)
-  (car (time-subtract (org-time-string-to-time deadline) (current-time))))
+  (let* ((deadline-date (date-to-time deadline))
+         (current-date (current-time))
+         (diff-seconds (float-time (time-subtract deadline-date current-date)))
+         (days-left (ceiling (/ diff-seconds 86400))))
+    days-left))
 
 (defun pagenda--days-left-string (days-left)
    (cond

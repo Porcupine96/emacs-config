@@ -2915,6 +2915,12 @@ sbt-mode
           		 (prettify-symbols-mode 1)))))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(use-package rainbow-delimiters
+  :straight t
+  :hook (emacs-lisp-mode . rainbow-delimiters-mode))
+#+end_src
+
 ** JavaScript
 #+begin_src emacs-lisp :results none
 (use-package js-mode
@@ -2971,6 +2977,13 @@ sbt-mode
 
 ** tree-sitter
 #+begin_src emacs-lisp :results none
+(use-package treesit-auto
+  :straight t
+  :config
+  (global-treesit-auto-mode))
+#+end_src
+
+#+begin_src emacs-lisp :results none :tangle no
 (use-package tree-sitter
   :straight t
   :defer t
@@ -2983,7 +2996,7 @@ sbt-mode
          (scala-mode . (lambda () (tree-sitter-mode) (tree-sitter-hl-mode)))))
 #+end_src
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package tree-sitter-langs
   :straight t
   :after tree-sitter)
@@ -3322,7 +3335,7 @@ sbt-mode
 #+end_src
 
 * Configure =mu4e=
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package mu4e
   :disabled t
   :straight nil
