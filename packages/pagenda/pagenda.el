@@ -2,7 +2,6 @@
 
 (require 'org-agenda)
 (require 'org-super-agenda)
-(require 'face-remap)
 (require 'winner)
 
 
@@ -78,7 +77,6 @@
       (if deadline
 	  (let* ((days-left (pagenda--get-days-left deadline)))
 	    (s-concat
-	     ;; TODO: fix padding
 	     (format (format "%%-%ds" pagenda--deadline-padding) item)
 	     (propertize (pagenda--days-left-string days-left) 'face 'pagenda--days-left-face)))
 	item))))

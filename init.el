@@ -1,13 +1,11 @@
 ;; Configure package.el to include MELPA.
 
-
-
 (customize-set-value 'straight-repository-branch "develop")
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
+      (bootstrap-version 7))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously

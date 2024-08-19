@@ -20,8 +20,7 @@
                    gc-cons-percentage 0.1)
              (message "Emacs started in: %s" (emacs-init-time))
              (garbage-collect)
-             (display-battery-mode)) t
-	     (tab-bar-mode -1))
+             (display-battery-mode)) t)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -624,14 +623,9 @@ Scale text.
   (interactive)
 
   (if (equal (car custom-enabled-themes) +core/dark-theme)
-      ;; TODO: could be improved by extracting background directly from theme
       (progn
-	;; (setq org-todo-keyword-faces '(
-	;; 			      ("REVIEW"  . (:foreground "#ffffff" :background "#ffcc00"))
-	;; 			      ("WAIT"    . (:foreground "#ffffff" :background "#ffcc00"))
-	;; 			      ("SOMEDAY" . (:foreground "#ffffff" :background "#ffcc00"))
-	;; 			      ("STRT"    . (:foreground "#ffffff" :background "#0198e1"))))
-	;; (setq org-modern-todo-faces org-todo-keyword-faces)
+	(setq org-todo-keyword-faces '(("TODO"  .   (:foreground "red" :background "white"))))
+	(setq org-modern-todo-faces org-todo-keyword-faces)
 	(+core/load-theme +core/light-theme)
 	(setq org-format-latex-options (plist-put org-format-latex-options :background "white")))
     (progn
@@ -1565,6 +1559,8 @@ Save image and insert it's link at point.
 (use-package code-cells
   :straight t
   :defer t
+  :bind (:map code-cells-mode-map
+	 ("C-c C-c" . #'code-cells-eval))
   :init
     (add-hook 'python-mode-hook 'code-cells-mode-maybe))
 #+end_src
@@ -2524,18 +2520,6 @@ Remove other LSP sessions.
 
 #+end_src
 
-** LSP Bridge
-
-#+begin_src emacs-lisp :results none :tangle no
-(use-package lsp-bridge
-  :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
-            :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
-            :build (:not compile))
-  :init
-    (setq lsp-bridge-python-lsp-server "pyright"))
-;; (global-lsp-bridge-mode))
-#+end_src
-
 ** Scala
 scala-mode
 #+begin_src emacs-lisp :results none
@@ -2788,6 +2772,7 @@ sbt-mode
     "import scala.concurrent.duration.FiniteDuration"
     "import java.time.ZonedDateTime"
     "import scala.jdk.CollectionConverters._"
+    "import com.typesafe.scalalogging.StrictLogging"
     "import cats.instances.future.catsStdInstancesForFuture"
     "import cats.instances.list.catsStdInstancesForList"
     "import cats.syntax.flatMap._"
@@ -2876,7 +2861,7 @@ sbt-mode
            (paths nil)
            (content (buffer-substring-no-properties (point-min) (point-max)))
            (pattern "\sbaseDirectory\\.value \\(.*\\)\\|^\s*\"\\(.*\\)\""))
-
+      
       (while (string-match pattern content pos)
         (setq pos (match-end 0))
 
@@ -2918,7 +2903,8 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package rainbow-delimiters
   :straight t
-  :hook (emacs-lisp-mode . rainbow-delimiters-mode))
+  :hook ((emacs-lisp-mode . rainbow-delimiters-mode)
+	 (scala-mode . rainbow-delimiters-mode)))
 #+end_src
 
 ** JavaScript
@@ -2996,7 +2982,7 @@ sbt-mode
          (scala-mode . (lambda () (tree-sitter-mode) (tree-sitter-hl-mode)))))
 #+end_src
 
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none 
 (use-package tree-sitter-langs
   :straight t
   :after tree-sitter)
