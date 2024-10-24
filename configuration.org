@@ -28,15 +28,37 @@
   (setq insert-directory-program "/opt/homebrew/bin/gls"))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+;; (use-package straight
+;;   :custom
+;;     ;; add project and flymake to the pseudo-packages variable so straight.el doesn't download a separate version than what eglot downloads.
+;;     (straight-built-in-pseudo-packages '(emacs nadvice python image-mode project flymake))
+;;     (straight-use-package-by-default t))
+#+end_src
+
 * Visuals
 Set window transparency.
 #+begin_src emacs-lisp :results none
-(set-frame-parameter nil 'alpha-background 25)
-(add-to-list 'default-frame-alist '(alpha-background . 25))
+(set-frame-parameter nil 'alpha-background 100)
+(add-to-list 'default-frame-alist '(alpha-background . 100))
 #+end_src
 
 Font.
 #+begin_src emacs-lisp :results none
+(defun setup-4k ()
+    (interactive)
+    
+  (set-face-attribute 'default nil :font "Roboto Mono for Powerline-15")
+  (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-15")
+  (set-face-attribute 'variable-pitch nil :font "Hack-15"))
+
+(defun setup-regular ()
+  (interactive)
+  
+  (set-face-attribute 'default nil :font "Roboto Mono for Powerline-13")
+  (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-13")
+  (set-face-attribute 'variable-pitch nil :font "Hack-13"))
+
 (set-face-attribute 'default nil :font "Roboto Mono for Powerline-13")
 (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-13")
 (set-face-attribute 'variable-pitch nil :font "Hack-13")
@@ -449,6 +471,7 @@ Buffer commands.
 
 #+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-c g") #'gpt-init)
+(global-set-key (kbd "C-c G") #'gptel)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -759,7 +782,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (use-package flycheck
   :defer t
   :straight t
-  :init (global-flycheck-mode)
+  ;; :init (global-flycheck-mode)
   :config 
     (evil-define-key '(normal) flycheck-mode-map (kbd "] e") 'flycheck-next-error)
     (evil-define-key '(normal) flycheck-mode-map (kbd "[ e") 'flycheck-previous-error)
@@ -829,6 +852,17 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (use-package flycheck-projectile
   :straight t 
   :defer t)
+#+end_src
+
+* Configure =flymake=
+
+#+begin_src emacs-lisp :results none
+(use-package flymake
+  :straight nil
+  :config
+    (evil-collection-define-key 'normal 'flymake-mode-map
+      (kbd "] e") 'flymake-goto-next-error
+      (kbd "[ e") 'flymake-goto-prev-error))
 #+end_src
 
 * Configure =org=
@@ -2246,8 +2280,14 @@ Setup =python-mode=.
       (setq python-shell-interpreter "ipython"
             python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
    :config
+     
      (add-hook 'python-base-mode-hook 'flymake-mode)
      (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
+
+     ;; automatically scroll the shell buffer 
+     (add-hook 'inferior-python-mode-hook
+          (lambda ()
+            (setq comint-move-point-for-output t)))
 
      (add-hook 'python-mode-hook 
        (lambda () (push '("lambda" . "λ") prettify-symbols-alist))))
@@ -2527,7 +2567,8 @@ scala-mode
   :straight t
   :mode "\\.s\\(cala\\|bt\\|c\\)$"
   :hook
-     (scala-mode . lsp)
+    ((scala-mode . lsp)
+     (scala-mode . flycheck-mode))
      ;; (scala-mode . company-mode)
   :bind (:map scala-mode-map
         ("C-c C-c" . +scala/dwim-at-point))
@@ -2583,17 +2624,27 @@ sbt-mode
 (defun +scala/create-test ()
   (interactive)
 
-  (let* ((file-path (buffer-file-name))
-	 (test-path (replace-regexp-in-string "src/main/scala" "src/test/scala" file-path)))
+  (let* ((style (completing-read "Choose: " '("munit" "scalatest")))
+	 (file-path (buffer-file-name))
+	 (test-path
+	  (replace-regexp-in-string "\\.scala" "Test.scala"
+				    (replace-regexp-in-string "src/main/scala" "src/test/scala" file-path))))
 
     (shell-command (format "mkdir -p %s" (file-name-directory test-path)))
     (shell-command (format "touch %s" test-path))
 
+
     (with-current-buffer (find-file test-path)
-      (insert (format "import org.scalatest.wordspec.AnyWordSpec\n"))
-      (insert (format "import org.scalatest.matchers.should.Matchers\n\n"))
-      (insert (format "class %sTest extends AnyWordSpec with Matchers {\n\n}" (file-name-nondirectory (file-name-sans-extension file-path))))
-      (save-buffer))))
+      (if (string= style "munit")
+	  (progn
+	    (insert (format "class %sTest extends munit.FunSuite {\n\n}" (file-name-nondirectory (file-name-sans-extension file-path)))))
+
+	(progn
+	  (insert (format "import org.scalatest.wordspec.AnyWordSpec\n"))
+	  (insert (format "import org.scalatest.matchers.should.Matchers\n\n"))
+	  (insert (format "class %sTest extends AnyWordSpec with Matchers {\n\n}" (file-name-nondirectory (file-name-sans-extension file-path)))))
+	
+      (save-buffer)))))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2790,6 +2841,8 @@ sbt-mode
     "import cats.effect.Resource"
     "import cats.effect.std.Dispatcher"
     "import cats.effect.unsafe.IORuntime"
+    "import io.opentracing.Span"
+    "import io.opentracing.Tracer"
     "import hero.common.logging.Logger"
     "import hero.common.logging.LoggingSupport"
     "import hero.common.util.time.TimeUtils.TimeProvider"
@@ -2905,6 +2958,14 @@ sbt-mode
   :straight t
   :hook ((emacs-lisp-mode . rainbow-delimiters-mode)
 	 (scala-mode . rainbow-delimiters-mode)))
+#+end_src
+
+** Java
+
+#+begin_src emacs-lisp :results none
+(use-package lsp-java
+  :straight t
+  :config (add-hook 'java-mode-hook 'lsp))
 #+end_src
 
 ** JavaScript
@@ -3254,7 +3315,7 @@ sbt-mode
   :defer t
   :commands olivetti-mode
   :custom
-    (olivetti-body-width 120)
+    (olivetti-body-width 200)
     (olivetti-recall-visual-line-mode-entry-state t))
 #+end_src
 
@@ -3761,7 +3822,14 @@ sbt-mode
 #+begin_src emacs-lisp :results none
 (use-package gptel
   :straight t
-  :defer t)
+  :defer t
+  :config
+    (setq gptel-model "gpt-4-turbo")
+    
+    (gptel-make-ollama "Ollama" 
+      :host "localhost:11434"
+      :stream t 
+      :models '("llama3.1")))
 #+end_src
 
 * Configure =psession=
@@ -3788,6 +3856,17 @@ sbt-mode
  			"WinConfig: "
  			(sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
     (psession-save-winconf conf)))
+#+end_src
+
+* Configure =ytdl=
+
+#+begin_src emacs-lisp :results none
+(use-package ytdl
+  :straight t
+  :defer t
+  :custom
+    (ytdl-command "yt-dlp")
+  :commands (ytdl-download ytdl-list))
 #+end_src
 
 * Work
@@ -4023,5 +4102,3 @@ sbt-mode
   :defer t
   :commands (winman-save winman-load winman-delete))
 #+end_src
-
-
