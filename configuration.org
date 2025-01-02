@@ -50,18 +50,18 @@ Font.
     
   (set-face-attribute 'default nil :font "Roboto Mono for Powerline-15")
   (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-15")
-  (set-face-attribute 'variable-pitch nil :font "Hack-15"))
+  (set-face-attribute 'variable-pitch nil :font "Iosevka Term-15"))
 
 (defun setup-regular ()
   (interactive)
   
   (set-face-attribute 'default nil :font "Roboto Mono for Powerline-13")
   (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-13")
-  (set-face-attribute 'variable-pitch nil :font "Hack-13"))
+  (set-face-attribute 'variable-pitch nil :font "Iosevka Term-13"))
 
 (set-face-attribute 'default nil :font "Roboto Mono for Powerline-13")
 (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-13")
-(set-face-attribute 'variable-pitch nil :font "Hack-13")
+(set-face-attribute 'variable-pitch nil :font "Iosevka Term-13")
 #+end_src
  
 Hide all the bezels.
@@ -997,7 +997,17 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
               (with-current-buffer buffer
                 (save-buffer)))
           (message "Ooops ... (%s) does not exist." afile))))
-
+    
+    (defun org-narrow-to-subtree-new-window ()
+      (interactive)
+      (org-back-to-heading)
+      (let ((buf (current-buffer))
+            (p (point)))
+        ;; Clone the current buffer and switch to it in a new window
+        (switch-to-buffer-other-window (make-indirect-buffer buf (generate-new-buffer-name "*Org Subtree*") t))
+        ;; Go to the same point as in the original buffer
+        (goto-char p)
+        (org-narrow-to-subtree)))
 
     (defun paste-formatted ()
       (interactive)
@@ -1007,6 +1017,19 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
             (insert (s-replace "- " "" (s-trim content)))
             (org-fill-paragraph))
          (evil-paste-after 1)))
+    
+    (defun copy-org-block-content ()
+      (interactive)
+      (save-excursion
+        (let* ((element (org-element-at-point))
+               (type (org-element-type element)))
+          (when (or (eq type 'src-block) (eq type 'quote-block))
+            (let ((block-body (org-element-property :value element)))
+              (if block-body
+                  (progn
+                    (kill-new block-body)
+                    (message "Block content copied!"))
+                (message "Empty block or error extracting content!")))))))
 
     (add-hook 'org-archive-hook 'org-archive-save-buffer)
 
@@ -1023,6 +1046,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
           ("p" . paste-formatted)
   	:map org-mode-map 
           ("C-c h" . org-toggle-heading)
+          ("C-c s" . org-narrow-to-subtree-new-window)
           ("C-x n S" . org-tree-to-indirect-buffer))
     :hook (org-mode . org-indent-mode)
     (org-mode . variable-pitch-mode)
@@ -2846,7 +2870,9 @@ sbt-mode
     "import hero.common.logging.Logger"
     "import hero.common.logging.LoggingSupport"
     "import hero.common.util.time.TimeUtils.TimeProvider"
-    "import hero.common.util.IdProvider"))
+    "import hero.common.util.IdProvider"
+    "import reactivemongo.api.indexes.Index"
+    "import reactivemongo.api.indexes.IndexType"))
 
 (defun +scala/insert-common-import (import)
   (interactive
@@ -2921,8 +2947,9 @@ sbt-mode
         (let* ((match (or (match-string 1 content) (match-string 2 content)))
                (raw-path (s-replace-all '(("," . "") (" " . "") ("\"" . "")) match))
                (path (if (s-starts-with? "/" raw-path) (substring raw-path 1) raw-path)))
-
-          (push path paths)))
+	  
+	  (if (not (s-starts-with? "-" path))
+	      (push path paths))))
 
       (let ((choice (completing-read " " paths)))
         (if choice
