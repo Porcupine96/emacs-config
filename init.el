@@ -23,11 +23,11 @@
 (defun get-modify-time (path)
   (time-convert (file-attribute-modification-time (file-attributes path)) 'integer))
 
-(if (let* ((org-modify-time (get-modify-time "~/.emacs.default/configuration.org"))
-	   (el-modify-time (get-modify-time "~/.emacs.default/configuration.el")))
+(if (let* ((org-modify-time (get-modify-time "~/.emacs.d/configuration.org"))
+	   (el-modify-time (get-modify-time "~/.emacs.d/configuration.el")))
       (< el-modify-time org-modify-time))
     (progn
-      (org-babel-tangle-file "~/.emacs.default/configuration.org" "~/.emacs.default/configuration.el")))
+      (org-babel-tangle-file "~/.emacs.d/configuration.org" "~/.emacs.d/configuration.el")))
 
 
-(load-file "~/.emacs.default/configuration.el")
+(load-file "~/.emacs.d/configuration.el")

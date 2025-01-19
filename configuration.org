@@ -91,7 +91,7 @@ Hide all the bezels.
 
 Color theme.
 #+begin_src emacs-lisp :results none
-(add-to-list 'custom-theme-load-path "~/.emacs.default/themes")
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 (load-theme 'noctilux t)
 
 ;; (load-theme 'modus-operandi t)
@@ -601,7 +601,7 @@ Scale text.
 #+begin_src emacs-lisp :results none
   (defun +core/refresh-config ()
     (interactive)
-    (org-babel-tangle-file "~/.emacs.default/configuration.org" "~/.emacs.default/configuration.el"))
+    (org-babel-tangle-file "~/.emacs.d/configuration.org" "~/.emacs.d/configuration.el"))
  #+end_src
   
 #+begin_src emacs-lisp :results none
@@ -1148,7 +1148,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
 #+begin_src emacs-lisp :results none
 (use-package pagenda
-  :load-path "~/.emacs.default/packages/pagenda/"
+  :load-path "~/.emacs.d/packages/pagenda/"
   :commands (pagenda-mode +agenda/daily-agenda +agenda/weekly-agenda)
   :defer t)
 #+end_src
@@ -1787,7 +1787,7 @@ vc-annotate options.
  :straight (git-timemachine :type git :host codeberg :repo "pidu/git-timemachine" :branch "master")
  :commands (git-timemachine))
  #+end_src
-
+ 
 * Configure =treemacs=
 #+begin_src emacs-lisp :results none
 (use-package treemacs 
@@ -2084,7 +2084,7 @@ SCHEDULED: <2024-04-29 Mon>
 
 #+begin_src emacs-lisp :results none
 (use-package consult-projectile
-  :load-path "~/.emacs.default/packages/consult-projectile/"
+  :load-path "~/.emacs.d/packages/consult-projectile/"
   :defer t
   :commands (consult-projectile))
 #+end_src
@@ -2325,7 +2325,7 @@ Setup =python-mode=.
 
 (defun +pyvenv-anaconda ()
   (interactive)
-  (let* ((root-dir "~/anaconda3/envs/")
+  (let* ((root-dir "/opt/anaconda3/envs")
            (dirs (directory-files root-dir t directory-files-no-dot-files-regexp))
            (chosen-dir (completing-read "Choose directory: " dirs nil t)))
      (pyvenv-activate chosen-dir)))
@@ -2344,7 +2344,7 @@ Setup =python-mode=.
   :hook (python-mode . blacken-mode))
 #+end_src
 
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none
 (use-package lsp-pyright
   :straight t
   :hook (python-mode . (lambda ()
@@ -2846,6 +2846,7 @@ sbt-mode
   '("import scala.concurrent.duration._"
     "import scala.concurrent.duration.FiniteDuration"
     "import java.time.ZonedDateTime"
+    "import java.time.Clock"
     "import scala.jdk.CollectionConverters._"
     "import com.typesafe.scalalogging.StrictLogging"
     "import cats.instances.future.catsStdInstancesForFuture"
@@ -3258,7 +3259,7 @@ sbt-mode
   :custom
     (elfeed-search-remain-on-entry t)
   :config
-    (load-file "~/.emacs.default/packages/pelfeed.el")
+    (load-file "~/.emacs.d/packages/pelfeed.el")
     (p/elfeed-setup)
 
     (setq-default elfeed-search-filter "@6-months-ago +unread")
@@ -3532,10 +3533,10 @@ sbt-mode
     "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
     "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
     "f d" (lambda () (interactive)(dired "~/dotfiles"))
-    "f c" (lambda () (interactive)(find-file "~/.emacs.default/configuration.org"))
+    "f c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org"))
     "f y" (lambda () (interactive)(find-file "~/youtube/"))
     "f n" (lambda () (interactive)(find-file "~/dotfiles/config/nix/home.nix"))
-    "f t" (lambda () (interactive)(find-file "~/.emacs.default/themes/noctilux-theme.el"))
+    "f t" (lambda () (interactive)(find-file "~/.emacs.d/themes/noctilux-theme.el"))
     "f x" (lambda () (interactive)(find-file "~/.config/yabai/yabairc"))
     "f X" (lambda () (interactive)(find-file "~/.config/skhd/skhdrc"))
     
@@ -3828,8 +3829,13 @@ sbt-mode
 * Configure =copilot=
 
 #+begin_src emacs-lisp :results none
+;; (use-package copilot
+;;   :vc (:url "https://github.com/copilot-emacs/copilot.el"
+;;             :rev :newest
+;;             :branch "main"))
+
 (use-package copilot
-  :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
+  :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
   :defer t
   :custom
     (copilot-indent-offset-warning-disable t)
@@ -3888,12 +3894,12 @@ sbt-mode
 * Configure =ytdl=
 
 #+begin_src emacs-lisp :results none
-(use-package ytdl
-  :straight t
-  :defer t
-  :custom
-    (ytdl-command "yt-dlp")
-  :commands (ytdl-download ytdl-list))
+;; (use-package ytdl
+;;  :straight t
+;;   :defer t
+;;   :custom
+;;     (ytdl-command "yt-dlp")
+;;   :commands (ytdl-download ytdl-list))
 #+end_src
 
 * Work
@@ -4011,7 +4017,7 @@ sbt-mode
 ** Version update
 #+begin_src emacs-lisp :results none
 (use-package version-update
-  :load-path "~/.emacs.default/packages/work/version-update"
+  :load-path "~/.emacs.d/packages/work/version-update"
   :defer t
   :commands (+work/sync-env +work/update-versions +work/apply-changes))
 #+end_src
@@ -4062,7 +4068,7 @@ sbt-mode
 ** RSVP
 #+begin_src emacs-lisp :results none
 (use-package prsvp
-  :load-path "~/.emacs.default/packages/prsvp/"
+  :load-path "~/.emacs.d/packages/prsvp/"
   :defer t
   :commands rsvp/run)
 #+end_src
@@ -4070,7 +4076,7 @@ sbt-mode
 ** Pscreenshot
 #+begin_src emacs-lisp :results none
 (use-package pscreenshot
-  :load-path "~/.emacs.default/packages/pscreenshot/"
+  :load-path "~/.emacs.d/packages/pscreenshot/"
   :defer t
   :commands (pscreenshot/org-screenshot-take +ocr/screenshot))
 #+end_src
@@ -4078,14 +4084,14 @@ sbt-mode
 ** Flash
 #+begin_src emacs-lisp :results none
 (use-package flash
-  :load-path "~/.emacs.default/packages/flash/"
+  :load-path "~/.emacs.d/packages/flash/"
   :commands (flash-create-note flash-select-note flash-mode))
 #+end_src
 
 ** Focus
 #+begin_src emacs-lisp :results none
 (use-package pfocus
-  :load-path "~/.emacs.default/packages/pfocus/"
+  :load-path "~/.emacs.d/packages/pfocus/"
   :defer t
   :commands p/focus-mode)
 #+end_src
@@ -4093,7 +4099,7 @@ sbt-mode
 ** GPT
 #+begin_src emacs-lisp :results none
 (use-package gpt
-  :load-path "~/.emacs.default/packages/gpt/"
+  :load-path "~/.emacs.d/packages/gpt/"
   :defer t
   :commands (gpt-init gpt-mode))
 #+end_src
@@ -4101,7 +4107,7 @@ sbt-mode
 ** Memo
 #+begin_src emacs-lisp :results none
 (use-package memo
-  :load-path "~/.emacs.default/packages/memo/"
+  :load-path "~/.emacs.d/packages/memo/"
   :defer t
   :commands (memo/create-flashcard))
 #+end_src
@@ -4109,7 +4115,7 @@ sbt-mode
 ** Read Me
 #+begin_src emacs-lisp :results none
 (use-package read-me
-  :load-path "~/.emacs.default/packages/read-me/"
+  :load-path "~/.emacs.d/packages/read-me/"
   :defer t
   :commands (read-me read-me-generate read-me-read))
 #+end_src
@@ -4117,7 +4123,7 @@ sbt-mode
 ** Pjira
 #+begin_src emacs-lisp :results none
 (use-package pjira
-  :load-path "~/.emacs.default/packages/pjira/"
+  :load-path "~/.emacs.d/packages/pjira/"
   :defer t
   :commands pjira-current-sprint)
 #+end_src
@@ -4125,7 +4131,7 @@ sbt-mode
 ** Winman
 #+begin_src emacs-lisp :results none
 (use-package winman
-  :load-path "~/.emacs.default/packages/winman/"
+  :load-path "~/.emacs.d/packages/winman/"
   :defer t
   :commands (winman-save winman-load winman-delete))
 #+end_src
