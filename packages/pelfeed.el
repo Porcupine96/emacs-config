@@ -23,6 +23,11 @@
 
 (defvar p/paper-directory "~/Dropbox/papers/")
 
+(defun p/elfeed-show-hide-images ()
+  (interactive)
+  (let ((shr-inhibit-images t))
+    (elfeed-show-refresh)))
+
 (defun p/elfeed-roam-note (entry)
   (interactive (list (elfeed-search-selected :ignore-region)))
 
@@ -78,14 +83,7 @@
    "&start=0&max_results=300&sortBy=submittedDate&sortOrder=descending"))
 
 (defun p/elfeed-setup ()
-  (setq elfeed-feeds `(,(p/arxiv-feed "cs.AI") ;; Artificial Intelligence
-		       ,(p/arxiv-feed "cs.CL") ;; Computation and Language
-		       ,(p/arxiv-feed "cs.LG"))) ;; Machine Learning
-
-
-  ;; TODO: add a hook that adds a new capture template to the list
-  
-	) 
+  (setq elfeed-feeds `("https://softwaremill.com/blog.rss"))) 
 
 (defun p/elfeed-show-entry (entry)
   (interactive (list (elfeed-search-selected :ignore-region)))
