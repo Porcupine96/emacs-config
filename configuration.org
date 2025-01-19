@@ -1474,7 +1474,7 @@ Save image and insert it's link at point.
   :commands org-roam-node-find
   ;; :hook (org-mode . org-roam-setup)
   :bind (:map global-map
-              (("C-c n f" . org-roam-node-find)
+              (("C-c n f" . (lambda () (interactive) (org-roam-node-find nil nil nil 'org-roam-node-read-sort-by-file-atime)))
                ("C-c n F" . +org-roam/find-file-by-title)
 	       ("C-c n k" . (lambda () (interactive) (consult-ripgrep  org-roam-directory)))
                ("C-c n p" . citar-open)
@@ -1483,7 +1483,6 @@ Save image and insert it's link at point.
               :map org-roam-node-map
               (("C-c n l" . +org-roam/goto-linked-file)
                ("C-c n L" . org-roam)
-               ("C-c n f" . org-roam-find-file)
                ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n C" . org-roam-db-sync)
                ("C-c n g" . org-roam-buffer-display-dedicated)
@@ -1495,6 +1494,7 @@ Save image and insert it's link at point.
                ("C-c n i" . org-roam-node-insert)))
   :init
     (setq org-roam-v2-ack t)
+    (setq org-roam-node-default-sort 'file-atime)
     (setq org-roam-directory "~/Dropbox/org-roam")
     (setq org-roam-dailies-directory "journal/")
   :config  
@@ -3249,7 +3249,7 @@ sbt-mode
 #+end_src
 
 * Configure =elfeed=
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none
 (use-package elfeed
   :straight t
   :defer t
