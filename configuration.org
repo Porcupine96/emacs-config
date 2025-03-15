@@ -1730,7 +1730,7 @@ Save image and insert it's link at point.
   :defer t
   :commands (magit-status magit-branch magit-init magit-push)
   :config
-    (setq magit-list-refs-sortby "committerdate")
+    (setq magit-list-refs-sortby "-committerdate")
     
     (setq auto-revert-check-vc-info nil))
 
@@ -1851,7 +1851,7 @@ SCHEDULED: <2024-04-29 Mon>
   (corfu-cycle t)                 ; Allows cycling through candidates
   (corfu-auto t)                  ; Enable auto completion
   (corfu-auto-prefix 2)
-  (corfu-auto-delay 0.1)
+  (corfu-auto-delay 0.2)
   (corfu-popupinfo-delay '(0.5 . 0.2))
   (corfu-preview-current 'insert) ; insert previewed candidate
   (corfu-preselect 'prompt)
@@ -3753,6 +3753,23 @@ sbt-mode
 	    (org-tree-to-indirect-buffer))))
 
   (general-define-key 
+   :prefix "SPC ;"
+   :states '(normal visual)
+   :keymaps 'override
+   ";" #'copilot-chat-transient
+   "p" #'copilot-chat-switch-to-buffer
+   "r" #'copilot-chat-reset
+   "f" #'copilot-chat-add-file
+   "w" #'copilot-chat-add-buffers-in-current-window
+   ";" #'copilot-chat-transient
+   "p" #'copilot-chat-switch-to-buffer
+   "r" #'copilot-chat-reset
+   "f" #'copilot-chat-add-file
+   "w" #'copilot-chat-add-buffers-in-current-window
+   "y" #'copilot-chat-yank
+   "b" #'copilot-chat-add-current-buffer)
+
+  (general-define-key 
    :prefix "C-c r"
    :states 'normal
    :keymaps '(evil-org-mode-map org-mode-map)
@@ -3829,11 +3846,6 @@ sbt-mode
 * Configure =copilot=
 
 #+begin_src emacs-lisp :results none
-;; (use-package copilot
-;;   :vc (:url "https://github.com/copilot-emacs/copilot.el"
-;;             :rev :newest
-;;             :branch "main"))
-
 (use-package copilot
   :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
   :defer t
@@ -3848,6 +3860,16 @@ sbt-mode
     (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
     (define-key copilot-completion-map (kbd "M-[") 'copilot-next-completion)
     (define-key copilot-completion-map (kbd "M-]") 'copilot-previous-completion))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package copilot-chat
+  :straight (:host github :repo "chep/copilot-chat.el" :files ("*.el"))
+  :after (request org markdown-mode)
+  :bind (:map global-map
+            ("C-c C-y" . copilot-chat-yank)
+            ("C-c M-y" . copilot-chat-yank-pop)
+            ("C-c C-M-y" . (lambda () (interactive) (copilot-chat-yank-pop -1)))))
 #+end_src
 
 * Configure =gptel=

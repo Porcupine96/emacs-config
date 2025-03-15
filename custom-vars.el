@@ -4,6 +4,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auth-source-save-behavior nil)
+ '(copilot-chat-model "claude-3.5-sonnet")
  '(custom-safe-themes
    '("52acee1228acc0397eb0e55039b43d18b6634ec0d259b57f8f0853b76137be2c" "3756ace14c5d362b7f9ca22a05cc3ba730d876962cd3b245147e67152b260a97" default))
  '(org-agenda-files
