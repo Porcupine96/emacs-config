@@ -235,7 +235,7 @@ Line wrapping.
 (setq-default truncate-lines t)
 (setq truncate-lines t)
 (setq truncate-partial-width-windows nil)
-(setq-default fill-column 80)
+(setq-default fill-column 120)
 #+end_src
   
 Allow remembering risky variables
@@ -2306,7 +2306,7 @@ Setup =python-mode=.
    :config
      
      (add-hook 'python-base-mode-hook 'flymake-mode)
-     (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
+     ;; (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
 
      ;; automatically scroll the shell buffer 
      (add-hook 'inferior-python-mode-hook
