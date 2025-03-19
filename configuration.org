@@ -50,18 +50,18 @@ Font.
     
   (set-face-attribute 'default nil :font "Roboto Mono for Powerline-15")
   (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-15")
-  (set-face-attribute 'variable-pitch nil :font "Iosevka Term-15"))
+  (set-face-attribute 'variable-pitch nil :font "Roboto Mono for Powerline-15"))
 
 (defun setup-regular ()
   (interactive)
   
   (set-face-attribute 'default nil :font "Roboto Mono for Powerline-13")
   (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-13")
-  (set-face-attribute 'variable-pitch nil :font "Iosevka Term-13"))
+  (set-face-attribute 'variable-pitch nil :font "Roboto Mono for Powerline-13"))
 
 (set-face-attribute 'default nil :font "Roboto Mono for Powerline-13")
 (set-face-attribute 'fixed-pitch nil :font "Roboto Mono for Powerline-13")
-(set-face-attribute 'variable-pitch nil :font "Iosevka Term-13")
+(set-face-attribute 'variable-pitch nil :font "Roboto Mono for Powerline-13")
 #+end_src
  
 Hide all the bezels.
@@ -235,7 +235,7 @@ Line wrapping.
 (setq-default truncate-lines t)
 (setq truncate-lines t)
 (setq truncate-partial-width-windows nil)
-(setq-default fill-column 80)
+(setq-default fill-column 120)
 #+end_src
   
 Allow remembering risky variables
@@ -455,10 +455,11 @@ Buffer commands.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(global-set-key (kbd "C-c w w") #'psession-restore-winconf)
-(global-set-key (kbd "C-c w s") #'psession-save-winconf)
-(global-set-key (kbd "C-c w r") #'psession-update-winconf)
-(global-set-key (kbd "C-c w d") #'psession-delete-winconf)
+(global-set-key (kbd "C-c w w") #'winman-switch)
+(global-set-key (kbd "C-c w s") #'winman-save)
+(global-set-key (kbd "C-c w r") #'winman-update)
+(global-set-key (kbd "C-c w R") #'winman-rename)
+(global-set-key (kbd "C-c w d") #'winman-delete)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1023,7 +1024,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
       (save-excursion
         (let* ((element (org-element-at-point))
                (type (org-element-type element)))
-          (when (or (eq type 'src-block) (eq type 'quote-block))
+          (when (or (eq type 'bsrc-block) (eq type 'quote-block))
             (let ((block-body (org-element-property :value element)))
               (if block-body
                   (progn
@@ -1120,7 +1121,28 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 (use-package evil-org
   :straight t
   :after org
+  :init
+    (evil-define-text-object evil-inner-org-block (count &optional beg end type)
+      "Select inner org block content."
+      :extend-selection t
+      (let* ((element (org-element-at-point))
+             (type (org-element-type element)))
+        (when (or (eq type 'src-block) (eq type 'quote-block))
+          (let ((pos (save-excursion
+                       (search-backward "#+begin" nil t)
+                       (forward-line)
+                       (point)))
+                (end (save-excursion
+                       (search-forward "#+end" nil t)
+                       (forward-line -1)
+                       (end-of-line)
+                       (point))))
+            (when (and pos end)
+              (evil-range pos end))))))
+    
+    (define-key evil-inner-text-objects-map "b" 'evil-inner-org-block)
   :config
+  
     (add-hook 'org-mode-hook 'evil-org-mode)
     (add-hook 'evil-org-mode-hook 'general-define-org-keys)
     (add-hook 'org-trigger-hook 'save-buffer)
@@ -1851,8 +1873,8 @@ SCHEDULED: <2024-04-29 Mon>
   (corfu-cycle t)                 ; Allows cycling through candidates
   (corfu-auto t)                  ; Enable auto completion
   (corfu-auto-prefix 2)
-  (corfu-auto-delay 0.2)
-  (corfu-popupinfo-delay '(0.5 . 0.2))
+  (corfu-auto-delay 0.1)
+  (corfu-popupinfo-delay '(0.5 . 0.1))
   (corfu-preview-current 'insert) ; insert previewed candidate
   (corfu-preselect 'prompt)
   (corfu-on-exact-match nil)      ; Don't auto expand tempel snippets
@@ -2220,20 +2242,20 @@ SCHEDULED: <2024-04-29 Mon>
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(use-package dirvish
-  :straight t
-  :ensure t
-  :custom 
-   (dirvish-attributes '(subtree-state all-the-icons))
-  :config
-   (setq dirvish-reuse-session t)
-   (setq dired-recursive-deletes 'always)
-   (setq delete-by-moving-to-thrash 'always)
+;; (use-package dirvish
+;;   :straight t
+;;   :ensure t
+;;   :custom 
+;;    (dirvish-attributes '(subtree-state all-the-icons))
+;;   :config
+;;    (setq dirvish-reuse-session t)
+;;    (setq dired-recursive-deletes 'always)
+;;    (setq delete-by-moving-to-thrash 'always)
 
-   (dirvish-override-dired-mode)
+;;    (dirvish-override-dired-mode)
 
-   (evil-collection-define-key 'normal 'dired-mode-map
-        "o" #'dirvish-quicksort))
+;;    (evil-collection-define-key 'normal 'dired-mode-map
+;;         "o" #'dirvish-quicksort))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2306,7 +2328,7 @@ Setup =python-mode=.
    :config
      
      (add-hook 'python-base-mode-hook 'flymake-mode)
-     (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
+     ;; (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
 
      ;; automatically scroll the shell buffer 
      (add-hook 'inferior-python-mode-hook
@@ -2336,6 +2358,17 @@ Setup =python-mode=.
 	 (env (s-trim (shell-command-to-string "pyenv local")))
 	 (path (concat root "/" "versions" "/" env)))
     (pyvenv-activate path)))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package conda
+  :straight t
+  :after python-mode 
+  :init
+    (setq conda-env-home-directory "/opt/anaconda3/") 
+  :config
+    (conda-env-initialize-interactive-shells)
+    (conda-env-initialize-eshell))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2862,6 +2895,7 @@ sbt-mode
     "import cats.syntax.apply._"
     "import cats.syntax.option._"
     "import cats.effect.IO"
+    "import cats.effect.ContextShift"
     "import cats.effect.kernel.Ref"
     "import cats.effect.Resource"
     "import cats.effect.std.Dispatcher"
@@ -3485,7 +3519,7 @@ sbt-mode
   :config
   (general-create-definer leader-def 
     :prefix "SPC")
-    
+  
   (leader-def
     :states '(normal visual motion)
     :keymaps 'override
@@ -3700,6 +3734,16 @@ sbt-mode
     "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
     "g p" (lambda () (interactive) (+work/goto-proto))
     "g u" (lambda () (interactive) (+scala/used-proto)))
+  
+  (local-leader-def
+    :states 'normal
+    :keymaps '(scala-mode-map conf-unix-mode)
+    "g c" (lambda () (interactive) (+scala/goto "src/main/resources/app.conf"))
+    "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
+    "g d" (lambda () (interactive) (+scala/goto "project/Dependencies.scala"))
+    "g v" (lambda () (interactive) (+scala/goto "project/DependencyVersions.scala"))
+    "g p" (lambda () (interactive) (+work/goto-proto))
+    "g u" (lambda () (interactive) (+scala/used-proto)))
 
   (general-def :states 'normal :keymaps 'dired-mode-map "SPC" nil)
 
@@ -3748,15 +3792,19 @@ sbt-mode
    :keymaps 'org-mode-map
    "w" #'widen
    "s" (lambda () (interactive)
-	  (progn
-	    (evil-window-vsplit)
-	    (org-tree-to-indirect-buffer))))
+	 (progn
+	   (evil-window-vsplit)
+	   (org-tree-to-indirect-buffer))))
 
   (general-define-key 
    :prefix "SPC ;"
    :states '(normal visual)
    :keymaps 'override
    ";" #'copilot-chat-transient
+   "q" (lambda ()
+         (interactive)
+         (copilot-chat-reset)
+         (copilot-chat-display))
    "p" #'copilot-chat-switch-to-buffer
    "r" #'copilot-chat-reset
    "f" #'copilot-chat-add-file
@@ -3869,7 +3917,13 @@ sbt-mode
   :bind (:map global-map
             ("C-c C-y" . copilot-chat-yank)
             ("C-c M-y" . copilot-chat-yank-pop)
-            ("C-c C-M-y" . (lambda () (interactive) (copilot-chat-yank-pop -1)))))
+            ("C-c C-M-y" . (lambda () (interactive) (copilot-chat-yank-pop -1))))
+
+  :config
+    (setq copilot-chat-org-prompt
+        (with-temp-buffer
+          (insert-file-contents "/Users/lukaszkazmierczak/.emacs.d/copilot-prompt.txt")
+          (buffer-string))))
 #+end_src
 
 * Configure =gptel=
@@ -3889,28 +3943,28 @@ sbt-mode
 
 * Configure =psession=
 #+begin_src emacs-lisp :results none
-(use-package psession
-  :straight t
-  :init 
-  (psession-autosave-mode 1)
-  (psession-mode 1)
-  :config
-  ;; idea: save magit commit history as well
-  (setq psession-object-to-save-alist '((extended-command-history . "extended-command-history.el")
-                                        (regexp-search-ring . "regexp-search-ring.el")
-                                        (search-ring . "search-ring.el")
-                                        (file-name-history . "file-name-history.el")
-                                        (kill-ring . "kill-ring.el")
-                                        (kill-ring-yank-pointer . "kill-ring-yank-pointer.el")
-                                        (register-alist . "register-alist.el")
-                                        (psession--save-buffers-alist . "psession-save-buffers-alist.el")
-                                        (psession--winconf-alist . "psession-winconf-alist.el")))
+;; (use-package psession
+;;   :straight t
+;;   :init 
+;;   (psession-autosave-mode 1)
+;;   (psession-mode 1)
+;;   :config
+;;   ;; idea: save magit commit history as well
+;;   (setq psession-object-to-save-alist '((extended-command-history . "extended-command-history.el")
+;;                                         (regexp-search-ring . "regexp-search-ring.el")
+;;                                         (search-ring . "search-ring.el")
+;;                                         (file-name-history . "file-name-history.el")
+;;                                         (kill-ring . "kill-ring.el")
+;;                                         (kill-ring-yank-pointer . "kill-ring-yank-pointer.el")
+;;                                         (register-alist . "register-alist.el")
+;;                                         (psession--save-buffers-alist . "psession-save-buffers-alist.el")
+;;                                         (psession--winconf-alist . "psession-winconf-alist.el")))
 
-  (defun psession-update-winconf (conf)
-    (interactive (list (completing-read
- 			"WinConfig: "
- 			(sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
-    (psession-save-winconf conf)))
+;;   (defun psession-update-winconf (conf)
+;;     (interactive (list (completing-read
+;;  			"WinConfig: "
+;;  			(sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
+;;     (psession-save-winconf conf)))
 #+end_src
 
 * Configure =ytdl=
@@ -4155,5 +4209,5 @@ sbt-mode
 (use-package winman
   :load-path "~/.emacs.d/packages/winman/"
   :defer t
-  :commands (winman-save winman-load winman-delete))
+  :commands (winman-save winman-switch winman-restore winman-delete))
 #+end_src
