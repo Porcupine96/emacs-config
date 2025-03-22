@@ -87,8 +87,8 @@ If the buffer doesn't exist anymore, create a new one."
           (funcall (or major 'fundamental-mode)))))
     
     (with-current-buffer buffer
-      (when point (goto-char point))
-      (when mark (set-mark mark)))
+      (when point (goto-char point)))
+      ;; (when mark (set-mark mark)))
     
     buffer))
 
