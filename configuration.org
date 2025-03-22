@@ -3092,7 +3092,7 @@ sbt-mode
   (global-treesit-auto-mode))
 #+end_src
 
-#+begin_src emacs-lisp :results none :tangle no
+#+begin_src emacs-lisp :results none
 (use-package tree-sitter
   :straight t
   :defer t
