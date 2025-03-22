@@ -2429,6 +2429,7 @@ Setup =python-mode=.
    :straight t
    :hook ((typescript-mode . lsp-deferred)  
           (c-mode . lsp-deferred)
+          (go-mode . lsp-deferred)
           (sh-mode . lsp-deferred)
           (lsp-completion-mode . my/lsp-mode-setup-completion))
    :custom
@@ -3164,6 +3165,14 @@ sbt-mode
   :straight t
   :defer t
   :mode "\\.fish$")
+#+end_src
+
+** Go
+
+#+begin_src emacs-lisp :resuts none
+(use-package go-mode
+  :straight t
+  :mode "\\.go$")
 #+end_src
 
 * Configure =format-all=
