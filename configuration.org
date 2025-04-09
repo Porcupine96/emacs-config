@@ -28,14 +28,6 @@
   (setq insert-directory-program "/opt/homebrew/bin/gls"))
 #+end_src
 
-#+begin_src emacs-lisp :results none
-;; (use-package straight
-;;   :custom
-;;     ;; add project and flymake to the pseudo-packages variable so straight.el doesn't download a separate version than what eglot downloads.
-;;     (straight-built-in-pseudo-packages '(emacs nadvice python image-mode project flymake))
-;;     (straight-use-package-by-default t))
-#+end_src
-
 * Visuals
 Set window transparency.
 #+begin_src emacs-lisp :results none
@@ -78,15 +70,15 @@ Hide all the bezels.
 #+end_src
 
 #+begin_src emacs-lisp :results none
-(setq-default left-margin-width 3)
-(setq-default right-margin-width 3)
+(setq-default left-margin-width 2)
+(setq-default right-margin-width 2)
 #+end_src
 
 #+begin_src emacs-lisp :results none
 (setq-default tab-bar-new-button-show nil)
 (setq-default tab-bar-close-button-show nil)
 (setq-default tab-bar-separator "")
-(setq-default tab-bar-auto-width-max '(300 20))
+(setq-default tab-bar-auto-width-max '(300 15))
 #+end_src
 
 Color theme.
@@ -2534,7 +2526,7 @@ Setup =python-mode=.
 
 #+begin_src emacs-lisp :results none
 (defun +lsp/get-errors-for-buffer ()
-  (mapcar (lambda (el) (gethash "message" el))
+  (mapcar (lambda (el) (plist-get el :message))
     (gethash (buffer-file-name)
 	     (lsp-diagnostics t))))
 #+end_src

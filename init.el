@@ -31,3 +31,4 @@
 
 
 (load-file "~/.emacs.d/configuration.el")
+(put 'narrow-to-region 'disabled nil)
