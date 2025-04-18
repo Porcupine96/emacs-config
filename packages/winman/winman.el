@@ -56,8 +56,7 @@ Each element is a cons cell (name . config) where config is a plist with
 
 (defun winman--get-current-buffers ()
   "Get information about all buffers in the current window configuration."
-  (let ((windows (window-list))
-        buffer-info)
+  (let ((windows (window-list)) buffer-info)
     (dolist (window windows buffer-info)
       (push (cons window (winman--get-buffer-info (window-buffer window)))
             buffer-info))))

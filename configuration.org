@@ -4002,17 +4002,6 @@ sbt-mode
 ;;     (psession-save-winconf conf)))
 #+end_src
 
-* Configure =ytdl=
-
-#+begin_src emacs-lisp :results none
-;; (use-package ytdl
-;;  :straight t
-;;   :defer t
-;;   :custom
-;;     (ytdl-command "yt-dlp")
-;;   :commands (ytdl-download ytdl-list))
-#+end_src
-
 * Work
 #+begin_src emacs-lisp :results none
 (defconst +work/monorepo-path "~/work/monorepo")
@@ -4245,4 +4234,21 @@ sbt-mode
   :load-path "~/.emacs.d/packages/winman/"
   :defer t
   :commands (winman-save winman-switch winman-restore winman-delete))
+#+end_src
+
+** Cursor
+#+begin_src emacs-lisp :results none
+(defun cursor-open ()
+  (interactive)
+
+  (let ((args))
+    (dolist (window (window-list))
+      (with-current-buffer (window-buffer window)
+	(when buffer-file-name
+	  (push "-g" args)
+	  (push buffer-file-name args))))
+
+    (push (projectile-project-root) args)
+
+    (apply 'call-process "cursor" nil 0 nil (nreverse args))))
 #+end_src
