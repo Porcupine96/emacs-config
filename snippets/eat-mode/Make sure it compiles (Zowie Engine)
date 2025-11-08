@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Make sure it compiles (Zowie Engine)
+# key: mscz
+# --
+Make sure that the code and its tests compile after you changes using: bloop compile core-zowie-engine-service-test

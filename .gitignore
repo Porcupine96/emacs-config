@@ -42,3 +42,7 @@ forge-database*
 tabsession.el
 org-persist/
 winman-configs.el
+eclipse.jdt.ls/
+elisp-objects/
+workspace/
+

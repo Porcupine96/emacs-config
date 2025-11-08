@@ -202,6 +202,11 @@ Open buffer position
      (side           . right)
      (window-width   . 0.5))
 
+    ("\\*claude.*\\*"
+     (display-buffer-in-side-window)
+     (side           . right)
+     (window-width   . 0.5))
+    
     ("\\*\\(eshell\\|Python\\|Synonyms List\\)\\*"
      (display-buffer-in-side-window)
      (side           . bottom)
@@ -295,6 +300,7 @@ Use =evil-mode=
 
     (evil-mode +1)
   :bind (:map evil-motion-state-map
+        ("C-w i" . evil-window-set-height)
         ("C-w C-U" . winner-undo)
         ("C-w C-w" . ace-window)
         ("C-w w"   . ace-window)))
@@ -435,6 +441,9 @@ Buffer commands.
 (global-set-key (kbd "C-x C-b") #'ibuffer)
 (global-set-key (kbd "C-c b n") #'next-buffer)
 (global-set-key (kbd "C-c b p") #'previous-buffer)
+
+(global-set-key (kbd "C-c C-c") #'claude-code-transient)
+(define-key evil-normal-state-map (kbd "C-z") #'claude-code-transient)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1704,6 +1713,7 @@ Save image and insert it's link at point.
     ;;                                                  projectile-root-top-down-recurring
     ;;                                                  projectile-root-bottom-up
     ;;                                                  projectile-root-local))
+    (setq projectile-project-root-files (remove "Makefile" projectile-project-root-files))
     (setq projectile-project-root-files-bottom-up '("build.sbt" ".git" "requirements.txt" "mypy.ini" "pyproject.toml"))
 
     (projectile-register-project-type 'scala '("build.sbt")))
@@ -1758,6 +1768,12 @@ Save image and insert it's link at point.
                      "gitlab.vpn.zowie.ai"
                      forge-gitlab-repository))
 )
+
+
+(defun magit-create-branch-from-master (name)
+  (interactive "sName: ")
+  (magit-branch-and-checkout name "master"))
+
 #+end_src
  
 vc-annotate options.
@@ -2133,6 +2149,15 @@ SCHEDULED: <2024-04-29 Mon>
   :defer t)
 #+end_src
 
+* Configure =verb=
+#+begin_src emacs-lisp :results none :tangle no
+(use-package verb
+  :straight t
+  :after org
+  :config
+    (define-key org-mode-map (kbd "C-c C-r") verb-command-map))
+#+end_src
+
 * Configure =emojify=
 #+begin_src emacs-lisp :results none
 (use-package emojify
@@ -2366,7 +2391,9 @@ Setup =python-mode=.
 #+begin_src emacs-lisp :results none
 (use-package blacken
   :straight t
-  :hook (python-mode . blacken-mode))
+  :hook (python-mode . blacken-mode)
+  :config
+    (setq blacken-line-length 150))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2432,6 +2459,7 @@ Setup =python-mode=.
          ;; (lsp-semantic-tokens-apply-modifiers nil)
    :init
          (setq lsp-use-plists t)
+         (setq lsp-response-timeout 120)
          (setq lsp-keymap-prefix "C-c l")
 
          (defun my/orderless-dispatch-flex-first (_pattern index _total)
@@ -2517,7 +2545,9 @@ Setup =python-mode=.
 (use-package lsp-metals
   :straight t
   :custom
-    (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"
+    (lsp-metals-server-args '("-J-Dmetals.startMcpServer=true"
+			      "-J-Dmetals.mcpClient=claude"
+			      "-J-Dmetals.allow-multiline-string-formatting=off"
                               "-J-Dmetals.icons=unicode"))
     (lsp-metals-super-method-lenses-enabled t)
     (lsp-metals-enable-semantic-highlighting t)
@@ -2654,8 +2684,6 @@ scala-mode
     ((scala-mode . lsp)
      (scala-mode . flycheck-mode))
      ;; (scala-mode . company-mode)
-  :bind (:map scala-mode-map
-        ("C-c C-c" . +scala/dwim-at-point))
   :config
     (font-lock-add-keywords 'scala-mode
       '(("\\(TODO\\):" 1 'todo-comment-face prepend)
@@ -2702,6 +2730,21 @@ sbt-mode
 
     (message "Copied: %s" import)
     (kill-new import))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun +scala/smart-compile (full-command bl-command)
+  (interactive)
+  (if (string-match-p "creator/creator-genai-service" default-directory)
+      (let* ((genai-service-dir (if (string-match "\\(.*creator/creator-genai-service\\)" default-directory)
+                                    (match-string 1 default-directory)
+                                  (error "Could not find creator-genai-service directory")))
+             (default-directory genai-service-dir)
+             (projects-output (shell-command-to-string "bloop projects"))
+             (projects (split-string projects-output "\n" t))
+             (selected-module (completing-read "Select module: " projects)))
+        (+projectile/compile (concat full-command " " selected-module)))
+    (+projectile/compile bl-command)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -2984,7 +3027,7 @@ sbt-mode
 	 (imports
 	  (-filter (lambda (s) (-any? (lambda (m) (s-ends-with? (concat "." m) s)) missing))
 		   available)))
-    
+
     (if imports
 	(save-excursion
 	  (beginning-of-buffer)
@@ -3600,6 +3643,7 @@ sbt-mode
     "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
     "f D" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work-daily.org"))
     "f s" (lambda () (interactive)(find-file "~/Dropbox/org/todo/studies.org"))
+    "f j" (lambda () (interactive)(find-file "~/Dropbox/org-roam/2023-11-17--22-19-24Z--japanese_learning.org"))
     "f S" (lambda () (interactive)(find-file "~/dotfiles/scripts"))
     "f d" (lambda () (interactive)(dired "~/dotfiles"))
     "f c" (lambda () (interactive)(find-file "~/.emacs.d/configuration.org"))
@@ -3645,7 +3689,8 @@ sbt-mode
     "l f" (lambda () (interactive) (if (derived-mode-p 'scala-mode) (lsp-format-buffer) (format-all-buffer)))
     "l I" #'+scala/copy-import
     
-    "o c" #'cfw:open-org-calendar
+    "o c" #'claude-code-toggle
+    "o x" #'claude-code-transient
     "o p" #'treemacs
     "o e" #'eshell
     "o E" #'+eshell/open-in-default
@@ -3691,7 +3736,7 @@ sbt-mode
     
     "y a" #'yas-new-snippet
     "y v" #'yas-visit-snippet-file
-    ;; "y c" #'company-yasnippet
+    "y c" #'claude/copy-claude-code-path
     "y p" #'+core/copy-file-path
     
     "RET" #'consult-bookmark
@@ -3757,11 +3802,11 @@ sbt-mode
     "t" #'lsp-metals-toggle-show-inferred-type
     "T" #'+scala/create-test
     "c b" (lambda () (interactive) (+projectile/compile "sbt bloopInstall"))
-    "c c" (lambda () (interactive) (+projectile/compile "bl"))
+    "c c" (lambda () (interactive) (+scala/smart-compile "bloop compile" "bl"))
+    "c n" (lambda () (interactive) (+scala/smart-compile "bloop compile --incremental=false" "bl -n"))
+    "c r" (lambda () (interactive) (+scala/smart-compile "bloop run" "bl -r"))
+    "c t" (lambda () (interactive) (+scala/smart-compile "bloop test" "bl -t"))
     "c p" (lambda () (interactive) (+projectile/compile "protob"))
-    "c n" (lambda () (interactive) (+projectile/compile "bl -n"))
-    "c r" (lambda () (interactive) (+projectile/compile "bl -r"))
-    "c t" (lambda () (interactive) (+projectile/compile "bl -t"))
     "c T" #'+scala/test
     "g c" (lambda () (interactive) (+scala/goto "src/main/resources/app.conf"))
     "g b" (lambda () (interactive) (+scala/goto "build.sbt"))
@@ -3941,6 +3986,7 @@ sbt-mode
   :config
     (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
     (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+    (define-key copilot-completion-map (kbd "C-<tab>") 'copilot-accept-completion-by-word)
     (define-key copilot-completion-map (kbd "M-[") 'copilot-next-completion)
     (define-key copilot-completion-map (kbd "M-]") 'copilot-previous-completion))
 #+end_src
@@ -3974,6 +4020,42 @@ sbt-mode
       :host "localhost:11434"
       :stream t 
       :models '("llama3.1")))
+#+end_src
+
+* Configure =claude=
+
+#+begin_src emacs-lisp :results none
+(use-package claude-code
+  :straight (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main" :files ("*.el" (:exclude "demo.gif")))
+  :bind-keymap
+    ("C-c u" . claude-code-command-map)
+  :config
+  (setq claude-code-program "pclaude")
+  (setq claude-code-program-switches '("--allow-dangerously-skip-permissions"))
+  (claude-code-mode))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(defun claude/copy-claude-code-path ()
+  (interactive)
+  (let* ((current-file (buffer-file-name))
+         (project-root (projectile-project-root))
+         (relative-path (if (and current-file project-root)
+                            (file-relative-name current-file project-root)
+                          current-file)))
+    (kill-new (concat "@" relative-path))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
+(use-package eat
+  :straight (:type git
+                   :host codeberg
+                   :repo "akib/emacs-eat"
+                   :files ("*.el" ("term" "term/*.el") "*.texi"
+                           "*.ti" ("terminfo/e" "terminfo/e/*")
+                           ("terminfo/65" "terminfo/65/*")
+                           ("integration" "integration/*")
+                           (:exclude ".dir-locals.el" "*-tests.el"))))
 #+end_src
 
 * Configure =psession=
@@ -4094,10 +4176,22 @@ sbt-mode
   (interactive)
 
   (let* ((default-directory (projectile-project-root))
-	 ;; (test-file (buffer-name (consult-find (projectile-project-root) "Test\\.scala #")))
-       (test-file (-last-item (s-split  "/" ( buffer-file-name))))
+	 (test-file (-last-item (s-split  "/" ( buffer-file-name))))
 	 (file-pattern (concat "\"*" (string-remove-suffix ".scala" test-file) "\""))
-  	 (project (s-trim (shell-command-to-string "bloop projects | head -n1"))))
+
+	 (genai-service-dir (if (string-match "\\(.*creator/creator-genai-service\\)" default-directory)
+                                (match-string 1 default-directory)
+                              default-directory))
+         (default-directory genai-service-dir)
+         (projects-output (shell-command-to-string "bloop projects"))
+         (projects (split-string projects-output "\n" t))
+         (project (completing-read "Select module: " projects))
+	 
+	 
+  	 ;; (project (s-trim (shell-command-to-string "bloop projects | head -n1")))
+
+
+	 )
 
     (+projectile/compile (concat "bloop " "test " project " -o " file-pattern))))
 #+end_src
@@ -4236,7 +4330,23 @@ sbt-mode
   :commands (winman-save winman-switch winman-restore winman-delete))
 #+end_src
 
-** Cursor
+** Vibe!
+#+begin_src emacs-lisp :results none
+(defun vscode-open ()
+  (interactive)
+
+  (let ((args))
+    (dolist (window (window-list))
+      (with-current-buffer (window-buffer window)
+	(when buffer-file-name
+	  (push "-g" args)
+	  (push (format "%s:%d" buffer-file-name (line-number-at-pos)) args))))
+
+    (push (projectile-project-root) args)
+
+    (apply 'call-process "code" nil 0 nil (nreverse args))))
+#+end_src
+
 #+begin_src emacs-lisp :results none
 (defun cursor-open ()
   (interactive)
@@ -4246,7 +4356,7 @@ sbt-mode
       (with-current-buffer (window-buffer window)
 	(when buffer-file-name
 	  (push "-g" args)
-	  (push buffer-file-name args))))
+	  (push (format "%s:%d" buffer-file-name (line-number-at-pos)) args))))
 
     (push (projectile-project-root) args)
 

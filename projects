@@ -1,5 +1,4 @@
 ;;; -*- lisp-data -*-
-(("/home/porcupine/work/monorepo/")
- ("~/projects/service-port/")
- ("/home/porcupine/")
- ("~/projects/homer/"))
+(("/Users/lukaszkazmierczak/work/")
+ ("/Users/lukaszkazmierczak/work/monorepo/creator/creator-automation-statistics-service/")
+ ("/Users/lukaszkazmierczak/work/monorepo/creator/creator-genai-service/"))
