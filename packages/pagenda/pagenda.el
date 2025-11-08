@@ -24,6 +24,9 @@
   diary-show-holidays-flag nil
   org-agenda-skip-deadline-prewarning-if-scheduled t
   org-agenda-skip-scheduled-if-deadline-is-shown t
+  org-agenda-skip-archived-trees nil
+  org-agenda-log-mode-items '(closed)
+  org-agenda-log-mode-add-notes t
   org-agenda-hide-tags-regexp ".*"
   org-agenda-breadcrumbs-separator " ❯ "
   org-agenda-scheduled-leaders '("" "")
@@ -38,7 +41,6 @@
   org-super-agenda-keep-order t
   org-agenda-cmp-user-defined #'org-agenda-cmp-user-defined)
 
-
 (defun org-agenda-cmp-user-defined (a b)
   (let* ((a-todo (get-text-property 0 'todo-state a))
 	 (b-todo (get-text-property 0 'todo-state b))
@@ -52,6 +54,9 @@
 	 (b-todo-prio (cdr (assoc b-todo todo-order))))
 
     (cond
+     ((and (null a-todo-prio) (null b-todo-prio)) 0)
+     ((null a-todo-prio) 1)
+     ((null b-todo-prio) -1)
      ((= a-todo-prio b-todo-prio) 0)
      ((> a-todo-prio b-todo-prio) -1)
      ((< a-todo-prio b-todo-prio) 1))))

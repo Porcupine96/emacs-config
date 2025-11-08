@@ -904,6 +904,9 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
     (setq org-fontify-quote-and-verse-blocks t)
 
+    ;; don't ask for confirmation when executing ord-mode functions
+    (setq org-link-elisp-confirm-function (lambda (a) t))
+
     ;; org-cite configuration
 
     (setq org-cite-global-bibliography p/bibliography)
@@ -1084,6 +1087,7 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
   :config
     (setq org-modern-table nil)
     (setq org-modern-footnote nil)
+    (setq org-modern-progress nil)
     (global-org-modern-mode))
 #+end_src
 
