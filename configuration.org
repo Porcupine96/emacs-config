@@ -1,4 +1,4 @@
-#+STARTUP: overview
++STARTUP: overview
 
 # TODO: play with https://github.com/cpitclaudel/monospacifier
 
@@ -138,7 +138,7 @@ MacOS settings
 #+begin_src emacs-lisp :results none
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-revert-verbose nil)
-(setq auto-revert-interval 0.2)
+(setq auto-revert-interval 5)
 (global-auto-revert-mode 1)
 #+end_src
 
@@ -1158,19 +1158,20 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
 #+begin_src emacs-lisp :results none
 (defun general-define-org-keys ()
-  (general-define-key 
-      :states '(normal insert motion)
-      :keymaps '(evil-org-mode-map org-mode-map)
-      "C-<return>" '+org/c-ret-dwim
-      "C-S-<return>" '+org/c-s-ret-dwim
-      "C-M-<return>" '+org/c-m-ret-dwim
-      "C-c f o" 'flash-create-note
-      "C-c f l" 'flash-select-note)
+  (when (fboundp 'general-define-key)
+    (general-define-key
+        :states '(normal insert motion)
+        :keymaps '(evil-org-mode-map org-mode-map)
+        "C-<return>" '+org/c-ret-dwim
+        "C-S-<return>" '+org/c-s-ret-dwim
+        "C-M-<return>" '+org/c-m-ret-dwim
+        "C-c f o" 'flash-create-note
+        "C-c f l" 'flash-select-note)
 
-  (general-define-key 
-      :states '(normal)
-      :keymaps '(evil-org-mode-map org-mode-map)
-      "<return>" '+org/ret-dwim))
+    (general-define-key
+        :states '(normal)
+        :keymaps '(evil-org-mode-map org-mode-map)
+        "<return>" '+org/ret-dwim)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1760,7 +1761,12 @@ Save image and insert it's link at point.
   :config
     (setq magit-list-refs-sortby "-committerdate")
     
-    (setq auto-revert-check-vc-info nil))
+    (setq auto-revert-check-vc-info nil)
+    
+    ;; forge is slow :( 
+    (with-eval-after-load 'magit
+      (remove-hook 'magit-status-sections-hook 'forge-insert-pullreqs)
+      (remove-hook 'magit-status-sections-hook 'forge-insert-issues)))
 
 (use-package forge 
    :straight t  
@@ -2175,6 +2181,9 @@ SCHEDULED: <2024-04-29 Mon>
     ("C-c SPC y" . (lambda () (interactive) (insert "🟡")))
     ("C-c SPC r" . (lambda () (interactive) (insert "🔴")))
     ("C-c SPC w" . (lambda () (interactive) (insert "⚪")))
+    ("C-c SPC o" . (lambda () (interactive) (insert "🟠")))
+    ("C-c SPC f" . (lambda () (interactive) (insert "🟣")))
+    ("C-c SPC b" . (lambda () (interactive) (insert "🔵")))
     ("C-c SPC h" . (lambda () (interactive) (insert "👈")))
     ("C-c SPC k" . (lambda () (interactive) (insert "👆")))
     ("C-c SPC j" . (lambda () (interactive) (insert "👇")))
@@ -2267,11 +2276,12 @@ SCHEDULED: <2024-04-29 Mon>
   :straight t
   :ensure t
   :custom 
-   (dirvish-attributes '(subtree-state all-the-icons))
+   (dirvish-attributes '(all-the-icons file-time file-size collapse subtree-state vc-state git-msg))
   :config
    (setq dirvish-reuse-session t)
    (setq dired-recursive-deletes 'always)
    (setq delete-by-moving-to-thrash 'always)
+   (setq dired-listing-switches "-lha")
 
    (dirvish-override-dired-mode)
 
@@ -2348,7 +2358,7 @@ Setup =python-mode=.
             python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
    :config
      
-     (add-hook 'python-base-mode-hook 'flymake-mode)
+     ;; (add-hook 'python-base-mode-hook 'flymake-mode)
      ;; (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
 
      ;; automatically scroll the shell buffer 
@@ -2417,6 +2427,7 @@ Setup =python-mode=.
   (interactive)
   (+core/surround-word-with "Optional[" "]"))
 #+end_src
+
 ** R
 #+begin_src emacs-lisp :results none
 (use-package ess
@@ -2650,31 +2661,31 @@ Remove other LSP sessions.
    
 ** Eglot 
 #+begin_src emacs-lisp :results none
-(use-package eglot
-  :straight t
-  :hook
-  (python-mode . eglot-ensure)
-
-  :config
-  (add-hook 'eglot-managed-mode-hook
-    (lambda () (cond ((derived-mode-p 'python-base-mode)
-                      (add-hook 'flymake-diagnostic-functions 'python-flymake nil t))
-                      ;; if not adding diagnostic functions to other modes just use an if
-                      ;; ...
-                     (t nil))))
-  
-  (setq-default eglot-workspace-configuration
-                '((:pyright-langserver . (:configurationSources ["flake8"]
-								:plugins (
-									  :pycodestyle (:enabled :json-false)
-									  :mccabe (:enabled :json-false)
-									  :pyflakes (:enabled :json-false)
-									  :flake8 (:enabled :json-false :maxLineLength 120)
-									  :ruff (:enabled t :lineLength 120)
-									  :pydocstyle (:enabled t :convention "numpy")
-									  :yapf (:enabled :json-false)
-									  :autopep8 (:enabled :json-false)
-									  :black (:enabled t :line_length 120 :cache_config t)))))))
+;; (use-package eglot
+;;   :straight t
+;;   :hook
+;;   (python-mode . eglot-ensure)
+;; 
+;;   :config
+;;   (add-hook 'eglot-managed-mode-hook
+;;     (lambda () (cond ((derived-mode-p 'python-base-mode)
+;;                       (add-hook 'flymake-diagnostic-functions 'python-flymake nil t))
+;;                       ;; if not adding diagnostic functions to other modes just use an if
+;;                       ;; ...
+;;                      (t nil))))
+;;   
+;;   (setq-default eglot-workspace-configuration
+;;                 '((:pyright-langserver . (:configurationSources ["flake8"]
+;; 								:plugins (
+;; 									  :pycodestyle (:enabled :json-false)
+;; 									  :mccabe (:enabled :json-false)
+;; 									  :pyflakes (:enabled :json-false)
+;; 									  :flake8 (:enabled :json-false :maxLineLength 120)
+;; 									  :ruff (:enabled t :lineLength 120)
+;; 									  :pydocstyle (:enabled t :convention "numpy")
+;; 									  :yapf (:enabled :json-false)
+;; 									  :autopep8 (:enabled :json-false)
+;; 									  :black (:enabled t :line_length 120 :cache_config t)))))))
 
 #+end_src
 
@@ -3163,7 +3174,8 @@ sbt-mode
 (use-package treesit-auto
   :straight t
   :config
-  (global-treesit-auto-mode))
+    (setq treesit-auto-langs '(scala python))
+    (global-treesit-auto-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -3464,6 +3476,21 @@ sbt-mode
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defvar my/olivetti-left-offset 10
+  "Extra columns to add to the left margin when olivetti-mode is active.")
+
+(defun my/olivetti-asymmetric-margins (orig-fun &rest args)
+  "Add offset to left margin after olivetti sets margins."
+  (apply orig-fun args)
+  (when olivetti-mode
+    (set-window-margins (selected-window)
+                        (+ (or (car (window-margins)) 0) my/olivetti-left-offset)
+                        (max 0 (- (or (cdr (window-margins)) 0) my/olivetti-left-offset)))))
+
+(advice-add 'olivetti-set-window :around #'my/olivetti-asymmetric-margins)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (use-package hide-mode-line
   :straight t 
   :defer t
@@ -3642,6 +3669,7 @@ sbt-mode
     "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
     "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
     "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
+    "f o" (lambda () (interactive)(find-file "~/Dropbox/org/todo/daily.org"))
     "f P" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/private.org"))
     "f e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org"))
     "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
@@ -4035,7 +4063,7 @@ sbt-mode
     ("C-c u" . claude-code-command-map)
   :config
   (setq claude-code-program "pclaude")
-  (setq claude-code-program-switches '("--allow-dangerously-skip-permissions"))
+  (setq claude-code-program-switches '("--dangerously-skip-permissions"))
   (claude-code-mode))
 #+end_src
 
@@ -4060,6 +4088,36 @@ sbt-mode
                            ("terminfo/65" "terminfo/65/*")
                            ("integration" "integration/*")
                            (:exclude ".dir-locals.el" "*-tests.el"))))
+#+end_src
+
+* Configure =agent-shell=
+
+#+begin_src emacs-lisp :results none
+(use-package shell-maker
+  :straight t) 
+
+(use-package agent-shell
+  :straight t
+  :config 
+    (setq agent-shell-google-authentication
+	  (agent-shell-google-make-authentication :vertex-ai t))
+
+    (setq agent-shell-anthropic-default-model-id "claude-opus-4-6")
+
+    (setq agent-shell-anthropic-claude-environment
+          (agent-shell-make-environment-variables
+           "CLAUDE_CODE_USE_VERTEX" "1"
+           "CLOUD_ML_REGION" "europe-west1"
+	   "ANTHROPIC_MODEL" "claude-opus-4-6"
+           "ANTHROPIC_VERTEX_PROJECT_ID" "zowie-product-tools"
+           "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"))
+
+    (setq agent-shell-opencode-acp-command '("oc" "acp")
+
+  :bind (:map agent-shell-mode-map
+              ("RET" . newline)
+              ("C-c C-c" . shell-maker-submit)
+              ("C-c C-k" . agent-shell-interrupt)))
 #+end_src
 
 * Configure =psession=

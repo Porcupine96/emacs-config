@@ -15,6 +15,18 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(when (and (fboundp 'loaddefs-generate)
+           (>= emacs-major-version 30))
+  (defun loaddefs-generate--wrapper (orig-fun dir output-file &rest args)
+    "Wrapper for loaddefs-generate to handle Emacs 30 compatibility."
+    (condition-case err
+        (apply orig-fun dir output-file args)
+      (error
+       (message "Warning: loaddefs-generate failed: %S, using fallback" err)
+       (when (fboundp 'make-directory-autoloads)
+         (make-directory-autoloads dir output-file)))))
+  (advice-add 'loaddefs-generate :around #'loaddefs-generate--wrapper))
+
 (straight-use-package 'use-package)
 
 (use-package org
