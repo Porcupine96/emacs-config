@@ -1712,14 +1712,12 @@ Save image and insert it's link at point.
     (setq projectile-auto-discover nil)
     (setq projectile-enable-caching t)
 
-    (setq projectile-project-root-functions #'(projectile-root-top-down))
+    (setq projectile-project-root-functions '(projectile-root-bottom-up
+                                              projectile-root-top-down))
 
-    ;; (setq projectile-project-root-files-functions #'(projectile-root-top-down
-    ;;                                                  projectile-root-top-down-recurring
-    ;;                                                  projectile-root-bottom-up
-    ;;                                                  projectile-root-local))
     (setq projectile-project-root-files (remove "Makefile" projectile-project-root-files))
-    (setq projectile-project-root-files-bottom-up '("build.sbt" ".git" "requirements.txt" "mypy.ini" "pyproject.toml"))
+    (setq projectile-project-root-files-bottom-up '("build.sbt" "requirements.txt" "mypy.ini" "pyproject.toml"))
+    (setq projectile-project-root-files-top-down '(".git"))
 
     (projectile-register-project-type 'scala '("build.sbt")))
 #+end_src
@@ -3730,6 +3728,8 @@ sbt-mode
     "o o" #'olivetti-mode
     "o v" #'+vterm/focus-or-create
     "o V" #'+vterm/new-session
+    "o a" #'agent-shell
+    "o A" #'agent-shell-new-shell
     "o m" #'mu4e
     "o w" #'+eww/browse-url
     
@@ -4103,6 +4103,8 @@ sbt-mode
 	  (agent-shell-google-make-authentication :vertex-ai t))
 
     (setq agent-shell-anthropic-default-model-id "claude-opus-4-6")
+    (setq agent-shell-session-strategy 'prompt)
+    (setq agent-shell-preferred-agent-config (agent-shell-anthropic-make-claude-code-config))
 
     (setq agent-shell-anthropic-claude-environment
           (agent-shell-make-environment-variables
@@ -4112,7 +4114,7 @@ sbt-mode
            "ANTHROPIC_VERTEX_PROJECT_ID" "zowie-product-tools"
            "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"))
 
-    (setq agent-shell-opencode-acp-command '("oc" "acp")
+    (setq agent-shell-opencode-acp-command '("oc" "acp"))
 
   :bind (:map agent-shell-mode-map
               ("RET" . newline)
