@@ -4103,6 +4103,7 @@ sbt-mode
 	  (agent-shell-google-make-authentication :vertex-ai t))
 
     (setq agent-shell-anthropic-default-model-id "claude-opus-4-6")
+    (setq agent-shell-anthropic-default-session-mode-id "bypassPermissions")
     (setq agent-shell-session-strategy 'prompt)
     (setq agent-shell-preferred-agent-config (agent-shell-anthropic-make-claude-code-config))
 
@@ -4115,6 +4116,7 @@ sbt-mode
            "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"))
 
     (setq agent-shell-opencode-acp-command '("oc" "acp"))
+    (setq agent-shell-opencode-default-model-id "github-copilot/gemini-3.1-pro-preview")
 
   :bind (:map agent-shell-mode-map
               ("RET" . newline)
@@ -4425,4 +4427,10 @@ sbt-mode
     (push (projectile-project-root) args)
 
     (apply 'call-process "cursor" nil 0 nil (nreverse args))))
+#+end_src
+
+* Start server
+
+#+begin_src emacs-lisp :resutls none
+(server-start)
 #+end_src
