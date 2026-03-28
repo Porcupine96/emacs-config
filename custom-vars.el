@@ -6,7 +6,8 @@
  '(auth-source-save-behavior nil)
  '(copilot-chat-model "claude-3.7-sonnet")
  '(custom-safe-themes
-   '("52acee1228acc0397eb0e55039b43d18b6634ec0d259b57f8f0853b76137be2c"
+   '("aa63c91f979b0b5c42ef50531775eca9f2803198dfb9a87be0acf8a6a4accfee"
+     "52acee1228acc0397eb0e55039b43d18b6634ec0d259b57f8f0853b76137be2c"
      "3756ace14c5d362b7f9ca22a05cc3ba730d876962cd3b245147e67152b260a97" default))
  '(org-agenda-files
    '("/Users/lukaszkazmierczak/Dropbox/org/todo/work.org" "/Users/lukaszkazmierczak/Dropbox/org/todo/private.org"))

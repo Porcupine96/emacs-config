@@ -1088,6 +1088,13 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     (setq org-modern-table nil)
     (setq org-modern-footnote nil)
     (setq org-modern-progress nil)
+
+    (defun org-modern--update-faces-safe (orig-fun &rest args)
+      (let ((bg (face-attribute 'default :background nil t)))
+        (when (and bg (not (eq bg 'unspecified)))
+          (apply orig-fun args))))
+    (advice-add 'org-modern--update-faces :around #'org-modern--update-faces-safe)
+
     (global-org-modern-mode))
 #+end_src
 
@@ -1853,6 +1860,11 @@ vc-annotate options.
 (straight-use-package '(nano-splash :type git :host github
                                     :repo "rougier/nano-splash"))
 
+(unless (facep 'nano-strong)
+  (defface nano-strong '((t :weight bold)) "Nano strong face."))
+(unless (facep 'nano-faded)
+  (defface nano-faded '((t :foreground "#999999")) "Nano faded face."))
+
 (require 'nano-splash)
 #+end_src
 
@@ -1863,6 +1875,8 @@ SCHEDULED: <2024-04-29 Mon>
 (use-package mood-line
   :straight t
   :config
+    (advice-add 'mood-line--process-segments :filter-return
+                (lambda (result) (or result "")))
     (mood-line-mode)
   :custom
     (mood-line-glyph-alist mood-line-glyphs-fira-code))
@@ -2527,7 +2541,7 @@ Setup =python-mode=.
              (not (functionp 'json-rpc-connection))  ;; native json-rpc
              (executable-find "emacs-lsp-booster"))
         (progn
-          (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+          (when-let* ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
             (setcar orig-result command-from-exec-path))
           (message "Using emacs-lsp-booster for %s!" orig-result)
           (cons "emacs-lsp-booster" orig-result))
@@ -2558,6 +2572,7 @@ Setup =python-mode=.
 (use-package lsp-metals
   :straight t
   :custom
+    (lsp-metals-server-command "~/dotfiles/scripts/metals-v2")
     (lsp-metals-server-args '("-J-Dmetals.startMcpServer=true"
 			      "-J-Dmetals.mcpClient=claude"
 			      "-J-Dmetals.allow-multiline-string-formatting=off"
@@ -3172,11 +3187,12 @@ sbt-mode
 (use-package treesit-auto
   :straight t
   :config
-    (setq treesit-auto-langs '(scala python))
+    (setq treesit-auto-langs '(python))
     (global-treesit-auto-mode))
 #+end_src
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
+;; Disabled: incompatible with Emacs 31 built-in treesit. Use treesit-auto instead.
 (use-package tree-sitter
   :straight t
   :defer t
@@ -3189,7 +3205,7 @@ sbt-mode
          (scala-mode . (lambda () (tree-sitter-mode) (tree-sitter-hl-mode)))))
 #+end_src
 
-#+begin_src emacs-lisp :results none 
+#+begin_src emacs-lisp :results none :tangle no
 (use-package tree-sitter-langs
   :straight t
   :after tree-sitter)
@@ -3197,11 +3213,11 @@ sbt-mode
 
 *** ts-fold
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package ts-fold
   :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold")
   :init
-    (setq global-ts-fold-mode t)	
+    (setq global-ts-fold-mode t)
     (define-key evil-normal-state-map (kbd "zc") #'ts-fold-close)
     (define-key evil-normal-state-map (kbd "zC") #'ts-fold-close-all)
     (define-key evil-normal-state-map (kbd "zo") #'ts-fold-open)

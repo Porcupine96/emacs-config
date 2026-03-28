@@ -1,6 +1,12 @@
 ;;; early-init.el --- Early initialization. -*- lexical-binding: t; -*-
 (setq package-enable-at-startup nil)
 
+;; Emacs 31 Homebrew build generates .eln files with duplicate LC_RPATH
+;; that macOS dlopen rejects. Disable native compilation until fixed.
+(setq native-comp-jit-compilation nil)
+(setq inhibit-automatic-native-compilation t)
+(setq native-comp-enable-subr-trampolines nil)
+
 (setenv "LSP_USE_PLISTS" "true")
 
 (require 'seq)
