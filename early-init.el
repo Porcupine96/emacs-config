@@ -49,7 +49,6 @@ Falls back to safe implementation when the original fails."
 
 (advice-add 'seq-empty-p :around #'seq-empty-p--patched)
 
-(add-to-list 'default-frame-alist '(fullscreen . fullboth))
 (add-to-list 'default-frame-alist '(undecorated-round . t))
 
 (provide 'early-init)
