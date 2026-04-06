@@ -3163,7 +3163,9 @@ sbt-mode
 (use-package treesit-auto
   :straight t
   :config
-  (global-treesit-auto-mode))
+    (setq treesit-auto-langs '(python scala))
+  
+    (global-treesit-auto-mode))
 #+end_src
 
 #+begin_src emacs-lisp :results none
