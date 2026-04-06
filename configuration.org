@@ -1,4 +1,4 @@
-#+STARTUP: overview
++STARTUP: overview
 
 # TODO: play with https://github.com/cpitclaudel/monospacifier
 
@@ -138,7 +138,7 @@ MacOS settings
 #+begin_src emacs-lisp :results none
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-revert-verbose nil)
-(setq auto-revert-interval 0.2)
+(setq auto-revert-interval 5)
 (global-auto-revert-mode 1)
 #+end_src
 
@@ -1088,6 +1088,13 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
     (setq org-modern-table nil)
     (setq org-modern-footnote nil)
     (setq org-modern-progress nil)
+
+    (defun org-modern--update-faces-safe (orig-fun &rest args)
+      (let ((bg (face-attribute 'default :background nil t)))
+        (when (and bg (not (eq bg 'unspecified)))
+          (apply orig-fun args))))
+    (advice-add 'org-modern--update-faces :around #'org-modern--update-faces-safe)
+
     (global-org-modern-mode))
 #+end_src
 
@@ -1158,19 +1165,20 @@ Based on the excellent [[https://protesilaos.com/dotemacs/#h:0077f7e0-409f-4645-
 
 #+begin_src emacs-lisp :results none
 (defun general-define-org-keys ()
-  (general-define-key 
-      :states '(normal insert motion)
-      :keymaps '(evil-org-mode-map org-mode-map)
-      "C-<return>" '+org/c-ret-dwim
-      "C-S-<return>" '+org/c-s-ret-dwim
-      "C-M-<return>" '+org/c-m-ret-dwim
-      "C-c f o" 'flash-create-note
-      "C-c f l" 'flash-select-note)
+  (when (fboundp 'general-define-key)
+    (general-define-key
+        :states '(normal insert motion)
+        :keymaps '(evil-org-mode-map org-mode-map)
+        "C-<return>" '+org/c-ret-dwim
+        "C-S-<return>" '+org/c-s-ret-dwim
+        "C-M-<return>" '+org/c-m-ret-dwim
+        "C-c f o" 'flash-create-note
+        "C-c f l" 'flash-select-note)
 
-  (general-define-key 
-      :states '(normal)
-      :keymaps '(evil-org-mode-map org-mode-map)
-      "<return>" '+org/ret-dwim))
+    (general-define-key
+        :states '(normal)
+        :keymaps '(evil-org-mode-map org-mode-map)
+        "<return>" '+org/ret-dwim)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -1711,14 +1719,12 @@ Save image and insert it's link at point.
     (setq projectile-auto-discover nil)
     (setq projectile-enable-caching t)
 
-    (setq projectile-project-root-functions #'(projectile-root-top-down))
+    (setq projectile-project-root-functions '(projectile-root-bottom-up
+                                              projectile-root-top-down))
 
-    ;; (setq projectile-project-root-files-functions #'(projectile-root-top-down
-    ;;                                                  projectile-root-top-down-recurring
-    ;;                                                  projectile-root-bottom-up
-    ;;                                                  projectile-root-local))
     (setq projectile-project-root-files (remove "Makefile" projectile-project-root-files))
-    (setq projectile-project-root-files-bottom-up '("build.sbt" ".git" "requirements.txt" "mypy.ini" "pyproject.toml"))
+    (setq projectile-project-root-files-bottom-up '("build.sbt" "requirements.txt" "mypy.ini" "pyproject.toml"))
+    (setq projectile-project-root-files-top-down '(".git"))
 
     (projectile-register-project-type 'scala '("build.sbt")))
 #+end_src
@@ -1760,7 +1766,12 @@ Save image and insert it's link at point.
   :config
     (setq magit-list-refs-sortby "-committerdate")
     
-    (setq auto-revert-check-vc-info nil))
+    (setq auto-revert-check-vc-info nil)
+    
+    ;; forge is slow :( 
+    (with-eval-after-load 'magit
+      (remove-hook 'magit-status-sections-hook 'forge-insert-pullreqs)
+      (remove-hook 'magit-status-sections-hook 'forge-insert-issues)))
 
 (use-package forge 
    :straight t  
@@ -1849,6 +1860,11 @@ vc-annotate options.
 (straight-use-package '(nano-splash :type git :host github
                                     :repo "rougier/nano-splash"))
 
+(unless (facep 'nano-strong)
+  (defface nano-strong '((t :weight bold)) "Nano strong face."))
+(unless (facep 'nano-faded)
+  (defface nano-faded '((t :foreground "#999999")) "Nano faded face."))
+
 (require 'nano-splash)
 #+end_src
 
@@ -1859,6 +1875,8 @@ SCHEDULED: <2024-04-29 Mon>
 (use-package mood-line
   :straight t
   :config
+    (advice-add 'mood-line--process-segments :filter-return
+                (lambda (result) (or result "")))
     (mood-line-mode)
   :custom
     (mood-line-glyph-alist mood-line-glyphs-fira-code))
@@ -2175,6 +2193,9 @@ SCHEDULED: <2024-04-29 Mon>
     ("C-c SPC y" . (lambda () (interactive) (insert "🟡")))
     ("C-c SPC r" . (lambda () (interactive) (insert "🔴")))
     ("C-c SPC w" . (lambda () (interactive) (insert "⚪")))
+    ("C-c SPC o" . (lambda () (interactive) (insert "🟠")))
+    ("C-c SPC f" . (lambda () (interactive) (insert "🟣")))
+    ("C-c SPC b" . (lambda () (interactive) (insert "🔵")))
     ("C-c SPC h" . (lambda () (interactive) (insert "👈")))
     ("C-c SPC k" . (lambda () (interactive) (insert "👆")))
     ("C-c SPC j" . (lambda () (interactive) (insert "👇")))
@@ -2267,11 +2288,12 @@ SCHEDULED: <2024-04-29 Mon>
   :straight t
   :ensure t
   :custom 
-   (dirvish-attributes '(subtree-state all-the-icons))
+   (dirvish-attributes '(all-the-icons file-time file-size collapse subtree-state vc-state git-msg))
   :config
    (setq dirvish-reuse-session t)
    (setq dired-recursive-deletes 'always)
    (setq delete-by-moving-to-thrash 'always)
+   (setq dired-listing-switches "-lha")
 
    (dirvish-override-dired-mode)
 
@@ -2348,7 +2370,7 @@ Setup =python-mode=.
             python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
    :config
      
-     (add-hook 'python-base-mode-hook 'flymake-mode)
+     ;; (add-hook 'python-base-mode-hook 'flymake-mode)
      ;; (setq python-flymake-command '("ruff" "--quiet" "--stdin-filename=stdin" "-"))
 
      ;; automatically scroll the shell buffer 
@@ -2417,6 +2439,7 @@ Setup =python-mode=.
   (interactive)
   (+core/surround-word-with "Optional[" "]"))
 #+end_src
+
 ** R
 #+begin_src emacs-lisp :results none
 (use-package ess
@@ -2518,7 +2541,7 @@ Setup =python-mode=.
              (not (functionp 'json-rpc-connection))  ;; native json-rpc
              (executable-find "emacs-lsp-booster"))
         (progn
-          (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+          (when-let* ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
             (setcar orig-result command-from-exec-path))
           (message "Using emacs-lsp-booster for %s!" orig-result)
           (cons "emacs-lsp-booster" orig-result))
@@ -2549,6 +2572,7 @@ Setup =python-mode=.
 (use-package lsp-metals
   :straight t
   :custom
+    (lsp-metals-server-command "~/dotfiles/scripts/metals-v2")
     (lsp-metals-server-args '("-J-Dmetals.startMcpServer=true"
 			      "-J-Dmetals.mcpClient=claude"
 			      "-J-Dmetals.allow-multiline-string-formatting=off"
@@ -2650,31 +2674,31 @@ Remove other LSP sessions.
    
 ** Eglot 
 #+begin_src emacs-lisp :results none
-(use-package eglot
-  :straight t
-  :hook
-  (python-mode . eglot-ensure)
-
-  :config
-  (add-hook 'eglot-managed-mode-hook
-    (lambda () (cond ((derived-mode-p 'python-base-mode)
-                      (add-hook 'flymake-diagnostic-functions 'python-flymake nil t))
-                      ;; if not adding diagnostic functions to other modes just use an if
-                      ;; ...
-                     (t nil))))
-  
-  (setq-default eglot-workspace-configuration
-                '((:pyright-langserver . (:configurationSources ["flake8"]
-								:plugins (
-									  :pycodestyle (:enabled :json-false)
-									  :mccabe (:enabled :json-false)
-									  :pyflakes (:enabled :json-false)
-									  :flake8 (:enabled :json-false :maxLineLength 120)
-									  :ruff (:enabled t :lineLength 120)
-									  :pydocstyle (:enabled t :convention "numpy")
-									  :yapf (:enabled :json-false)
-									  :autopep8 (:enabled :json-false)
-									  :black (:enabled t :line_length 120 :cache_config t)))))))
+;; (use-package eglot
+;;   :straight t
+;;   :hook
+;;   (python-mode . eglot-ensure)
+;; 
+;;   :config
+;;   (add-hook 'eglot-managed-mode-hook
+;;     (lambda () (cond ((derived-mode-p 'python-base-mode)
+;;                       (add-hook 'flymake-diagnostic-functions 'python-flymake nil t))
+;;                       ;; if not adding diagnostic functions to other modes just use an if
+;;                       ;; ...
+;;                      (t nil))))
+;;   
+;;   (setq-default eglot-workspace-configuration
+;;                 '((:pyright-langserver . (:configurationSources ["flake8"]
+;; 								:plugins (
+;; 									  :pycodestyle (:enabled :json-false)
+;; 									  :mccabe (:enabled :json-false)
+;; 									  :pyflakes (:enabled :json-false)
+;; 									  :flake8 (:enabled :json-false :maxLineLength 120)
+;; 									  :ruff (:enabled t :lineLength 120)
+;; 									  :pydocstyle (:enabled t :convention "numpy")
+;; 									  :yapf (:enabled :json-false)
+;; 									  :autopep8 (:enabled :json-false)
+;; 									  :black (:enabled t :line_length 120 :cache_config t)))))))
 
 #+end_src
 
@@ -3163,12 +3187,12 @@ sbt-mode
 (use-package treesit-auto
   :straight t
   :config
-    (setq treesit-auto-langs '(python scala))
-  
+    (setq treesit-auto-langs '(python))
     (global-treesit-auto-mode))
 #+end_src
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
+;; Disabled: incompatible with Emacs 31 built-in treesit. Use treesit-auto instead.
 (use-package tree-sitter
   :straight t
   :defer t
@@ -3181,7 +3205,7 @@ sbt-mode
          (scala-mode . (lambda () (tree-sitter-mode) (tree-sitter-hl-mode)))))
 #+end_src
 
-#+begin_src emacs-lisp :results none 
+#+begin_src emacs-lisp :results none :tangle no
 (use-package tree-sitter-langs
   :straight t
   :after tree-sitter)
@@ -3189,11 +3213,11 @@ sbt-mode
 
 *** ts-fold
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (use-package ts-fold
   :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold")
   :init
-    (setq global-ts-fold-mode t)	
+    (setq global-ts-fold-mode t)
     (define-key evil-normal-state-map (kbd "zc") #'ts-fold-close)
     (define-key evil-normal-state-map (kbd "zC") #'ts-fold-close-all)
     (define-key evil-normal-state-map (kbd "zo") #'ts-fold-open)
@@ -3466,6 +3490,21 @@ sbt-mode
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defvar my/olivetti-left-offset 10
+  "Extra columns to add to the left margin when olivetti-mode is active.")
+
+(defun my/olivetti-asymmetric-margins (orig-fun &rest args)
+  "Add offset to left margin after olivetti sets margins."
+  (apply orig-fun args)
+  (when olivetti-mode
+    (set-window-margins (selected-window)
+                        (+ (or (car (window-margins)) 0) my/olivetti-left-offset)
+                        (max 0 (- (or (cdr (window-margins)) 0) my/olivetti-left-offset)))))
+
+(advice-add 'olivetti-set-window :around #'my/olivetti-asymmetric-margins)
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (use-package hide-mode-line
   :straight t 
   :defer t
@@ -3644,6 +3683,7 @@ sbt-mode
     "f w" (lambda () (interactive)(find-file "~/Dropbox/org/todo/work.org"))
     "f W" (lambda () (interactive)(find-file "~/Dropbox/org/work/work.org"))
     "f p" (lambda () (interactive)(find-file "~/Dropbox/org/todo/private.org"))
+    "f o" (lambda () (interactive)(find-file "~/Dropbox/org/todo/daily.org"))
     "f P" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/private.org"))
     "f e" (lambda () (interactive)(find-file "~/Dropbox/org/resources/resources.org"))
     "f C" (lambda () (interactive)(find-file "~/Dropbox/org/knowledge/cheatsheet.org"))
@@ -3704,6 +3744,8 @@ sbt-mode
     "o o" #'olivetti-mode
     "o v" #'+vterm/focus-or-create
     "o V" #'+vterm/new-session
+    "o a" #'agent-shell
+    "o A" #'agent-shell-new-shell
     "o m" #'mu4e
     "o w" #'+eww/browse-url
     
@@ -4037,7 +4079,7 @@ sbt-mode
     ("C-c u" . claude-code-command-map)
   :config
   (setq claude-code-program "pclaude")
-  (setq claude-code-program-switches '("--allow-dangerously-skip-permissions"))
+  (setq claude-code-program-switches '("--dangerously-skip-permissions"))
   (claude-code-mode))
 #+end_src
 
@@ -4062,6 +4104,40 @@ sbt-mode
                            ("terminfo/65" "terminfo/65/*")
                            ("integration" "integration/*")
                            (:exclude ".dir-locals.el" "*-tests.el"))))
+#+end_src
+
+* Configure =agent-shell=
+
+#+begin_src emacs-lisp :results none
+(use-package shell-maker
+  :straight t) 
+
+(use-package agent-shell
+  :straight t
+  :config 
+    (setq agent-shell-google-authentication
+	  (agent-shell-google-make-authentication :vertex-ai t))
+
+    (setq agent-shell-anthropic-default-model-id "claude-opus-4-6")
+    (setq agent-shell-anthropic-default-session-mode-id "bypassPermissions")
+    (setq agent-shell-session-strategy 'prompt)
+    (setq agent-shell-preferred-agent-config (agent-shell-anthropic-make-claude-code-config))
+
+    (setq agent-shell-anthropic-claude-environment
+          (agent-shell-make-environment-variables
+           "CLAUDE_CODE_USE_VERTEX" "1"
+           "CLOUD_ML_REGION" "europe-west1"
+	   "ANTHROPIC_MODEL" "claude-opus-4-6"
+           "ANTHROPIC_VERTEX_PROJECT_ID" "zowie-product-tools"
+           "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"))
+
+    (setq agent-shell-opencode-acp-command '("oc" "acp"))
+    (setq agent-shell-opencode-default-model-id "github-copilot/gemini-3.1-pro-preview")
+
+  :bind (:map agent-shell-mode-map
+              ("RET" . newline)
+              ("C-c C-c" . shell-maker-submit)
+              ("C-c C-k" . agent-shell-interrupt)))
 #+end_src
 
 * Configure =psession=
@@ -4367,4 +4443,10 @@ sbt-mode
     (push (projectile-project-root) args)
 
     (apply 'call-process "cursor" nil 0 nil (nreverse args))))
+#+end_src
+
+* Start server
+
+#+begin_src emacs-lisp :resutls none
+(server-start)
 #+end_src
