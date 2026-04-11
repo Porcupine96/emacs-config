@@ -614,6 +614,16 @@ Scale text.
 #+end_src
 
 #+begin_src emacs-lisp :results none
+(defun ediff-visible-buffers ()
+  (interactive)
+  (let ((windows (window-list)))
+    (if (/= (length windows) 2)
+        (user-error "Expected exactly 2 visible windows, got %d" (length windows))
+      (ediff-buffers (window-buffer (car windows))
+                     (window-buffer (cadr windows))))))
+#+end_src
+
+#+begin_src emacs-lisp :results none
 (defun +core/copy-file-path ()
   (interactive)
   (kill-new (buffer-file-name)))
@@ -3647,6 +3657,15 @@ sbt-mode
     :states '(normal visual motion)
     :keymaps 'override
     "0" #'toggle-frame-fullscreen
+    "1" #'harpoon-go-to-1
+    "2" #'harpoon-go-to-2
+    "3" #'harpoon-go-to-3
+    "4" #'harpoon-go-to-4
+    "5" #'harpoon-go-to-5
+    "6" #'harpoon-go-to-6
+    "7" #'harpoon-go-to-7
+    "8" #'harpoon-go-to-8
+    "9" #'harpoon-go-to-9
 
     "a a" #'org-agenda
     "a c" #'open-calendar
@@ -3707,6 +3726,8 @@ sbt-mode
     "g t" #'git-timemachine
     "g m" #'man
     
+    "h a" #'harpoon-add-file
+    "h h" #'harpoon-toggle-file
     "h b" #'counsel-descbinds
     "h k" #'helpful-key
     "h f" #'helpful-function
@@ -4110,10 +4131,12 @@ sbt-mode
 
 #+begin_src emacs-lisp :results none
 (use-package shell-maker
-  :straight t) 
+  :straight t
+  :defer t) 
 
 (use-package agent-shell
   :straight t
+  :defer t
   :config 
     (setq agent-shell-google-authentication
 	  (agent-shell-google-make-authentication :vertex-ai t))
@@ -4140,31 +4163,14 @@ sbt-mode
               ("C-c C-k" . agent-shell-interrupt)))
 #+end_src
 
-* Configure =psession=
-#+begin_src emacs-lisp :results none
-;; (use-package psession
-;;   :straight t
-;;   :init 
-;;   (psession-autosave-mode 1)
-;;   (psession-mode 1)
-;;   :config
-;;   ;; idea: save magit commit history as well
-;;   (setq psession-object-to-save-alist '((extended-command-history . "extended-command-history.el")
-;;                                         (regexp-search-ring . "regexp-search-ring.el")
-;;                                         (search-ring . "search-ring.el")
-;;                                         (file-name-history . "file-name-history.el")
-;;                                         (kill-ring . "kill-ring.el")
-;;                                         (kill-ring-yank-pointer . "kill-ring-yank-pointer.el")
-;;                                         (register-alist . "register-alist.el")
-;;                                         (psession--save-buffers-alist . "psession-save-buffers-alist.el")
-;;                                         (psession--winconf-alist . "psession-winconf-alist.el")))
+* Configure =harpoon=
 
-;;   (defun psession-update-winconf (conf)
-;;     (interactive (list (completing-read
-;;  			"WinConfig: "
-;;  			(sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
-;;     (psession-save-winconf conf)))
+#+begin_src emacs-lisp :results none
+(use-package harpoon
+  :straight t
+  :defer t)
 #+end_src
+
 
 * Work
 #+begin_src emacs-lisp :results none
