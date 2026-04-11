@@ -1,6 +1,7 @@
 ;; Configure package.el to include MELPA.
 
 (customize-set-value 'straight-repository-branch "develop")
+(customize-set-value 'straight-built-in-pseudo-packages '(seq))
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
