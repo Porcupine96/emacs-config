@@ -1530,6 +1530,7 @@ Save image and insert it's link at point.
                ("C-c n L" . org-roam)
                ("C-c n F" . +org-roam/find-file-by-title)
                ("C-c n C" . org-roam-db-sync)
+               ("C-c n V" . +org-roam/switch-vault)
                ("C-c n g" . org-roam-buffer-display-dedicated)
                ("C-c n w" . writer)
                ("C-c n p" . +org-ref/org-ref-open-associated-pdf))
@@ -1577,6 +1578,24 @@ Save image and insert it's link at point.
             			      :unnarrowed t)))
 
    (org-roam-db-autosync-mode))
+
+(defvar +org-roam/vaults
+  '(("default" . "~/Dropbox/org-roam")
+    ("masters" . "~/Library/CloudStorage/Dropbox/masters-roam"))
+  "Alist of org-roam vault names to directories.")
+
+(defun +org-roam/switch-vault ()
+  "Switch org-roam directory between configured vaults."
+  (interactive)
+  (let* ((current (abbreviate-file-name (expand-file-name org-roam-directory)))
+         (name (completing-read
+                (format "Switch org-roam vault (current: %s): " current)
+                (mapcar #'car +org-roam/vaults)
+                nil t))
+         (dir (alist-get name +org-roam/vaults nil nil #'string=)))
+    (setq org-roam-directory dir)
+    (org-roam-db-sync)
+    (message "Switched org-roam vault to: %s (%s)" name dir)))
 #+end_src
 
 #+begin_src emacs-lisp :results none
