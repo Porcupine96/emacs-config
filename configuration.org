@@ -1614,6 +1614,24 @@ Save image and insert it's link at point.
      (print (org-roam-reflinks-get current))))
 #+end_src
 
+#+begin_src emacs-lisp :results none
+(defvar +org-roam/vaults
+  '(("default"  . "~/Dropbox/org-roam")
+    ("masters"  . "~/Dropbox/masters-roam")))
+
+(defun +org-roam/switch-vault ()
+  (interactive)
+  (let* ((current org-roam-directory)
+         (choice (completing-read
+                  (format "Switch org-roam vault (current: %s): " current)
+                  (mapcar #'car +org-roam/vaults)
+                  nil t))
+         (dir (alist-get choice +org-roam/vaults nil nil #'string=)))
+    (setq org-roam-directory (expand-file-name dir))
+    (org-roam-db-sync)
+    (message "Switched org-roam vault to: %s (%s)" choice dir)))
+#+end_src
+
 #+begin_src emacs-lisp :results none :tangle no
 (use-package org-roam-ui
   :straight t
@@ -3739,7 +3757,13 @@ sbt-mode
     "h e" #'view-echo-area-messages
     "h l" #'find-library
     
-    "k" #'consult-yank-from-kill-ring
+    "k" nil
+    "k s" #'koko-speak
+    "k p" #'koko-pause
+    "k r" #'koko-resume
+    "k R" #'koko-replay
+    "k q" #'koko-stop
+    "k k" #'consult-yank-from-kill-ring
 
     "m f" #'memo/create-flashcard
     
@@ -4400,6 +4424,16 @@ sbt-mode
   :load-path "~/.emacs.d/packages/read-me/"
   :defer t
   :commands (read-me read-me-generate read-me-read))
+#+end_src
+
+** Koko
+#+begin_src emacs-lisp :results none
+(use-package koko
+  :load-path "~/.emacs.d/packages/koko/"
+  :defer t
+  :commands (koko-speak koko-pause koko-resume koko-replay koko-stop)
+  :config
+  (setq koko-speed 1.3))
 #+end_src
 
 ** Pjira
